@@ -35,7 +35,6 @@ def numero_linhas_consulta(query_consulta):
 
 
 class EngenhariaApp(QWidget):
-    # Adicione este sinal à classe
     guia_fechada = pyqtSignal()
 
     def __init__(self):
