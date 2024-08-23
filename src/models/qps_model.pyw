@@ -1,17 +1,17 @@
 import locale
-import locale
 import os
 import sys
-from datetime import datetime
+
+# Caminho absoluto para o diretório onde o módulo src está localizado
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 import pandas as pd
-import pyperclip
 import requests
 from PyQt5.QtCore import Qt, QProcess, pyqtSignal, QEvent, QThread
 from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtWidgets import QApplication, QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QLabel, QSizePolicy, QMenu, QFrame, \
-    QCalendarWidget, QFileDialog
+    QCalendarWidget
 from sqlalchemy import create_engine, text
 
 from src.app.utils.db_mssql import setup_mssql
