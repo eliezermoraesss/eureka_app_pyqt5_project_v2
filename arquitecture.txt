@@ -1,0 +1,33 @@
+my_pyqt5_project/
+├── docs/
+├── src/
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── main.py
+│   │   ├── views/
+│   │   │   ├── __init__.py
+│   │   │   ├── main_window.py
+│   │   │   ├── dialogs.py
+│   │   └── controllers/
+│   │       ├── __init__.py
+│   │       ├── main_controller.py
+│   │       ├── dialogs_controller.py
+│   ├── resources/
+│   │   ├── images/
+│   │   │   ├── icon.png
+│   │   │   ├── logo.png
+│   │   ├── styles/
+│   │       ├── main.qss
+│   │       ├── dark.qss
+│   └── models/
+│       ├── __init__.py
+│       ├── data_model.py
+├── tests/
+│   ├── __init__.py
+│   ├── test_main.py
+│   ├── test_views.py
+│   ├── test_models.py
+├── .gitignore
+├── README.md
+├── requirements.txt
+├── setup.py
