@@ -200,12 +200,12 @@ class ComercialApp(QWidget):
         self.btn_exportar_pdf = QPushButton("Exportar PDF", self)
         self.btn_exportar_pdf.clicked.connect(self.exportar_pdf)
         self.btn_exportar_pdf.setMinimumWidth(100)
-        self.btn_exportar_pdf.setEnabled(False)
+        self.btn_exportar_pdf.hide()
 
         self.btn_exportar_excel = QPushButton("Exportar Excel", self)
         self.btn_exportar_excel.clicked.connect(lambda: self.exportar_excel('excel'))
         self.btn_exportar_excel.setMinimumWidth(100)
-        self.btn_exportar_excel.setEnabled(False)
+        self.btn_exportar_excel.hide()
 
         self.btn_fechar = QPushButton("Fechar", self)
         self.btn_fechar.clicked.connect(self.fechar_janela)
@@ -418,6 +418,9 @@ class ComercialApp(QWidget):
         # Ler dados do Excel
         dataframe_tabela = pd.read_excel(self.file_path, sheet_name='Dados')
 
+        if os.path.exists(self.file_path):
+            os.remove(self.file_path)
+
         # Caminho para salvar o PDF
         pdf_path, _ = QFileDialog.getSaveFileName(self, 'Salvar como', self.file_path.replace('.xlsx', '.pdf'),
                                                   'Arquivos PDF (*.pdf);;Todos os arquivos (*)')
@@ -629,6 +632,8 @@ class ComercialApp(QWidget):
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
         self.label_product_name.hide()
+        self.btn_exportar_excel.hide()
+        self.btn_exportar_pdf.hide()
 
     def controle_campos_formulario(self, status):
         self.campo_codigo.setEnabled(status)
@@ -731,6 +736,8 @@ class ComercialApp(QWidget):
             exibir_mensagem('Erro ao consultar tabela', f'Erro: {str(ex)}', 'error')
 
         finally:
+            self.btn_exportar_excel.show()
+            self.btn_exportar_pdf.show()
             # Fecha a conexão com o banco de dados se estiver aberta
             if 'engine' in locals():
                 engine.dispose()
