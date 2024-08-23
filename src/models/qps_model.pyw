@@ -1,10 +1,8 @@
-import ctypes
+import locale
 import locale
 import os
 import sys
-import tkinter as tk
 from datetime import datetime
-from tkinter import messagebox
 
 import pandas as pd
 import pyperclip
@@ -16,45 +14,8 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLineEdit, QPushButton, QVBox
     QCalendarWidget, QFileDialog
 from sqlalchemy import create_engine, text
 
-
-def exibir_mensagem(title, message, icon_type):
-    root = tk.Tk()
-    root.withdraw()
-    root.lift()  # Garante que a janela esteja na frente
-    root.title(title)
-    root.attributes('-topmost', True)
-
-    if icon_type == 'info':
-        messagebox.showinfo(title, message)
-    elif icon_type == 'warning':
-        messagebox.showwarning(title, message)
-    elif icon_type == 'error':
-        messagebox.showerror(title, message)
-
-    root.destroy()
-
-
-def setup_mssql():
-    caminho_do_arquivo = (r"\\192.175.175.4\f\INTEGRANTES\ELIEZER\PROJETO SOLIDWORKS "
-                          r"TOTVS\libs-python\user-password-mssql\USER_PASSWORD_MSSQL_PROD.txt")
-    try:
-        with open(caminho_do_arquivo, 'r') as arquivo:
-            string_lida = arquivo.read()
-            username, password, database, server = string_lida.split(';')
-            return username, password, database, server
-
-    except FileNotFoundError:
-        ctypes.windll.user32.MessageBoxW(0,
-                                         "Erro ao ler credenciais de acesso ao banco de dados MSSQL.\n\nBase de "
-                                         "dados ERP TOTVS PROTHEUS.\n\nPor favor, informe ao desenvolvedor/TI "
-                                         "sobre o erro exibido.\n\nTenha um bom dia! ツ",
-                                         "CADASTRO DE ESTRUTURA - TOTVS®", 16 | 0)
-        sys.exit()
-
-    except Exception as e:
-        ctypes.windll.user32.MessageBoxW(0, "Ocorreu um erro ao ler o arquivo:", "CADASTRO DE ESTRUTURA - TOTVS®",
-                                         16 | 0)
-        sys.exit()
+from src.app.utils.db_mssql import setup_mssql
+from src.app.utils.utils import exibir_mensagem, abrir_nova_janela, copiar_linha, exportar_excel
 
 
 class UpdateTableThread(QThread):
@@ -278,7 +239,7 @@ class QpClosedApp(QWidget):
         self.btn_atualizar_qp.setObjectName("btn_atualizar_qp")
 
         self.btn_exportar_excel = QPushButton("Exportar Excel", self)
-        self.btn_exportar_excel.clicked.connect(self.exportar_excel)
+        self.btn_exportar_excel.clicked.connect(lambda: exportar_excel(self, self.tree))
         self.btn_exportar_excel.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
         self.btn_exportar_excel.setEnabled(False)
 
@@ -379,48 +340,6 @@ class QpClosedApp(QWidget):
         else:
             exibir_mensagem("Erro na atualização", message, "error")
 
-    def exportar_excel(self):
-        desktop_path = os.path.join(os.path.expanduser("~"), 'Desktop')
-
-        now = datetime.now()
-        default_filename = f'QPS-report_{now.today().strftime('%Y-%m-%d_%H%M%S')}.xlsx'
-
-        file_path, _ = QFileDialog.getSaveFileName(self, 'Salvar como', os.path.join(desktop_path, default_filename),
-                                                   'Arquivos Excel (*.xlsx);;Todos os arquivos (*)')
-
-        if file_path:
-            data = self.obter_dados_tabela()
-            column_headers = [self.tree.horizontalHeaderItem(i).text() for i in range(self.tree.columnCount())]
-            df = pd.DataFrame(data, columns=column_headers)
-
-            writer = pd.ExcelWriter(file_path, engine='xlsxwriter')
-            df.to_excel(writer, sheet_name='Dados', index=False)
-
-            workbook = writer.book
-            worksheet = writer.sheets['Dados']
-
-            for i, col in enumerate(df.columns):
-                max_len = df[col].astype(str).map(len).max()
-                worksheet.set_column(i, i, max_len + 2)
-
-            writer.close()
-
-            os.startfile(file_path)
-
-    def obter_dados_tabela(self):
-        # Obter os dados da tabela
-        data = []
-        for i in range(self.tree.rowCount()):
-            row_data = []
-            for j in range(self.tree.columnCount()):
-                item = self.tree.item(i, j)
-                if item is not None:
-                    row_data.append(item.text())
-                else:
-                    row_data.append("")
-            data.append(row_data)
-        return data
-
     def show_context_menu(self, position, table):
         indexes = table.selectedIndexes()
         if indexes:
@@ -432,7 +351,7 @@ class QpClosedApp(QWidget):
             table.selectRow(index.row())
             menu = QMenu()
             context_menu_nova_janela = QAction('Nova janela', self)
-            context_menu_nova_janela.triggered.connect(lambda: self.abrir_nova_janela())
+            context_menu_nova_janela.triggered.connect(lambda: abrir_nova_janela(self, QpClosedApp()))
             menu.addAction(context_menu_nova_janela)
             menu.exec_(table.viewport().mapToGlobal(position))
 
@@ -444,12 +363,6 @@ class QpClosedApp(QWidget):
         self.tree.setRowCount(0)
         self.label_line_number.hide()
         self.btn_atualizar_qp.hide()
-
-    def abrir_nova_janela(self):
-        if not self.nova_janela or not self.nova_janela.isVisible():
-            self.nova_janela = QpClosedApp()
-            self.nova_janela.setGeometry(self.x() + 50, self.y() + 50, self.width(), self.height())
-            self.nova_janela.show()
 
     def add_clear_button(self, line_edit):
         clear_icon = self.style().standardIcon(QStyle.SP_LineEditClearButton)
@@ -466,7 +379,7 @@ class QpClosedApp(QWidget):
         self.tree.setEditTriggers(QTableWidget.NoEditTriggers)
         self.tree.setSelectionBehavior(QTableWidget.SelectRows)
         self.tree.setSelectionMode(QTableWidget.SingleSelection)
-        self.tree.itemDoubleClicked.connect(self.copiar_linha)
+        self.tree.itemDoubleClicked.connect(copiar_linha)
         self.tree.setFont(QFont(self.fonte_tabela, self.tamanho_fonte_tabela))
         self.tree.verticalHeader().setDefaultSectionSize(self.altura_linha)
         self.tree.horizontalHeader().setSortIndicator(-1, Qt.AscendingOrder)
@@ -474,11 +387,6 @@ class QpClosedApp(QWidget):
         self.tree.horizontalHeader().setStretchLastSection(False)
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(lambda pos: self.show_context_menu(pos, self.tree))
-
-    def copiar_linha(self, item):
-        if item is not None:
-            valor_campo = item.text()
-            pyperclip.copy(str(valor_campo))
 
     def ordenar_tabela(self, logical_index):
         # Obter o índice real da coluna (considerando a ordem de classificação)
@@ -546,7 +454,7 @@ class QpClosedApp(QWidget):
             FROM 
                 enaplic_management.dbo.tb_qps
             WHERE
-                cod_qp LIKE '%{numero_qp}'
+                cod_qp LIKE '%{numero_qp}%'
                 AND des_qp LIKE '{descricao}%'
                 AND {clausulas_contem_descricao}
                 AND status_qp = '{status_qp}'

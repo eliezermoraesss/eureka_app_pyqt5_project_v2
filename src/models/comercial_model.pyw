@@ -1,20 +1,17 @@
-import ctypes
 import io
 import locale
 import os
 import sys
-import tkinter as tk
 from datetime import datetime
-from tkinter import messagebox
+
 import pandas as pd
 import pyodbc
-import pyperclip
 import xlwings as xw
 from PyPDF2 import PdfReader
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QPixmap, QIcon
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
-    QTableWidget, QTableWidgetItem, QHeaderView, QFileDialog, QStyle, QAction, QSizePolicy
+    QTableWidget, QTableWidgetItem, QHeaderView, QFileDialog, QStyle, QAction
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import A4
@@ -23,51 +20,8 @@ from reportlab.lib.units import inch, mm
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Image, Spacer
 from sqlalchemy import create_engine
 
-
-def exibir_mensagem(title, message, icon_type):
-    root = tk.Tk()
-    root.withdraw()
-    root.lift()  # Garante que a janela esteja na frente
-    root.title(title)
-    root.attributes('-topmost', True)
-
-    if icon_type == 'info':
-        messagebox.showinfo(title, message)
-    elif icon_type == 'warning':
-        messagebox.showwarning(title, message)
-    elif icon_type == 'error':
-        messagebox.showerror(title, message)
-
-    root.destroy()
-
-
-def copiar_linha(item):
-    if item is not None:
-        valor_campo = item.text()
-        pyperclip.copy(str(valor_campo))
-
-
-def setup_mssql():
-    caminho_do_arquivo = (r"\\192.175.175.4\f\INTEGRANTES\ELIEZER\PROJETO SOLIDWORKS "
-                          r"TOTVS\libs-python\user-password-mssql\USER_PASSWORD_MSSQL_PROD.txt")
-    try:
-        with open(caminho_do_arquivo, 'r') as arquivo:
-            string_lida = arquivo.read()
-            username_txt, password_txt, database_txt, server_txt = string_lida.split(';')
-            return username_txt, password_txt, database_txt, server_txt
-
-    except FileNotFoundError:
-        ctypes.windll.user32.MessageBoxW(0,
-                                         "Erro ao ler credenciais de acesso ao banco de dados MSSQL.\n\nBase de "
-                                         "dados ERP TOTVS PROTHEUS.\n\nPor favor, informe ao desenvolvedor/TI "
-                                         "sobre o erro exibido.\n\nTenha um bom dia! ツ",
-                                         "CADASTRO DE ESTRUTURA - TOTVS®", 16 | 0)
-        sys.exit()
-
-    except Exception as ex:
-        ctypes.windll.user32.MessageBoxW(0, f"Ocorreu um erro ao ler o arquivo: {ex}", "CADASTRO DE ESTRUTURA - TOTVS®",
-                                         16 | 0)
-        sys.exit()
+from src.app.utils.db_mssql import setup_mssql
+from src.app.utils.utils import exibir_mensagem, copiar_linha, obter_dados_tabela, abrir_nova_janela
 
 
 def recalculate_excel_formulas(file_path):
@@ -236,7 +190,7 @@ class ComercialApp(QWidget):
         self.btn_limpar.setEnabled(False)
 
         self.btn_nova_janela = QPushButton("Nova Janela", self)
-        self.btn_nova_janela.clicked.connect(self.abrir_nova_janela)
+        self.btn_nova_janela.clicked.connect(lambda: abrir_nova_janela(self, ComercialApp()))
         self.btn_nova_janela.setMinimumWidth(100)
 
         self.btn_exportar_pdf = QPushButton("Exportar PDF", self)
@@ -367,12 +321,6 @@ class ComercialApp(QWidget):
                     }
                 """)
 
-    def abrir_nova_janela(self):
-        if not self.nova_janela or not self.nova_janela.isVisible():
-            self.nova_janela = ComercialApp()
-            self.nova_janela.setGeometry(self.x() + 50, self.y() + 50, self.width(), self.height())
-            self.nova_janela.show()
-
     def add_clear_button(self, line_edit):
         clear_icon = self.style().standardIcon(QStyle.SP_LineEditClearButton)
         pixmap = clear_icon.pixmap(40, 40)  # Redimensionar o ícone para 20x20 pixels
@@ -395,7 +343,7 @@ class ComercialApp(QWidget):
             self.file_path = os.path.join(desktop_path, default_filename)
 
         if self.file_path:
-            data = self.obter_dados_tabela()
+            data = obter_dados_tabela(self.tree)
             column_headers = [self.tree.horizontalHeaderItem(i).text() for i in range(self.tree.columnCount())]
             df = pd.DataFrame(data, columns=column_headers)
 
@@ -459,20 +407,6 @@ class ComercialApp(QWidget):
 
             if tipo_exportacao == 'excel':
                 os.startfile(self.file_path)
-
-    def obter_dados_tabela(self):
-        # Obter os dados da tabela
-        data = []
-        for i in range(self.tree.rowCount()):
-            row_data = []
-            for j in range(self.tree.columnCount()):
-                item = self.tree.item(i, j)
-                if item is not None:
-                    row_data.append(item.text())
-                else:
-                    row_data.append("")
-            data.append(row_data)
-        return data
 
     def exportar_pdf(self):
         self.exportar_excel('pdf')
@@ -806,7 +740,5 @@ if __name__ == "__main__":
     window = ComercialApp()
     username, password, database, server = setup_mssql()
     driver = '{SQL Server}'
-
     window.showMaximized()
-
     sys.exit(app.exec_())
