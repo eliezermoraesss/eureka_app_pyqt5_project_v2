@@ -5,7 +5,7 @@ import sys
 
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-q
+
 from datetime import datetime
 
 import pandas as pd
