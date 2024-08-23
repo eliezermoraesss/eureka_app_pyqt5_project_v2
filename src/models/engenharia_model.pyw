@@ -1,6 +1,10 @@
 import locale
-import sys
 import time
+import sys
+import os
+
+# Caminho absoluto para o diretório onde o módulo src está localizado
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 import pyodbc
 from PyQt5.QtCore import Qt, pyqtSignal, QProcess
