@@ -565,7 +565,7 @@ class QpClosedApp(QWidget):
     def date_selected(self, date):
         if self.selected_row is not None:
             date_str = date.toString("dd/MM/yyyy")
-            cod_qp = self.tree.item(self.selected_row, 1).text()  # Assuming QP is in the second column
+            cod_qp = self.tree.item(self.selected_row, 1).text().zfill(6)  # Assuming QP is in the second column
 
             update_query = text("""
                 UPDATE enaplic_management.dbo.tb_qps
@@ -606,7 +606,7 @@ class QpClosedApp(QWidget):
                     cell_value = current_item.text()
                     status_qp = self.tree.item(current_row, 3).text()
                     if cell_value and status_qp == 'FINALIZADO':
-                        cod_qp = self.tree.item(current_row, 1).text()
+                        cod_qp = self.tree.item(current_row, 1).text().zfill(6)
 
                         update_query = text("""
                             UPDATE enaplic_management.dbo.tb_qps
