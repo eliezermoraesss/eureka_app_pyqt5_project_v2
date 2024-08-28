@@ -1,6 +1,10 @@
 import sys
+import os
+# Caminho absoluto para o diretório onde o módulo src está localizado
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
 from PyQt5.QtWidgets import QApplication
-from .controllers.main_controller import MainController
+from src.app.controllers.main_controller import MainController
 
 
 def main():

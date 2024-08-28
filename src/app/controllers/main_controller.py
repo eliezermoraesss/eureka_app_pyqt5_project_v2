@@ -25,4 +25,4 @@ class MainController:
         self.main_window.pcp_button.clicked.connect(execute_pcp_model)
 
     def show_main_window(self):
-        self.main_window.show()
+        self.main_window.showMaximized()
