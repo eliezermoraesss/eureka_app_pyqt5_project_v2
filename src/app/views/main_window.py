@@ -70,7 +70,7 @@ class MainWindow(QMainWindow):
 
         layout_linha_01.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         layout_linha_01.addWidget(self.engenharia_button)
-        layout_linha_01.addWidget(self.comercial_button )
+        layout_linha_01.addWidget(self.comercial_button)
         layout_linha_01.addWidget(self.pcp_button)
         layout_linha_01.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
 
