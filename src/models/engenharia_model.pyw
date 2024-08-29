@@ -18,6 +18,7 @@ from sqlalchemy import create_engine
 from src.app.utils.consultar_estrutura import executar_consulta_estrutura
 from src.app.utils.consultar_onde_usado import executar_consulta_onde_usado
 from src.app.utils.consultar_saldo_estoque import executar_saldo_em_estoque
+from src.app.utils.consultar_ultimos_fornecedores import executar_ultimos_fornecedores
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.utils import *
 
@@ -53,6 +54,7 @@ class EngenhariaApp(QWidget):
         self.guias_abertas = []
         self.guias_abertas_onde_usado = []
         self.guias_abertas_saldo = []
+        self.guias_abertas_ultimos_fornecedores = []
         fonte = "Segoe UI"
         tamanho_fonte = 10
 
@@ -173,6 +175,11 @@ class EngenhariaApp(QWidget):
         self.btn_saldo_estoque.clicked.connect(lambda: executar_saldo_em_estoque(self, self.tree))
         self.btn_saldo_estoque.setMinimumWidth(150)
         self.btn_saldo_estoque.setEnabled(False)
+        
+        self.btn_ultimos_fornecedores = QPushButton("Fornecedores", self)
+        self.btn_ultimos_fornecedores.clicked.connect(lambda: executar_ultimos_fornecedores(self, self.tree))
+        self.btn_ultimos_fornecedores.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.btn_ultimos_fornecedores.setEnabled(False)
 
         self.btn_limpar = QPushButton("Limpar", self)
         self.btn_limpar.clicked.connect(self.limpar_campos)
@@ -229,6 +236,7 @@ class EngenhariaApp(QWidget):
         layout_button_03.addWidget(self.btn_consultar_estrutura)
         layout_button_03.addWidget(self.btn_onde_e_usado)
         layout_button_03.addWidget(self.btn_saldo_estoque)
+        layout_button_03.addWidget(self.btn_ultimos_fornecedores)
         layout_button_03.addWidget(self.btn_limpar)
         layout_button_03.addWidget(self.btn_nova_janela)
         layout_button_03.addWidget(self.btn_abrir_desenho)
@@ -448,6 +456,9 @@ class EngenhariaApp(QWidget):
             context_menu_saldo_estoque = QAction('Saldo em estoque', self)
             context_menu_saldo_estoque.triggered.connect(lambda: executar_saldo_em_estoque(self, table))
 
+            context_menu_ultimo_fornecedor = QAction('Fornecedores', self)
+            context_menu_ultimo_fornecedor.triggered.connect(lambda: executar_ultimos_fornecedores(self, table))
+
             context_menu_nova_janela = QAction('Nova janela', self)
             context_menu_nova_janela.triggered.connect(lambda: abrir_nova_janela(self, EngenhariaApp()))
 
@@ -455,6 +466,7 @@ class EngenhariaApp(QWidget):
             menu.addAction(context_menu_consultar_estrutura)
             menu.addAction(context_menu_consultar_onde_usado)
             menu.addAction(context_menu_saldo_estoque)
+            menu.addAction(context_menu_ultimo_fornecedor)
             menu.addAction(context_menu_nova_janela)
 
             menu.exec_(table.viewport().mapToGlobal(position))
@@ -515,6 +527,7 @@ class EngenhariaApp(QWidget):
         self.btn_consultar_estrutura.setEnabled(status)
         self.btn_onde_e_usado.setEnabled(status)
         self.btn_saldo_estoque.setEnabled(status)
+        self.btn_ultimos_fornecedores.setEnabled(status)
 
     def query_consulta_tabela_produtos(self):
 
@@ -682,7 +695,10 @@ class EngenhariaApp(QWidget):
                 try:
                     self.guias_abertas_onde_usado.remove(codigo_guia_fechada)
                 except ValueError:
-                    self.guias_abertas_saldo.remove(codigo_guia_fechada)
+                    try:
+                        self.guias_abertas_saldo.remove(codigo_guia_fechada)
+                    except ValueError:
+                        self.guias_abertas_ultimos_fornecedores.remove(codigo_guia_fechada)
 
             finally:
                 self.tabWidget.removeTab(index)
