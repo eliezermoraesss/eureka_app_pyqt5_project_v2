@@ -1,37 +1,14 @@
-import os
-
 import bcrypt
 import random
-import sqlite3
+
 from datetime import datetime, timedelta
+
+from src.app.config.db_config import DbConnection
 
 
 class AuthController:
     def __init__(self):
-        self.base_dir = os.path.dirname(os.path.abspath(__file__))
-        # Define o caminho para salvar o banco de dados na pasta database
-        database_path = os.path.abspath(os.path.join(self.base_dir, '..', 'config', 'database', 'app.db'))
-
-        os.makedirs(os.path.dirname(database_path), exist_ok=True)
-        self.conn = sqlite3.connect(database_path)
-        self.create_tables()
-
-    def create_tables(self):
-        cursor = self.conn.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS users (
-                          id INTEGER PRIMARY KEY AUTOINCREMENT,
-                          full_name TEXT NOT NULL,
-                          username TEXT NOT NULL UNIQUE,
-                          email TEXT NOT NULL UNIQUE,
-                          hashed_password TEXT NOT NULL,
-                          role TEXT NOT NULL,
-                          created_at DATETIME NOT NULL)''')
-        cursor.execute('''CREATE TABLE IF NOT EXISTS password_reset (
-                          id INTEGER PRIMARY KEY AUTOINCREMENT,
-                          user_id INTEGER,
-                          reset_code TEXT NOT NULL,
-                          expiration_time DATETIME NOT NULL)''')
-        self.conn.commit()
+        self.db_connection = DbConnection()
 
     def hash_password(self, password):
         salt = bcrypt.gensalt()
@@ -48,19 +25,19 @@ class AuthController:
 
         hashed_password = self.hash_password(password)
         created_at = datetime.now()  # Captura a data e hora atuais
-        cursor = self.conn.cursor()
+        cursor = self.db_connection.conn.cursor()
         cursor.execute('''INSERT INTO users (full_name, username, email, hashed_password, role, created_at)
                           VALUES (?, ?, ?, ?, ?, ?)''', (full_name, username, email, hashed_password, role, created_at))
-        self.conn.commit()
+        self.db_connection.conn.commit()
         return True, "Usuário registrado com sucesso!"
 
     def get_user_by_username(self, username):
-        cursor = self.conn.cursor()
+        cursor = self.db_connection.conn.cursor()
         cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
         return cursor.fetchone()
 
     def get_user_by_email(self, email):
-        cursor = self.conn.cursor()
+        cursor = self.db_connection.conn.cursor()
         cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
         return cursor.fetchone()
 
@@ -69,10 +46,10 @@ class AuthController:
         if user:
             reset_code = str(random.randint(100000, 999999))
             expiration_time = datetime.now() + timedelta(seconds=10)
-            cursor = self.conn.cursor()
+            cursor = self.db_connection.conn.cursor()
             cursor.execute('''INSERT INTO password_reset (user_id, reset_code, expiration_time)
                               VALUES (?, ?, ?)''', (user[0], reset_code, expiration_time))
-            self.conn.commit()
+            self.db_connection.conn.commit()
             self.send_reset_email(email, reset_code)
             return True
         return False
@@ -85,7 +62,7 @@ class AuthController:
         if not user:
             return False, "Email inválido."
 
-        cursor = self.conn.cursor()
+        cursor = self.db_connection.conn.cursor()
         cursor.execute('''SELECT reset_code, expiration_time FROM password_reset
                           WHERE user_id = ? ORDER BY id DESC LIMIT 1''', (user[0],))
         result = cursor.fetchone()
@@ -105,10 +82,10 @@ class AuthController:
         user = self.get_user_by_email(email)
         if user:
             hashed_password = self.hash_password(new_password)
-            cursor = self.conn.cursor()
+            cursor = self.db_connection.conn.cursor()
             cursor.execute('''UPDATE users SET hashed_password = ?
                               WHERE email = ?''', (hashed_password, email))
-            self.conn.commit()
+            self.db_connection.conn.commit()
             return True
         return False
 

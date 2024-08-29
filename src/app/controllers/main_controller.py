@@ -25,8 +25,14 @@ class MainController:
             script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'pcp_model.pyw'))
             process.startDetached("python", [script_path])
 
+        def execute_compras_model():
+            process = QProcess()
+            script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'compras_model.pyw'))
+            process.startDetached("python", [script_path])
+
         self.main_window.engenharia_button.clicked.connect(execute_engenharia_model)
         self.main_window.pcp_button.clicked.connect(execute_pcp_model)
+        self.main_window.compras_button.clicked.connect(execute_compras_model)
         self.main_window.comercial_button.clicked.connect(execute_comercial_model)
 
     def show_main_window(self):

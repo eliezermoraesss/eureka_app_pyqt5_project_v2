@@ -54,19 +54,23 @@ class MainWindow(QMainWindow):
         self.engenharia_button = QPushButton("Engenharia", self)
         self.engenharia_button .setMinimumWidth(150)
 
-        self.comercial_button = QPushButton("Comercial", self)
-        self.comercial_button .setMinimumWidth(150)
-
         self.pcp_button = QPushButton("PCP", self)
         self.pcp_button.setMinimumWidth(150)
+
+        self.compras_button = QPushButton("Compras", self)
+        self.compras_button.setMinimumWidth(150)
+
+        self.comercial_button = QPushButton("Comercial", self)
+        self.comercial_button .setMinimumWidth(150)
 
         layout = QVBoxLayout()
         layout_linha_01 = QHBoxLayout()
 
         layout_linha_01.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         layout_linha_01.addWidget(self.engenharia_button)
-        layout_linha_01.addWidget(self.comercial_button)
         layout_linha_01.addWidget(self.pcp_button)
+        layout_linha_01.addWidget(self.compras_button)
+        layout_linha_01.addWidget(self.comercial_button)
         layout_linha_01.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
 
         layout.addLayout(layout_linha_01)
