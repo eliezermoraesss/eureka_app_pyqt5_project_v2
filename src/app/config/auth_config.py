@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 import sys
 import os
 
-
 class AuthController:
     def __init__(self):
         # Define o caminho para salvar o banco de dados na pasta database
@@ -47,9 +46,9 @@ class AuthController:
             return False, "O e-mail já está em uso."
 
         hashed_password = self.hash_password(password)
-        created_at = datetime.now()
+        created_at = datetime.now()  # Captura a data e hora atuais
         cursor = self.conn.cursor()
-        cursor.execute('''INSERT INTO users (full_name, username, email, hashed_password, role)
+        cursor.execute('''INSERT INTO users (full_name, username, email, hashed_password, role, created_at)
                           VALUES (?, ?, ?, ?, ?, ?)''', (full_name, username, email, hashed_password, role, created_at))
         self.conn.commit()
         return True, "Usuário registrado com sucesso!"
@@ -68,7 +67,7 @@ class AuthController:
         user = self.get_user_by_email(email)
         if user:
             reset_code = str(random.randint(100000, 999999))
-            expiration_time = datetime.now() + timedelta(seconds=15)
+            expiration_time = datetime.now() + timedelta(minutes=15)
             cursor = self.conn.cursor()
             cursor.execute('''INSERT INTO password_reset (user_id, reset_code, expiration_time)
                               VALUES (?, ?, ?)''', (user[0], reset_code, expiration_time))
@@ -255,7 +254,7 @@ class RegisterWindow(QtWidgets.QWidget):
             QMessageBox.warning(self, 'Erro', 'As senhas não coincidem')
             return
 
-        success, message = self.auth_controller.create_user(full_name, username, email, password, role, )
+        success, message = self.auth_controller.create_user(full_name, username, email, password, role)
         if success:
             QMessageBox.information(self, 'Sucesso', message)
             self.close()
@@ -382,8 +381,18 @@ class MainWindow(QtWidgets.QWidget):
         self.setLayout(layout)
 
 
+def load_stylesheet(application, path):
+    with open(path, 'r') as file:
+        application.setStyleSheet(file.read())
+
+
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
+
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    stylesheet_path = os.path.abspath(os.path.join(base_dir, '..', '..', 'resources', 'styles', 'style.qss'))
+    load_stylesheet(app, stylesheet_path)
+
     auth_controller = AuthController()
     login_window = LoginWindow(auth_controller)
     login_window.show()

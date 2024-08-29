@@ -1,16 +1,11 @@
 from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QSizePolicy, QSpacerItem
-from PyQt5.QtGui import QIcon
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("EUREKA SMARTPLIC® HOME - v0.1")
-
-        # Configurar o ícone da janela
-        icon_path = "src/resources/images/010.png"
-        self.setWindowIcon(QIcon(icon_path))
+        self.setWindowTitle("EUREKA® Home")
 
         # Aplicar folha de estilo ao aplicativo
         self.setStyleSheet("""
