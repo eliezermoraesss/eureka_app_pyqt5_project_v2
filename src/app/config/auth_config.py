@@ -24,7 +24,8 @@ class AuthController:
                           username TEXT NOT NULL UNIQUE,
                           email TEXT NOT NULL UNIQUE,
                           hashed_password TEXT NOT NULL,
-                          role TEXT NOT NULL)''')
+                          role TEXT NOT NULL,
+                          created_at DATETIME NOT NULL)''')
         cursor.execute('''CREATE TABLE IF NOT EXISTS password_reset (
                           id INTEGER PRIMARY KEY AUTOINCREMENT,
                           user_id INTEGER,
@@ -46,9 +47,10 @@ class AuthController:
             return False, "O e-mail já está em uso."
 
         hashed_password = self.hash_password(password)
+        created_at = datetime.now()
         cursor = self.conn.cursor()
         cursor.execute('''INSERT INTO users (full_name, username, email, hashed_password, role)
-                          VALUES (?, ?, ?, ?, ?)''', (full_name, username, email, hashed_password, role))
+                          VALUES (?, ?, ?, ?, ?, ?)''', (full_name, username, email, hashed_password, role, created_at))
         self.conn.commit()
         return True, "Usuário registrado com sucesso!"
 
@@ -253,7 +255,7 @@ class RegisterWindow(QtWidgets.QWidget):
             QMessageBox.warning(self, 'Erro', 'As senhas não coincidem')
             return
 
-        success, message = self.auth_controller.create_user(full_name, username, email, password, role)
+        success, message = self.auth_controller.create_user(full_name, username, email, password, role, )
         if success:
             QMessageBox.information(self, 'Sucesso', message)
             self.close()
