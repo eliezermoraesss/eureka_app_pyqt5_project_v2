@@ -33,6 +33,7 @@ def executar_ultimos_fornecedores(self, table):
                         A5_FORNECE AS "Cód. Forn.", 
                         A5_NOMEFOR AS "Razão Social",
                         FORN.A2_NREDUZ AS "Nome Fantasia",
+                        FORN.A2_CGC AS "CNPJ",
                         A5_QUANT01 AS "Qtd. 1ª compra",
                         A5_QUANT02 AS "Qtd. 2ª compra",
                         A5_QUANT03 AS "Qtd. 3ª compra",
