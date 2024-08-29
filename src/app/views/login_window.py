@@ -1,9 +1,18 @@
+import os
+
 from PyQt5 import QtWidgets
+from PyQt5.QtCore import QProcess
 from PyQt5.QtWidgets import QLineEdit, QLabel, QPushButton, QVBoxLayout, QMessageBox
 
 from src.app.views.code_verification_window import CodeVerificationWindow
-from src.app.views.open_home_window import OpenHomeWindow
 from src.app.views.register_window import RegisterWindow
+
+
+def start_app():
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    process = QProcess()
+    script_path = os.path.abspath(os.path.join(base_dir, 'home_window.py'))
+    process.startDetached("python", [script_path])
 
 
 class LoginWindow(QtWidgets.QWidget):
@@ -54,9 +63,8 @@ class LoginWindow(QtWidgets.QWidget):
         user = self.auth_controller.get_user_by_username(username)
 
         if user and self.auth_controller.verify_password(user[4], password):
-            self.main_window = OpenHomeWindow(self.auth_controller, username)  # Abre a janela principal se o login for bem-sucedido
-            self.main_window.show()
             self.close()
+            start_app()
         else:
             QMessageBox.warning(self, 'Erro', 'Credenciais inválidas')
 

@@ -8,8 +8,10 @@ from datetime import datetime, timedelta
 
 class AuthController:
     def __init__(self):
+        self.base_dir = os.path.dirname(os.path.abspath(__file__))
         # Define o caminho para salvar o banco de dados na pasta database
-        database_path = os.path.join(os.path.dirname(__file__), 'database', 'app.db')
+        database_path = os.path.abspath(os.path.join(self.base_dir, '..', 'config', 'database', 'app.db'))
+
         os.makedirs(os.path.dirname(database_path), exist_ok=True)
         self.conn = sqlite3.connect(database_path)
         self.create_tables()

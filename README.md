@@ -30,7 +30,7 @@ Este projeto é uma aplicação desktop desenvolvida em Python que utiliza a bib
 
 4. **Execute a aplicação:**
     ```bash
-    python main.py
+    python main.pyw
     ```
 
 ### Dependências
@@ -152,7 +152,7 @@ This project is a desktop application developed in Python using the PyQt5 librar
 
 4. **Run the application:**
     ```bash
-    python main.py
+    python main.pyw
     ```
 
 ### Dependencies
