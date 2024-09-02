@@ -4,6 +4,7 @@ import random
 from datetime import datetime, timedelta
 
 from src.app.config.db_config import DbConnection
+from src.app.utils.send_email import send_email
 
 
 class AuthController:
@@ -50,12 +51,9 @@ class AuthController:
             cursor.execute('''INSERT INTO password_reset (user_id, reset_code, expiration_time)
                               VALUES (?, ?, ?)''', (user[0], reset_code, expiration_time))
             self.db_connection.conn.commit()
-            self.send_reset_email(email, reset_code)
+            send_email(email, reset_code)
             return True
         return False
-
-    def send_reset_email(self, email, reset_code):
-        print(f'Send reset code {reset_code} to {email}')
 
     def verify_reset_code(self, email, code):
         user = self.get_user_by_email(email)

@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://X:/ELIEZER/PROJETO SOLIDWORKS TOTVS/VBA/PYTHON/.idea/PYTHON.iml" filepath="X:/ELIEZER/PROJETO SOLIDWORKS TOTVS/VBA/PYTHON/.idea/PYTHON.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../WORKSPACES/python/qt-designer/eureka-windows/.idea/eureka-windows.iml" filepath="$PROJECT_DIR$/../../WORKSPACES/python/qt-designer/eureka-windows/.idea/eureka-windows.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/eureka_app_pyqt5_project.iml" filepath="$PROJECT_DIR$/.idea/eureka_app_pyqt5_project.iml" />
+      <module fileurl="file://$USER_HOME$/Documents/workspaces/python/powerbi-mssql-indicators-dashboard-python-flask-api-rest/.idea/powerbi-mssql-indicators-dashboard-python-flask-api-rest.iml" filepath="$USER_HOME$/Documents/workspaces/python/powerbi-mssql-indicators-dashboard-python-flask-api-rest/.idea/powerbi-mssql-indicators-dashboard-python-flask-api-rest.iml" />
     </modules>
   </component>
 </project>
