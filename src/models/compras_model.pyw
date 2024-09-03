@@ -930,7 +930,7 @@ class ComprasApp(QWidget):
                                     previsao_entrega_obj = datetime.strptime(previsao_entrega_sem_formatacao, "%Y%m%d")
                                     previsao_entrega_formatada = previsao_entrega_obj.strftime("%d/%m/%Y")
                                     previsao_entrega = pd.to_datetime(previsao_entrega_formatada, dayfirst=True)
-                                    value = (data_atual - previsao_entrega).days
+                                    value = (previsao_entrega - data_atual).days
                             elif j == 11 and row['Nota Fiscal Ent.'] is not None:
                                 value = '-'
                             if j == 14 and pd.isna(value):  # COLUNA QTD. ENTREGUE
