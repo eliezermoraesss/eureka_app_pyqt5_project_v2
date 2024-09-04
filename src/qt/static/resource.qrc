@@ -5,6 +5,15 @@
     <file>image/logo_enaplic_50.png</file>
   </qresource>
   <qresource prefix="icon">
+    <file>icon/ordem-de-servico.png</file>
+    <file>icon/producao.png</file>
+    <file>icon/pedir-comida.png</file>
+    <file>icon/acordo.png</file>
+    <file>icon/carrinho-carrinho.png</file>
+    <file>icon/fabricacao.png</file>
+    <file>icon/engenharia.png</file>
+    <file>icon/relatorio.png</file>
+    <file>icon/icons8-gráfico-combinado.gif</file>
     <file>icon/fechar.png</file>
     <file>icon/aviao-de-papel.png</file>
     <file>icon/arrow.png</file>

@@ -1,7 +1,7 @@
 import locale
-import time
-import sys
 import os
+import sys
+import time
 
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -44,7 +44,6 @@ class EngenhariaApp(QWidget):
 
     def __init__(self):
         super().__init__()
-
         self.engine = None
         self.setWindowTitle("EUREKA® ENGENHARIA - v2.0")
 

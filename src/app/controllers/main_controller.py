@@ -1,11 +1,18 @@
 import os
-from PyQt5.QtCore import QProcess
-from ..views.main_window import MainWindow
+
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import QProcess, Qt
+
+from ...qt.ui.ui_home_window import Ui_HomeWindow
 
 
-class MainController:
+class MainController(QtWidgets.QMainWindow):
     def __init__(self):
-        self.main_window = MainWindow()
+        super(MainController, self).__init__()
+        self.home_window = Ui_HomeWindow()
+        self.home_window.setupUi(self)
+        self.setWindowFlags(Qt.FramelessWindowHint)
+        # self.setFixedSize(1200, 800)
         self.setup_connections()
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -35,11 +42,15 @@ class MainController:
             script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'compras_model.pyw'))
             process.startDetached("python", [script_path])
 
-        self.main_window.dashboard_button.clicked.connect(execute_dashboard_model)
-        self.main_window.engenharia_button.clicked.connect(execute_engenharia_model)
-        self.main_window.pcp_button.clicked.connect(execute_pcp_model)
-        self.main_window.compras_button.clicked.connect(execute_compras_model)
-        self.main_window.comercial_button.clicked.connect(execute_comercial_model)
+        def execute_qps_model():
+            process = QProcess()
+            script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'qps_model.pyw'))
+            process.startDetached("python", [script_path])
 
-    def show_main_window(self):
-        self.main_window.showMaximized()
+        self.home_window.btn_dashboard.clicked.connect(execute_dashboard_model)
+        self.home_window.btn_engenharia.clicked.connect(execute_engenharia_model)
+        self.home_window.btn_pcp.clicked.connect(execute_pcp_model)
+        self.home_window.btn_compras.clicked.connect(execute_compras_model)
+        self.home_window.btn_comercial.clicked.connect(execute_comercial_model)
+        self.home_window.btn_qps.clicked.connect(execute_qps_model)
+        self.home_window.btn_close.clicked.connect(self.close)

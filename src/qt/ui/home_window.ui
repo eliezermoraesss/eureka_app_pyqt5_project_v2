@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>HomeWindow</class>
+ <widget class="QMainWindow" name="HomeWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1319</width>
+    <height>797</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QWidget" name="widget" native="true">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>0</y>
+      <width>1200</width>
+      <height>800</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">* {
+    background-color: #ffffff;
+	font-style: &quot;Segoe UI&quot;;
+ 	color: #0B090A;
+}
+
+QPushButton {
+    background-color: #fbba72;
+    border-radius: 20px;
+    font-size: 22px;
+    font-weight: regular;
+}
+
+QPushButton:hover {
+    background-color: #399918;
+    border: 2px solid #333;
+    color: #EEEEEE;
+	font-weight: bold;
+}
+
+QPushButton:pressed {
+    background-color: #6703c5;
+    color: #EEEEEE;
+}
+</string>
+    </property>
+    <widget class="QPushButton" name="btn_dashboard">
+     <property name="geometry">
+      <rect>
+       <x>130</x>
+       <y>260</y>
+       <width>221</width>
+       <height>131</height>
+      </rect>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>221</width>
+       <height>41</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>-1</pointsize>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string>Dashboard</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../static/resource.qrc">
+       <normaloff>:/icon/icon/relatorio.png</normaloff>:/icon/icon/relatorio.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>64</width>
+       <height>64</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_engenharia">
+     <property name="geometry">
+      <rect>
+       <x>440</x>
+       <y>260</y>
+       <width>221</width>
+       <height>131</height>
+      </rect>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>221</width>
+       <height>41</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>-1</pointsize>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string>Engenharia</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../static/resource.qrc">
+       <normaloff>:/icon/icon/engenharia.png</normaloff>:/icon/icon/engenharia.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>64</width>
+       <height>64</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_pcp">
+     <property name="geometry">
+      <rect>
+       <x>750</x>
+       <y>260</y>
+       <width>221</width>
+       <height>131</height>
+      </rect>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>221</width>
+       <height>41</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>-1</pointsize>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string> PCP</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../static/resource.qrc">
+       <normaloff>:/icon/icon/producao.png</normaloff>:/icon/icon/producao.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>64</width>
+       <height>64</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_compras">
+     <property name="geometry">
+      <rect>
+       <x>130</x>
+       <y>470</y>
+       <width>221</width>
+       <height>131</height>
+      </rect>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>221</width>
+       <height>41</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>-1</pointsize>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string>Compras</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../static/resource.qrc">
+       <normaloff>:/icon/icon/carrinho-carrinho.png</normaloff>:/icon/icon/carrinho-carrinho.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>64</width>
+       <height>64</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_comercial">
+     <property name="geometry">
+      <rect>
+       <x>440</x>
+       <y>470</y>
+       <width>221</width>
+       <height>131</height>
+      </rect>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>221</width>
+       <height>41</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>-1</pointsize>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string>Comercial</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../static/resource.qrc">
+       <normaloff>:/icon/icon/acordo.png</normaloff>:/icon/icon/acordo.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>64</width>
+       <height>64</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_qps">
+     <property name="geometry">
+      <rect>
+       <x>750</x>
+       <y>470</y>
+       <width>221</width>
+       <height>131</height>
+      </rect>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>221</width>
+       <height>41</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>-1</pointsize>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string>Gestão QPS</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../static/resource.qrc">
+       <normaloff>:/icon/icon/pedir-comida.png</normaloff>:/icon/icon/pedir-comida.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>64</width>
+       <height>64</height>
+      </size>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="welcome_label">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>70</y>
+       <width>441</width>
+       <height>61</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI Semibold</family>
+       <pointsize>-1</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QLabel {
+	background-color: transparent;
+    color: #a4161a;
+    font-size: 28px;
+    font-weight: bold;
+	font-style: &quot;Segoe UI&quot;;
+}</string>
+     </property>
+     <property name="text">
+      <string>Seja bem-vindo(a) ao Eureka!</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="user_label">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>10</y>
+       <width>441</width>
+       <height>61</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI Semibold</family>
+       <pointsize>-1</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QLabel {
+	background-color: transparent;
+    color: #a4161a;
+    font-size: 28px;
+    font-weight: bold;
+	font-style: &quot;Segoe UI&quot;;
+}</string>
+     </property>
+     <property name="text">
+      <string>Olá {user}</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="logo_enaplic_50">
+     <property name="geometry">
+      <rect>
+       <x>950</x>
+       <y>700</y>
+       <width>121</width>
+       <height>101</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="../static/resource.qrc">:/image/image/logo_enaplic_50_anos.png</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_close">
+     <property name="geometry">
+      <rect>
+       <x>1020</x>
+       <y>10</y>
+       <width>51</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>41</height>
+      </size>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">* {
+	background-color: transparent;
+	border: none;
+}</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../static/resource.qrc">
+       <normaloff>:/icon/icon/excluir (1).png</normaloff>:/icon/icon/excluir (1).png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="sidebar_enaplic" native="true">
+    <property name="geometry">
+     <rect>
+      <x>-10</x>
+      <y>0</y>
+      <width>241</width>
+      <height>801</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">* {
+background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(186, 24, 27, 255), stop:1 rgba(102, 7, 8, 255));
+}</string>
+    </property>
+    <widget class="QLabel" name="logo_enaplic">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>40</y>
+       <width>81</width>
+       <height>81</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="../static/resource.qrc">:/image/image/LOGO.jpeg</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+ </widget>
+ <resources>
+  <include location="../static/resource.qrc"/>
+ </resources>
+ <connections/>
+</ui>

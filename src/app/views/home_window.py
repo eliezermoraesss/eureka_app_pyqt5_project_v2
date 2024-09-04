@@ -7,7 +7,7 @@ from src.app.controllers.main_controller import MainController
 def main():
     app = QApplication(sys.argv)
     main_controller = MainController()
-    main_controller.show_main_window()
+    main_controller.show()
     sys.exit(app.exec_())
 
 

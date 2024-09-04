@@ -81,14 +81,10 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgb
  	color: #0B090A;
 }
 
-QLabel, QCheckBox {
+QLabel {
     color: #0B090A;
     font-size: 11px;
     font-weight: bold;
-}
-
-QLabel#logo-enaplic {
-    margin: 5px 0;
 }
 
 QLineEdit {
@@ -96,32 +92,6 @@ QLineEdit {
     padding-left: 15px;
     border-radius: 18px;
 	font-size: 14px;
-}
-
-QDateEdit, QComboBox {
-    background-color: #DFE0E2;
-    border: 1px solid #262626;
-    padding: 5px 10px;
-    border-radius: 10px;
-    height: 20px;
-    font-size: 16px;
-}
-
-QDateEdit::drop-down, QComboBox::drop-down {
-    subcontrol-origin: padding;
-    subcontrol-position: top right;
-    width: 30px;
-    border-left-width: 1px;
-    border-left-color: darkgray;
-    border-left-style: solid;
-    border-top-right-radius: 3px;
-    border-bottom-right-radius: 3px;
-}
-
-QDateEdit::down-arrow, QComboBox::down-arrow {
-    image: url(../resources/images/arrow.png);
-    width: 10px;
-    height: 10px;
 }
 
 QPushButton {
@@ -140,38 +110,6 @@ QPushButton:hover {
 QPushButton:pressed {
     background-color: #6703c5;
     color: #EEEEEE;
-}
-
-QTableWidget {
-    border: 1px solid #000000;
-    background-color: #686D76;
-    padding-left: 10px;
-    margin-bottom: 15px;
-}
-
-QTableWidget QHeaderView::section {
-    background-color: #262626;
-    color: #A7A6A6;
-    padding: 5px;
-    height: 18px;
-}
-
-QTableWidget QHeaderView::section:horizontal {
-    border-top: 1px solid #333;
-}
-
-QTableWidget::item {
-    background-color: #363636;
-    color: #fff;
-    font-weight: bold;
-    padding-right: 8px;
-    padding-left: 8px;
-}
-
-QTableWidget::item:selected {
-    background-color: #000000;
-    color: #EEEEEE;
-    font-weight: bold;
 }</string>
     </property>
     <widget class="QLineEdit" name="user_field">
@@ -203,7 +141,6 @@ QTableWidget::item:selected {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -246,7 +183,6 @@ QTableWidget::item:selected {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -286,7 +222,6 @@ QTableWidget::item:selected {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -328,7 +263,6 @@ QTableWidget::item:selected {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -369,7 +303,6 @@ QTableWidget::item:selected {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -404,7 +337,6 @@ QTableWidget::item:selected {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
        <weight>75</weight>
        <bold>true</bold>
@@ -425,7 +357,6 @@ QTableWidget::item:selected {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
        <weight>75</weight>
        <bold>true</bold>
@@ -499,7 +430,6 @@ QTableWidget::item:selected {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
        <weight>75</weight>
        <bold>true</bold>
