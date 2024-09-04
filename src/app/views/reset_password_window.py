@@ -1,40 +1,26 @@
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QLineEdit, QLabel, QPushButton, QVBoxLayout, QMessageBox
+from PyQt5.QtWidgets import QMessageBox
+
+from src.qt.ui.ui_password_change_window import Ui_PasswordChangeWindow
 
 
-class ResetPasswordWindow(QtWidgets.QWidget):
+class ResetPasswordWindow(QtWidgets.QDialog):
     def __init__(self, auth_controller, email):
-        super().__init__()
+        super(ResetPasswordWindow, self).__init__()
         self.auth_controller = auth_controller
         self.email = email
+        self.ui = Ui_PasswordChangeWindow()
+        self.ui.setupUi(self)
         self.init_ui()
 
     def init_ui(self):
-        self.setWindowTitle('Redefinir Senha')
-        self.setGeometry(100, 100, 300, 250)
-
-        self.new_password_input = QLineEdit(self)
-        self.new_password_input.setPlaceholderText('Nova senha')
-        self.new_password_input.setEchoMode(QLineEdit.Password)
-
-        self.confirm_password_input = QLineEdit(self)
-        self.confirm_password_input.setPlaceholderText('Confirme a nova senha')
-        self.confirm_password_input.setEchoMode(QLineEdit.Password)
-
-        self.confirm_button = QPushButton('Redefinir Senha', self)
-        self.confirm_button.clicked.connect(self.reset_password)
-
-        layout = QVBoxLayout()
-        layout.addWidget(QLabel('Digite a nova senha:'))
-        layout.addWidget(self.new_password_input)
-        layout.addWidget(QLabel('Confirme a nova senha:'))
-        layout.addWidget(self.confirm_password_input)
-        layout.addWidget(self.confirm_button)
-        self.setLayout(layout)
+        self.setFixedSize(480, 400)
+        self.ui.btn_change_password.clicked.connect(self.reset_password)
+        self.ui.btn_close.clicked.connect(self.close)
 
     def reset_password(self):
-        new_password = self.new_password_input.text()
-        confirm_password = self.confirm_password_input.text()
+        new_password = self.ui.password_field.text()
+        confirm_password = self.ui.password_confirm_field.text()
 
         if not new_password or not confirm_password:
             QMessageBox.warning(self, 'Erro', 'Todos os campos são obrigatórios')

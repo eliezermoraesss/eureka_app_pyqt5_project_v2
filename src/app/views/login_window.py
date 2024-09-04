@@ -1,82 +1,66 @@
 import os
+import sys
 
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import QProcess
-from PyQt5.QtWidgets import QLineEdit, QLabel, QPushButton, QVBoxLayout, QMessageBox
+from PyQt5.QtCore import Qt, QProcess
 
-from src.app.views.code_verification_window import CodeVerificationWindow
+from src.app.controllers.auth_controller import AuthController
+from src.app.views.email_recovery_window import EmailRecoveryWindow
 from src.app.views.register_window import RegisterWindow
+from src.qt.ui.ui_login_screen import Ui_LoginWindow
 
 
-def start_app():
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    process = QProcess()
-    script_path = os.path.abspath(os.path.join(base_dir, 'home_window.py'))
-    process.startDetached("python", [script_path])
-
-
-class LoginWindow(QtWidgets.QWidget):
+class LoginWindow(QtWidgets.QMainWindow):
     def __init__(self, auth_controller):
-        super().__init__()
+        super(LoginWindow, self).__init__()
         self.auth_controller = auth_controller
+        self.ui = Ui_LoginWindow()
+        self.ui.setupUi(self)
         self.init_ui()
 
     def init_ui(self):
-        self.setWindowTitle('Login')
-        self.setGeometry(100, 100, 300, 200)
+        self.setWindowFlags(Qt.FramelessWindowHint)
 
-        self.username_input = QLineEdit(self)
-        self.username_input.setPlaceholderText('Nome de Usuário')
-
-        self.password_input = QLineEdit(self)
-        self.password_input.setPlaceholderText('Senha')
-        self.password_input.setEchoMode(QLineEdit.Password)
-
-        self.login_button = QPushButton('Login', self)
-        self.login_button.clicked.connect(self.login)
-
-        self.forgot_password_button = QPushButton('Esqueceu a senha?', self)
-        self.forgot_password_button.clicked.connect(self.forgot_password)
-
-        self.register_button = QPushButton('Registrar', self)
-        self.register_button.clicked.connect(self.open_register_window)
-
-        layout = QVBoxLayout()
-        layout.addWidget(QLabel('Nome de Usuário:'))
-        layout.addWidget(self.username_input)
-        layout.addWidget(QLabel('Senha:'))
-        layout.addWidget(self.password_input)
-        layout.addWidget(self.login_button)
-        layout.addWidget(self.forgot_password_button)
-        layout.addWidget(self.register_button)
-
-        self.setLayout(layout)
+        # Conectar os botões às funções
+        self.ui.btn_login.clicked.connect(self.login)
+        self.ui.btn_register.clicked.connect(self.open_register_window)
+        self.ui.btn_forget_password.clicked.connect(self.forgot_password)
+        self.ui.btn_close.clicked.connect(self.close)
 
     def login(self):
-        username = self.username_input.text()
-        password = self.password_input.text()
+        username = self.ui.user_field.text()
+        password = self.ui.password_field.text()
 
         if not username or not password:
-            QMessageBox.warning(self, 'Erro', 'Todos os campos são obrigatórios')
+            QtWidgets.QMessageBox.warning(self, 'Erro', 'Todos os campos são obrigatórios')
             return
 
         user = self.auth_controller.get_user_by_username(username)
 
         if user and self.auth_controller.verify_password(user[4], password):
             self.close()
-            start_app()
+            self.start_home_window()
         else:
-            QMessageBox.warning(self, 'Erro', 'Credenciais inválidas')
+            QtWidgets.QMessageBox.warning(self, 'Erro', 'Credenciais inválidas')
 
     def forgot_password(self):
-        email, ok = QtWidgets.QInputDialog.getText(self, 'Recuperar Senha', 'Digite seu e-mail:')
-        if ok and email:
-            if self.auth_controller.generate_reset_code(email):
-                self.code_verification_window = CodeVerificationWindow(self.auth_controller, email)
-                self.code_verification_window.show()
-            else:
-                QMessageBox.warning(self, 'Erro', 'Email não encontrado')
+        self.email_recovery_window = EmailRecoveryWindow(self.auth_controller, self)
+        self.email_recovery_window.exec_()
 
     def open_register_window(self):
         self.register_window = RegisterWindow(self.auth_controller)
         self.register_window.show()
+
+    def start_home_window(self):
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        process = QProcess()
+        script_path = os.path.abspath(os.path.join(base_dir, 'home_window.py'))
+        process.startDetached("python", [script_path])
+
+
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    auth_controller = AuthController()
+    login_window = LoginWindow(auth_controller)
+    login_window.show()
+    sys.exit(app.exec_())

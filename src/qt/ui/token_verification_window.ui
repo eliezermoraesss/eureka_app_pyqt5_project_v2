@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TokenVerificationWindow</class>
+ <widget class="QDialog" name="TokenVerificationWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>480</width>
+    <height>400</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Eureka®</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">* {
+    background-color: #ffffff;
+	font-style: &quot;Segoe UI&quot;;
+ 	color: #0B090A;
+}
+
+QLabel {
+    color: #0B090A;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+QLineEdit {
+    background-color: #DFE0E2;
+    padding-left: 15px;
+    border-radius: 18px;
+	font-size: 18px;
+}
+
+QPushButton {
+    background-color: #fbba72;
+    border: 2px;
+    border-radius: 18px;
+    font-size: 14px;
+    font-weight: regular;
+}
+
+QPushButton:hover {
+    background-color: #399918;
+    color: #EEEEEE
+}
+
+QPushButton:pressed {
+    background-color: #6703c5;
+    color: #EEEEEE;
+}
+</string>
+  </property>
+  <widget class="QLineEdit" name="token_field">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>150</y>
+     <width>161</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>150</width>
+     <height>41</height>
+    </size>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+     <pointsize>-1</pointsize>
+    </font>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
+   <property name="inputMask">
+    <string/>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="maxLength">
+    <number>6</number>
+   </property>
+   <property name="clearButtonEnabled">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btn_verify_token">
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>300</y>
+     <width>111</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>41</height>
+    </size>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+     <pointsize>-1</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
+   <property name="text">
+    <string>Verificar</string>
+   </property>
+   <property name="icon">
+    <iconset resource="../static/resource.qrc">
+     <normaloff>:/icon/icon/carraca.png</normaloff>:/icon/icon/carraca.png</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btn_close">
+   <property name="geometry">
+    <rect>
+     <x>250</x>
+     <y>300</y>
+     <width>111</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>41</height>
+    </size>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+     <pointsize>-1</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton:hover {
+    background-color: #d60000;
+    color: #EEEEEE
+}</string>
+   </property>
+   <property name="text">
+    <string> Cancelar</string>
+   </property>
+   <property name="icon">
+    <iconset resource="../static/resource.qrc">
+     <normaloff>:/icon/icon/excluir (1).png</normaloff>:/icon/icon/excluir (1).png</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+  </widget>
+  <widget class="QWidget" name="window_title_bar" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>481</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">* {
+background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(102, 7, 8, 255), stop:1 rgba(102, 7, 8, 255));
+}</string>
+   </property>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>0</y>
+      <width>241</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>-1</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel {
+	background-color: transparent;
+    color: #EEEEEE;
+    font-size: 22px;
+    font-weight: regular;
+	font-style: &quot;Segoe UI&quot;;
+}</string>
+    </property>
+    <property name="text">
+     <string>Verificação de token</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QPushButton" name="btn_new_token">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>240</y>
+     <width>161</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>41</height>
+    </size>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+     <pointsize>-1</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton:hover {
+    background-color: #00b4d8;
+    color: #EEEEEE
+}</string>
+   </property>
+   <property name="text">
+    <string>Gerar novo Token</string>
+   </property>
+   <property name="icon">
+    <iconset resource="../static/resource.qrc">
+     <normaloff>:/icon/icon/codigo-binario.png</normaloff>:/icon/icon/codigo-binario.png</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>120</y>
+     <width>261</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>-1</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QLabel {
+    color: #0B090A;
+    font-size: 12px;
+    font-weight: bold;
+	font-style: &quot;Segoe UI&quot;;
+}</string>
+   </property>
+   <property name="text">
+    <string>Digite o token enviado para o seu e-mail:</string>
+   </property>
+  </widget>
+ </widget>
+ <resources>
+  <include location="../static/resource.qrc"/>
+ </resources>
+ <connections/>
+</ui>

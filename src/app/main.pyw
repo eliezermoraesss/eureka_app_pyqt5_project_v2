@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets
 import sys
 
 from src.app.controllers.auth_controller import AuthController
-from src.app.views.login_window_2 import LoginWindow
+from src.app.views.login_window import LoginWindow
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
