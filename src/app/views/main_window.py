@@ -51,6 +51,9 @@ class MainWindow(QMainWindow):
         """)
 
         # Botões
+        self.dashboard_button = QPushButton("Dashboard", self)
+        self.dashboard_button .setMinimumWidth(150)
+
         self.engenharia_button = QPushButton("Engenharia", self)
         self.engenharia_button .setMinimumWidth(150)
 
@@ -67,6 +70,7 @@ class MainWindow(QMainWindow):
         layout_linha_01 = QHBoxLayout()
 
         layout_linha_01.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        layout_linha_01.addWidget(self.dashboard_button)
         layout_linha_01.addWidget(self.engenharia_button)
         layout_linha_01.addWidget(self.pcp_button)
         layout_linha_01.addWidget(self.compras_button)

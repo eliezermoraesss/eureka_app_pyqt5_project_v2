@@ -6,6 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/../../WORKSPACES/python/qt-designer/eureka-windows/.idea/eureka-windows.iml" filepath="$PROJECT_DIR$/../../WORKSPACES/python/qt-designer/eureka-windows/.idea/eureka-windows.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/eureka_app_pyqt5_project.iml" filepath="$PROJECT_DIR$/.idea/eureka_app_pyqt5_project.iml" />
       <module fileurl="file://$USER_HOME$/Documents/workspaces/python/powerbi-mssql-indicators-dashboard-python-flask-api-rest/.idea/powerbi-mssql-indicators-dashboard-python-flask-api-rest.iml" filepath="$USER_HOME$/Documents/workspaces/python/powerbi-mssql-indicators-dashboard-python-flask-api-rest/.idea/powerbi-mssql-indicators-dashboard-python-flask-api-rest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../WORKSPACES/python/.idea/python.iml" filepath="$PROJECT_DIR$/../../WORKSPACES/python/.idea/python.iml" />
     </modules>
   </component>
 </project>

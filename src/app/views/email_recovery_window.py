@@ -23,7 +23,7 @@ class EmailRecoveryWindow(QtWidgets.QDialog):
             if self.auth_controller.generate_reset_code(email):
                 # Assuming CodeVerificationWindow is defined elsewhere
                 self.code_verification_window = CodeVerificationWindow(self.auth_controller, email)
-                self.code_verification_window.show()
+                self.code_verification_window.exec_()
                 self.close()
             else:
                 QtWidgets.QMessageBox.warning(self, 'Erro', 'Email não encontrado')

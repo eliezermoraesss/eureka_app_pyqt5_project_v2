@@ -20,6 +20,9 @@ class Ui_EmailRecoveryWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(EmailRecoveryWindow.sizePolicy().hasHeightForWidth())
         EmailRecoveryWindow.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setFamily("Segoe UI")
+        EmailRecoveryWindow.setFont(font)
         EmailRecoveryWindow.setWindowOpacity(1.0)
         EmailRecoveryWindow.setStyleSheet("* {\n"
 "    background-color: #ffffff;\n"
@@ -62,12 +65,14 @@ class Ui_EmailRecoveryWindow(object):
         self.email_field.setGeometry(QtCore.QRect(100, 180, 301, 41))
         self.email_field.setMinimumSize(QtCore.QSize(301, 41))
         font = QtGui.QFont()
+        font.setFamily("Segoe UI")
         font.setPointSize(-1)
+        font.setStrikeOut(False)
         self.email_field.setFont(font)
-        self.email_field.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.email_field.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.email_field.setInputMask("")
         self.email_field.setText("")
-        self.email_field.setMaxLength(32767)
+        self.email_field.setMaxLength(30)
         self.email_field.setClearButtonEnabled(True)
         self.email_field.setObjectName("email_field")
         self.email_label = QtWidgets.QLabel(EmailRecoveryWindow)
@@ -91,11 +96,12 @@ class Ui_EmailRecoveryWindow(object):
         font = QtGui.QFont()
         font.setPointSize(-1)
         self.btn_send_email.setFont(font)
+        self.btn_send_email.setFocusPolicy(QtCore.Qt.TabFocus)
         self.btn_send_email.setStyleSheet("")
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/icon/icon/enviar.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.btn_send_email.setIcon(icon)
-        self.btn_send_email.setIconSize(QtCore.QSize(24, 24))
+        self.btn_send_email.setIconSize(QtCore.QSize(16, 16))
         self.btn_send_email.setObjectName("btn_send_email")
         self.btn_close = QtWidgets.QPushButton(EmailRecoveryWindow)
         self.btn_close.setGeometry(QtCore.QRect(260, 290, 101, 41))
@@ -103,6 +109,7 @@ class Ui_EmailRecoveryWindow(object):
         font = QtGui.QFont()
         font.setPointSize(-1)
         self.btn_close.setFont(font)
+        self.btn_close.setFocusPolicy(QtCore.Qt.TabFocus)
         self.btn_close.setStyleSheet("QPushButton:hover {\n"
 "    background-color: #d60000;\n"
 "    color: #EEEEEE\n"
@@ -110,28 +117,28 @@ class Ui_EmailRecoveryWindow(object):
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap(":/icon/icon/excluir (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.btn_close.setIcon(icon1)
-        self.btn_close.setIconSize(QtCore.QSize(24, 24))
+        self.btn_close.setIconSize(QtCore.QSize(16, 16))
         self.btn_close.setObjectName("btn_close")
         self.window_title_bar = QtWidgets.QWidget(EmailRecoveryWindow)
         self.window_title_bar.setGeometry(QtCore.QRect(0, 0, 481, 51))
         self.window_title_bar.setStyleSheet("* {\n"
-"background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(102, 7, 8, 255), stop:1 rgba(102, 7, 8, 255));\n"
+"background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(186, 24, 27, 255), stop:1 rgba(102, 7, 8, 255));\n"
 "}")
         self.window_title_bar.setObjectName("window_title_bar")
-        self.window_title_label = QtWidgets.QLabel(self.window_title_bar)
-        self.window_title_label.setGeometry(QtCore.QRect(120, 0, 261, 51))
+        self.label = QtWidgets.QLabel(self.window_title_bar)
+        self.label.setGeometry(QtCore.QRect(130, 10, 261, 31))
         font = QtGui.QFont()
         font.setPointSize(-1)
         font.setBold(True)
         font.setWeight(75)
-        self.window_title_label.setFont(font)
-        self.window_title_label.setStyleSheet("QLabel {\n"
+        self.label.setFont(font)
+        self.label.setStyleSheet("QLabel {\n"
 "    background-color: transparent;\n"
 "    color: #EEEEEE;\n"
+"      font-style: \"Segoe UI\";\n"
 "    font-size: 22px;\n"
-"    font-weight: regular;\n"
 "}")
-        self.window_title_label.setObjectName("window_title_label")
+        self.label.setObjectName("label")
 
         self.retranslateUi(EmailRecoveryWindow)
         QtCore.QMetaObject.connectSlotsByName(EmailRecoveryWindow)
@@ -140,7 +147,7 @@ class Ui_EmailRecoveryWindow(object):
         _translate = QtCore.QCoreApplication.translate
         EmailRecoveryWindow.setWindowTitle(_translate("EmailRecoveryWindow", "Eureka®"))
         self.email_label.setText(_translate("EmailRecoveryWindow", "Digite o seu e-mail:"))
-        self.btn_send_email.setText(_translate("EmailRecoveryWindow", "Enviar"))
-        self.btn_close.setText(_translate("EmailRecoveryWindow", "Cancelar"))
-        self.window_title_label.setText(_translate("EmailRecoveryWindow", "Recuperação de senha"))
+        self.btn_send_email.setText(_translate("EmailRecoveryWindow", " Enviar"))
+        self.btn_close.setText(_translate("EmailRecoveryWindow", " Cancelar"))
+        self.label.setText(_translate("EmailRecoveryWindow", "Recuperação de senha"))
 import resource_rc

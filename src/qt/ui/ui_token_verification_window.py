@@ -61,7 +61,6 @@ class Ui_TokenVerificationWindow(object):
         self.token_field.setGeometry(QtCore.QRect(160, 150, 161, 41))
         self.token_field.setMinimumSize(QtCore.QSize(150, 41))
         font = QtGui.QFont()
-        font.setFamily("Segoe UI")
         font.setPointSize(-1)
         self.token_field.setFont(font)
         self.token_field.setFocusPolicy(QtCore.Qt.ClickFocus)
@@ -74,22 +73,22 @@ class Ui_TokenVerificationWindow(object):
         self.btn_verify_token.setGeometry(QtCore.QRect(120, 300, 111, 41))
         self.btn_verify_token.setMinimumSize(QtCore.QSize(0, 41))
         font = QtGui.QFont()
-        font.setFamily("Segoe UI")
         font.setPointSize(-1)
         self.btn_verify_token.setFont(font)
+        self.btn_verify_token.setFocusPolicy(QtCore.Qt.TabFocus)
         self.btn_verify_token.setStyleSheet("")
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/icon/icon/carraca.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.btn_verify_token.setIcon(icon)
-        self.btn_verify_token.setIconSize(QtCore.QSize(24, 24))
+        self.btn_verify_token.setIconSize(QtCore.QSize(16, 16))
         self.btn_verify_token.setObjectName("btn_verify_token")
         self.btn_close = QtWidgets.QPushButton(TokenVerificationWindow)
         self.btn_close.setGeometry(QtCore.QRect(250, 300, 111, 41))
         self.btn_close.setMinimumSize(QtCore.QSize(0, 41))
         font = QtGui.QFont()
-        font.setFamily("Segoe UI")
         font.setPointSize(-1)
         self.btn_close.setFont(font)
+        self.btn_close.setFocusPolicy(QtCore.Qt.TabFocus)
         self.btn_close.setStyleSheet("QPushButton:hover {\n"
 "    background-color: #d60000;\n"
 "    color: #EEEEEE\n"
@@ -97,17 +96,18 @@ class Ui_TokenVerificationWindow(object):
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap(":/icon/icon/excluir (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.btn_close.setIcon(icon1)
-        self.btn_close.setIconSize(QtCore.QSize(24, 24))
+        self.btn_close.setIconSize(QtCore.QSize(16, 16))
         self.btn_close.setObjectName("btn_close")
         self.window_title_bar = QtWidgets.QWidget(TokenVerificationWindow)
         self.window_title_bar.setGeometry(QtCore.QRect(0, 0, 481, 51))
         self.window_title_bar.setStyleSheet("* {\n"
-"background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(102, 7, 8, 255), stop:1 rgba(102, 7, 8, 255));\n"
+"background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(186, 24, 27, 255), stop:1 rgba(102, 7, 8, 255));\n"
 "}")
         self.window_title_bar.setObjectName("window_title_bar")
         self.label_2 = QtWidgets.QLabel(self.window_title_bar)
-        self.label_2.setGeometry(QtCore.QRect(130, 0, 241, 51))
+        self.label_2.setGeometry(QtCore.QRect(140, 0, 241, 51))
         font = QtGui.QFont()
+        font.setFamily("Segoe UI Light")
         font.setPointSize(-1)
         font.setBold(True)
         font.setWeight(75)
@@ -121,12 +121,12 @@ class Ui_TokenVerificationWindow(object):
 "}")
         self.label_2.setObjectName("label_2")
         self.btn_new_token = QtWidgets.QPushButton(TokenVerificationWindow)
-        self.btn_new_token.setGeometry(QtCore.QRect(160, 240, 161, 41))
+        self.btn_new_token.setGeometry(QtCore.QRect(160, 220, 161, 41))
         self.btn_new_token.setMinimumSize(QtCore.QSize(0, 41))
         font = QtGui.QFont()
-        font.setFamily("Segoe UI")
         font.setPointSize(-1)
         self.btn_new_token.setFont(font)
+        self.btn_new_token.setFocusPolicy(QtCore.Qt.TabFocus)
         self.btn_new_token.setStyleSheet("QPushButton:hover {\n"
 "    background-color: #00b4d8;\n"
 "    color: #EEEEEE\n"
@@ -139,6 +139,7 @@ class Ui_TokenVerificationWindow(object):
         self.label = QtWidgets.QLabel(TokenVerificationWindow)
         self.label.setGeometry(QtCore.QRect(130, 120, 261, 16))
         font = QtGui.QFont()
+        font.setFamily("Segoe UI")
         font.setPointSize(-1)
         font.setBold(True)
         font.setWeight(75)
@@ -157,9 +158,9 @@ class Ui_TokenVerificationWindow(object):
     def retranslateUi(self, TokenVerificationWindow):
         _translate = QtCore.QCoreApplication.translate
         TokenVerificationWindow.setWindowTitle(_translate("TokenVerificationWindow", "Eureka®"))
-        self.btn_verify_token.setText(_translate("TokenVerificationWindow", "Verificar"))
+        self.btn_verify_token.setText(_translate("TokenVerificationWindow", " Verificar"))
         self.btn_close.setText(_translate("TokenVerificationWindow", " Cancelar"))
         self.label_2.setText(_translate("TokenVerificationWindow", "Verificação de token"))
-        self.btn_new_token.setText(_translate("TokenVerificationWindow", "Gerar novo Token"))
+        self.btn_new_token.setText(_translate("TokenVerificationWindow", "Gerar novo token"))
         self.label.setText(_translate("TokenVerificationWindow", "Digite o token enviado para o seu e-mail:"))
 import resource_rc

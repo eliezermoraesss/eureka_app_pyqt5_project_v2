@@ -10,6 +10,11 @@ class MainController:
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
 
     def setup_connections(self):
+        def execute_dashboard_model():
+            process = QProcess()
+            script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'dashboard_model.pyw'))
+            process.startDetached("python", [script_path])  # Usa startDetached para execução independente
+
         def execute_engenharia_model():
             process = QProcess()
             script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'engenharia_model.pyw'))
@@ -30,6 +35,7 @@ class MainController:
             script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'compras_model.pyw'))
             process.startDetached("python", [script_path])
 
+        self.main_window.dashboard_button.clicked.connect(execute_dashboard_model)
         self.main_window.engenharia_button.clicked.connect(execute_engenharia_model)
         self.main_window.pcp_button.clicked.connect(execute_pcp_model)
         self.main_window.compras_button.clicked.connect(execute_compras_model)

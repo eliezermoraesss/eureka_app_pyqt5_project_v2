@@ -26,7 +26,7 @@ class CodeVerificationWindow(QtWidgets.QDialog):
         success, message = self.auth_controller.verify_reset_code(self.email, code)
         if success:
             self.reset_password_window = ResetPasswordWindow(self.auth_controller, self.email)
-            self.reset_password_window.show()
+            self.reset_password_window.exec_()
             self.close()
         else:
             QMessageBox.warning(self, 'Erro', message)

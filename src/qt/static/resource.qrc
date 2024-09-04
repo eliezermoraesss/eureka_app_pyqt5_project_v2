@@ -5,6 +5,8 @@
     <file>image/logo_enaplic_50.png</file>
   </qresource>
   <qresource prefix="icon">
+    <file>icon/fechar.png</file>
+    <file>icon/aviao-de-papel.png</file>
     <file>icon/arrow.png</file>
     <file>icon/caixa-de-senha-com-asteriscos.png</file>
     <file>icon/entrada-de-senha.png</file>

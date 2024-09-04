@@ -75,7 +75,6 @@ QPushButton:pressed {
    </property>
    <property name="font">
     <font>
-     <family>Segoe UI</family>
      <pointsize>-1</pointsize>
     </font>
    </property>
@@ -112,15 +111,17 @@ QPushButton:pressed {
    </property>
    <property name="font">
     <font>
-     <family>Segoe UI</family>
      <pointsize>-1</pointsize>
     </font>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::TabFocus</enum>
    </property>
    <property name="styleSheet">
     <string notr="true"/>
    </property>
    <property name="text">
-    <string>Verificar</string>
+    <string> Verificar</string>
    </property>
    <property name="icon">
     <iconset resource="../static/resource.qrc">
@@ -128,8 +129,8 @@ QPushButton:pressed {
    </property>
    <property name="iconSize">
     <size>
-     <width>24</width>
-     <height>24</height>
+     <width>16</width>
+     <height>16</height>
     </size>
    </property>
   </widget>
@@ -150,9 +151,11 @@ QPushButton:pressed {
    </property>
    <property name="font">
     <font>
-     <family>Segoe UI</family>
      <pointsize>-1</pointsize>
     </font>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::TabFocus</enum>
    </property>
    <property name="styleSheet">
     <string notr="true">QPushButton:hover {
@@ -169,8 +172,8 @@ QPushButton:pressed {
    </property>
    <property name="iconSize">
     <size>
-     <width>24</width>
-     <height>24</height>
+     <width>16</width>
+     <height>16</height>
     </size>
    </property>
   </widget>
@@ -185,13 +188,13 @@ QPushButton:pressed {
    </property>
    <property name="styleSheet">
     <string notr="true">* {
-background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(102, 7, 8, 255), stop:1 rgba(102, 7, 8, 255));
+background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(186, 24, 27, 255), stop:1 rgba(102, 7, 8, 255));
 }</string>
    </property>
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>130</x>
+      <x>140</x>
       <y>0</y>
       <width>241</width>
       <height>51</height>
@@ -199,6 +202,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgb
     </property>
     <property name="font">
      <font>
+      <family>Segoe UI Light</family>
       <pointsize>-1</pointsize>
       <weight>75</weight>
       <bold>true</bold>
@@ -222,7 +226,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgb
    <property name="geometry">
     <rect>
      <x>160</x>
-     <y>240</y>
+     <y>220</y>
      <width>161</width>
      <height>41</height>
     </rect>
@@ -235,9 +239,11 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgb
    </property>
    <property name="font">
     <font>
-     <family>Segoe UI</family>
      <pointsize>-1</pointsize>
     </font>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::TabFocus</enum>
    </property>
    <property name="styleSheet">
     <string notr="true">QPushButton:hover {
@@ -246,7 +252,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgb
 }</string>
    </property>
    <property name="text">
-    <string>Gerar novo Token</string>
+    <string>Gerar novo token</string>
    </property>
    <property name="icon">
     <iconset resource="../static/resource.qrc">
@@ -270,6 +276,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgb
    </property>
    <property name="font">
     <font>
+     <family>Segoe UI</family>
      <pointsize>-1</pointsize>
      <weight>75</weight>
      <bold>true</bold>

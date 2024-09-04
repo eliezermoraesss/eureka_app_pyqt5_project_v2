@@ -38,13 +38,14 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgb
      <property name="geometry">
       <rect>
        <x>140</x>
-       <y>0</y>
-       <width>371</width>
+       <y>-5</y>
+       <width>321</width>
        <height>51</height>
       </rect>
      </property>
      <property name="font">
       <font>
+       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -198,8 +199,14 @@ QTableWidget::item:selected {
        <height>41</height>
       </size>
      </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>-1</pointsize>
+      </font>
+     </property>
      <property name="focusPolicy">
-      <enum>Qt::StrongFocus</enum>
+      <enum>Qt::ClickFocus</enum>
      </property>
      <property name="inputMask">
       <string/>
@@ -229,11 +236,17 @@ QTableWidget::item:selected {
        <height>41</height>
       </size>
      </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>-1</pointsize>
+      </font>
+     </property>
      <property name="tabletTracking">
       <bool>false</bool>
      </property>
      <property name="focusPolicy">
-      <enum>Qt::StrongFocus</enum>
+      <enum>Qt::ClickFocus</enum>
      </property>
      <property name="inputMask">
       <string/>
@@ -260,6 +273,14 @@ QTableWidget::item:selected {
        <height>13</height>
       </rect>
      </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>-1</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
      <property name="text">
       <string>Usuário</string>
      </property>
@@ -273,6 +294,14 @@ QTableWidget::item:selected {
        <height>16</height>
       </rect>
      </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>-1</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
      <property name="text">
       <string>E-mail</string>
      </property>
@@ -282,7 +311,7 @@ QTableWidget::item:selected {
       <rect>
        <x>310</x>
        <y>460</y>
-       <width>111</width>
+       <width>91</width>
        <height>41</height>
       </rect>
      </property>
@@ -292,6 +321,15 @@ QTableWidget::item:selected {
        <height>41</height>
       </size>
      </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>-1</pointsize>
+      </font>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::TabFocus</enum>
+     </property>
      <property name="styleSheet">
       <string notr="true">QPushButton:hover {
     background-color: #d60000;
@@ -299,16 +337,16 @@ QTableWidget::item:selected {
 }</string>
      </property>
      <property name="text">
-      <string>Cancelar</string>
+      <string> Voltar</string>
      </property>
      <property name="icon">
       <iconset resource="../static/resource.qrc">
-       <normaloff>:/icon/icon/sair.png</normaloff>:/icon/icon/sair.png</iconset>
+       <normaloff>:/icon/icon/arrow-92-64.ico</normaloff>:/icon/icon/arrow-92-64.ico</iconset>
      </property>
      <property name="iconSize">
       <size>
-       <width>24</width>
-       <height>24</height>
+       <width>16</width>
+       <height>16</height>
       </size>
      </property>
     </widget>
@@ -320,6 +358,14 @@ QTableWidget::item:selected {
        <width>47</width>
        <height>13</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>-1</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
      </property>
      <property name="text">
       <string>Nome</string>
@@ -340,8 +386,14 @@ QTableWidget::item:selected {
        <height>41</height>
       </size>
      </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>-1</pointsize>
+      </font>
+     </property>
      <property name="focusPolicy">
-      <enum>Qt::StrongFocus</enum>
+      <enum>Qt::ClickFocus</enum>
      </property>
      <property name="accessibleDescription">
       <string/>
@@ -374,8 +426,14 @@ QTableWidget::item:selected {
        <height>41</height>
       </size>
      </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>-1</pointsize>
+      </font>
+     </property>
      <property name="focusPolicy">
-      <enum>Qt::StrongFocus</enum>
+      <enum>Qt::ClickFocus</enum>
      </property>
      <property name="inputMask">
       <string/>
@@ -402,6 +460,14 @@ QTableWidget::item:selected {
        <height>16</height>
       </rect>
      </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>-1</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
      <property name="text">
       <string>Senha</string>
      </property>
@@ -427,11 +493,17 @@ QTableWidget::item:selected {
        <height>41</height>
       </size>
      </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>-1</pointsize>
+      </font>
+     </property>
      <property name="cursor">
       <cursorShape>ArrowCursor</cursorShape>
      </property>
      <property name="focusPolicy">
-      <enum>Qt::NoFocus</enum>
+      <enum>Qt::ClickFocus</enum>
      </property>
      <property name="insertPolicy">
       <enum>QComboBox::InsertAlphabetically</enum>
@@ -502,6 +574,14 @@ QTableWidget::item:selected {
        <height>16</height>
       </rect>
      </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>-1</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
      <property name="text">
       <string>Setor</string>
      </property>
@@ -557,7 +637,7 @@ QTableWidget::item:selected {
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap resource="../static/resource.qrc">:/icon/icon/email-12-64.ico</pixmap>
+      <pixmap resource="../static/resource.qrc">:/icon/icon/no.png</pixmap>
      </property>
      <property name="scaledContents">
       <bool>true</bool>
@@ -576,7 +656,7 @@ QTableWidget::item:selected {
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap resource="../static/resource.qrc">:/icon/icon/key-3-64.ico</pixmap>
+      <pixmap resource="../static/resource.qrc">:/icon/icon/cadeado (1).png</pixmap>
      </property>
      <property name="scaledContents">
       <bool>true</bool>
@@ -623,9 +703,9 @@ QTableWidget::item:selected {
     <widget class="QPushButton" name="btn_save">
      <property name="geometry">
       <rect>
-       <x>180</x>
+       <x>200</x>
        <y>460</y>
-       <width>111</width>
+       <width>91</width>
        <height>41</height>
       </rect>
      </property>
@@ -635,6 +715,15 @@ QTableWidget::item:selected {
        <height>41</height>
       </size>
      </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>-1</pointsize>
+      </font>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::TabFocus</enum>
+     </property>
      <property name="styleSheet">
       <string notr="true">QPushButton:hover {
     background-color: #399918;
@@ -642,7 +731,7 @@ QTableWidget::item:selected {
 }</string>
      </property>
      <property name="text">
-      <string> Cadastrar</string>
+      <string> Salvar</string>
      </property>
      <property name="icon">
       <iconset resource="../static/resource.qrc">
@@ -650,8 +739,8 @@ QTableWidget::item:selected {
      </property>
      <property name="iconSize">
       <size>
-       <width>24</width>
-       <height>24</height>
+       <width>16</width>
+       <height>16</height>
       </size>
      </property>
     </widget>
