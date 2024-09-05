@@ -40,7 +40,6 @@ class LoginWindow(QtWidgets.QMainWindow):
 
         if user and self.auth_controller.verify_password(user[4], password):
             self.close()
-            subprocess.run(['setx', 'EUREKA_USER', user[2]], shell=True)
             self.start_home_window()
         else:
             QtWidgets.QMessageBox.warning(self, 'Atenção', 'Credenciais inválidas')

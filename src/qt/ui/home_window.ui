@@ -41,10 +41,11 @@ QPushButton {
 }
 
 QPushButton:hover {
-    background-color: #399918;
+    background-color: #a4161a;
     border: 2px solid #333;
     color: #EEEEEE;
 	font-weight: bold;
+  	font-size: 23px;
 }
 
 QPushButton:pressed {
@@ -59,35 +60,37 @@ QPushButton:pressed {
        <x>130</x>
        <y>260</y>
        <width>221</width>
-       <height>131</height>
+       <height>121</height>
       </rect>
      </property>
      <property name="minimumSize">
       <size>
-       <width>221</width>
+       <width>0</width>
        <height>41</height>
       </size>
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
      </property>
      <property name="styleSheet">
       <string notr="true"/>
      </property>
      <property name="text">
-      <string>Dashboard</string>
+      <string> Dashboard</string>
      </property>
      <property name="icon">
       <iconset resource="../static/resource.qrc">
-       <normaloff>:/icon/icon/relatorio.png</normaloff>:/icon/icon/relatorio.png</iconset>
+       <normaloff>:/icon/icon/dashboard-64.png</normaloff>:/icon/icon/dashboard-64.png</iconset>
      </property>
      <property name="iconSize">
       <size>
-       <width>64</width>
-       <height>64</height>
+       <width>32</width>
+       <height>32</height>
       </size>
      </property>
     </widget>
@@ -108,7 +111,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -116,11 +118,11 @@ QPushButton:pressed {
       <string notr="true"/>
      </property>
      <property name="text">
-      <string>Engenharia</string>
+      <string> Engenharia</string>
      </property>
      <property name="icon">
       <iconset resource="../static/resource.qrc">
-       <normaloff>:/icon/icon/engenharia.png</normaloff>:/icon/icon/engenharia.png</iconset>
+       <normaloff>:/icon/icon/engineering-64.ico</normaloff>:/icon/icon/engineering-64.ico</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -146,7 +148,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -158,7 +159,7 @@ QPushButton:pressed {
      </property>
      <property name="icon">
       <iconset resource="../static/resource.qrc">
-       <normaloff>:/icon/icon/producao.png</normaloff>:/icon/icon/producao.png</iconset>
+       <normaloff>:/icon/icon/factory-64.ico</normaloff>:/icon/icon/factory-64.ico</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -184,7 +185,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -192,11 +192,11 @@ QPushButton:pressed {
       <string notr="true"/>
      </property>
      <property name="text">
-      <string>Compras</string>
+      <string> Compras</string>
      </property>
      <property name="icon">
       <iconset resource="../static/resource.qrc">
-       <normaloff>:/icon/icon/carrinho-carrinho.png</normaloff>:/icon/icon/carrinho-carrinho.png</iconset>
+       <normaloff>:/icon/icon/buy-64.ico</normaloff>:/icon/icon/buy-64.ico</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -222,7 +222,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -230,11 +229,11 @@ QPushButton:pressed {
       <string notr="true"/>
      </property>
      <property name="text">
-      <string>Comercial</string>
+      <string> Comercial</string>
      </property>
      <property name="icon">
       <iconset resource="../static/resource.qrc">
-       <normaloff>:/icon/icon/acordo.png</normaloff>:/icon/icon/acordo.png</iconset>
+       <normaloff>:/icon/icon/sale-2-64.ico</normaloff>:/icon/icon/sale-2-64.ico</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -260,7 +259,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -268,11 +266,11 @@ QPushButton:pressed {
       <string notr="true"/>
      </property>
      <property name="text">
-      <string>Gestão QPS</string>
+      <string> Gestão QPS</string>
      </property>
      <property name="icon">
       <iconset resource="../static/resource.qrc">
-       <normaloff>:/icon/icon/pedir-comida.png</normaloff>:/icon/icon/pedir-comida.png</iconset>
+       <normaloff>:/icon/icon/purchase-order-64.ico</normaloff>:/icon/icon/purchase-order-64.ico</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -288,14 +286,13 @@ QPushButton:pressed {
      <property name="geometry">
       <rect>
        <x>30</x>
-       <y>70</y>
+       <y>60</y>
        <width>441</width>
        <height>61</height>
       </rect>
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI Semibold</family>
        <pointsize>-1</pointsize>
        <weight>75</weight>
        <bold>true</bold>
@@ -325,7 +322,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI Semibold</family>
        <pointsize>-1</pointsize>
        <weight>75</weight>
        <bold>true</bold>
@@ -398,6 +394,38 @@ QPushButton:pressed {
       </size>
      </property>
     </widget>
+    <widget class="QFrame" name="frame">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>130</y>
+       <width>1050</width>
+       <height>2</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QFrame {
+	background-color: #a4161a;
+}</string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+    </widget>
+    <zorder>btn_qps</zorder>
+    <zorder>btn_comercial</zorder>
+    <zorder>btn_compras</zorder>
+    <zorder>btn_pcp</zorder>
+    <zorder>btn_engenharia</zorder>
+    <zorder>btn_dashboard</zorder>
+    <zorder>welcome_label</zorder>
+    <zorder>user_label</zorder>
+    <zorder>logo_enaplic_50</zorder>
+    <zorder>btn_close</zorder>
+    <zorder>frame</zorder>
    </widget>
    <widget class="QWidget" name="sidebar_enaplic" native="true">
     <property name="geometry">

@@ -1,72 +1,40 @@
 <RCC>
-  <qresource prefix="image">
-    <file>image/logo_enaplic_50_anos.png</file>
-    <file>image/LOGO.jpeg</file>
-    <file>image/logo_enaplic_50.png</file>
-  </qresource>
   <qresource prefix="icon">
-    <file>icon/ordem-de-servico.png</file>
-    <file>icon/producao.png</file>
-    <file>icon/pedir-comida.png</file>
-    <file>icon/acordo.png</file>
-    <file>icon/carrinho-carrinho.png</file>
-    <file>icon/fabricacao.png</file>
-    <file>icon/engenharia.png</file>
-    <file>icon/relatorio.png</file>
-    <file>icon/icons8-gráfico-combinado.gif</file>
-    <file>icon/fechar.png</file>
-    <file>icon/aviao-de-papel.png</file>
-    <file>icon/arrow.png</file>
-    <file>icon/caixa-de-senha-com-asteriscos.png</file>
-    <file>icon/entrada-de-senha.png</file>
-    <file>icon/carraca.png</file>
-    <file>icon/codigo-binario.png</file>
-    <file>icon/o-email.png</file>
-    <file>icon/no.png</file>
-    <file>icon/enviar.png</file>
-    <file>icon/icons8-salvar-50.png</file>
-    <file>icon/excluir (1).png</file>
-    <file>icon/excluir.png</file>
-    <file>icon/sair.png</file>
-    <file>icon/login-64.ico</file>
+    <file>icon/sale-2-64.ico</file>
+    <file>icon/purchase-order-64.ico</file>
+    <file>icon/buy-64.ico</file>
+    <file>icon/factory-64.ico</file>
+    <file>icon/dashboard-64.png</file>
+    <file>icon/engineering-64.ico</file>
     <file>icon/add-user-64.ico</file>
-    <file>icon/add-user-3-24.ico</file>
     <file>icon/adicionar-usuario.png</file>
-    <file>icon/arrow-80-64.ico</file>
+    <file>icon/arrow.png</file>
     <file>icon/arrow-92-64.ico</file>
     <file>icon/cadeado (1).png</file>
-    <file>icon/cadeado.png</file>
+    <file>icon/caixa-de-senha-com-asteriscos.png</file>
+    <file>icon/carraca.png</file>
+    <file>icon/codigo-binario.png</file>
     <file>icon/email-12-64.ico</file>
+    <file>icon/entrada-de-senha.png</file>
     <file>icon/entrar (1).png</file>
     <file>icon/entrar (2).png</file>
-    <file>icon/entrar.png</file>
+    <file>icon/enviar.png</file>
+    <file>icon/excluir (1).png</file>
+    <file>icon/excluir.png</file>
     <file>icon/factory-2-64.ico</file>
+    <file>icon/icons8-salvar-50.png</file>
     <file>icon/key-3-64.ico</file>
-    <file>icon/login-16.ico</file>
+    <file>icon/login-64.ico</file>
+    <file>icon/no.png</file>
+    <file>icon/painel.png</file>
+    <file>icon/sair.png</file>
     <file>icon/save-64.ico</file>
     <file>icon/user-3-64.ico</file>
     <file>icon/user-64.ico</file>
-    <file>icon/factory-2-64.ico</file>
-    <file>icon/arrow-80-64.ico</file>
-    <file>icon/arrow-92-64.ico</file>
-    <file>icon/save-64.ico</file>
-    <file>icon/cadeado (1).png</file>
-    <file>icon/add-user-3-24.ico</file>
-    <file>icon/adicionar-usuario.png</file>
-    <file>icon/cadeado.png</file>
-    <file>icon/entrar (1).png</file>
-    <file>icon/entrar (2).png</file>
-    <file>icon/entrar.png</file>
-    <file>icon/login-16.ico</file>
-    <file>icon/adicionar-usuario.png</file>
-    <file>icon/add-user-3-24.ico</file>
-    <file>icon/entrar (1).png</file>
-    <file>icon/entrar (2).png</file>
-    <file>icon/entrar.png</file>
-    <file>icon/login-16.ico</file>
-    <file>icon/entrar (1).png</file>
-    <file>icon/entrar (2).png</file>
-    <file>icon/entrar.png</file>
-    <file>icon/login-16.ico</file>
+  </qresource>
+  <qresource prefix="image">
+    <file>image/LOGO.jpeg</file>
+    <file>image/logo_enaplic_50.png</file>
+    <file>image/logo_enaplic_50_anos.png</file>
   </qresource>
 </RCC>

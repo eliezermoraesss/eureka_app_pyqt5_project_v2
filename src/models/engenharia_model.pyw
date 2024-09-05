@@ -3,6 +3,8 @@ import os
 import sys
 import time
 
+from src.app.views.edit_product_window import EditarItemWindow
+
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -445,30 +447,51 @@ class EngenhariaApp(QWidget):
 
             context_menu_abrir_desenho = QAction('Abrir desenho', self)
             context_menu_abrir_desenho.triggered.connect(lambda: abrir_desenho(self, table))
+            menu.addAction(context_menu_abrir_desenho)
+
+            editar_action = QAction('Editar...', self)
+            editar_action.triggered.connect(self.editar_item_selecionado)
+            menu.addAction(editar_action)
 
             context_menu_consultar_estrutura = QAction('Consultar estrutura', self)
             context_menu_consultar_estrutura.triggered.connect(lambda: executar_consulta_estrutura(self, table))
+            menu.addAction(context_menu_consultar_estrutura)
 
             context_menu_consultar_onde_usado = QAction('Onde é usado?', self)
             context_menu_consultar_onde_usado.triggered.connect(lambda: executar_consulta_onde_usado(self, table))
+            menu.addAction(context_menu_consultar_onde_usado)
 
             context_menu_saldo_estoque = QAction('Saldo em estoque', self)
             context_menu_saldo_estoque.triggered.connect(lambda: executar_saldo_em_estoque(self, table))
+            menu.addAction(context_menu_saldo_estoque)
 
             context_menu_ultimo_fornecedor = QAction('Fornecedores', self)
             context_menu_ultimo_fornecedor.triggered.connect(lambda: executar_ultimos_fornecedores(self, table))
+            menu.addAction(context_menu_ultimo_fornecedor)
 
             context_menu_nova_janela = QAction('Nova janela', self)
             context_menu_nova_janela.triggered.connect(lambda: abrir_nova_janela(self, EngenhariaApp()))
-
-            menu.addAction(context_menu_abrir_desenho)
-            menu.addAction(context_menu_consultar_estrutura)
-            menu.addAction(context_menu_consultar_onde_usado)
-            menu.addAction(context_menu_saldo_estoque)
-            menu.addAction(context_menu_ultimo_fornecedor)
             menu.addAction(context_menu_nova_janela)
 
             menu.exec_(table.viewport().mapToGlobal(position))
+
+    def editar_item_selecionado(self):
+        selected_row = self.tree.currentRow()
+        if selected_row != -1:
+            linha_completa = []
+            for column in range(self.tree.columnCount()):
+                item = self.tree.item(selected_row, column)
+                linha_completa.append(item.text() if item else "")
+
+            self.abrir_janela_edicao(linha_completa)
+
+    def abrir_janela_edicao(self, linha_completa):
+        edit_window = EditarItemWindow(linha_completa, self)
+        if edit_window.exec_():
+            selected_row = self.tree.currentRow()
+            for column, value in enumerate(linha_completa):
+                item = QTableWidgetItem(value)
+                self.tree.setItem(selected_row, column, item)
 
     def configurar_tabela_tooltips(self, dataframe):
         tooltips = {
