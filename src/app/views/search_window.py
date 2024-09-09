@@ -11,20 +11,22 @@ from src.qt.ui.ui_search_window import Ui_SearchWindow
 
 
 class SearchWindow(QDialog):
-    def __init__(self, entity, parent=None):
+    def __init__(self, entity_name, entity, parent=None):
         super(SearchWindow, self).__init__(parent)
+        self.entity_name = entity_name
         self.engine = None
         self.entity = entity
         self.selected_code = None
         self.altura_linha = 30
         self.tamanho_fonte_tabela = 10
         self.fonte_tabela = 'Segoe UI'
+        self.setFixedSize(640, 550)
         self.ui = Ui_SearchWindow()
         self.ui.setupUi(self)
-        self.setFixedSize(640, 600)
         self.init_ui()
 
     def init_ui(self):
+        self.ui.type_label.setText(self.entity_name)
         self.fill_search_table(self.entity)
         self.ui.search_field.returnPressed.connect(self.get_parameters_values)
         self.ui.search_table.itemDoubleClicked.connect(self.accept_selection)

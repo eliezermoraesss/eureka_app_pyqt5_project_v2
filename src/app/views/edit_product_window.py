@@ -4,32 +4,47 @@ from src.app.utils.open_search_dialog import open_search_dialog
 from src.qt.ui.ui_edit_product_window import Ui_EditProductWindow
 
 
-class EditarProdutoItemWindow(QtWidgets.QMainWindow):
-    def __init__(self, linha_completa):
+class EditarProdutoItemWindow(QtWidgets.QDialog):
+    def __init__(self, selected_row_table):
         super(EditarProdutoItemWindow, self).__init__()
 
-        self.linha_completa = linha_completa
+        self.selected_row_table = selected_row_table
         self.setFixedSize(640, 600)
         self.ui = Ui_EditProductWindow()
         self.ui.setupUi(self)
         self.init_ui()
 
     def init_ui(self):
-        self.ui.btn_close.clicked.connect(self.close)
-        self.ui.btn_save.clicked.connect(self.atualizar_produto)
-        self.ui.btn_search_um.clicked.connect(lambda: open_search_dialog(self.ui.um_field, "unidade_medida"))
 
-    def atualizar_produto(self):
+        self.ui.type_label.setText(self.selected_row_table[0])
+        self.ui.descricao_field.setText(self.selected_row_table[1])
+        self.ui.desc_comp_field.setText(self.selected_row_table[2])
+        self.ui.tipo_field.setText(self.selected_row_table[3])
+        self.ui.um_field.setText(self.selected_row_table[4])
+        self.ui.armazem_field.setText(self.selected_row_table[5])
+        self.ui.cc_field.setText(self.selected_row_table[8])
+        self.ui.grupo_field.setText(self.selected_row_table[6])
+        self.ui.bloquear_combobox.setCurrentText(self.selected_row_table[9])
+        self.ui.endereco_field.setText(self.selected_row_table[13])
+
+        self.ui.btn_close.clicked.connect(self.close)
+        self.ui.btn_save.clicked.connect(self.update_product)
+        self.ui.btn_search_um.clicked.connect(lambda: open_search_dialog("Unidade de Medida", self.ui.um_field, "unidade_medida"))
+
+    def update_table(self):
         # Recupera os valores editados
-        self.linha_completa[1] = self.line_edit_desc.text()
-        self.linha_completa[2] = self.line_edit_desc_compl.text()
-        self.linha_completa[3] = self.line_edit_tipo.text()
-        self.linha_completa[4] = self.line_edit_unid_med.text()
-        self.linha_completa[5] = self.line_edit_armazem.text()
-        self.linha_completa[6] = self.line_edit_grupo.text()
-        self.linha_completa[8] = self.line_edit_centro_custo.text()
-        self.linha_completa[9] = self.line_edit_bloqueado.text()
-        self.linha_completa[13] = self.line_edit_endereco.text()
+        self.selected_row_table[1] = self.ui.descricao_field.text()
+        self.selected_row_table[2] = self.ui.desc_comp_field.text()
+        self.selected_row_table[3] = self.ui.tipo_field.text()
+        self.selected_row_table[4] = self.ui.um_field.text()
+        self.selected_row_table[5] = self.ui.armazem_field.text()
+        self.selected_row_table[6] = self.ui.grupo_field.text()
+        self.selected_row_table[8] = self.ui.cc_field.text()
+        self.selected_row_table[9] = self.ui.bloquear_combobox.currentText()
+        self.selected_row_table[13] = self.ui.endereco_field.text()
+
+    def update_product(self):
+        self.update_table()
 
         # Fechar a janela após salvar
         self.accept()

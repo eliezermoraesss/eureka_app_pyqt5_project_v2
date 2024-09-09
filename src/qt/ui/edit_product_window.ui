@@ -79,7 +79,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgb
    <widget class="QLabel" name="title_label">
     <property name="geometry">
      <rect>
-      <x>130</x>
+      <x>50</x>
       <y>0</y>
       <width>191</width>
       <height>51</height>
@@ -103,15 +103,15 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgb
 }</string>
     </property>
     <property name="text">
-     <string>Editar o produto</string>
+     <string>Alterar o produto:</string>
     </property>
    </widget>
    <widget class="QLabel" name="type_label">
     <property name="geometry">
      <rect>
-      <x>320</x>
+      <x>250</x>
       <y>0</y>
-      <width>171</width>
+      <width>321</width>
       <height>51</height>
      </rect>
     </property>
@@ -584,8 +584,8 @@ QTableWidget::item:selected {
    <widget class="QLabel" name="logo_enaplic_50">
     <property name="geometry">
      <rect>
-      <x>510</x>
-      <y>460</y>
+      <x>480</x>
+      <y>450</y>
       <width>121</width>
       <height>101</height>
      </rect>

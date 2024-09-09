@@ -477,19 +477,18 @@ class EngenhariaApp(QWidget):
     def editar_item_selecionado(self):
         selected_row = self.tree.currentRow()
         if selected_row != -1:
-            linha_completa = []
+            selected_row_table = []
             for column in range(self.tree.columnCount()):
                 item = self.tree.item(selected_row, column)
-                linha_completa.append(item.text() if item else "")
+                selected_row_table.append(item.text() if item else "")
 
-            self.abrir_janela_edicao(linha_completa)
+            self.abrir_janela_edicao(selected_row_table)
 
-    def abrir_janela_edicao(self, linha_completa):
-        self.edit_window = EditarProdutoItemWindow(linha_completa)
-        self.edit_window.show()
-        if self.edit_window:
+    def abrir_janela_edicao(self, selected_row_table):
+        edit_window = EditarProdutoItemWindow(selected_row_table)
+        if edit_window.exec_():
             selected_row = self.tree.currentRow()
-            for column, value in enumerate(linha_completa):
+            for column, value in enumerate(selected_row_table):
                 item = QTableWidgetItem(value)
                 self.tree.setItem(selected_row, column, item)
 
