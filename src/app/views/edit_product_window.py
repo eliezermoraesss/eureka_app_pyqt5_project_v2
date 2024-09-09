@@ -1,14 +1,14 @@
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5 import QtWidgets
 
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.qt.ui.ui_edit_product_window import Ui_EditProductWindow
 
 
-class EditarProdutoItemWindow(QMainWindow):
-    def __init__(self):
+class EditarProdutoItemWindow(QtWidgets.QMainWindow):
+    def __init__(self, linha_completa):
         super(EditarProdutoItemWindow, self).__init__()
 
-        self.linha_completa = None
+        self.linha_completa = linha_completa
         self.setFixedSize(640, 600)
         self.ui = Ui_EditProductWindow()
         self.ui.setupUi(self)

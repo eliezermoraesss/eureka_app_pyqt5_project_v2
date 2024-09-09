@@ -347,4 +347,4 @@ class Ui_SearchWindow(object):
         self.type_search_combobox.setItemText(0, _translate("SearchWindow", "Código"))
         self.type_search_combobox.setItemText(1, _translate("SearchWindow", "Descrição"))
         self.type_search_label.setText(_translate("SearchWindow", "Critério"))
-import resource_rc
+from src.qt.ui import resource_rc

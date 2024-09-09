@@ -449,7 +449,7 @@ class EngenhariaApp(QWidget):
             menu.addAction(context_menu_abrir_desenho)
 
             editar_action = QAction('Editar...', self)
-            editar_action.triggered.connect(lambda: self.editar_item_selecionado)
+            editar_action.triggered.connect(self.editar_item_selecionado)
             menu.addAction(editar_action)
 
             context_menu_consultar_estrutura = QAction('Consultar estrutura', self)
@@ -485,8 +485,9 @@ class EngenhariaApp(QWidget):
             self.abrir_janela_edicao(linha_completa)
 
     def abrir_janela_edicao(self, linha_completa):
-        edit_window = EditarProdutoItemWindow(linha_completa, self)
-        if edit_window.exec_():
+        self.edit_window = EditarProdutoItemWindow(linha_completa)
+        self.edit_window.show()
+        if self.edit_window:
             selected_row = self.tree.currentRow()
             for column, value in enumerate(linha_completa):
                 item = QTableWidgetItem(value)

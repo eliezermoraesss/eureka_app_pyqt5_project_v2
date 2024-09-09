@@ -647,4 +647,4 @@ class Ui_EditProductWindow(object):
         self.bloquear_combobox.setItemText(1, _translate("EditProductWindow", "Sim"))
         self.bloquear_label.setText(_translate("EditProductWindow", "Bloquear?"))
         self.endereco_label.setText(_translate("EditProductWindow", "Endereço estoque"))
-import resource_rc
+from src.qt.ui import resource_rc
