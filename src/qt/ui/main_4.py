@@ -1,17 +1,19 @@
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QDialog
+import sys
+
+from PyQt5.QtWidgets import QMainWindow, QApplication, QDialog
 
 from src.app.views.search_window import SearchWindow
 from src.qt.ui.ui_edit_product_window import Ui_EditProductWindow
 
 
-class EditarProdutoItemWindow(QtWidgets.QDialog):
-    def __init__(self, linha_completa, parent=None):
-        super().__init__(parent)
-        self.linha_completa = linha_completa
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super(MainWindow, self).__init__()
+
+        # self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setFixedSize(640, 600)
         self.ui = Ui_EditProductWindow()
         self.ui.setupUi(self)
-        self.setFixedSize(640, 600)
         self.init_ui()
 
     def init_ui(self):
@@ -40,3 +42,12 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
 
         # Fechar a janela após salvar
         self.accept()
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+
+    window = MainWindow()
+    window.show()
+
+    sys.exit(app.exec())

@@ -1,0 +1,104 @@
+import pandas as pd
+import pyodbc
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QDialog, QTableWidget, QTableWidgetItem, QHeaderView
+from sqlalchemy import create_engine
+
+from src.app.utils.db_mssql import setup_mssql
+from src.app.utils.search_queries import select_query
+from src.qt.ui.ui_search_window import Ui_SearchWindow
+
+
+class SearchWindow(QDialog):
+    def __init__(self, entity, parent=None):
+        super(SearchWindow, self).__init__(parent)
+        self.engine = None
+        self.entity = entity
+        self.selected_code = None
+        self.altura_linha = 25
+        self.tamanho_fonte_tabela = 10
+        self.fonte_tabela = 'Segoe UI'
+        self.ui = Ui_SearchWindow()
+        self.ui.setupUi(self)
+        self.setFixedSize(640, 600)
+        self.init_ui()
+
+    def init_ui(self):
+        self.fill_search_table(self.entity)
+        # Detecta clique duplo ou Enter na tabela
+        self.ui.search_table.itemDoubleClicked.connect(self.accept_selection)
+        self.ui.search_table.setSelectionBehavior(QTableWidget.SelectRows)
+
+        self.ui.btn_ok.clicked.connect(self.accept_selection)
+        self.ui.btn_close.clicked.connect(self.close)
+
+    def fill_search_table(self, entity):
+        query = select_query(entity)
+        driver = '{SQL Server}'
+        username, password, database, server = setup_mssql()
+
+        conn_str = f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+        self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
+
+        try:
+            dataframe = pd.read_sql(query, self.engine)
+
+            if not dataframe.empty:
+                self.configurar_tabela(self.ui.search_table, dataframe)
+
+                for i in range(self.ui.search_table.columnCount()):
+                    self.ui.search_table.horizontalHeader().setSectionResizeMode(i, QHeaderView.Stretch)
+
+                self.ui.search_table.horizontalHeader().setSortIndicator(-1, Qt.AscendingOrder)
+            else:
+                return
+
+            for i, row in dataframe.iterrows():
+                self.ui.search_table.setSortingEnabled(False)
+                self.ui.search_table.insertRow(i)
+                for j, value in enumerate(row):
+                    item = QTableWidgetItem(str(value).strip())
+                    if j == 0:
+                        item.setTextAlignment(Qt.AlignCenter)
+                    self.ui.search_table.setItem(i, j, item)
+            self.ui.search_table.setSortingEnabled(True)
+
+        except pyodbc.Error as ex:
+            print(f"Falha na consulta. Erro: {str(ex)}")
+
+        finally:
+            if hasattr(self, 'engine'):
+                self.engine.dispose()
+                self.engine = None
+
+    def configurar_tabela(self, table, dataframe):
+        table.setColumnCount(len(dataframe.columns))
+        table.setHorizontalHeaderLabels(dataframe.columns)
+        table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        table.setEditTriggers(QTableWidget.NoEditTriggers)
+        table.setSelectionBehavior(QTableWidget.SelectRows)
+        table.setSelectionMode(QTableWidget.SingleSelection)
+        table.setFont(QFont(self.fonte_tabela, self.tamanho_fonte_tabela))
+        table.verticalHeader().setDefaultSectionSize(self.altura_linha)
+        table.horizontalHeader().sectionClicked.connect(self.ordenar_tabela)
+
+    def ordenar_tabela(self, logical_index):
+        # Obter o índice real da coluna (considerando a ordem de classificação)
+        index = self.ui.search_table.horizontalHeader().sortIndicatorOrder()
+
+        # Definir a ordem de classificação
+        order = Qt.AscendingOrder if index == 0 else Qt.DescendingOrder
+
+        # Ordenar a tabela pela coluna clicada
+        self.ui.search_table.sortItems(logical_index, order)
+
+    def accept_selection(self):
+        selected_items = self.ui.search_table.selectedItems()
+        if selected_items:
+            codigo = selected_items[0].text()  # Pega o código da primeira coluna
+            self.selected_code = codigo
+            self.accept()
+
+    def get_selected_code(self):
+        return getattr(self, 'selected_code', None)

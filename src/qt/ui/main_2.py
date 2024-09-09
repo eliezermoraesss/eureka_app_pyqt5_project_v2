@@ -4,7 +4,7 @@ from PyQt5.QtGui import QPainterPath, QPainter, QPalette
 from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton
 from PyQt5.QtCore import pyqtSlot, QFile, QTextStream, Qt
 
-from ui.ui_register_screen import Ui_RegisterWindow
+from src.qt.ui.ui_register_screen import Ui_RegisterWindow
 
 
 class MainWindow(QMainWindow):

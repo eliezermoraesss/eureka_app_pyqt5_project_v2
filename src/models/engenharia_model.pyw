@@ -3,8 +3,6 @@ import os
 import sys
 import time
 
-from src.app.views.edit_product_window import EditarItemWindow
-
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -17,6 +15,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButto
     QCheckBox, QMenu, QAction, QComboBox, QStyle
 from sqlalchemy import create_engine
 
+from src.app.views.edit_product_window import EditarProdutoItemWindow
 from src.app.utils.consultar_estrutura import executar_consulta_estrutura
 from src.app.utils.consultar_onde_usado import executar_consulta_onde_usado
 from src.app.utils.consultar_saldo_estoque import executar_saldo_em_estoque
@@ -450,7 +449,7 @@ class EngenhariaApp(QWidget):
             menu.addAction(context_menu_abrir_desenho)
 
             editar_action = QAction('Editar...', self)
-            editar_action.triggered.connect(self.editar_item_selecionado)
+            editar_action.triggered.connect(lambda: self.editar_item_selecionado)
             menu.addAction(editar_action)
 
             context_menu_consultar_estrutura = QAction('Consultar estrutura', self)
@@ -486,7 +485,7 @@ class EngenhariaApp(QWidget):
             self.abrir_janela_edicao(linha_completa)
 
     def abrir_janela_edicao(self, linha_completa):
-        edit_window = EditarItemWindow(linha_completa, self)
+        edit_window = EditarProdutoItemWindow(linha_completa, self)
         if edit_window.exec_():
             selected_row = self.tree.currentRow()
             for column, value in enumerate(linha_completa):
