@@ -5,6 +5,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QDialog, QTableWidget, QTableWidgetItem, QHeaderView
 from sqlalchemy import create_engine
 
+from src.app.utils.config_search_table import config_search_table
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.search_queries import select_query
 from src.qt.ui.ui_search_window import Ui_SearchWindow
@@ -45,11 +46,9 @@ class SearchWindow(QDialog):
             dataframe = pd.read_sql(query, self.engine)
 
             if not dataframe.empty:
-                self.configurar_tabela(self.ui.search_table, dataframe)
-
+                config_search_table(self, self.ui.search_table, dataframe)
                 for i in range(self.ui.search_table.columnCount()):
                     self.ui.search_table.horizontalHeader().setSectionResizeMode(i, QHeaderView.Stretch)
-
                 self.ui.search_table.horizontalHeader().setSortIndicator(-1, Qt.AscendingOrder)
             else:
                 return
@@ -71,27 +70,6 @@ class SearchWindow(QDialog):
             if hasattr(self, 'engine'):
                 self.engine.dispose()
                 self.engine = None
-
-    def configurar_tabela(self, table, dataframe):
-        table.setColumnCount(len(dataframe.columns))
-        table.setHorizontalHeaderLabels(dataframe.columns)
-        table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        table.setEditTriggers(QTableWidget.NoEditTriggers)
-        table.setSelectionBehavior(QTableWidget.SelectRows)
-        table.setSelectionMode(QTableWidget.SingleSelection)
-        table.setFont(QFont(self.fonte_tabela, self.tamanho_fonte_tabela))
-        table.verticalHeader().setDefaultSectionSize(self.altura_linha)
-        table.horizontalHeader().sectionClicked.connect(self.ordenar_tabela)
-
-    def ordenar_tabela(self, logical_index):
-        # Obter o índice real da coluna (considerando a ordem de classificação)
-        index = self.ui.search_table.horizontalHeader().sortIndicatorOrder()
-
-        # Definir a ordem de classificação
-        order = Qt.AscendingOrder if index == 0 else Qt.DescendingOrder
-
-        # Ordenar a tabela pela coluna clicada
-        self.ui.search_table.sortItems(logical_index, order)
 
     def accept_selection(self):
         selected_items = self.ui.search_table.selectedItems()

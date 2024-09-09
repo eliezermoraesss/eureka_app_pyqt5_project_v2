@@ -2,11 +2,12 @@ import sys
 
 from PyQt5.QtWidgets import QMainWindow, QApplication, QDialog
 
+from src.app.views.edit_product_window import EditarProdutoItemWindow
 from src.app.views.search_window import SearchWindow
 from src.qt.ui.ui_edit_product_window import Ui_EditProductWindow
 
 
-class MainWindow(QMainWindow):
+class MainWindow(QDialog):
     def __init__(self):
         super(MainWindow, self).__init__()
 
@@ -47,7 +48,7 @@ class MainWindow(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
-    window = MainWindow()
+    window = EditarProdutoItemWindow()
     window.show()
 
     sys.exit(app.exec())

@@ -120,14 +120,10 @@ class Ui_SearchWindow(object):
 "    font-style: \'Segoe UI\';\n"
 "}\n"
 "\n"
-"QLabel, QCheckBox {\n"
+"QLabel {\n"
 "    color: #0B090A;\n"
 "    font-size: 11px;\n"
 "    font-weight: bold;\n"
-"}\n"
-"\n"
-"QLabel#logo-enaplic {\n"
-"    margin: 5px 0;\n"
 "}\n"
 "\n"
 "QLineEdit {\n"
@@ -137,7 +133,7 @@ class Ui_SearchWindow(object):
 "    font-size: 14px;\n"
 "}\n"
 "\n"
-"QDateEdit, QComboBox {\n"
+"QComboBox {\n"
 "    background-color: #DFE0E2;\n"
 "    padding: 5px 10px;\n"
 "    border-radius: 18px;\n"
@@ -145,7 +141,7 @@ class Ui_SearchWindow(object):
 "    font-size: 16px;\n"
 "}\n"
 "\n"
-"QDateEdit::drop-down, QComboBox::drop-down {\n"
+"QComboBox::drop-down {\n"
 "    subcontrol-origin: padding;\n"
 "    subcontrol-position: top right;\n"
 "    width: 30px;\n"
@@ -156,7 +152,7 @@ class Ui_SearchWindow(object):
 "    border-bottom-right-radius: 3px;\n"
 "}\n"
 "\n"
-"QDateEdit::down-arrow, QComboBox::down-arrow {\n"
+"QComboBox::down-arrow {\n"
 "    image: url(../static/icon/arrow.png);\n"
 "    width: 10px;\n"
 "    height: 10px;\n"
@@ -184,6 +180,7 @@ class Ui_SearchWindow(object):
         self.btn_close.setGeometry(QtCore.QRect(320, 490, 111, 41))
         self.btn_close.setMinimumSize(QtCore.QSize(0, 41))
         font = QtGui.QFont()
+        font.setFamily("Segoe UI")
         font.setPointSize(-1)
         self.btn_close.setFont(font)
         self.btn_close.setFocusPolicy(QtCore.Qt.TabFocus)
@@ -230,6 +227,7 @@ class Ui_SearchWindow(object):
         self.btn_ok.setGeometry(QtCore.QRect(190, 490, 111, 41))
         self.btn_ok.setMinimumSize(QtCore.QSize(0, 41))
         font = QtGui.QFont()
+        font.setFamily("Segoe UI")
         font.setPointSize(-1)
         self.btn_ok.setFont(font)
         self.btn_ok.setFocusPolicy(QtCore.Qt.TabFocus)
@@ -314,10 +312,15 @@ class Ui_SearchWindow(object):
         self.search_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.search_table.setAlternatingRowColors(True)
         self.search_table.setShowGrid(False)
+        self.search_table.setCornerButtonEnabled(False)
         self.search_table.setRowCount(0)
         self.search_table.setObjectName("search_table")
         self.search_table.setColumnCount(0)
+        self.search_table.horizontalHeader().setMinimumSectionSize(100)
         self.search_table.horizontalHeader().setSortIndicatorShown(True)
+        self.search_table.horizontalHeader().setStretchLastSection(False)
+        self.search_table.verticalHeader().setDefaultSectionSize(25)
+        self.search_table.verticalHeader().setMinimumSectionSize(25)
         self.search_table.raise_()
         self.btn_close.raise_()
         self.search_label.raise_()

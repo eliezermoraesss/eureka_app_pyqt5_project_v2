@@ -1,30 +1,23 @@
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QDialog
+from PyQt5.QtWidgets import QMainWindow
 
-from src.app.views.search_window import SearchWindow
+from src.app.utils.open_search_dialog import open_search_dialog
 from src.qt.ui.ui_edit_product_window import Ui_EditProductWindow
 
 
-class EditarProdutoItemWindow(QtWidgets.QDialog):
-    def __init__(self, linha_completa, parent=None):
-        super().__init__(parent)
-        self.linha_completa = linha_completa
+class EditarProdutoItemWindow(QMainWindow):
+    def __init__(self):
+        super(EditarProdutoItemWindow, self).__init__()
+
+        self.linha_completa = None
+        self.setFixedSize(640, 600)
         self.ui = Ui_EditProductWindow()
         self.ui.setupUi(self)
-        self.setFixedSize(640, 600)
         self.init_ui()
 
     def init_ui(self):
         self.ui.btn_close.clicked.connect(self.close)
         self.ui.btn_save.clicked.connect(self.atualizar_produto)
-        self.ui.btn_search_um.clicked.connect(lambda: self.open_search_dialog(self.ui.um_field, "unidade_medida"))
-
-    def open_search_dialog(self, field, entity):
-        dialog = SearchWindow(entity)
-        if dialog.exec() == QDialog.Accepted:
-            selected_code = dialog.get_selected_code()
-            if selected_code:
-                field.setText(selected_code)
+        self.ui.btn_search_um.clicked.connect(lambda: open_search_dialog(self.ui.um_field, "unidade_medida"))
 
     def atualizar_produto(self):
         # Recupera os valores editados
