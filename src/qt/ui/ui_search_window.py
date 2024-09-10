@@ -66,23 +66,8 @@ class Ui_SearchWindow(object):
 "background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(186, 24, 27, 255), stop:1 rgba(102, 7, 8, 255));\n"
 "}")
         self.window_title_bar.setObjectName("window_title_bar")
-        self.title_label = QtWidgets.QLabel(self.window_title_bar)
-        self.title_label.setGeometry(QtCore.QRect(30, 0, 111, 51))
-        font = QtGui.QFont()
-        font.setPointSize(-1)
-        font.setBold(True)
-        font.setWeight(75)
-        self.title_label.setFont(font)
-        self.title_label.setStyleSheet("QLabel {\n"
-"    background-color: transparent;\n"
-"    color: #EEEEEE;\n"
-"    font-size: 22px;\n"
-"    font-weight: regular;\n"
-"    font-style: \"Segoe UI\";\n"
-"}")
-        self.title_label.setObjectName("title_label")
         self.type_label = QtWidgets.QLabel(self.window_title_bar)
-        self.type_label.setGeometry(QtCore.QRect(160, 0, 421, 51))
+        self.type_label.setGeometry(QtCore.QRect(30, 0, 421, 51))
         font = QtGui.QFont()
         font.setPointSize(-1)
         font.setBold(True)
@@ -322,8 +307,7 @@ class Ui_SearchWindow(object):
 
     def retranslateUi(self, SearchWindow):
         _translate = QtCore.QCoreApplication.translate
-        SearchWindow.setWindowTitle(_translate("SearchWindow", "Eureka®"))
-        self.title_label.setText(_translate("SearchWindow", "Pesquisar:"))
+        SearchWindow.setWindowTitle(_translate("SearchWindow", "Pesquisar"))
         self.type_label.setText(_translate("SearchWindow", "{area}"))
         self.btn_close.setText(_translate("SearchWindow", " Cancelar"))
         self.search_label.setText(_translate("SearchWindow", "Pesquisar"))

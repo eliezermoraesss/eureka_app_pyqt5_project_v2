@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Eureka®</string>
+   <string>Alterar produto</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../static/resource.qrc">
@@ -76,39 +76,10 @@ QPushButton:pressed {
 background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(186, 24, 27, 255), stop:1 rgba(102, 7, 8, 255));
 }</string>
    </property>
-   <widget class="QLabel" name="title_label">
-    <property name="geometry">
-     <rect>
-      <x>50</x>
-      <y>0</y>
-      <width>241</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>-1</pointsize>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">QLabel {
-	background-color: transparent;
-    color: #EEEEEE;
-    font-size: 22px;
-    font-weight: regular;
-	font-style: &quot;Segoe UI&quot;;
-}</string>
-    </property>
-    <property name="text">
-     <string>Alteração do produto:</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="type_label">
     <property name="geometry">
      <rect>
-      <x>300</x>
+      <x>50</x>
       <y>0</y>
       <width>261</width>
       <height>51</height>

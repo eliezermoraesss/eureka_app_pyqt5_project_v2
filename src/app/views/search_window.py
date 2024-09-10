@@ -7,6 +7,7 @@ from sqlalchemy import create_engine
 from src.app.utils.config_search_table import config_search_table
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.search_queries import select_query
+from src.app.utils.utils import exibir_mensagem
 from src.qt.ui.ui_search_window import Ui_SearchWindow
 
 
@@ -28,11 +29,19 @@ class SearchWindow(QDialog):
     def init_ui(self):
         self.ui.type_label.setText(self.entity_name)
         self.fill_search_table(self.entity)
-        self.ui.search_field.returnPressed.connect(self.get_parameters_values)
         self.ui.search_table.itemDoubleClicked.connect(self.accept_selection)
         self.ui.btn_search.clicked.connect(self.get_parameters_values)
         self.ui.btn_ok.clicked.connect(self.accept_selection)
         self.ui.btn_close.clicked.connect(self.close)
+
+        self.ui.search_field.returnPressed.connect(self.get_parameters_values)
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
+            # Bloqueia o fechamento da janela e chama a função de busca
+            event.accept()  # Impede o comportamento padrão (fechar a janela)
+        else:
+            super(SearchWindow, self).keyPressEvent(event)  # Executa o comportamento padrão para outras teclas
 
     def get_parameters_values(self):
         search_field = self.ui.search_field.text().upper().strip()
@@ -63,6 +72,7 @@ class SearchWindow(QDialog):
                 self.ui.search_table.horizontalHeader().setSortIndicator(-1, Qt.AscendingOrder)
                 self.ui.search_table.setRowCount(0)
             else:
+                exibir_mensagem("Eureka®", "Nenhum resultado encontrado!", 'info')
                 return
 
             for i, row in dataframe.iterrows():
