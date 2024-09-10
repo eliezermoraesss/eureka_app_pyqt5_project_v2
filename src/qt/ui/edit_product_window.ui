@@ -81,13 +81,12 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgb
      <rect>
       <x>50</x>
       <y>0</y>
-      <width>191</width>
+      <width>241</width>
       <height>51</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <family>Segoe UI</family>
       <pointsize>-1</pointsize>
       <weight>75</weight>
       <bold>true</bold>
@@ -103,21 +102,20 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgb
 }</string>
     </property>
     <property name="text">
-     <string>Alterar o produto:</string>
+     <string>Alteração do produto:</string>
     </property>
    </widget>
    <widget class="QLabel" name="type_label">
     <property name="geometry">
      <rect>
-      <x>250</x>
+      <x>300</x>
       <y>0</y>
-      <width>321</width>
+      <width>261</width>
       <height>51</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <family>Segoe UI</family>
       <pointsize>-1</pointsize>
       <weight>75</weight>
       <bold>true</bold>
@@ -294,7 +292,6 @@ QTableWidget::item:selected {
     </property>
     <property name="font">
      <font>
-      <family>Segoe UI</family>
       <pointsize>-1</pointsize>
      </font>
     </property>
@@ -331,7 +328,6 @@ QTableWidget::item:selected {
     </property>
     <property name="font">
      <font>
-      <family>Segoe UI</family>
       <pointsize>-1</pointsize>
      </font>
     </property>
@@ -400,8 +396,8 @@ QTableWidget::item:selected {
    <widget class="QPushButton" name="btn_close">
     <property name="geometry">
      <rect>
-      <x>320</x>
-      <y>470</y>
+      <x>480</x>
+      <y>480</y>
       <width>111</width>
       <height>41</height>
      </rect>
@@ -414,7 +410,6 @@ QTableWidget::item:selected {
     </property>
     <property name="font">
      <font>
-      <family>Segoe UI</family>
       <pointsize>-1</pointsize>
      </font>
     </property>
@@ -478,7 +473,6 @@ QTableWidget::item:selected {
     </property>
     <property name="font">
      <font>
-      <family>Segoe UI</family>
       <pointsize>-1</pointsize>
      </font>
     </property>
@@ -518,7 +512,6 @@ QTableWidget::item:selected {
     </property>
     <property name="font">
      <font>
-      <family>Segoe UI</family>
       <pointsize>-1</pointsize>
      </font>
     </property>
@@ -581,30 +574,11 @@ QTableWidget::item:selected {
      <string>Armazém</string>
     </property>
    </widget>
-   <widget class="QLabel" name="logo_enaplic_50">
-    <property name="geometry">
-     <rect>
-      <x>480</x>
-      <y>450</y>
-      <width>121</width>
-      <height>101</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="pixmap">
-     <pixmap resource="../static/resource.qrc">:/image/image/logo_enaplic_50_anos.png</pixmap>
-    </property>
-    <property name="scaledContents">
-     <bool>true</bool>
-    </property>
-   </widget>
    <widget class="QPushButton" name="btn_save">
     <property name="geometry">
      <rect>
-      <x>190</x>
-      <y>470</y>
+      <x>350</x>
+      <y>480</y>
       <width>111</width>
       <height>41</height>
      </rect>
@@ -617,7 +591,6 @@ QTableWidget::item:selected {
     </property>
     <property name="font">
      <font>
-      <family>Segoe UI</family>
       <pointsize>-1</pointsize>
      </font>
     </property>
@@ -647,8 +620,8 @@ QTableWidget::item:selected {
    <widget class="QLineEdit" name="grupo_field">
     <property name="geometry">
      <rect>
-      <x>230</x>
-      <y>280</y>
+      <x>40</x>
+      <y>360</y>
       <width>91</width>
       <height>41</height>
      </rect>
@@ -661,7 +634,6 @@ QTableWidget::item:selected {
     </property>
     <property name="font">
      <font>
-      <family>Segoe UI</family>
       <pointsize>-1</pointsize>
      </font>
     </property>
@@ -687,8 +659,8 @@ QTableWidget::item:selected {
    <widget class="QLabel" name="grupo_label">
     <property name="geometry">
      <rect>
-      <x>240</x>
-      <y>260</y>
+      <x>50</x>
+      <y>340</y>
       <width>81</width>
       <height>16</height>
      </rect>
@@ -704,12 +676,12 @@ QTableWidget::item:selected {
      <string>Grupo</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="desc_grup_field">
+   <widget class="QLineEdit" name="desc_grupo_field">
     <property name="geometry">
      <rect>
-      <x>390</x>
-      <y>280</y>
-      <width>201</width>
+      <x>200</x>
+      <y>360</y>
+      <width>391</width>
       <height>41</height>
      </rect>
     </property>
@@ -721,7 +693,6 @@ QTableWidget::item:selected {
     </property>
     <property name="font">
      <font>
-      <family>Segoe UI</family>
       <pointsize>-1</pointsize>
      </font>
     </property>
@@ -735,23 +706,23 @@ QTableWidget::item:selected {
      <string/>
     </property>
     <property name="maxLength">
-     <number>18</number>
+     <number>30</number>
     </property>
     <property name="echoMode">
-     <enum>QLineEdit::Password</enum>
+     <enum>QLineEdit::Normal</enum>
     </property>
     <property name="readOnly">
      <bool>true</bool>
     </property>
     <property name="clearButtonEnabled">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="QLabel" name="desc_grupo_label">
     <property name="geometry">
      <rect>
-      <x>400</x>
-      <y>260</y>
+      <x>210</x>
+      <y>340</y>
       <width>101</width>
       <height>16</height>
      </rect>
@@ -790,9 +761,9 @@ QTableWidget::item:selected {
    <widget class="QComboBox" name="bloquear_combobox">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>360</y>
-      <width>141</width>
+      <x>230</x>
+      <y>280</y>
+      <width>101</width>
       <height>41</height>
      </rect>
     </property>
@@ -810,7 +781,6 @@ QTableWidget::item:selected {
     </property>
     <property name="font">
      <font>
-      <family>Segoe UI</family>
       <pointsize>-1</pointsize>
      </font>
     </property>
@@ -846,8 +816,8 @@ QTableWidget::item:selected {
    <widget class="QLabel" name="bloquear_label">
     <property name="geometry">
      <rect>
-      <x>50</x>
-      <y>340</y>
+      <x>240</x>
+      <y>260</y>
       <width>101</width>
       <height>16</height>
      </rect>
@@ -866,9 +836,9 @@ QTableWidget::item:selected {
    <widget class="QLineEdit" name="endereco_field">
     <property name="geometry">
      <rect>
-      <x>210</x>
-      <y>360</y>
-      <width>381</width>
+      <x>370</x>
+      <y>280</y>
+      <width>211</width>
       <height>41</height>
      </rect>
     </property>
@@ -880,7 +850,6 @@ QTableWidget::item:selected {
     </property>
     <property name="font">
      <font>
-      <family>Segoe UI</family>
       <pointsize>-1</pointsize>
      </font>
     </property>
@@ -909,8 +878,8 @@ QTableWidget::item:selected {
    <widget class="QLabel" name="endereco_label">
     <property name="geometry">
      <rect>
-      <x>220</x>
-      <y>340</y>
+      <x>380</x>
+      <y>260</y>
       <width>111</width>
       <height>16</height>
      </rect>
@@ -943,7 +912,6 @@ QTableWidget::item:selected {
     </property>
     <property name="font">
      <font>
-      <family>Segoe UI</family>
       <pointsize>-1</pointsize>
      </font>
     </property>
@@ -986,7 +954,6 @@ QTableWidget::item:selected {
     </property>
     <property name="font">
      <font>
-      <family>Segoe UI</family>
       <pointsize>-1</pointsize>
      </font>
     </property>
@@ -1239,8 +1206,8 @@ QPushButton:pressed {
    <widget class="QPushButton" name="btn_search_grupo">
     <property name="geometry">
      <rect>
-      <x>325</x>
-      <y>280</y>
+      <x>135</x>
+      <y>360</y>
       <width>41</width>
       <height>41</height>
      </rect>
@@ -1290,6 +1257,25 @@ QPushButton:pressed {
       <width>32</width>
       <height>32</height>
      </size>
+    </property>
+   </widget>
+   <widget class="QLabel" name="logo_enaplic_50">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>450</y>
+      <width>121</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap resource="../static/resource.qrc">:/image/image/logo_enaplic_50_anos.png</pixmap>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
     </property>
    </widget>
   </widget>

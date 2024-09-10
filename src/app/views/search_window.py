@@ -20,7 +20,7 @@ class SearchWindow(QDialog):
         self.altura_linha = 30
         self.tamanho_fonte_tabela = 10
         self.fonte_tabela = 'Segoe UI'
-        self.setFixedSize(640, 550)
+        self.setFixedSize(640, 600)
         self.ui = Ui_SearchWindow()
         self.ui.setupUi(self)
         self.init_ui()
@@ -53,10 +53,9 @@ class SearchWindow(QDialog):
         driver = '{SQL Server}'
         username, password, database, server = setup_mssql()
 
-        conn_str = f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}'
-        self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
-
         try:
+            conn_str = f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+            self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
             dataframe = pd.read_sql(query, self.engine)
 
             if not dataframe.empty:

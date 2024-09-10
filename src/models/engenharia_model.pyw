@@ -291,7 +291,6 @@ class EngenhariaApp(QWidget):
 
             QLineEdit {
                 background-color: #DFE0E2;
-                border: 1px solid #262626;
                 padding: 5px;
                 border-radius: 8px;
             }
@@ -354,7 +353,7 @@ class EngenhariaApp(QWidget):
 
             QTableWidget {
                 border: 1px solid #000000;
-                background-color: #686D76;
+                background-color: #363636;
                 padding-left: 10px;
                 margin-bottom: 15px;
             }
