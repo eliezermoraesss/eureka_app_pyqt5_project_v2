@@ -73,7 +73,6 @@ class PcpApp(QWidget):
         self.tree = QTableWidget(self)
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
-        self.process = QProcess(self)
         self.nova_janela = None
 
         self.tabWidget = QTabWidget(self)  # Adicione um QTabWidget ao layout principal
@@ -529,19 +528,22 @@ class PcpApp(QWidget):
         self.label_line_number.hide()
 
     def abrir_modulo_engenharia(self):
+        process = QProcess()
         script_dir = os.path.dirname(os.path.abspath(__file__))
         script_path = os.path.join(script_dir, 'engenharia_model.pyw')
-        self.process.start("python", [script_path])
+        process.startDetached("python", [script_path])
 
     def abrir_modulo_compras(self):
+        process = QProcess()
         script_dir = os.path.dirname(os.path.abspath(__file__))
         script_path = os.path.join(script_dir, 'compras_model.pyw')
-        self.process.start("python", [script_path])
+        process.startDetached("python", [script_path])
 
     def abrir_modulo_qps_concluidas(self):
+        process = QProcess()
         script_dir = os.path.dirname(os.path.abspath(__file__))
         script_path = os.path.join(script_dir, 'qps_model.pyw')
-        self.process.start("python", [script_path])
+        process.startDetached("python", [script_path])
 
     def add_today_button(self, date_edit):
         calendar = date_edit.calendarWidget()

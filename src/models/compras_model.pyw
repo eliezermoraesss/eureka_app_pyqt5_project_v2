@@ -119,7 +119,6 @@ class ComprasApp(QWidget):
         self.tree.setRowCount(0)
 
         self.nova_janela = None
-        self.process = QProcess(self)
 
         self.tabWidget = QTabWidget(self)  # Adicione um QTabWidget ao layout principal
         self.tabWidget.setTabsClosable(True)  # Adicione essa linha para permitir o fechamento de guias
@@ -1004,9 +1003,10 @@ class ComprasApp(QWidget):
         self.close()
 
     def abrir_modulo_engenharia(self):
+        process = QProcess()
         script_dir = os.path.dirname(os.path.abspath(__file__))
         script_path = os.path.join(script_dir, 'engenharia_model.pyw')
-        self.process.start("python", [script_path])
+        process.startDetached("python", [script_path])
 
 
 if __name__ == "__main__":

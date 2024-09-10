@@ -67,8 +67,6 @@ class EngenhariaApp(QWidget):
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
 
-        self.process = QProcess(self)
-
         self.tabWidget = QTabWidget(self)  # Adicione um QTabWidget ao layout principal
         self.tabWidget.setTabsClosable(True)  # Adicione essa linha para permitir o fechamento de guias
         self.tabWidget.tabCloseRequested.connect(self.fechar_guia)
@@ -385,14 +383,16 @@ class EngenhariaApp(QWidget):
                 """)
 
     def abrir_modulo_pcp(self):
+        process = QProcess()
         script_dir = os.path.dirname(os.path.abspath(__file__))
         script_path = os.path.join(script_dir, 'pcp_model.pyw')
-        self.process.start("python", [script_path])
+        process.startDetached("python", [script_path])
 
     def abrir_modulo_compras(self):
+        process = QProcess()
         script_dir = os.path.dirname(os.path.abspath(__file__))
         script_path = os.path.join(script_dir, 'compras_model.pyw')
-        self.process.start("python", [script_path])
+        process.startDetached("python", [script_path])
 
     def add_clear_button(self, line_edit):
         clear_icon = self.style().standardIcon(QStyle.SP_LineEditClearButton)
