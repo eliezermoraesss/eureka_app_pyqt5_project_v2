@@ -39,6 +39,13 @@ class LoginWindow(QtWidgets.QMainWindow):
         user = self.auth_controller.get_user_by_username(username)
 
         if user and self.auth_controller.verify_password(user[4], password):
+            user_data = {
+                "username": user[2],
+                "email": user[3],
+                "role": user[5],
+                "full_name": user[1]
+            }
+            self.auth_controller.save_session(user_data)  # Salva a sessão com o QSettings
             self.close()
             self.start_home_window()
         else:

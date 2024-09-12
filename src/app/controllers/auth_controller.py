@@ -3,6 +3,8 @@ import random
 
 from datetime import datetime, timedelta
 
+from PyQt5.QtCore import QSettings
+
 from src.app.config.db_config import DbConnection
 from src.app.utils.send_email import send_email
 
@@ -10,6 +12,13 @@ from src.app.utils.send_email import send_email
 class AuthController:
     def __init__(self):
         self.db_connection = DbConnection()
+
+    def save_session(self, user_data):
+        settings = QSettings("Enaplic", "EurekaApp")
+        settings.setValue("username", user_data["username"])
+        settings.setValue("email", user_data["email"])
+        settings.setValue("role", user_data["role"])
+        settings.setValue("full_name", user_data["full_name"])
 
     def hash_password(self, password):
         salt = bcrypt.gensalt()

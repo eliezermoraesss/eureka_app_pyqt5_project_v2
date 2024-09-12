@@ -3,6 +3,7 @@ import os
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QProcess, Qt
 
+from ..utils.load_session import load_session
 from ...qt.ui.ui_home_window import Ui_HomeWindow
 
 
@@ -11,10 +12,17 @@ class MainController(QtWidgets.QMainWindow):
         super(MainController, self).__init__()
         self.home_window = Ui_HomeWindow()
         self.home_window.setupUi(self)
+        self.base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.init_ui()
+
+    def init_ui(self):
+        user_data = load_session()
+        primeiro_nome = user_data["full_name"].split(' ')[0]
+        id_title = self.home_window.user_label.text()
+        self.home_window.user_label.setText(id_title.replace("{user}", f"{primeiro_nome},"))
         self.setWindowFlags(Qt.FramelessWindowHint)
         # self.setFixedSize(1200, 800)
         self.setup_connections()
-        self.base_dir = os.path.dirname(os.path.abspath(__file__))
 
     def setup_connections(self):
         def execute_dashboard_model():
