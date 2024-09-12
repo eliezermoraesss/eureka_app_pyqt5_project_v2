@@ -32,7 +32,7 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
     def __init__(self, selected_row_table):
         super(EditarProdutoItemWindow, self).__init__()
 
-        self.required_field_is_blank = None
+        self.required_field_is_blank = False
         self.selected_row_table = selected_row_table
         self.setFixedSize(640, 600)
         self.ui = Ui_EditProductWindow()
@@ -102,12 +102,11 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
         self.selected_row_table[13] = self.ui.endereco_field.text().upper()
 
     def verify_blank_required_fields(self):
+        self.required_field_is_blank = False
         for field_name, field_object in self.required_fields.items():
             if not field_object.text():
                 exibir_mensagem("Eureka®", f"O campo '{field_name}' é obrigatório e não pode estar vazio.", "info")
                 self.required_field_is_blank = True
-            else:
-                self.required_field_is_blank = False
 
     def update_product(self):
         try:
@@ -144,6 +143,7 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
 
             # Fechar a janela após salvar
             self.accept()
+
         except Exception as ex:
             exibir_mensagem(f"Eureka® - Falha ao conectar no banco de dados",
                             f"Erro ao tentar alterar as informações do produto {self.selected_row_table[0]}.\n\n{str(ex)}\n\nContate o administrador do sistema.",
