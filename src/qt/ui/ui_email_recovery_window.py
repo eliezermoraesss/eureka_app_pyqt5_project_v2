@@ -150,4 +150,4 @@ class Ui_EmailRecoveryWindow(object):
         self.btn_send_email.setText(_translate("EmailRecoveryWindow", " Enviar"))
         self.btn_close.setText(_translate("EmailRecoveryWindow", " Cancelar"))
         self.label.setText(_translate("EmailRecoveryWindow", "Recuperação de senha"))
-import resource_rc
+from src.qt.ui import resource_rc

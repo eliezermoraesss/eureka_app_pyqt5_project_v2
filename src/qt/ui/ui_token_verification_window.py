@@ -163,4 +163,4 @@ class Ui_TokenVerificationWindow(object):
         self.label_2.setText(_translate("TokenVerificationWindow", "Verificação de token"))
         self.btn_new_token.setText(_translate("TokenVerificationWindow", "Gerar novo token"))
         self.label.setText(_translate("TokenVerificationWindow", "Digite o token enviado para o seu e-mail:"))
-import resource_rc
+from src.qt.ui import resource_rc

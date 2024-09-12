@@ -289,4 +289,4 @@ class Ui_LoginWindow(object):
         self.user_label.setText(_translate("LoginWindow", "Usuário"))
         self.password_label.setText(_translate("LoginWindow", "Senha"))
         self.window_title_label.setText(_translate("LoginWindow", "Seja bem-vindo(a) ao Eureka!"))
-import resource_rc
+from src.qt.ui import resource_rc

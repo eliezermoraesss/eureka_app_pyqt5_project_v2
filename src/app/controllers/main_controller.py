@@ -13,6 +13,7 @@ class MainController(QtWidgets.QMainWindow):
         self.home_window = Ui_HomeWindow()
         self.home_window.setupUi(self)
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.init_ui()
 
     def init_ui(self):

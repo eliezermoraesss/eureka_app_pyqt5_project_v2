@@ -383,4 +383,4 @@ class Ui_RegisterWindow(object):
         self.area_combobox_field.setItemText(9, _translate("RegisterWindow", "RH"))
         self.area_lable.setText(_translate("RegisterWindow", "Setor"))
         self.btn_save.setText(_translate("RegisterWindow", " Salvar"))
-import resource_rc
+from src.qt.ui import resource_rc

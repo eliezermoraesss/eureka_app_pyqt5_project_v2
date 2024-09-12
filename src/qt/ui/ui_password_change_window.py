@@ -170,4 +170,4 @@ class Ui_PasswordChangeWindow(object):
         self.btn_close.setText(_translate("PasswordChangeWindow", " Cancelar"))
         self.window_title_label.setText(_translate("PasswordChangeWindow", "Redefinir senha"))
         self.password_confirm_label.setText(_translate("PasswordChangeWindow", "Confirme a nova senha:"))
-import resource_rc
+from src.qt.ui import resource_rc
