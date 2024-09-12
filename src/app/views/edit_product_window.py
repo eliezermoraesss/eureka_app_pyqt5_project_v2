@@ -1,14 +1,14 @@
 import pyodbc
 from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QMessageBox
 
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.app.utils.search_queries import select_query
-from src.app.utils.utils import exibir_mensagem
 from src.qt.ui.ui_edit_product_window import Ui_EditProductWindow
 
 
-def execute_validate_query(entity, field):
+def execute_validate_query(self, entity, field):
     query = select_query(entity)
     query = query[1].replace(":search_field", f"{field}")  # Índice [1] filtra pelo código da entidade
 
@@ -23,9 +23,8 @@ def execute_validate_query(entity, field):
             return result if result is not None else None
 
     except Exception as ex:
-        exibir_mensagem(f"Eureka® - Falha ao conectar no banco de dados",
-                        f"Erro ao consultar {field}.\n\n{str(ex)}\n\nContate o administrador do sistema.",
-                        "error")
+        QMessageBox.warning(self, f"Eureka® - Falha ao conectar no banco de dados",
+                            f"Erro ao consultar {field}.\n\n{str(ex)}\n\nContate o administrador do sistema.")
 
 
 class EditarProdutoItemWindow(QtWidgets.QDialog):
@@ -37,6 +36,14 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
         self.setFixedSize(640, 600)
         self.ui = Ui_EditProductWindow()
         self.ui.setupUi(self)
+        self.entity_names = {
+            "descricao": "DESCRIÇÃO",
+            "tipo": "TIPO",
+            "unidade_medida": "UNID. MEDIDA",
+            "armazem": "ARMAZÉM",
+            "centro_custo": "CENTRO DE CUSTO",
+            "grupo": "GRUPO"
+        }
         self.required_fields = {
             "descricao": self.ui.descricao_field,
             "tipo": self.ui.tipo_field,
@@ -70,19 +77,29 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
             lambda: open_search_dialog("Centro de Custo", self.ui.cc_field, "centro_custo"))
         self.ui.btn_search_grupo.clicked.connect(lambda: open_search_dialog("Grupo", self.ui.grupo_field, "grupo"))
 
-        self.ui.tipo_field.textChanged.connect(lambda: self.validate_required_fields("tipo", self.ui.tipo_field.text().upper()))
-        self.ui.um_field.textChanged.connect(lambda: self.validate_required_fields("unidade_medida", self.ui.um_field.text().upper()))
-        self.ui.armazem_field.textChanged.connect(lambda: self.validate_required_fields("armazem", self.ui.armazem_field.text().upper()))
-        self.ui.cc_field.textChanged.connect(lambda: self.validate_required_fields("centro_custo", self.ui.cc_field.text().upper()))
-        self.ui.grupo_field.textChanged.connect(lambda: self.validate_required_fields("grupo", self.ui.grupo_field.text().upper()))
+        self.ui.tipo_field.textChanged.connect(
+            lambda: self.validate_required_fields("tipo", self.ui.tipo_field.text().upper()))
+        self.ui.um_field.textChanged.connect(
+            lambda: self.validate_required_fields("unidade_medida", self.ui.um_field.text().upper()))
+        self.ui.armazem_field.textChanged.connect(
+            lambda: self.validate_required_fields("armazem", self.ui.armazem_field.text().upper()))
+        self.ui.cc_field.textChanged.connect(
+            lambda: self.validate_required_fields("centro_custo", self.ui.cc_field.text().upper()))
         self.ui.grupo_field.textChanged.connect(self.on_grupo_field_changed)
+        self.ui.grupo_field.textChanged.connect(
+            lambda: self.validate_required_fields("grupo", self.ui.grupo_field.text().upper()))
 
     def validate_required_fields(self, entity, field):
-        validated = execute_validate_query(entity, field)
-        if validated is None:
-            required_field = self.required_fields[entity]
-            required_field.clear()
-            exibir_mensagem("Eureka®", f"Nenhum resultado encontrado para o campo '{entity}' com o valor {field}", 'info')
+        if field != '':
+            validated = execute_validate_query(self, entity, field)
+            if validated is None:
+                required_field = self.required_fields[entity]
+                required_field.clear()
+                QMessageBox.information(self, "Eureka®",
+                                        f"Nenhum resultado encontrado para o campo {self.entity_names[entity]} com o "
+                                        f"valor {field}")
+        elif entity == 'grupo':
+            self.ui.desc_grupo_field.setText("")
 
     def on_grupo_field_changed(self, field_value):
         if field_value:
@@ -105,7 +122,8 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
         self.required_field_is_blank = False
         for field_name, field_object in self.required_fields.items():
             if not field_object.text():
-                exibir_mensagem("Eureka®", f"O campo '{field_name}' é obrigatório e não pode estar vazio.", "info")
+                QMessageBox.information(self, 'Eureka®', f"O campo {self.entity_names[field_name]} é obrigatório e não "
+                                                         f"pode estar vazio.")
                 self.required_field_is_blank = True
 
     def update_product(self):
@@ -114,7 +132,7 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
             self.verify_blank_required_fields()
             if self.required_field_is_blank:
                 return
-            
+
             query = f"""
                 UPDATE
                     PROTHEUS12_R27.dbo.SB1010 
@@ -145,14 +163,14 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
             self.accept()
 
         except Exception as ex:
-            exibir_mensagem(f"Eureka® - Falha ao conectar no banco de dados",
-                            f"Erro ao tentar alterar as informações do produto {self.selected_row_table[0]}.\n\n{str(ex)}\n\nContate o administrador do sistema.",
-                            "error")
+            QMessageBox.warning(self, f"Eureka® - Falha ao conectar no banco de dados",
+                                f"Erro ao tentar alterar as informações do produto {self.selected_row_table[0]}.\n\n{str(ex)}\n\nContate o administrador do sistema.")
 
     def fetch_group_description(self, field_value):
-        result = execute_validate_query("grupo", field_value)
+        result = execute_validate_query(self, "grupo", field_value)
         if result is not None:
             group_description = result[1].strip()
             self.ui.desc_grupo_field.setText(group_description)
         else:
-            exibir_mensagem("Eureka®", f"Nenhum resultado encontrado para o campo 'Grupo' com o valor {field_value}", 'info')
+            QMessageBox.information(self, "Eureka®",
+                                    f"Nenhum resultado encontrado para o campo GRUPO com o valor {field_value}")

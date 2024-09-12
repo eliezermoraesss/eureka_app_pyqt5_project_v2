@@ -115,17 +115,17 @@ class Ui_EditProductWindow(object):
 "\n"
 "QLineEdit {\n"
 "    background-color: #DFE0E2;\n"
-"    padding-left: 15px;\n"
+"    padding-left: 11px;\n"
 "    border-radius: 18px;\n"
 "    font-size: 14px;\n"
 "}\n"
 "\n"
 "QDateEdit, QComboBox {\n"
 "    background-color: #DFE0E2;\n"
-"    padding: 5px 10px;\n"
+"    padding-left: 11px;\n"
 "    border-radius: 18px;\n"
 "    height: 20px;\n"
-"    font-size: 16px;\n"
+"    font-size: 14px;\n"
 "}\n"
 "\n"
 "QDateEdit::drop-down, QComboBox::drop-down {\n"
@@ -143,24 +143,6 @@ class Ui_EditProductWindow(object):
 "    image: url(../static/icon/arrow.png);\n"
 "    width: 10px;\n"
 "    height: 10px;\n"
-"}\n"
-"\n"
-"QPushButton {\n"
-"    background-color: #fbba72;\n"
-"    border: 2px;\n"
-"    border-radius: 18px;\n"
-"    font-size: 14px;\n"
-"    font-weight: regular;\n"
-"}\n"
-"\n"
-"QPushButton:hover {\n"
-"    background-color: #e5383b;\n"
-"    color: #EEEEEE\n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background-color: #6703c5;\n"
-"    color: #EEEEEE;\n"
 "}\n"
 "\n"
 "QTableWidget {\n"
@@ -196,7 +178,7 @@ class Ui_EditProductWindow(object):
 "}")
         self.main_area.setObjectName("main_area")
         self.desc_comp_field = QtWidgets.QLineEdit(self.main_area)
-        self.desc_comp_field.setGeometry(QtCore.QRect(40, 120, 551, 41))
+        self.desc_comp_field.setGeometry(QtCore.QRect(50, 120, 551, 41))
         self.desc_comp_field.setMinimumSize(QtCore.QSize(301, 41))
         font = QtGui.QFont()
         font.setPointSize(-1)
@@ -208,7 +190,7 @@ class Ui_EditProductWindow(object):
         self.desc_comp_field.setClearButtonEnabled(True)
         self.desc_comp_field.setObjectName("desc_comp_field")
         self.tipo_field = QtWidgets.QLineEdit(self.main_area)
-        self.tipo_field.setGeometry(QtCore.QRect(40, 200, 91, 41))
+        self.tipo_field.setGeometry(QtCore.QRect(50, 200, 91, 41))
         self.tipo_field.setMinimumSize(QtCore.QSize(10, 41))
         font = QtGui.QFont()
         font.setPointSize(-1)
@@ -222,7 +204,7 @@ class Ui_EditProductWindow(object):
         self.tipo_field.setClearButtonEnabled(True)
         self.tipo_field.setObjectName("tipo_field")
         self.desc_comp_label = QtWidgets.QLabel(self.main_area)
-        self.desc_comp_label.setGeometry(QtCore.QRect(50, 100, 131, 16))
+        self.desc_comp_label.setGeometry(QtCore.QRect(60, 100, 131, 16))
         font = QtGui.QFont()
         font.setPointSize(-1)
         font.setBold(True)
@@ -230,7 +212,7 @@ class Ui_EditProductWindow(object):
         self.desc_comp_label.setFont(font)
         self.desc_comp_label.setObjectName("desc_comp_label")
         self.tipo_label = QtWidgets.QLabel(self.main_area)
-        self.tipo_label.setGeometry(QtCore.QRect(50, 180, 51, 16))
+        self.tipo_label.setGeometry(QtCore.QRect(60, 180, 51, 16))
         font = QtGui.QFont()
         font.setPointSize(-1)
         font.setBold(True)
@@ -238,23 +220,38 @@ class Ui_EditProductWindow(object):
         self.tipo_label.setFont(font)
         self.tipo_label.setObjectName("tipo_label")
         self.btn_close = QtWidgets.QPushButton(self.main_area)
-        self.btn_close.setGeometry(QtCore.QRect(480, 480, 111, 41))
+        self.btn_close.setGeometry(QtCore.QRect(490, 480, 111, 41))
         self.btn_close.setMinimumSize(QtCore.QSize(0, 41))
         font = QtGui.QFont()
         font.setPointSize(-1)
         self.btn_close.setFont(font)
         self.btn_close.setFocusPolicy(QtCore.Qt.TabFocus)
-        self.btn_close.setStyleSheet("QPushButton:hover {\n"
+        self.btn_close.setStyleSheet("QPushButton {\n"
+"    background-color: #fbba72;\n"
+"    border: 2px;\n"
+"    border-radius: 18px;\n"
+"    font-size: 14px;\n"
+"    font-weight: regular;\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
 "    background-color: #d60000;\n"
 "    color: #EEEEEE\n"
-"}")
+"}\n"
+"\n"
+"QPushButton:pressed {\n"
+"    background-color: #6703c5;\n"
+"    color: #EEEEEE;\n"
+"}\n"
+"\n"
+"")
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap(":/icon/icon/excluir (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.btn_close.setIcon(icon1)
         self.btn_close.setIconSize(QtCore.QSize(16, 16))
         self.btn_close.setObjectName("btn_close")
         self.descricao_label = QtWidgets.QLabel(self.main_area)
-        self.descricao_label.setGeometry(QtCore.QRect(50, 20, 61, 16))
+        self.descricao_label.setGeometry(QtCore.QRect(60, 20, 61, 16))
         font = QtGui.QFont()
         font.setPointSize(-1)
         font.setBold(True)
@@ -262,7 +259,7 @@ class Ui_EditProductWindow(object):
         self.descricao_label.setFont(font)
         self.descricao_label.setObjectName("descricao_label")
         self.descricao_field = QtWidgets.QLineEdit(self.main_area)
-        self.descricao_field.setGeometry(QtCore.QRect(40, 40, 551, 41))
+        self.descricao_field.setGeometry(QtCore.QRect(50, 40, 551, 41))
         self.descricao_field.setMinimumSize(QtCore.QSize(301, 41))
         font = QtGui.QFont()
         font.setPointSize(-1)
@@ -275,7 +272,7 @@ class Ui_EditProductWindow(object):
         self.descricao_field.setClearButtonEnabled(True)
         self.descricao_field.setObjectName("descricao_field")
         self.um_field = QtWidgets.QLineEdit(self.main_area)
-        self.um_field.setGeometry(QtCore.QRect(210, 200, 91, 41))
+        self.um_field.setGeometry(QtCore.QRect(220, 200, 91, 41))
         self.um_field.setMinimumSize(QtCore.QSize(10, 41))
         font = QtGui.QFont()
         font.setPointSize(-1)
@@ -288,7 +285,7 @@ class Ui_EditProductWindow(object):
         self.um_field.setClearButtonEnabled(True)
         self.um_field.setObjectName("um_field")
         self.um_label = QtWidgets.QLabel(self.main_area)
-        self.um_label.setGeometry(QtCore.QRect(220, 180, 81, 16))
+        self.um_label.setGeometry(QtCore.QRect(230, 180, 81, 16))
         font = QtGui.QFont()
         font.setPointSize(-1)
         font.setBold(True)
@@ -296,7 +293,7 @@ class Ui_EditProductWindow(object):
         self.um_label.setFont(font)
         self.um_label.setObjectName("um_label")
         self.armazem_label = QtWidgets.QLabel(self.main_area)
-        self.armazem_label.setGeometry(QtCore.QRect(380, 180, 61, 16))
+        self.armazem_label.setGeometry(QtCore.QRect(390, 180, 61, 16))
         font = QtGui.QFont()
         font.setPointSize(-1)
         font.setBold(True)
@@ -304,23 +301,37 @@ class Ui_EditProductWindow(object):
         self.armazem_label.setFont(font)
         self.armazem_label.setObjectName("armazem_label")
         self.btn_save = QtWidgets.QPushButton(self.main_area)
-        self.btn_save.setGeometry(QtCore.QRect(350, 480, 111, 41))
+        self.btn_save.setGeometry(QtCore.QRect(360, 480, 111, 41))
         self.btn_save.setMinimumSize(QtCore.QSize(0, 41))
         font = QtGui.QFont()
         font.setPointSize(-1)
         self.btn_save.setFont(font)
         self.btn_save.setFocusPolicy(QtCore.Qt.TabFocus)
-        self.btn_save.setStyleSheet("QPushButton:hover {\n"
+        self.btn_save.setStyleSheet("QPushButton {\n"
+"    background-color: #fbba72;\n"
+"    border: 2px;\n"
+"    border-radius: 18px;\n"
+"    font-size: 14px;\n"
+"    font-weight: regular;\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
 "    background-color: #399918;\n"
 "    color: #EEEEEE\n"
-"}")
+"}\n"
+"QPushButton:pressed {\n"
+"    background-color: #6703c5;\n"
+"    color: #EEEEEE;\n"
+"}\n"
+"\n"
+"")
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap(":/icon/icon/icons8-salvar-50.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.btn_save.setIcon(icon2)
         self.btn_save.setIconSize(QtCore.QSize(16, 16))
         self.btn_save.setObjectName("btn_save")
         self.grupo_field = QtWidgets.QLineEdit(self.main_area)
-        self.grupo_field.setGeometry(QtCore.QRect(40, 360, 91, 41))
+        self.grupo_field.setGeometry(QtCore.QRect(50, 360, 91, 41))
         self.grupo_field.setMinimumSize(QtCore.QSize(10, 41))
         font = QtGui.QFont()
         font.setPointSize(-1)
@@ -333,7 +344,7 @@ class Ui_EditProductWindow(object):
         self.grupo_field.setClearButtonEnabled(True)
         self.grupo_field.setObjectName("grupo_field")
         self.grupo_label = QtWidgets.QLabel(self.main_area)
-        self.grupo_label.setGeometry(QtCore.QRect(50, 340, 81, 16))
+        self.grupo_label.setGeometry(QtCore.QRect(60, 340, 81, 16))
         font = QtGui.QFont()
         font.setPointSize(-1)
         font.setBold(True)
@@ -341,7 +352,7 @@ class Ui_EditProductWindow(object):
         self.grupo_label.setFont(font)
         self.grupo_label.setObjectName("grupo_label")
         self.desc_grupo_field = QtWidgets.QLineEdit(self.main_area)
-        self.desc_grupo_field.setGeometry(QtCore.QRect(200, 360, 391, 41))
+        self.desc_grupo_field.setGeometry(QtCore.QRect(210, 360, 391, 41))
         self.desc_grupo_field.setMinimumSize(QtCore.QSize(10, 41))
         font = QtGui.QFont()
         font.setPointSize(-1)
@@ -363,7 +374,7 @@ class Ui_EditProductWindow(object):
         self.desc_grupo_label.setFont(font)
         self.desc_grupo_label.setObjectName("desc_grupo_label")
         self.cc_label = QtWidgets.QLabel(self.main_area)
-        self.cc_label.setGeometry(QtCore.QRect(50, 260, 101, 16))
+        self.cc_label.setGeometry(QtCore.QRect(60, 260, 101, 16))
         font = QtGui.QFont()
         font.setPointSize(-1)
         font.setBold(True)
@@ -371,7 +382,7 @@ class Ui_EditProductWindow(object):
         self.cc_label.setFont(font)
         self.cc_label.setObjectName("cc_label")
         self.bloquear_combobox = QtWidgets.QComboBox(self.main_area)
-        self.bloquear_combobox.setGeometry(QtCore.QRect(230, 280, 101, 41))
+        self.bloquear_combobox.setGeometry(QtCore.QRect(240, 280, 101, 41))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -390,7 +401,7 @@ class Ui_EditProductWindow(object):
         self.bloquear_combobox.addItem("")
         self.bloquear_combobox.addItem("")
         self.bloquear_label = QtWidgets.QLabel(self.main_area)
-        self.bloquear_label.setGeometry(QtCore.QRect(240, 260, 101, 16))
+        self.bloquear_label.setGeometry(QtCore.QRect(250, 260, 101, 16))
         font = QtGui.QFont()
         font.setPointSize(-1)
         font.setBold(True)
@@ -398,7 +409,7 @@ class Ui_EditProductWindow(object):
         self.bloquear_label.setFont(font)
         self.bloquear_label.setObjectName("bloquear_label")
         self.endereco_field = QtWidgets.QLineEdit(self.main_area)
-        self.endereco_field.setGeometry(QtCore.QRect(370, 280, 211, 41))
+        self.endereco_field.setGeometry(QtCore.QRect(380, 280, 221, 41))
         self.endereco_field.setMinimumSize(QtCore.QSize(10, 41))
         font = QtGui.QFont()
         font.setPointSize(-1)
@@ -412,7 +423,7 @@ class Ui_EditProductWindow(object):
         self.endereco_field.setClearButtonEnabled(True)
         self.endereco_field.setObjectName("endereco_field")
         self.endereco_label = QtWidgets.QLabel(self.main_area)
-        self.endereco_label.setGeometry(QtCore.QRect(380, 260, 111, 16))
+        self.endereco_label.setGeometry(QtCore.QRect(390, 260, 111, 16))
         font = QtGui.QFont()
         font.setPointSize(-1)
         font.setBold(True)
@@ -420,7 +431,7 @@ class Ui_EditProductWindow(object):
         self.endereco_label.setFont(font)
         self.endereco_label.setObjectName("endereco_label")
         self.armazem_field = QtWidgets.QLineEdit(self.main_area)
-        self.armazem_field.setGeometry(QtCore.QRect(370, 200, 91, 41))
+        self.armazem_field.setGeometry(QtCore.QRect(380, 200, 91, 41))
         self.armazem_field.setMinimumSize(QtCore.QSize(10, 41))
         font = QtGui.QFont()
         font.setPointSize(-1)
@@ -434,7 +445,7 @@ class Ui_EditProductWindow(object):
         self.armazem_field.setClearButtonEnabled(True)
         self.armazem_field.setObjectName("armazem_field")
         self.cc_field = QtWidgets.QLineEdit(self.main_area)
-        self.cc_field.setGeometry(QtCore.QRect(40, 280, 121, 41))
+        self.cc_field.setGeometry(QtCore.QRect(50, 280, 121, 41))
         self.cc_field.setMinimumSize(QtCore.QSize(10, 41))
         font = QtGui.QFont()
         font.setPointSize(-1)
@@ -448,7 +459,7 @@ class Ui_EditProductWindow(object):
         self.cc_field.setClearButtonEnabled(True)
         self.cc_field.setObjectName("cc_field")
         self.btn_search_tipo = QtWidgets.QPushButton(self.main_area)
-        self.btn_search_tipo.setGeometry(QtCore.QRect(135, 200, 41, 41))
+        self.btn_search_tipo.setGeometry(QtCore.QRect(145, 200, 41, 41))
         self.btn_search_tipo.setMinimumSize(QtCore.QSize(0, 41))
         font = QtGui.QFont()
         font.setPointSize(-1)
@@ -478,7 +489,7 @@ class Ui_EditProductWindow(object):
         self.btn_search_tipo.setIconSize(QtCore.QSize(32, 32))
         self.btn_search_tipo.setObjectName("btn_search_tipo")
         self.btn_search_um = QtWidgets.QPushButton(self.main_area)
-        self.btn_search_um.setGeometry(QtCore.QRect(305, 200, 41, 41))
+        self.btn_search_um.setGeometry(QtCore.QRect(315, 200, 41, 41))
         self.btn_search_um.setMinimumSize(QtCore.QSize(0, 41))
         font = QtGui.QFont()
         font.setPointSize(-1)
@@ -506,7 +517,7 @@ class Ui_EditProductWindow(object):
         self.btn_search_um.setIconSize(QtCore.QSize(32, 32))
         self.btn_search_um.setObjectName("btn_search_um")
         self.btn_search_arm = QtWidgets.QPushButton(self.main_area)
-        self.btn_search_arm.setGeometry(QtCore.QRect(465, 200, 41, 41))
+        self.btn_search_arm.setGeometry(QtCore.QRect(475, 200, 41, 41))
         self.btn_search_arm.setMinimumSize(QtCore.QSize(0, 41))
         font = QtGui.QFont()
         font.setPointSize(-1)
@@ -534,7 +545,7 @@ class Ui_EditProductWindow(object):
         self.btn_search_arm.setIconSize(QtCore.QSize(32, 32))
         self.btn_search_arm.setObjectName("btn_search_arm")
         self.btn_search_cc = QtWidgets.QPushButton(self.main_area)
-        self.btn_search_cc.setGeometry(QtCore.QRect(165, 280, 41, 41))
+        self.btn_search_cc.setGeometry(QtCore.QRect(175, 280, 41, 41))
         self.btn_search_cc.setMinimumSize(QtCore.QSize(0, 41))
         font = QtGui.QFont()
         font.setPointSize(-1)
@@ -562,7 +573,7 @@ class Ui_EditProductWindow(object):
         self.btn_search_cc.setIconSize(QtCore.QSize(32, 32))
         self.btn_search_cc.setObjectName("btn_search_cc")
         self.btn_search_grupo = QtWidgets.QPushButton(self.main_area)
-        self.btn_search_grupo.setGeometry(QtCore.QRect(135, 360, 41, 41))
+        self.btn_search_grupo.setGeometry(QtCore.QRect(145, 360, 41, 41))
         self.btn_search_grupo.setMinimumSize(QtCore.QSize(0, 41))
         font = QtGui.QFont()
         font.setPointSize(-1)
@@ -590,7 +601,7 @@ class Ui_EditProductWindow(object):
         self.btn_search_grupo.setIconSize(QtCore.QSize(32, 32))
         self.btn_search_grupo.setObjectName("btn_search_grupo")
         self.logo_enaplic_50 = QtWidgets.QLabel(self.main_area)
-        self.logo_enaplic_50.setGeometry(QtCore.QRect(40, 450, 121, 101))
+        self.logo_enaplic_50.setGeometry(QtCore.QRect(50, 450, 121, 101))
         self.logo_enaplic_50.setText("")
         self.logo_enaplic_50.setPixmap(QtGui.QPixmap(":/image/image/logo_enaplic_50_anos.png"))
         self.logo_enaplic_50.setScaledContents(True)
