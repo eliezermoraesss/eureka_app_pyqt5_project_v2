@@ -5,12 +5,34 @@ from src.app.utils.db_mssql import setup_mssql
 
 
 def format_log_description(selected_row_before_changed, selected_row_after_changed):
-    result = 'Antes:\n'
-    for value in selected_row_before_changed:
-        result += value + '\n'
-    result += 'Depois:\n'
+    before_change = {}
+    after_change = {}
+    column_names = {
+        1: 'Descrição: ',
+        2: 'Desc. Compl.: ',
+        3: 'Tipo: ',
+        4: 'Unid. Med.: ',
+        5: 'Armazém: ',
+        6: 'Grupo: ',
+        7: 'Desc. Grupo: ',
+        8: 'Centro Custo: ',
+        9: 'Bloqueio: ',
+        13: 'Endereço: '
+    }
     for value in selected_row_after_changed:
-        result += value + '\n'
+        if value not in selected_row_before_changed:
+            index = selected_row_after_changed.index(value)
+            after_change[index] = value
+    for value in selected_row_before_changed:
+        if value not in selected_row_after_changed:
+            index = selected_row_before_changed.index(value)
+            before_change[index] = value
+    result = 'Before:\n'
+    for key, value in before_change.items():
+        result += column_names[key] + value + '\n'
+    result += '\nAfter:\n'
+    for key, value in after_change.items():
+        result += column_names[key] + value + '\n'
     return result
 
 
@@ -24,9 +46,9 @@ def save_log_database(user_data, selected_row_before_changed, selected_row_after
     query = f"""
     INSERT INTO 
         enaplic_management.dbo.tb_user_logs 
-        (full_name, email, user_role, log_description, created_at) 
+        (full_name, email, user_role, part_number, log_description, created_at) 
     VALUES
-        ('{full_name}', '{email}', '{user_role}', '{log_description}', switchoffset(sysdatetimeoffset(),'-03:00'));
+        ('{full_name}', '{email}', '{user_role}', '{selected_row_after_changed[0]}', '{log_description}', switchoffset(sysdatetimeoffset(),'-03:00'));
     """
 
     driver = '{SQL Server}'
