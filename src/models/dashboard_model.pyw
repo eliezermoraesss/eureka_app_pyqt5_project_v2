@@ -8,7 +8,7 @@ class DashboardWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Power BI Viewer")
+        self.setWindowTitle("Eureka® Power BI Viewer")
 
         # Cria o widget QWebEngineView
         self.browser = QWebEngineView()

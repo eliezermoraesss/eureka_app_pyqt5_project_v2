@@ -1,5 +1,5 @@
 import pyodbc
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import QMessageBox
 
 from src.app.utils.db_mssql import setup_mssql
@@ -168,6 +168,9 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
             self.accept()
 
             save_log_database(self.user_data, selected_row_before_changed, selected_row_after_changed)
+
+            QMessageBox.information(None, f"Eureka®",
+                               f"Alteração realizada com sucesso!")
 
         except Exception as ex:
             QMessageBox.warning(None, f"Eureka® - Falha ao conectar no banco de dados",

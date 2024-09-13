@@ -46,7 +46,7 @@ class EngenhariaApp(QWidget):
     def __init__(self):
         super().__init__()
         self.engine = None
-        self.setWindowTitle("EUREKA® ENGENHARIA - v2.0")
+        self.setWindowTitle("Eureka® Engenharia")
 
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 

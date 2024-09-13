@@ -284,8 +284,8 @@ class Ui_LoginWindow(object):
         _translate = QtCore.QCoreApplication.translate
         LoginWindow.setWindowTitle(_translate("LoginWindow", "MainWindow"))
         self.btn_login.setText(_translate("LoginWindow", " Entrar"))
-        self.btn_register.setText(_translate("LoginWindow", " Criar uma nova conta"))
-        self.btn_forget_password.setText(_translate("LoginWindow", " Esqueceu sua senha?"))
+        self.btn_register.setText(_translate("LoginWindow", " Primeiro acesso?"))
+        self.btn_forget_password.setText(_translate("LoginWindow", " Esqueci minha senha"))
         self.user_label.setText(_translate("LoginWindow", "Usuário"))
         self.password_label.setText(_translate("LoginWindow", "Senha"))
         self.window_title_label.setText(_translate("LoginWindow", "Seja bem-vindo(a) ao Eureka!"))

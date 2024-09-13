@@ -48,7 +48,7 @@ class QpClosedApp(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("EUREKA® QPS")
+        self.setWindowTitle("Eureka® QPS")
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
         self.update_thread = None

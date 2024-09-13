@@ -58,7 +58,7 @@ class ComprasApp(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("EUREKA® Compras - v2.0")
+        self.setWindowTitle("Eureka® Compras")
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
         self.engine = None

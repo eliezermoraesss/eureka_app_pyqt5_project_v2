@@ -162,7 +162,7 @@ class ComercialApp(QWidget):
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
 
-        self.setWindowTitle("EUREKA® COMERCIAL - v2.0")
+        self.setWindowTitle("Eureka® Comercial")
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
         script_dir = os.path.dirname(os.path.abspath(__file__))
