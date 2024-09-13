@@ -1,13 +1,12 @@
 import pandas as pd
 import pyodbc
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog, QTableWidgetItem
+from PyQt5.QtWidgets import QDialog, QTableWidgetItem, QMessageBox
 from sqlalchemy import create_engine
 
 from src.app.utils.config_search_table import config_search_table
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.search_queries import select_query
-from src.app.utils.utils import exibir_mensagem
 from src.qt.ui.ui_search_window import Ui_SearchWindow
 
 
@@ -72,7 +71,7 @@ class SearchWindow(QDialog):
                 self.ui.search_table.horizontalHeader().setSortIndicator(-1, Qt.AscendingOrder)
                 self.ui.search_table.setRowCount(0)
             else:
-                exibir_mensagem("Eureka®", "Nenhum resultado encontrado!", 'info')
+                QMessageBox.information(None, "Eureka®", "Nenhum resultado encontrado!")
                 return
 
             for i, row in dataframe.iterrows():
