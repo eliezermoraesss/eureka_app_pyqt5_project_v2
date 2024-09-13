@@ -550,7 +550,6 @@ class EngenhariaApp(QWidget):
         self.btn_ultimos_fornecedores.setEnabled(status)
 
     def query_consulta_tabela_produtos(self):
-
         codigo = self.campo_codigo.text().upper().strip()
         descricao = self.campo_descricao.text().upper().strip()
         descricao2 = self.campo_contem_descricao.text().upper().strip()

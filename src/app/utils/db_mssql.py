@@ -3,8 +3,8 @@ import sys
 
 
 def setup_mssql():
-    caminho_do_arquivo = (r"\\192.175.175.4\f\INTEGRANTES\ELIEZER\PROJETO SOLIDWORKS "
-                          r"TOTVS\libs-python\user-password-mssql\USER_PASSWORD_MSSQL_PROD.txt")
+    caminho_do_arquivo = (r"\\192.175.175.4\desenvolvimento\REPOSITORIOS\resources\application-properties"
+                          r"\USER_PASSWORD_MSSQL_PROD.txt")
     try:
         with open(caminho_do_arquivo, 'r') as arquivo:
             string_lida = arquivo.read()
