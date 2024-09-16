@@ -4,6 +4,7 @@ import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QProcess, Qt
 
+from src.app.config.authorize_decorator import authorize
 from src.app.utils.load_session import load_session
 from src.qt.ui.ui_home_window import Ui_HomeWindow
 
@@ -28,7 +29,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setup_connections()
 
     def setup_connections(self):
-        def execute_dashboard_model():
+        @authorize(['admin', 'Engenharia', 'PCP'])
+        def execute_dashboard_model(checked=False):
             process = QProcess()
             script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'dashboard_model.pyw'))
             process.startDetached("python", [script_path])  # Usa startDetached para execução independente
