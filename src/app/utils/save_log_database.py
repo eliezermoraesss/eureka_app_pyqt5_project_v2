@@ -1,4 +1,3 @@
-import logging
 import os
 from datetime import datetime
 
@@ -6,15 +5,6 @@ import pyodbc
 from PyQt5.QtWidgets import QMessageBox
 
 from src.app.utils.db_mssql import setup_mssql
-
-logging.basicConfig(
-    filename='edit_product_error_log.log',  # Local log file for errors
-    level=logging.ERROR,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-
-# Network path for log storage
-network_log_path = r'\\192.175.175.4\desenvolvimento\REPOSITORIOS\resources\logs'
 
 
 def format_log_description(selected_row_before_changed, selected_row_after_changed):
@@ -79,14 +69,14 @@ def save_log_database(user_data, selected_row_before_changed, selected_row_after
 
     except Exception as ex:
         conn.rollback()
-        # Log the error locally
-        logging.error(f"Error while inserting log entry: {log_description}. Exception: {str(ex)}")
         QMessageBox.warning(None, f"Eureka® - Erro",
                             f"Erro ao salvar log {user_data}\n{log_description}.\n\n{str(ex)}\n\nContate o administrador do sistema.")
 
 
 def save_to_network_log(user_data, log_description):
     try:
+        # Network path for log storage
+        network_log_path = r'\\192.175.175.4\desenvolvimento\REPOSITORIOS\resources\logs'
         # Ensure the network path exists
         if not os.path.exists(network_log_path):
             os.makedirs(network_log_path)
@@ -106,6 +96,6 @@ def save_to_network_log(user_data, log_description):
             file.write(log_entry)
 
     except Exception as ex:
-        # Log if there is any failure while writing to network location
-        logging.error(f"Failed to write log to network location: {str(ex)}")
+        QMessageBox.warning(None, f"Eureka® - Erro",
+                            f"Erro ao salvar arquivo de log: \n{str(ex)}\n\nContate o administrador do sistema.")
 
