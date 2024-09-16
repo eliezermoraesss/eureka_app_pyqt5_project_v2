@@ -1,9 +1,10 @@
 import os
+import sys
 
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QProcess, Qt
 
-from ..utils.load_session import load_session
+from src.app.utils.load_session import load_session
 from ...qt.ui.ui_home_window import Ui_HomeWindow
 
 
@@ -63,3 +64,10 @@ class MainController(QtWidgets.QMainWindow):
         self.home_window.btn_comercial.clicked.connect(execute_comercial_model)
         self.home_window.btn_qps.clicked.connect(execute_qps_model)
         self.home_window.btn_close.clicked.connect(self.close)
+
+
+# if __name__ == "__main__":
+#     app = QtWidgets.QApplication(sys.argv)
+#     main_window = MainController()
+#     main_window.show()
+#     sys.exit(app.exec_())

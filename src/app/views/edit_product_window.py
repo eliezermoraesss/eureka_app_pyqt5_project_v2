@@ -1,5 +1,5 @@
 import pyodbc
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 
 from src.app.utils.db_mssql import setup_mssql

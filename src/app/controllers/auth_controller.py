@@ -1,9 +1,12 @@
+import base64
+from pathlib import Path
+
 import bcrypt
 import random
 from datetime import datetime, timedelta
 from PyQt5.QtCore import QSettings
 from src.app.config.db_config import DbConnection
-from src.app.utils.send_email import send_email
+from src.app.utils.email_service import send_email
 
 
 class AuthController:
@@ -56,14 +59,39 @@ class AuthController:
         user = self.get_user_by_email(email)
         if user:
             reset_code = str(random.randint(100000, 999999))
-            expiration_time = datetime.now() + timedelta(seconds=30)
+            expiration_time = datetime.now() + timedelta(minutes=1)
             cursor = self.db_connection.conn.cursor()
             cursor.execute('''INSERT INTO enaplic_management.dbo.eureka_password_reset 
                               (user_id, reset_code, expiration_time)
                               VALUES (?, ?, ?)''',
                            (user[0], reset_code, expiration_time))
             self.db_connection.conn.commit()
-            send_email(email, reset_code)
+            subject = "🦾🤖 Eureka® BOT - Recuperação de senha solicitada 🔒"
+
+            image_path = Path(__file__).resolve().parent.parent.parent / "resources" / "images" / "logo_enaplic.jpg"
+            with open(image_path, "rb") as image_file:
+                encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
+
+            body = f"""
+                <html>
+                <body>
+                    <h2 style="color: #4CAF50;">Recuperação de Senha 🔒</h2>
+                    <p> 🤖 Prezado(a) {user[1].split(' ')[0]},</p>
+                    <p>Recebemos uma solicitação para redefinir a senha associada ao seu acesso. Utilize o código abaixo para concluir o processo de recuperação de senha:</p>
+                    <h2 style="color: #333333; background-color: #f2f2f2; padding: 10px; display: inline-block; border-radius: 5px;">{reset_code}</h2>
+                    <p>Este código é válido por 1 minuto. Caso o tempo expire, será necessário solicitar um novo código.</p>
+                    <p>Se você não solicitou a redefinição de senha, por favor, ignore este e-mail.</p>
+                    <p>Atenciosamente,</p>
+                    <p><strong>🦾🤖 Eureka® BOT</strong></p>
+                    <p>👨‍💻<i> Este e-mail foi gerado automaticamente e não há necessidade de respondê-lo.</i></p>
+                    <br>
+                    <img src="data:image/jpeg;base64,{encoded_image}" alt="Enaplic logo" width="200px">
+                </body>
+                </html>
+                """
+
+            send_email(subject, body, email)
+            print(f'Send reset code {reset_code} to {email}')
             return True
         return False
 
@@ -106,6 +134,6 @@ class AuthController:
         user = self.get_user_by_username(username)
         if user:
             user_role = user[5]
-            if user_role == 'Admin' or user_role == required_role:
+            if user_role == 'admin' or user_role == required_role:
                 return True
         return False
