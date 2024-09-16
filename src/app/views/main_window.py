@@ -1,84 +1,74 @@
-from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QSizePolicy, QSpacerItem
+import os
+import sys
+
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import QProcess, Qt
+
+from src.app.utils.load_session import load_session
+from src.qt.ui.ui_home_window import Ui_HomeWindow
 
 
-class MainWindow(QMainWindow):
+class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
-        super().__init__()
+        super(MainWindow, self).__init__()
+        self.home_window = Ui_HomeWindow()
+        self.home_window.setupUi(self)
+        self.base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.init_ui()
 
-        self.setWindowTitle("EUREKA® Home")
+    def init_ui(self):
+        user_data = load_session()
+        primeiro_nome = user_data["full_name"].split(' ')[0]
+        id_title = self.home_window.user_label.text()
+        self.setWindowTitle("Eureka® Home")
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
+        self.home_window.user_label.setText(id_title.replace("{user}", f"{primeiro_nome},"))
+        # self.setWindowFlags(Qt.FramelessWindowHint)  # Ocultar moldura padrão da janela
+        self.setFixedSize(1319, 797)
+        self.setup_connections()
 
-        # Aplicar folha de estilo ao aplicativo
-        self.setStyleSheet("""
-            * {
-                background-color: #363636;
-            }
+    def setup_connections(self):
+        def execute_dashboard_model():
+            process = QProcess()
+            script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'dashboard_model.pyw'))
+            process.startDetached("python", [script_path])  # Usa startDetached para execução independente
 
-            QLabel, QCheckBox {
-                color: #EEEEEE;
-                font-size: 11px;
-                font-weight: bold;
-            }
+        def execute_engenharia_model():
+            process = QProcess()
+            script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'engenharia_model.pyw'))
+            process.startDetached("python", [script_path])  # Usa startDetached para execução independente
 
-            QLineEdit {
-                background-color: #A7A6A6;
-                border: 1px solid #262626;
-                padding: 5px;
-                border-radius: 8px;
-            }
+        def execute_comercial_model():
+            process = QProcess()
+            script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'comercial_model.pyw'))
+            process.startDetached("python", [script_path])
 
-            QPushButton {
-                background-color: #0a79f8;
-                color: #fff;
-                padding: 5px 15px;
-                border: 2px;
-                border-radius: 8px;
-                font-size: 11px;
-                height: 60px;
-                font-weight: bold;
-                margin-top: 6px;
-                margin-bottom: 6px;
-            }
+        def execute_pcp_model():
+            process = QProcess()
+            script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'pcp_model.pyw'))
+            process.startDetached("python", [script_path])
 
-            QPushButton:hover {
-                background-color: #fff;
-                color: #0a79f8
-            }
+        def execute_compras_model():
+            process = QProcess()
+            script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'compras_model.pyw'))
+            process.startDetached("python", [script_path])
 
-            QPushButton:pressed {
-                background-color: #6703c5;
-                color: #fff;
-            }
-        """)
+        def execute_qps_model():
+            process = QProcess()
+            script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'qps_model.pyw'))
+            process.startDetached("python", [script_path])
 
-        # Botões
-        self.dashboard_button = QPushButton("Dashboard", self)
-        self.dashboard_button .setMinimumWidth(150)
+        self.home_window.btn_dashboard.clicked.connect(execute_dashboard_model)
+        self.home_window.btn_engenharia.clicked.connect(execute_engenharia_model)
+        self.home_window.btn_pcp.clicked.connect(execute_pcp_model)
+        self.home_window.btn_compras.clicked.connect(execute_compras_model)
+        self.home_window.btn_comercial.clicked.connect(execute_comercial_model)
+        self.home_window.btn_qps.clicked.connect(execute_qps_model)
+        self.home_window.btn_close.clicked.connect(self.close)
 
-        self.engenharia_button = QPushButton("Engenharia", self)
-        self.engenharia_button .setMinimumWidth(150)
 
-        self.pcp_button = QPushButton("PCP", self)
-        self.pcp_button.setMinimumWidth(150)
-
-        self.compras_button = QPushButton("Compras", self)
-        self.compras_button.setMinimumWidth(150)
-
-        self.comercial_button = QPushButton("Comercial", self)
-        self.comercial_button .setMinimumWidth(150)
-
-        layout = QVBoxLayout()
-        layout_linha_01 = QHBoxLayout()
-
-        layout_linha_01.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
-        layout_linha_01.addWidget(self.dashboard_button)
-        layout_linha_01.addWidget(self.engenharia_button)
-        layout_linha_01.addWidget(self.pcp_button)
-        layout_linha_01.addWidget(self.compras_button)
-        layout_linha_01.addWidget(self.comercial_button)
-        layout_linha_01.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
-
-        layout.addLayout(layout_linha_01)
-
-        container = QWidget()
-        container.setLayout(layout)
-        self.setCentralWidget(container)
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    main_window = MainWindow()
+    main_window.show()
+    sys.exit(app.exec_())

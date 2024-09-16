@@ -45,8 +45,8 @@ class LoginWindow(QtWidgets.QMainWindow):
                 "role": user[5]
             }
             self.auth_controller.save_session(user_data)  # Salva a sessão com o QSettings
-            self.close()
             self.start_home_window()
+            self.close()
         else:
             QtWidgets.QMessageBox.warning(None, 'Atenção', 'Credenciais inválidas')
 
@@ -61,7 +61,7 @@ class LoginWindow(QtWidgets.QMainWindow):
     def start_home_window(self):
         base_dir = os.path.dirname(os.path.abspath(__file__))
         process = QProcess()
-        script_path = os.path.abspath(os.path.join(base_dir, 'home_window.py'))
+        script_path = os.path.abspath(os.path.join(base_dir, 'main_window.py'))
         process.startDetached("python", [script_path])
 
 
