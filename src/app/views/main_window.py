@@ -29,7 +29,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setup_connections()
 
     def setup_connections(self):
-        @authorize(['admin', 'Engenharia', 'PCP'])
+        @authorize(['admin', 'Engenharia', 'PCP'], self)
         def execute_dashboard_model(checked=False):
             process = QProcess()
             script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'dashboard_model.pyw'))
@@ -60,13 +60,19 @@ class MainWindow(QtWidgets.QMainWindow):
             script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'qps_model.pyw'))
             process.startDetached("python", [script_path])
 
+        def execute_logout():
+            process = QProcess()
+            script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'app', 'main.pyw'))
+            process.startDetached("python", [script_path])
+            self.close()
+
         self.home_window.btn_dashboard.clicked.connect(execute_dashboard_model)
         self.home_window.btn_engenharia.clicked.connect(execute_engenharia_model)
         self.home_window.btn_pcp.clicked.connect(execute_pcp_model)
         self.home_window.btn_compras.clicked.connect(execute_compras_model)
         self.home_window.btn_comercial.clicked.connect(execute_comercial_model)
         self.home_window.btn_qps.clicked.connect(execute_qps_model)
-        self.home_window.btn_close.clicked.connect(self.close)
+        self.home_window.btn_logout.clicked.connect(execute_logout)
 
 
 if __name__ == "__main__":

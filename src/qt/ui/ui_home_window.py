@@ -15,16 +15,22 @@ class Ui_HomeWindow(object):
     def setupUi(self, HomeWindow):
         HomeWindow.setObjectName("HomeWindow")
         HomeWindow.resize(1319, 797)
+        font = QtGui.QFont()
+        font.setFamily("Segoe UI")
+        HomeWindow.setFont(font)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/image/image/LOGO.jpeg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        HomeWindow.setWindowIcon(icon)
         HomeWindow.setStyleSheet("")
         self.centralwidget = QtWidgets.QWidget(HomeWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.widget = QtWidgets.QWidget(self.centralwidget)
         self.widget.setGeometry(QtCore.QRect(230, 0, 1200, 800))
         font = QtGui.QFont()
-        font.setFamily("Segoe UI")
+        font.setFamily("Segoe UI Light")
         self.widget.setFont(font)
         self.widget.setStyleSheet("* {\n"
-"    background-color: #ffffff;\n"
+"    background-color: #F2F5F7;\n"
 "    font-style: \"Segoe UI\";\n"
 "     color: #0B090A;\n"
 "}\n"
@@ -59,9 +65,9 @@ class Ui_HomeWindow(object):
         self.btn_dashboard.setFont(font)
         self.btn_dashboard.setAutoFillBackground(False)
         self.btn_dashboard.setStyleSheet("")
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/icon/icon/painel.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_dashboard.setIcon(icon)
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(":/icon/icon/painel.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_dashboard.setIcon(icon1)
         self.btn_dashboard.setIconSize(QtCore.QSize(64, 64))
         self.btn_dashboard.setObjectName("btn_dashboard")
         self.btn_engenharia = QtWidgets.QPushButton(self.widget)
@@ -72,9 +78,9 @@ class Ui_HomeWindow(object):
         font.setPointSize(-1)
         self.btn_engenharia.setFont(font)
         self.btn_engenharia.setStyleSheet("")
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/icon/icon/engineering-64.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_engenharia.setIcon(icon1)
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap(":/icon/icon/engineering-64.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_engenharia.setIcon(icon2)
         self.btn_engenharia.setIconSize(QtCore.QSize(64, 64))
         self.btn_engenharia.setObjectName("btn_engenharia")
         self.btn_pcp = QtWidgets.QPushButton(self.widget)
@@ -85,9 +91,9 @@ class Ui_HomeWindow(object):
         font.setPointSize(-1)
         self.btn_pcp.setFont(font)
         self.btn_pcp.setStyleSheet("")
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(":/icon/icon/factory-64.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_pcp.setIcon(icon2)
+        icon3 = QtGui.QIcon()
+        icon3.addPixmap(QtGui.QPixmap(":/icon/icon/factory-64.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_pcp.setIcon(icon3)
         self.btn_pcp.setIconSize(QtCore.QSize(64, 64))
         self.btn_pcp.setObjectName("btn_pcp")
         self.btn_compras = QtWidgets.QPushButton(self.widget)
@@ -98,9 +104,9 @@ class Ui_HomeWindow(object):
         font.setPointSize(-1)
         self.btn_compras.setFont(font)
         self.btn_compras.setStyleSheet("")
-        icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap(":/icon/icon/buy-64.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_compras.setIcon(icon3)
+        icon4 = QtGui.QIcon()
+        icon4.addPixmap(QtGui.QPixmap(":/icon/icon/buy-64.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_compras.setIcon(icon4)
         self.btn_compras.setIconSize(QtCore.QSize(64, 64))
         self.btn_compras.setObjectName("btn_compras")
         self.btn_comercial = QtWidgets.QPushButton(self.widget)
@@ -111,9 +117,9 @@ class Ui_HomeWindow(object):
         font.setPointSize(-1)
         self.btn_comercial.setFont(font)
         self.btn_comercial.setStyleSheet("")
-        icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap(":/icon/icon/sale-2-64.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_comercial.setIcon(icon4)
+        icon5 = QtGui.QIcon()
+        icon5.addPixmap(QtGui.QPixmap(":/icon/icon/sale-2-64.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_comercial.setIcon(icon5)
         self.btn_comercial.setIconSize(QtCore.QSize(64, 64))
         self.btn_comercial.setObjectName("btn_comercial")
         self.btn_qps = QtWidgets.QPushButton(self.widget)
@@ -124,9 +130,9 @@ class Ui_HomeWindow(object):
         font.setPointSize(-1)
         self.btn_qps.setFont(font)
         self.btn_qps.setStyleSheet("")
-        icon5 = QtGui.QIcon()
-        icon5.addPixmap(QtGui.QPixmap(":/icon/icon/purchase-order-64.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_qps.setIcon(icon5)
+        icon6 = QtGui.QIcon()
+        icon6.addPixmap(QtGui.QPixmap(":/icon/icon/purchase-order-64.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_qps.setIcon(icon6)
         self.btn_qps.setIconSize(QtCore.QSize(64, 64))
         self.btn_qps.setCheckable(False)
         self.btn_qps.setObjectName("btn_qps")
@@ -146,25 +152,6 @@ class Ui_HomeWindow(object):
 "    font-style: \"Segoe UI\";\n"
 "}")
         self.welcome_label.setObjectName("welcome_label")
-        self.logo_enaplic_50 = QtWidgets.QLabel(self.widget)
-        self.logo_enaplic_50.setGeometry(QtCore.QRect(950, 700, 121, 101))
-        self.logo_enaplic_50.setText("")
-        self.logo_enaplic_50.setPixmap(QtGui.QPixmap(":/image/image/logo_enaplic_50_anos.png"))
-        self.logo_enaplic_50.setScaledContents(True)
-        self.logo_enaplic_50.setObjectName("logo_enaplic_50")
-        self.btn_close = QtWidgets.QPushButton(self.widget)
-        self.btn_close.setGeometry(QtCore.QRect(1020, 10, 51, 51))
-        self.btn_close.setMinimumSize(QtCore.QSize(0, 41))
-        self.btn_close.setStyleSheet("* {\n"
-"    background-color: transparent;\n"
-"    border: none;\n"
-"}")
-        self.btn_close.setText("")
-        icon6 = QtGui.QIcon()
-        icon6.addPixmap(QtGui.QPixmap(":/icon/icon/excluir (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_close.setIcon(icon6)
-        self.btn_close.setIconSize(QtCore.QSize(32, 32))
-        self.btn_close.setObjectName("btn_close")
         self.frame = QtWidgets.QFrame(self.widget)
         self.frame.setGeometry(QtCore.QRect(20, 130, 1050, 2))
         self.frame.setStyleSheet("QFrame {\n"
@@ -189,6 +176,34 @@ class Ui_HomeWindow(object):
 "    font-style: \"Segoe UI\";\n"
 "}")
         self.user_label.setObjectName("user_label")
+        self.btn_logout = QtWidgets.QPushButton(self.widget)
+        self.btn_logout.setGeometry(QtCore.QRect(870, 720, 111, 51))
+        self.btn_logout.setMinimumSize(QtCore.QSize(0, 41))
+        font = QtGui.QFont()
+        font.setFamily("Segoe UI Light")
+        font.setPointSize(-1)
+        self.btn_logout.setFont(font)
+        self.btn_logout.setStyleSheet("QPushButton {\n"
+"    background-color: #fbba72;\n"
+"    border: 2px;\n"
+"    border-radius: 18px;\n"
+"    font-size: 18px;\n"
+"    font-weight: regular;\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
+"    background-color: #a4161a;\n"
+"    border: 2px solid #333;\n"
+"    color: #EEEEEE;\n"
+"    font-weight: bold;\n"
+"      font-size: 23px;\n"
+"}\n"
+"")
+        icon7 = QtGui.QIcon()
+        icon7.addPixmap(QtGui.QPixmap(":/icon/icon/sair.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_logout.setIcon(icon7)
+        self.btn_logout.setIconSize(QtCore.QSize(32, 32))
+        self.btn_logout.setObjectName("btn_logout")
         self.btn_qps.raise_()
         self.btn_comercial.raise_()
         self.btn_compras.raise_()
@@ -196,10 +211,9 @@ class Ui_HomeWindow(object):
         self.btn_engenharia.raise_()
         self.btn_dashboard.raise_()
         self.welcome_label.raise_()
-        self.logo_enaplic_50.raise_()
-        self.btn_close.raise_()
         self.frame.raise_()
         self.user_label.raise_()
+        self.btn_logout.raise_()
         self.sidebar_enaplic = QtWidgets.QWidget(self.centralwidget)
         self.sidebar_enaplic.setGeometry(QtCore.QRect(-10, 0, 241, 801))
         self.sidebar_enaplic.setStyleSheet("* {\n"
@@ -228,4 +242,5 @@ class Ui_HomeWindow(object):
         self.btn_qps.setText(_translate("HomeWindow", " Gestão QPS"))
         self.welcome_label.setText(_translate("HomeWindow", "Seja bem-vindo(a) ao Eureka®"))
         self.user_label.setText(_translate("HomeWindow", "Olá {user}"))
+        self.btn_logout.setText(_translate("HomeWindow", "Sair"))
 from src.qt.ui import resource_rc

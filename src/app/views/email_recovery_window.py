@@ -26,6 +26,6 @@ class EmailRecoveryWindow(QtWidgets.QDialog):
                 self.code_verification_window.exec_()
                 self.close()
             else:
-                QtWidgets.QMessageBox.warning(None, 'Erro', 'Email não encontrado')
+                QtWidgets.QMessageBox.warning(self, 'Erro', 'Email não encontrado')
         else:
-            QtWidgets.QMessageBox.warning(None, 'Erro', 'O campo de e-mail não pode estar vazio')
+            QtWidgets.QMessageBox.warning(self, 'Erro', 'O campo de e-mail não pode estar vazio')

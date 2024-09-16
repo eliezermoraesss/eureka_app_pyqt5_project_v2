@@ -1,5 +1,7 @@
+import os
+
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt, QRegExp
+from PyQt5.QtCore import Qt, QRegExp, QProcess
 from PyQt5.QtGui import QRegExpValidator
 
 from src.qt.ui.ui_register_screen import Ui_RegisterWindow

@@ -98,7 +98,7 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
             if validated is None:
                 required_field = self.required_fields[entity]
                 required_field.clear()
-                QMessageBox.information(None, "Eureka®",
+                QMessageBox.information(self, "Eureka®",
                                         f"Nenhum resultado encontrado para o campo {self.entity_names[entity]} com o "
                                         f"valor {field}")
         elif entity == 'grupo':
@@ -125,7 +125,7 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
         self.required_field_is_blank = False
         for field_name, field_object in self.required_fields.items():
             if not field_object.text():
-                QMessageBox.information(None, 'Eureka®', f"O campo {self.entity_names[field_name]} é obrigatório e não "
+                QMessageBox.information(self, 'Eureka®', f"O campo {self.entity_names[field_name]} é obrigatório e não "
                                                          f"pode estar vazio.")
                 self.required_field_is_blank = True
 
@@ -169,11 +169,11 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
 
             save_log_database(self.user_data, selected_row_before_changed, selected_row_after_changed)
 
-            QMessageBox.information(None, f"Eureka®",
+            QMessageBox.information(self, f"Eureka®",
                                f"Alteração realizada com sucesso!")
 
         except Exception as ex:
-            QMessageBox.warning(None, f"Eureka® - Falha ao conectar no banco de dados",
+            QMessageBox.warning(self, f"Eureka® - Falha ao conectar no banco de dados",
                                 f"Erro ao tentar alterar as informações do produto {self.selected_row[0]}.\n\n{str(ex)}\n\nContate o administrador do sistema.")
 
     def fetch_group_description(self, field_value):
@@ -182,5 +182,5 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
             group_description = result[1].strip()
             self.ui.desc_grupo_field.setText(group_description)
         else:
-            QMessageBox.information(None, "Eureka®",
+            QMessageBox.information(self, "Eureka®",
                                     f"Nenhum resultado encontrado para o campo GRUPO com o valor {field_value}")

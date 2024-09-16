@@ -29,16 +29,16 @@ class CodeVerificationWindow(QtWidgets.QDialog):
             self.reset_password_window.exec_()
             self.close()
         else:
-            QMessageBox.warning(None, 'Erro', message)
+            QMessageBox.warning(self, 'Erro', message)
             if message == "O código expirou.":
                 self.ui.btn_new_token.show()
 
     def generate_new_code(self):
         if self.auth_controller.generate_reset_code(self.email):
-            QMessageBox.information(None, 'Sucesso', 'Novo código enviado para o seu e-mail.')
+            QMessageBox.information(self, 'Sucesso', 'Novo código enviado para o seu e-mail.')
             self.ui.btn_new_token.hide()
         else:
-            QMessageBox.warning(None, 'Erro', 'Erro ao gerar novo código.')
+            QMessageBox.warning(self, 'Erro', 'Erro ao gerar novo código.')
 
     def fade_in(self):
         self.effect = QtWidgets.QGraphicsOpacityEffect()

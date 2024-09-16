@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icon">
+    <file>icon/sair (1).png</file>
     <file>icon/procurar.png</file>
     <file>icon/lupa (2).png</file>
     <file>icon/lupa (1).png</file>

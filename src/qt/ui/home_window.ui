@@ -10,8 +10,17 @@
     <height>797</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <family>Segoe UI</family>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../static/resource.qrc">
+    <normaloff>:/image/image/LOGO.jpeg</normaloff>:/image/image/LOGO.jpeg</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true"/>
@@ -28,12 +37,12 @@
     </property>
     <property name="font">
      <font>
-      <family>Segoe UI</family>
+      <family>Segoe UI Light</family>
      </font>
     </property>
     <property name="styleSheet">
      <string notr="true">* {
-    background-color: #ffffff;
+    background-color: #F2F5F7;
 	font-style: &quot;Segoe UI&quot;;
  	color: #0B090A;
 }
@@ -76,7 +85,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -117,7 +125,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -155,7 +162,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -193,7 +199,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -231,7 +236,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -269,7 +273,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -304,7 +307,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI Semibold</family>
        <pointsize>-1</pointsize>
        <weight>75</weight>
        <bold>true</bold>
@@ -321,60 +323,6 @@ QPushButton:pressed {
      </property>
      <property name="text">
       <string>Seja bem-vindo(a) ao Eureka®</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="logo_enaplic_50">
-     <property name="geometry">
-      <rect>
-       <x>950</x>
-       <y>700</y>
-       <width>121</width>
-       <height>101</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="pixmap">
-      <pixmap resource="../static/resource.qrc">:/image/image/logo_enaplic_50_anos.png</pixmap>
-     </property>
-     <property name="scaledContents">
-      <bool>true</bool>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="btn_close">
-     <property name="geometry">
-      <rect>
-       <x>1020</x>
-       <y>10</y>
-       <width>51</width>
-       <height>51</height>
-      </rect>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>41</height>
-      </size>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">* {
-	background-color: transparent;
-	border: none;
-}</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="../static/resource.qrc">
-       <normaloff>:/icon/icon/excluir (1).png</normaloff>:/icon/icon/excluir (1).png</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>32</width>
-       <height>32</height>
-      </size>
      </property>
     </widget>
     <widget class="QFrame" name="frame">
@@ -409,7 +357,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI Semibold</family>
        <pointsize>-1</pointsize>
        <weight>75</weight>
        <bold>true</bold>
@@ -428,6 +375,58 @@ QPushButton:pressed {
       <string>Olá {user}</string>
      </property>
     </widget>
+    <widget class="QPushButton" name="btn_logout">
+     <property name="geometry">
+      <rect>
+       <x>500</x>
+       <y>680</y>
+       <width>111</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>41</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>-1</pointsize>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton {
+    background-color: #fbba72;
+    border: 2px;
+    border-radius: 18px;
+    font-size: 18px;
+    font-weight: regular;
+}
+
+QPushButton:hover {
+    background-color: #a4161a;
+    border: 2px solid #333;
+    color: #EEEEEE;
+	font-weight: bold;
+  	font-size: 23px;
+}
+</string>
+     </property>
+     <property name="text">
+      <string>Sair</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../static/resource.qrc">
+       <normaloff>:/icon/icon/sair.png</normaloff>:/icon/icon/sair.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
     <zorder>btn_qps</zorder>
     <zorder>btn_comercial</zorder>
     <zorder>btn_compras</zorder>
@@ -435,10 +434,9 @@ QPushButton:pressed {
     <zorder>btn_engenharia</zorder>
     <zorder>btn_dashboard</zorder>
     <zorder>welcome_label</zorder>
-    <zorder>logo_enaplic_50</zorder>
-    <zorder>btn_close</zorder>
     <zorder>frame</zorder>
     <zorder>user_label</zorder>
+    <zorder>btn_logout</zorder>
    </widget>
    <widget class="QWidget" name="sidebar_enaplic" native="true">
     <property name="geometry">

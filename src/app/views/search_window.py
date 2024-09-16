@@ -71,7 +71,7 @@ class SearchWindow(QDialog):
                 self.ui.search_table.horizontalHeader().setSortIndicator(-1, Qt.AscendingOrder)
                 self.ui.search_table.setRowCount(0)
             else:
-                QMessageBox.information(None, "Eureka®", "Nenhum resultado encontrado!")
+                QMessageBox.information(self, "Eureka®", "Nenhum resultado encontrado!")
                 return
 
             for i, row in dataframe.iterrows():

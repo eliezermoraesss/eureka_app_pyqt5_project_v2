@@ -23,15 +23,15 @@ class ResetPasswordWindow(QtWidgets.QDialog):
         confirm_password = self.ui.password_confirm_field.text()
 
         if not new_password or not confirm_password:
-            QMessageBox.warning(None, 'Erro', 'Todos os campos são obrigatórios')
+            QMessageBox.warning(self, 'Erro', 'Todos os campos são obrigatórios')
             return
 
         if new_password != confirm_password:
-            QMessageBox.warning(None, 'Erro', 'As senhas não coincidem')
+            QMessageBox.warning(self, 'Erro', 'As senhas não coincidem')
             return
 
         if self.auth_controller.reset_password(self.email, new_password):
-            QMessageBox.information(None, 'Sucesso', 'Senha redefinida com sucesso!')
+            QMessageBox.information(self, 'Sucesso', 'Senha redefinida com sucesso!')
             self.close()
         else:
-            QMessageBox.warning(None, 'Erro', 'Erro ao redefinir a senha.')
+            QMessageBox.warning(self, 'Erro', 'Erro ao redefinir a senha.')

@@ -15,6 +15,9 @@ class Ui_EditProductWindow(object):
     def setupUi(self, EditProductWindow):
         EditProductWindow.setObjectName("EditProductWindow")
         EditProductWindow.resize(640, 600)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/image/image/LOGO.jpeg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        EditProductWindow.setWindowIcon(icon)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)

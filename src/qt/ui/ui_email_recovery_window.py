@@ -15,6 +15,9 @@ class Ui_EmailRecoveryWindow(object):
     def setupUi(self, EmailRecoveryWindow):
         EmailRecoveryWindow.setObjectName("EmailRecoveryWindow")
         EmailRecoveryWindow.resize(480, 400)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/image/image/LOGO.jpeg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        EmailRecoveryWindow.setWindowIcon(icon)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)

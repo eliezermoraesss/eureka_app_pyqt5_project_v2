@@ -15,6 +15,9 @@ class Ui_SearchWindow(object):
     def setupUi(self, SearchWindow):
         SearchWindow.setObjectName("SearchWindow")
         SearchWindow.resize(640, 600)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/image/image/LOGO.jpeg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        SearchWindow.setWindowIcon(icon)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)

@@ -15,6 +15,9 @@ class Ui_TokenVerificationWindow(object):
     def setupUi(self, TokenVerificationWindow):
         TokenVerificationWindow.setObjectName("TokenVerificationWindow")
         TokenVerificationWindow.resize(480, 400)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/image/image/LOGO.jpeg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        TokenVerificationWindow.setWindowIcon(icon)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)

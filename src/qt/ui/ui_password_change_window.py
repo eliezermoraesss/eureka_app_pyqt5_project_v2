@@ -15,6 +15,9 @@ class Ui_PasswordChangeWindow(object):
     def setupUi(self, PasswordChangeWindow):
         PasswordChangeWindow.setObjectName("PasswordChangeWindow")
         PasswordChangeWindow.resize(480, 400)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/image/image/LOGO.jpeg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        PasswordChangeWindow.setWindowIcon(icon)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)

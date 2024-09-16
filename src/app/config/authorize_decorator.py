@@ -6,7 +6,7 @@ from PyQt5 import QtWidgets
 from src.app.utils.load_session import load_session
 
 
-def authorize(allowed_roles):
+def authorize(allowed_roles, self):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -22,7 +22,7 @@ def authorize(allowed_roles):
                     return func(*args, **kwargs)  # User has the required role, proceed
                 else:
                     logging.warning(f"Access denied for role: {user_role}")
-                    QtWidgets.QMessageBox.warning(None, "Eureka® - Acesso negado", "Desculpe, você não tem permissão para acessar este recurso.")
+                    QtWidgets.QMessageBox.warning(self, "Eureka® - Acesso negado", "Desculpe, você não tem permissão para acessar este recurso.")
                     return None  # Access denied, do nothing
             except Exception as e:
                 logging.error(f"Error during authorization: {e}")

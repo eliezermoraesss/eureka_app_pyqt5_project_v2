@@ -27,12 +27,15 @@ class LoginWindow(QtWidgets.QMainWindow):
         self.ui.btn_forget_password.clicked.connect(self.forgot_password)
         self.ui.btn_close.clicked.connect(self.close)
 
+        self.ui.user_field.returnPressed.connect(self.login)
+        self.ui.password_field.returnPressed.connect(self.login)
+
     def login(self):
         username = self.ui.user_field.text()
         password = self.ui.password_field.text()
 
         if not username or not password:
-            QtWidgets.QMessageBox.warning(None, 'Atenção', 'Todos os campos são obrigatórios')
+            QtWidgets.QMessageBox.warning(self, 'Atenção', 'Todos os campos são obrigatórios')
             return
 
         user = self.auth_controller.get_user_by_username(username)
@@ -48,7 +51,7 @@ class LoginWindow(QtWidgets.QMainWindow):
             self.start_home_window()
             self.close()
         else:
-            QtWidgets.QMessageBox.warning(None, 'Atenção', 'Credenciais inválidas')
+            QtWidgets.QMessageBox.warning(self, 'Atenção', 'Credenciais inválidas')
 
     def forgot_password(self):
         self.email_recovery_window = EmailRecoveryWindow(self.auth_controller, self)
