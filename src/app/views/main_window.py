@@ -32,7 +32,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setup_connections()
 
     def setup_connections(self):
-        @authorize(['admin', 'Engenharia', 'PCP'], self)
+        @authorize(['admin', 'Diretoria'], self)
         def execute_dashboard_model(checked=False):
             process = QProcess()
             script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'dashboard_model.pyw'))
