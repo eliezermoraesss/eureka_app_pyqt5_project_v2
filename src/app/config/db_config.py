@@ -1,5 +1,5 @@
 import pyodbc
-from src.app.utils.db_mssql import setup_mssql
+from app.utils.db_mssql import setup_mssql
 
 
 class DbConnection:

@@ -3,7 +3,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import logging
 
-from src.app.config.email_config import read_email_params
+from app.config.email_config import read_email_params
 
 logging.basicConfig(level=logging.DEBUG)
 

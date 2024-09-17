@@ -154,7 +154,7 @@ class Ui_LoginWindow(object):
                 self.user_field.setMaximumSize(QtCore.QSize(221, 41))
                 font = QtGui.QFont()
                 font.setFamily("Segoe UI")
-                font.setPointSize(-1)
+                font.setPointSize(1)
                 self.user_field.setFont(font)
                 self.user_field.setFocusPolicy(QtCore.Qt.StrongFocus)
                 self.user_field.setInputMask("")
@@ -168,7 +168,7 @@ class Ui_LoginWindow(object):
                 self.password_field.setMaximumSize(QtCore.QSize(221, 41))
                 font = QtGui.QFont()
                 font.setFamily("Segoe UI")
-                font.setPointSize(-1)
+                font.setPointSize(1)
                 self.password_field.setFont(font)
                 self.password_field.setFocusPolicy(QtCore.Qt.StrongFocus)
                 self.password_field.setInputMask("")
@@ -182,7 +182,7 @@ class Ui_LoginWindow(object):
                 self.btn_login.setMinimumSize(QtCore.QSize(221, 41))
                 font = QtGui.QFont()
                 font.setFamily("Segoe UI")
-                font.setPointSize(-1)
+                font.setPointSize(1)
                 self.btn_login.setFont(font)
                 self.btn_login.setStyleSheet("QPushButton:hover {\n"
                                              "    background-color: #399918;\n"
@@ -199,7 +199,7 @@ class Ui_LoginWindow(object):
                 self.btn_register.setMinimumSize(QtCore.QSize(221, 41))
                 font = QtGui.QFont()
                 font.setFamily("Segoe UI")
-                font.setPointSize(-1)
+                font.setPointSize(1)
                 self.btn_register.setFont(font)
                 self.btn_register.setStyleSheet("QPushButton:hover {\n"
                                                 "    background-color: #00b4d8;\n"
@@ -215,7 +215,7 @@ class Ui_LoginWindow(object):
                 self.btn_forget_password.setMinimumSize(QtCore.QSize(221, 41))
                 font = QtGui.QFont()
                 font.setFamily("Segoe UI")
-                font.setPointSize(-1)
+                font.setPointSize(1)
                 self.btn_forget_password.setFont(font)
                 self.btn_forget_password.setStyleSheet("QPushButton:hover {\n"
                                                        "    background-color: #ff6700;\n"
@@ -230,7 +230,7 @@ class Ui_LoginWindow(object):
                 self.user_label.setGeometry(QtCore.QRect(200, 130, 47, 13))
                 font = QtGui.QFont()
                 font.setFamily("Segoe UI")
-                font.setPointSize(-1)
+                font.setPointSize(1)
                 font.setBold(True)
                 font.setWeight(75)
                 self.user_label.setFont(font)
@@ -239,7 +239,7 @@ class Ui_LoginWindow(object):
                 self.password_label.setGeometry(QtCore.QRect(200, 210, 51, 16))
                 font = QtGui.QFont()
                 font.setFamily("Segoe UI")
-                font.setPointSize(-1)
+                font.setPointSize(1)
                 font.setBold(True)
                 font.setWeight(75)
                 self.password_label.setFont(font)
@@ -266,7 +266,7 @@ class Ui_LoginWindow(object):
                 self.window_title_label.setGeometry(QtCore.QRect(110, 10, 401, 61))
                 font = QtGui.QFont()
                 font.setFamily("Segoe UI")
-                font.setPointSize(-1)
+                font.setPointSize(1)
                 font.setBold(True)
                 font.setWeight(75)
                 self.window_title_label.setFont(font)
@@ -292,4 +292,4 @@ class Ui_LoginWindow(object):
                 self.user_label.setText(_translate("LoginWindow", "Usuário"))
                 self.password_label.setText(_translate("LoginWindow", "Senha"))
                 self.window_title_label.setText(_translate("LoginWindow", "Seja bem-vindo(a) ao Eureka®"))
-from src.qt.ui import resource_rc
+from qt.ui import resource_rc

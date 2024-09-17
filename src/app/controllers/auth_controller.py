@@ -5,8 +5,8 @@ import bcrypt
 import random
 from datetime import datetime, timedelta
 from PyQt5.QtCore import QSettings
-from src.app.config.db_config import DbConnection
-from src.app.utils.email_service import send_email
+from app.config.db_config import DbConnection
+from app.utils.email_service import send_email
 
 
 class AuthController:

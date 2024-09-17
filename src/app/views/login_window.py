@@ -1,13 +1,15 @@
 import os
 import sys
+# Caminho absoluto para o diretório onde o módulo src está localizado
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, QProcess
 
-from src.app.controllers.auth_controller import AuthController
-from src.app.views.email_recovery_window import EmailRecoveryWindow
-from src.app.views.register_window import RegisterWindow
-from src.qt.ui.ui_login_screen import Ui_LoginWindow
+from app.controllers.auth_controller import AuthController
+from app.views.email_recovery_window import EmailRecoveryWindow
+from app.views.register_window import RegisterWindow
+from qt.ui.ui_login_screen import Ui_LoginWindow
 
 
 class LoginWindow(QtWidgets.QMainWindow):

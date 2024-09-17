@@ -79,6 +79,7 @@
     <file>icon/arrow.png</file>
   </qresource>
   <qresource prefix="image">
+    <file>image/user_photo.png</file>
     <file>image/LOGO.jpeg</file>
     <file>image/logo_enaplic_50.png</file>
     <file>image/logo_enaplic_50_anos.png</file>

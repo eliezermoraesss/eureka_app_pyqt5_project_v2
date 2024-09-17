@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 
-from src.qt.ui.ui_password_change_window import Ui_PasswordChangeWindow
+from qt.ui.ui_password_change_window import Ui_PasswordChangeWindow
 
 
 class ResetPasswordWindow(QtWidgets.QDialog):
@@ -17,6 +17,8 @@ class ResetPasswordWindow(QtWidgets.QDialog):
         self.setFixedSize(480, 400)
         self.ui.btn_change_password.clicked.connect(self.reset_password)
         self.ui.btn_close.clicked.connect(self.close)
+        self.ui.password_field.returnPressed.connect(self.reset_password)
+        self.ui.password_confirm_field.returnPressed.connect(self.reset_password)
 
     def reset_password(self):
         new_password = self.ui.password_field.text()

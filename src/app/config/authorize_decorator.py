@@ -1,9 +1,14 @@
 import logging
+import os
+import sys
 from functools import wraps
+
+# Caminho absoluto para o diretório onde o módulo src está localizado
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from PyQt5 import QtWidgets
 
-from src.app.utils.load_session import load_session
+from app.utils.load_session import load_session
 
 
 def authorize(allowed_roles, self):
@@ -22,11 +27,14 @@ def authorize(allowed_roles, self):
                     return func(*args, **kwargs)  # User has the required role, proceed
                 else:
                     logging.warning(f"Access denied for role: {user_role}")
-                    QtWidgets.QMessageBox.warning(self, "Eureka® - Acesso negado", "Desculpe, você não tem permissão para acessar este recurso.")
+                    QtWidgets.QMessageBox.warning(self, "Eureka® - Acesso negado",
+                                                  "Desculpe, você não tem permissão para acessar este recurso.")
                     return None  # Access denied, do nothing
             except Exception as e:
                 logging.error(f"Error during authorization: {e}")
                 QtWidgets.QMessageBox.critical(None, "Error", f"An error occurred: {e}")
                 return None
+
         return wrapper
+
     return decorator

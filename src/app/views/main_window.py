@@ -1,12 +1,15 @@
 import os
 import sys
 
+# Caminho absoluto para o diretório onde o módulo src está localizado
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QProcess, Qt
 
-from src.app.config.authorize_decorator import authorize
-from src.app.utils.load_session import load_session
-from src.qt.ui.ui_home_window import Ui_HomeWindow
+from app.config.authorize_decorator import authorize
+from app.utils.load_session import load_session
+from qt.ui.ui_home_window import Ui_HomeWindow
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -62,7 +65,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         def execute_logout():
             process = QProcess()
-            script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'app', 'main.pyw'))
+            script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'main.py'))
             process.startDetached("python", [script_path])
             self.close()
 

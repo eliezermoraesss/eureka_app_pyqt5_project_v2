@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets
 
-from src.app.views.code_verification_window import CodeVerificationWindow
-from src.qt.ui.ui_email_recovery_window import Ui_EmailRecoveryWindow
+from app.views.code_verification_window import CodeVerificationWindow
+from qt.ui.ui_email_recovery_window import Ui_EmailRecoveryWindow
 
 
 class EmailRecoveryWindow(QtWidgets.QDialog):
@@ -16,6 +16,8 @@ class EmailRecoveryWindow(QtWidgets.QDialog):
         # Connect buttons to methods
         self.ui.btn_send_email.clicked.connect(self.send_email)
         self.ui.btn_close.clicked.connect(self.close)
+        
+        self.ui.email_field.returnPressed.connect(self.send_email)
 
     def send_email(self):
         email = self.ui.email_field.text()
