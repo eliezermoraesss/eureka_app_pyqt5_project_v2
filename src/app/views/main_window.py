@@ -65,7 +65,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         def execute_logout():
             process = QProcess()
-            script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'main.py'))
+            script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'main.pyw'))
             process.startDetached("python", [script_path])
             self.close()
 

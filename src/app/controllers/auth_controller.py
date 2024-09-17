@@ -59,7 +59,8 @@ class AuthController:
         user = self.get_user_by_email(email)
         if user:
             reset_code = str(random.randint(100000, 999999))
-            expiration_time = datetime.now() + timedelta(minutes=1)
+            minutes = 5
+            expiration_time = datetime.now() + timedelta(minutes=minutes)
             cursor = self.db_connection.conn.cursor()
             cursor.execute('''INSERT INTO enaplic_management.dbo.eureka_password_reset 
                               (user_id, reset_code, expiration_time)
@@ -79,8 +80,7 @@ class AuthController:
                     <p> 🤖 Prezado(a) {user[1].split(' ')[0]},</p>
                     <p>Recebemos uma solicitação para redefinir a senha associada ao seu acesso. Utilize o código abaixo para concluir o processo de recuperação de senha:</p>
                     <h2 style="color: #333333; background-color: #f2f2f2; padding: 10px; display: inline-block; border-radius: 5px;">{reset_code}</h2>
-                    <p>Este código é válido por 1 minuto. Caso o tempo expire, será necessário solicitar um novo código.</p>
-                    <p>Se você não solicitou a redefinição de senha, por favor, ignore este e-mail.</p>
+                    <p>Este código é válido por {minutes} minuto. Caso o tempo expire, será necessário solicitar um novo código.</p>
                     <p>Atenciosamente,</p>
                     <p><strong>🦾🤖 Eureka® BOT</strong></p>
                     <p>👨‍💻<i> Este e-mail foi gerado automaticamente e não há necessidade de respondê-lo.</i></p>
