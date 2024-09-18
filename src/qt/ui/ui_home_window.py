@@ -139,9 +139,9 @@ class Ui_HomeWindow(object):
         self.welcome_label = QtWidgets.QLabel(self.widget)
         self.welcome_label.setGeometry(QtCore.QRect(60, 100, 821, 61))
         font = QtGui.QFont()
-        font.setFamily("Segoe UI")
+        font.setFamily("Segoe UI Semibold")
         font.setPointSize(1)
-        font.setBold(True)
+        font.setBold(False)
         font.setWeight(75)
         self.welcome_label.setFont(font)
         self.welcome_label.setStyleSheet("QLabel {\n"
@@ -163,9 +163,9 @@ class Ui_HomeWindow(object):
         self.user_label = QtWidgets.QLabel(self.widget)
         self.user_label.setGeometry(QtCore.QRect(60, 30, 441, 61))
         font = QtGui.QFont()
-        font.setFamily("Segoe UI")
+        font.setFamily("Segoe UI Semibold")
         font.setPointSize(1)
-        font.setBold(True)
+        font.setBold(False)
         font.setWeight(75)
         self.user_label.setFont(font)
         self.user_label.setStyleSheet("QLabel {\n"
