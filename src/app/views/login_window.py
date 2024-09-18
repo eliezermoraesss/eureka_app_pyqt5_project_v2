@@ -70,6 +70,7 @@ class LoginWindow(QtWidgets.QMainWindow):
         process.startDetached("python", [script_path])
 
 
+
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     auth_controller = AuthController()
