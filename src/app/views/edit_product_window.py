@@ -91,6 +91,15 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
         self.ui.grupo_field.textChanged.connect(self.on_grupo_field_changed)
         self.ui.grupo_field.textChanged.connect(
             lambda: self.validate_required_fields("grupo", self.ui.grupo_field.text().upper()))
+        
+        self.ui.descricao_field.returnPressed.connect(self.update_product)
+        self.ui.desc_comp_field.returnPressed.connect(self.update_product)
+        self.ui.tipo_field.returnPressed.connect(self.update_product)
+        self.ui.um_field.returnPressed.connect(self.update_product)
+        self.ui.armazem_field.returnPressed.connect(self.update_product)
+        self.ui.cc_field.returnPressed.connect(self.update_product)
+        self.ui.grupo_field.returnPressed.connect(self.update_product)
+        self.ui.endereco_field.returnPressed.connect(self.update_product)
 
     def validate_required_fields(self, entity, field):
         if field != '':
@@ -124,7 +133,7 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
     def verify_blank_required_fields(self):
         self.required_field_is_blank = False
         for field_name, field_object in self.required_fields.items():
-            if not field_object.text():
+            if field_name != 'centro_custo' and not field_object.text():
                 QMessageBox.information(self, 'Eureka®', f"O campo {self.entity_names[field_name]} é obrigatório e não "
                                                          f"pode estar vazio.")
                 self.required_field_is_blank = True
