@@ -26,7 +26,7 @@ class Ui_HomeWindow(object):
         self.centralwidget.setObjectName("centralwidget")
         self.widget = QtWidgets.QWidget(self.centralwidget)
         self.widget.setGeometry(QtCore.QRect(230, 0, 1200, 800))
-        font = QtGui.QFont()
+        font = QtGui.QFont(font)
         font.setFamily("Segoe UI Light")
         self.widget.setFont(font)
         self.widget.setStyleSheet("* {\n"
@@ -37,7 +37,6 @@ class Ui_HomeWindow(object):
 "\n"
 "QPushButton {\n"
 "    background-color: #fbba72;\n"
-"    border: 2px solid #333;\n"
 "    border-radius: 20px;\n"
 "    font-size: 22px;\n"
 "    font-weight: regular;\n"
@@ -45,7 +44,7 @@ class Ui_HomeWindow(object):
 "\n"
 "QPushButton:hover {\n"
 "    background-color: #a4161a;\n"
-"    border: none;\n"
+"    border: 2px solid #333;\n"
 "    color: #EEEEEE;\n"
 "    font-weight: bold;\n"
 "      font-size: 23px;\n"
@@ -138,7 +137,7 @@ class Ui_HomeWindow(object):
         self.btn_qps.setCheckable(False)
         self.btn_qps.setObjectName("btn_qps")
         self.welcome_label = QtWidgets.QLabel(self.widget)
-        self.welcome_label.setGeometry(QtCore.QRect(30, 60, 441, 61))
+        self.welcome_label.setGeometry(QtCore.QRect(60, 100, 821, 61))
         font = QtGui.QFont()
         font.setFamily("Segoe UI")
         font.setPointSize(1)
@@ -148,13 +147,13 @@ class Ui_HomeWindow(object):
         self.welcome_label.setStyleSheet("QLabel {\n"
 "    background-color: transparent;\n"
 "    color: #a4161a;\n"
-"    font-size: 28px;\n"
-"    font-weight: bold;\n"
+"    font-size: 34px;\n"
+"    font-weight: regular;\n"
 "    font-style: \"Segoe UI\";\n"
 "}")
         self.welcome_label.setObjectName("welcome_label")
         self.frame = QtWidgets.QFrame(self.widget)
-        self.frame.setGeometry(QtCore.QRect(20, 130, 1050, 2))
+        self.frame.setGeometry(QtCore.QRect(20, 200, 1050, 2))
         self.frame.setStyleSheet("QFrame {\n"
 "    background-color: #a4161a;\n"
 "}")
@@ -162,7 +161,7 @@ class Ui_HomeWindow(object):
         self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame.setObjectName("frame")
         self.user_label = QtWidgets.QLabel(self.widget)
-        self.user_label.setGeometry(QtCore.QRect(30, 10, 441, 61))
+        self.user_label.setGeometry(QtCore.QRect(60, 30, 441, 61))
         font = QtGui.QFont()
         font.setFamily("Segoe UI")
         font.setPointSize(1)
@@ -172,8 +171,8 @@ class Ui_HomeWindow(object):
         self.user_label.setStyleSheet("QLabel {\n"
 "    background-color: transparent;\n"
 "    color: #a4161a;\n"
-"    font-size: 28px;\n"
-"    font-weight: bold;\n"
+"    font-size: 34px;\n"
+"    font-weight: regular;\n"
 "    font-style: \"Segoe UI\";\n"
 "}")
         self.user_label.setObjectName("user_label")
@@ -183,6 +182,14 @@ class Ui_HomeWindow(object):
         self.logo_enaplic.setPixmap(QtGui.QPixmap(":/image/image/LOGO.jpeg"))
         self.logo_enaplic.setScaledContents(True)
         self.logo_enaplic.setObjectName("logo_enaplic")
+        self.frame_2 = QtWidgets.QFrame(self.widget)
+        self.frame_2.setGeometry(QtCore.QRect(20, 650, 1050, 2))
+        self.frame_2.setStyleSheet("QFrame {\n"
+"    background-color: #a4161a;\n"
+"}")
+        self.frame_2.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.frame_2.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.frame_2.setObjectName("frame_2")
         self.btn_qps.raise_()
         self.btn_comercial.raise_()
         self.btn_compras.raise_()
@@ -193,6 +200,7 @@ class Ui_HomeWindow(object):
         self.frame.raise_()
         self.user_label.raise_()
         self.logo_enaplic.raise_()
+        self.frame_2.raise_()
         self.sidebar_enaplic = QtWidgets.QWidget(self.centralwidget)
         self.sidebar_enaplic.setGeometry(QtCore.QRect(-10, 0, 241, 801))
         self.sidebar_enaplic.setStyleSheet("* {\n"
@@ -203,21 +211,22 @@ class Ui_HomeWindow(object):
         self.btn_logout.setGeometry(QtCore.QRect(70, 730, 101, 51))
         self.btn_logout.setMinimumSize(QtCore.QSize(0, 41))
         font = QtGui.QFont()
+        font.setFamily("Segoe UI")
         font.setPointSize(1)
         self.btn_logout.setFont(font)
         self.btn_logout.setStyleSheet("QPushButton {\n"
 "    background-color: #fbba72;\n"
-"    border: 2px solid #333;\n"
 "    border-radius: 8px;\n"
 "    font-size: 14px;\n"
 "    font-weight: regular;\n"
 "}\n"
 "\n"
 "QPushButton:hover {\n"
-"    background-color: #EEEEEE;\n"
-"    border: none;\n"
-"    font-weight: regular;\n"
-"      font-size: 14px;\n"
+"    background-color: #a4161a;\n"
+"    border: 2px solid #333;\n"
+"    color: #EEEEEE;\n"
+"    font-weight: bold;\n"
+"      font-size: 16px;\n"
 "}\n"
 "")
         icon7 = QtGui.QIcon()
@@ -252,7 +261,7 @@ class Ui_HomeWindow(object):
         self.btn_compras.setText(_translate("HomeWindow", " Compras"))
         self.btn_comercial.setText(_translate("HomeWindow", " Comercial"))
         self.btn_qps.setText(_translate("HomeWindow", " Gestão QPS"))
-        self.welcome_label.setText(_translate("HomeWindow", "Seja bem-vindo(a) ao Eureka®!"))
+        self.welcome_label.setText(_translate("HomeWindow", "Bem-vindo(a) ao Eureka®!"))
         self.user_label.setText(_translate("HomeWindow", "Olá {user}"))
         self.btn_logout.setText(_translate("HomeWindow", "Sair"))
 from qt.ui import resource_rc

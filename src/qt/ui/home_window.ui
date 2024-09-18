@@ -49,7 +49,6 @@
 
 QPushButton {
     background-color: #fbba72;
-	border: 2px solid #333;
     border-radius: 20px;
     font-size: 22px;
     font-weight: regular;
@@ -57,7 +56,7 @@ QPushButton {
 
 QPushButton:hover {
     background-color: #a4161a;
-	border: none;
+	border: 2px solid #333;
     color: #EEEEEE;
 	font-weight: bold;
   	font-size: 23px;
@@ -86,7 +85,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -127,7 +125,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -165,7 +162,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -203,7 +199,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -241,7 +236,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -279,7 +273,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -306,15 +299,14 @@ QPushButton:pressed {
     <widget class="QLabel" name="welcome_label">
      <property name="geometry">
       <rect>
-       <x>30</x>
-       <y>60</y>
-       <width>441</width>
+       <x>50</x>
+       <y>100</y>
+       <width>821</width>
        <height>61</height>
       </rect>
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
        <weight>75</weight>
        <bold>true</bold>
@@ -324,20 +316,20 @@ QPushButton:pressed {
       <string notr="true">QLabel {
 	background-color: transparent;
     color: #a4161a;
-    font-size: 28px;
+    font-size: 34px;
     font-weight: bold;
 	font-style: &quot;Segoe UI&quot;;
 }</string>
      </property>
      <property name="text">
-      <string>Seja bem-vindo(a) ao Eureka®!</string>
+      <string>Bem-vindo(a) ao Eureka®!</string>
      </property>
     </widget>
     <widget class="QFrame" name="frame">
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>130</y>
+       <y>200</y>
        <width>1050</width>
        <height>2</height>
       </rect>
@@ -357,15 +349,14 @@ QPushButton:pressed {
     <widget class="QLabel" name="user_label">
      <property name="geometry">
       <rect>
-       <x>30</x>
-       <y>10</y>
-       <width>441</width>
+       <x>50</x>
+       <y>30</y>
+       <width>751</width>
        <height>61</height>
       </rect>
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
        <weight>75</weight>
        <bold>true</bold>
@@ -375,7 +366,7 @@ QPushButton:pressed {
       <string notr="true">QLabel {
 	background-color: transparent;
     color: #a4161a;
-    font-size: 28px;
+    font-size: 36px;
     font-weight: bold;
 	font-style: &quot;Segoe UI&quot;;
 }</string>
@@ -403,6 +394,27 @@ QPushButton:pressed {
       <bool>true</bool>
      </property>
     </widget>
+    <widget class="QFrame" name="frame_2">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>650</y>
+       <width>1050</width>
+       <height>2</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QFrame {
+	background-color: #a4161a;
+}</string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+    </widget>
     <zorder>btn_qps</zorder>
     <zorder>btn_comercial</zorder>
     <zorder>btn_compras</zorder>
@@ -413,6 +425,7 @@ QPushButton:pressed {
     <zorder>frame</zorder>
     <zorder>user_label</zorder>
     <zorder>logo_enaplic</zorder>
+    <zorder>frame_2</zorder>
    </widget>
    <widget class="QWidget" name="sidebar_enaplic" native="true">
     <property name="geometry">
@@ -445,21 +458,21 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgb
      </property>
      <property name="font">
       <font>
+       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
      <property name="styleSheet">
       <string notr="true">QPushButton {
     background-color: #fbba72;
-	border: 2px solid #333;
     border-radius: 8px;
     font-size: 14px;
     font-weight: regular;
 }
 
 QPushButton:hover {
-    background-color: #EEEEEE;
-    border: none;
+    background-color: #a4161a;
+    border: 2px solid #333;
 	font-weight: regular;
   	font-size: 14px;
 }

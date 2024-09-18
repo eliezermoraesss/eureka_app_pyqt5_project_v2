@@ -21,19 +21,23 @@ class RegisterWindow(QtWidgets.QMainWindow):
         self.ui.btn_save.clicked.connect(self.register)
         self.ui.btn_close.clicked.connect(self.close)
 
+        self.ui.name_field.returnPressed.connect(self.register)
+        self.ui.user_field.returnPressed.connect(self.register)
+        self.ui.email_field.returnPressed.connect(self.register)
+        self.ui.password_field.returnPressed.connect(self.register)
+
     def register(self):
         full_name = self.ui.name_field.text()
         username = self.ui.user_field.text()
         email = self.ui.email_field.text()
         password = self.ui.password_field.text()
-        confirm_password = self.ui.password_field.text()
         role = self.ui.area_combobox_field.currentText()
 
         regex = QRegExp(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b')
         validator = QRegExpValidator(regex)
         self.ui.email_field.setValidator(validator)
 
-        if not full_name or not username or not email or not password or not confirm_password:
+        if not full_name or not username or not email or not password or not role:
             QtWidgets.QMessageBox.warning(self, 'Atenção', 'Todos os campos são obrigatórios')
             return
 
@@ -41,8 +45,8 @@ class RegisterWindow(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.warning(self, 'Atenção', 'Email inválido')
             return
 
-        if password != confirm_password:
-            QtWidgets.QMessageBox.warning(self, 'Atenção', 'As senhas não coincidem')
+        if 'enaplic.com.br' not in self.ui.email_field.text():
+            QtWidgets.QMessageBox.warning(self, 'Atenção', 'Email inválido.\nPor favor utilizar seu e-mail corporativo.')
             return
 
         success, message = self.auth_controller.create_user(full_name, username, email, password, role)
