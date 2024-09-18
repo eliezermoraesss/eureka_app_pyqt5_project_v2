@@ -25,7 +25,7 @@ class MainWindow(QtWidgets.QMainWindow):
         primeiro_nome = user_data["full_name"].split(' ')[0]
         id_title = self.home_window.user_label.text()
         self.setWindowTitle("Eureka® Home")
-        self.setWindowFlags(Qt.WindowStaysOnTopHint)
+        # self.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.home_window.user_label.setText(id_title.replace("{user}", f"{primeiro_nome},"))
         # self.setWindowFlags(Qt.FramelessWindowHint)  # Ocultar moldura padrão da janela
         self.setFixedSize(1319, 797)

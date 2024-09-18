@@ -1,5 +1,6 @@
 import os
 import sys
+
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -7,6 +8,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, QProcess
 
 from app.controllers.auth_controller import AuthController
+from app.views.main_window import MainWindow
 from app.views.email_recovery_window import EmailRecoveryWindow
 from app.views.register_window import RegisterWindow
 from qt.ui.ui_login_screen import Ui_LoginWindow
@@ -64,11 +66,8 @@ class LoginWindow(QtWidgets.QMainWindow):
         self.register_window.show()
 
     def start_home_window(self):
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        process = QProcess()
-        script_path = os.path.abspath(os.path.join(base_dir, 'main_window.py'))
-        process.startDetached("python", [script_path])
-
+        self.home_window = MainWindow()
+        self.home_window.show()
 
 
 if __name__ == "__main__":
