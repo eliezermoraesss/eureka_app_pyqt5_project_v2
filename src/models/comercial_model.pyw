@@ -132,7 +132,7 @@ def query_consulta(codigo):
         SB1010 AS prod ON listMP."COMPONENTE" = prod.B1_COD
     WHERE 
         prod.B1_TIPO = 'MP'
-        AND prod.B1_LOCPAD IN ('01','03', '11', '12', '97')
+        AND prod.B1_LOCPAD IN ('01', '03', '11', '12', '97')
         AND prod.D_E_L_E_T_ <> '*'
     GROUP BY 
         "COMPONENTE",
