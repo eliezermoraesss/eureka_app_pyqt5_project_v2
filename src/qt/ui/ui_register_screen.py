@@ -159,7 +159,7 @@ class Ui_RegisterWindow(object):
         self.email_field.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.email_field.setInputMask("")
         self.email_field.setText("")
-        self.email_field.setMaxLength(30)
+        self.email_field.setMaxLength(50)
         self.email_field.setEchoMode(QtWidgets.QLineEdit.Normal)
         self.email_field.setClearButtonEnabled(True)
         self.email_field.setObjectName("email_field")
