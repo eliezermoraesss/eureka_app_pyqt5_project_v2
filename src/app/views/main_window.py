@@ -25,9 +25,7 @@ class MainWindow(QtWidgets.QMainWindow):
         primeiro_nome = user_data["full_name"].split(' ')[0]
         id_title = self.home_window.user_label.text()
         self.setWindowTitle("Eureka® Home")
-        # self.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.home_window.user_label.setText(id_title.replace("{user}", f"{primeiro_nome},"))
-        # self.setWindowFlags(Qt.FramelessWindowHint)  # Ocultar moldura padrão da janela
         self.setFixedSize(1319, 797)
         self.setup_connections()
 
@@ -63,19 +61,13 @@ class MainWindow(QtWidgets.QMainWindow):
             script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'qps_model.pyw'))
             process.startDetached("python", [script_path])
 
-        def execute_logout():
-            process = QProcess()
-            script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'main.pyw'))
-            process.startDetached("python", [script_path])
-            self.close()
-
         self.home_window.btn_dashboard.clicked.connect(execute_dashboard_model)
         self.home_window.btn_engenharia.clicked.connect(execute_engenharia_model)
         self.home_window.btn_pcp.clicked.connect(execute_pcp_model)
         self.home_window.btn_compras.clicked.connect(execute_compras_model)
         self.home_window.btn_comercial.clicked.connect(execute_comercial_model)
         self.home_window.btn_qps.clicked.connect(execute_qps_model)
-        self.home_window.btn_logout.clicked.connect(execute_logout)
+        self.home_window.btn_logout.clicked.connect(self.close)
 
 
 if __name__ == "__main__":
