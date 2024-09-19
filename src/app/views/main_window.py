@@ -12,6 +12,7 @@ from models.engenharia_model import EngenhariaApp
 from models.pcp_model import PcpApp
 from models.compras_model import ComprasApp
 from models.comercial_model import ComercialApp
+from models.qps_model import QpClosedApp
 from app.utils.load_session import load_session
 from qt.ui.ui_home_window import Ui_HomeWindow
 
@@ -57,9 +58,8 @@ class MainWindow(QtWidgets.QMainWindow):
             compras_window.showMaximized()
 
         def execute_qps_model():
-            process = QProcess()
-            script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'qps_model.pyw'))
-            process.startDetached("python", [script_path])
+            qps_window = QpClosedApp()
+            qps_window.showMaximized()
 
         self.home_window.btn_dashboard.clicked.connect(execute_dashboard_model)
         self.home_window.btn_engenharia.clicked.connect(execute_engenharia_model)

@@ -47,6 +47,8 @@ class QpClosedApp(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.username, self.password, self.database, self.server = setup_mssql()
+        self.driver = '{SQL Server}'
 
         self.setWindowTitle("Eureka® QPS")
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
@@ -471,7 +473,7 @@ class QpClosedApp(QWidget):
             FROM ({query.replace("ORDER BY cod_qp DESC", "")}) AS results
         """
 
-        conn_str = f'DRIVER={driver};SERVER={server};UID={username};PWD={password}'
+        conn_str = f'DRIVER={self.driver};SERVER={self.server};UID={self.username};PWD={self.password}'
         self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
 
         try:
@@ -574,7 +576,7 @@ class QpClosedApp(QWidget):
             """)
 
             try:
-                conn_str = f'DRIVER={driver};SERVER={server};UID={username};PWD={password}'
+                conn_str = f'DRIVER={self.driver};SERVER={self.server};UID={self.username};PWD={self.password}'
                 self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
 
                 with self.engine.begin() as connection:
@@ -615,7 +617,7 @@ class QpClosedApp(QWidget):
                         """)
 
                         try:
-                            conn_str = f'DRIVER={driver};SERVER={server};UID={username};PWD={password}'
+                            conn_str = f'DRIVER={self.driver};SERVER={self.server};UID={self.username};PWD={self.password}'
                             self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
 
                             with self.engine.begin() as connection:
