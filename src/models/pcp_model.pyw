@@ -22,48 +22,14 @@ from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.utils import exibir_mensagem, abrir_desenho, abrir_nova_janela, exportar_excel, copiar_linha
 
 
-def validar_campos(codigo_produto, numero_qp, numero_op):
-
-    if len(codigo_produto) != 13 and not codigo_produto == '':
-        exibir_mensagem("ATENÇÃO!",
-                             "Produto não encontrado!\n\nCorrija e tente "
-                             f"novamente.\n\nツ\n\nSMARTPLIC®",
-                             "info")
-        return True
-
-    if len(numero_op) != 6 and not numero_op == '':
-        exibir_mensagem("ATENÇÃO!",
-                             "Ordem de Produção não encontrada!\n\nCorrija e tente "
-                             f"novamente.\n\nツ\n\nSMARTPLIC®",
-                             "info")
-        return True
-
-    if len(numero_qp.zfill(6)) != 6 and not numero_qp == '':
-        exibir_mensagem("ATENÇÃO!",
-                             "QP não encontrada!\n\nCorrija e tente "
-                             f"novamente.\n\nツ\n\nSMARTPLIC®",
-                             "info")
-        return True
-
-
-def numero_linhas_consulta(query_consulta):
-
-    order_by_a_remover = "ORDER BY op.R_E_C_N_O_ DESC;"
-    query_sem_order_by = query_consulta.replace(order_by_a_remover, "")
-
-    query = f"""
-                SELECT 
-                    COUNT(*) AS total_records
-                FROM ({query_sem_order_by}) AS combined_results;
-            """
-    return query
-
-
 class PcpApp(QWidget):
     guia_fechada = pyqtSignal()
 
     def __init__(self):
         super().__init__()
+
+        self.username, self.password, self.database, self.server = setup_mssql()
+        self.driver = '{SQL Server}'
 
         self.setWindowTitle("Eureka® PCP")
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
@@ -453,6 +419,41 @@ class PcpApp(QWidget):
         layout.addLayout(self.layout_footer_label)
         self.setLayout(layout)
 
+    def validar_campos(self, codigo_produto, numero_qp, numero_op):
+
+        if len(codigo_produto) != 13 and not codigo_produto == '':
+            exibir_mensagem("ATENÇÃO!",
+                            "Produto não encontrado!\n\nCorrija e tente "
+                            f"novamente.\n\nツ\n\nSMARTPLIC®",
+                            "info")
+            return True
+
+        if len(numero_op) != 6 and not numero_op == '':
+            exibir_mensagem("ATENÇÃO!",
+                            "Ordem de Produção não encontrada!\n\nCorrija e tente "
+                            f"novamente.\n\nツ\n\nSMARTPLIC®",
+                            "info")
+            return True
+
+        if len(numero_qp.zfill(6)) != 6 and not numero_qp == '':
+            exibir_mensagem("ATENÇÃO!",
+                            "QP não encontrada!\n\nCorrija e tente "
+                            f"novamente.\n\nツ\n\nSMARTPLIC®",
+                            "info")
+            return True
+
+    def numero_linhas_consulta(self, query_consulta):
+
+        order_by_a_remover = "ORDER BY op.R_E_C_N_O_ DESC;"
+        query_sem_order_by = query_consulta.replace(order_by_a_remover, "")
+
+        query = f"""
+                    SELECT 
+                        COUNT(*) AS total_records
+                    FROM ({query_sem_order_by}) AS combined_results;
+                """
+        return query
+
     def fechar_guia(self, index):
         if index >= 0:
             try:
@@ -624,7 +625,7 @@ class PcpApp(QWidget):
         contem_descricao = self.campo_contem_descricao_prod.text().upper().strip()
         observacao = self.campo_observacao.text().upper().strip()
 
-        if validar_campos(codigo_produto, numero_qp, numero_op):
+        if self.validar_campos(codigo_produto, numero_qp, numero_op):
             self.btn_consultar.setEnabled(True)
             return
 
@@ -656,17 +657,17 @@ class PcpApp(QWidget):
                 C2_AGLUT AS "Aglutinada?",
                 users.USR_NOME AS "Aberto por:" 
             FROM 
-                {database}.dbo.SC2010 op
+                {self.database}.dbo.SC2010 op
             LEFT JOIN 
                 SB1010 prod ON C2_PRODUTO = B1_COD
             LEFT JOIN 
-                {database}.dbo.SYS_USR users
+                {self.database}.dbo.SYS_USR users
             ON 
                 users.USR_CNLOGON = op.C2_XMAQUIN 
                 AND users.D_E_L_E_T_ <> '*'
                 AND users.USR_ID = (
                     SELECT MAX(users.USR_ID) 
-                    FROM {database}.dbo.SYS_USR users
+                    FROM {self.database}.dbo.SYS_USR users
                     WHERE users.USR_CNLOGON = op.C2_XMAQUIN 
                 AND users.D_E_L_E_T_ <> '*')
             WHERE 
@@ -701,12 +702,12 @@ class PcpApp(QWidget):
         query_consulta_op = self.query_consulta_ordem_producao()
         if query_consulta_op is None:
             return
-        query_contagem_linhas = numero_linhas_consulta(query_consulta_op)
+        query_contagem_linhas = self.numero_linhas_consulta(query_consulta_op)
 
         self.label_line_number.hide()
         self.controle_campos_formulario(False)
 
-        conn_str = f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+        conn_str = f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};PWD={self.password}'
         self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
 
         try:
