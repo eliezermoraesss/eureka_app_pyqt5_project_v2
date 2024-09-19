@@ -8,6 +8,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import QProcess, Qt
 
 from app.config.authorize_decorator import authorize
+from models.engenharia_model import EngenhariaApp
 from app.utils.load_session import load_session
 from qt.ui.ui_home_window import Ui_HomeWindow
 
@@ -30,16 +31,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setup_connections()
 
     def setup_connections(self):
-        @authorize(['admin', 'Diretoria'], self)
+        @authorize(['admin', 'manager', 'Diretoria'], self)
         def execute_dashboard_model(checked=False):
             process = QProcess()
             script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'dashboard_model.pyw'))
             process.startDetached("python", [script_path])  # Usa startDetached para execução independente
 
         def execute_engenharia_model():
-            process = QProcess()
-            script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'engenharia_model.pyw'))
-            process.startDetached("python", [script_path])  # Usa startDetached para execução independente
+            eng_window = EngenhariaApp()
+            eng_window.showMaximized()
 
         def execute_comercial_model():
             process = QProcess()

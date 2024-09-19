@@ -24,22 +24,6 @@ from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.utils import *
 
 
-def abrir_tabela_pesos():
-    os.startfile(r'\\192.175.175.4\f\INTEGRANTES\ELIEZER\DOCUMENTOS_UTEIS\TABELA_PESO.xlsx')
-
-
-def numero_linhas_consulta(query_consulta):
-    order_by_a_remover = "ORDER BY B1_COD ASC"
-    query_sem_order_by = query_consulta.replace(order_by_a_remover, "")
-
-    query = f"""
-                SELECT 
-                    COUNT(*) AS total_records
-                FROM ({query_sem_order_by}) AS combined_results;
-            """
-    return query
-
-
 class EngenhariaApp(QWidget):
     guia_fechada = pyqtSignal()
 
@@ -47,6 +31,8 @@ class EngenhariaApp(QWidget):
         super().__init__()
         self.engine = None
         self.setWindowTitle("Eureka® Engenharia")
+        self.username, self.password, self.database, self.server = setup_mssql()
+        self.driver = '{SQL Server}'
 
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
@@ -197,7 +183,7 @@ class EngenhariaApp(QWidget):
         self.btn_exportar_excel.setEnabled(False)  # Desativar inicialmente
 
         self.btn_calculo_peso = QPushButton("Tabela de pesos", self)
-        self.btn_calculo_peso.clicked.connect(abrir_tabela_pesos)
+        self.btn_calculo_peso.clicked.connect(self.abrir_tabela_pesos)
         self.btn_calculo_peso.setMinimumWidth(100)
 
         self.btn_fechar = QPushButton("Fechar", self)
@@ -381,6 +367,20 @@ class EngenhariaApp(QWidget):
                 font-weight: bold;
             }
                 """)
+
+    def abrir_tabela_pesos(self):
+        os.startfile(r'\\192.175.175.4\f\INTEGRANTES\ELIEZER\DOCUMENTOS_UTEIS\TABELA_PESO.xlsx')
+
+    def numero_linhas_consulta(self, query_consulta):
+        order_by_a_remover = "ORDER BY B1_COD ASC"
+        query_sem_order_by = query_consulta.replace(order_by_a_remover, "")
+
+        query = f"""
+                    SELECT 
+                        COUNT(*) AS total_records
+                    FROM ({query_sem_order_by}) AS combined_results;
+                """
+        return query
 
     def abrir_modulo_pcp(self):
         process = QProcess()
@@ -596,7 +596,7 @@ class EngenhariaApp(QWidget):
             B1_UREV AS "Data Últ. Rev.", 
             B1_ZZLOCAL AS "Endereço"
         FROM 
-            {database}.dbo.SB1010
+            {self.database}.dbo.SB1010
         WHERE 
             B1_COD LIKE '{codigo}%' 
             AND B1_DESC LIKE '{descricao}%' 
@@ -617,12 +617,12 @@ class EngenhariaApp(QWidget):
             self.btn_consultar.setEnabled(True)
             return
 
-        query_contagem_linhas = numero_linhas_consulta(query_consulta)
+        query_contagem_linhas = self.numero_linhas_consulta(query_consulta)
 
         self.label_line_number.hide()
         self.controle_campos_formulario(False)
 
-        conn_str = f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+        conn_str = f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};PWD={self.password}'
         self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
 
         try:
