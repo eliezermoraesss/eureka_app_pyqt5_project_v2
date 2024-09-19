@@ -37,8 +37,14 @@ def executar_consulta_onde_usado(self, table):
                     INNER JOIN 
                         {database}.dbo.SB1010 PROD 
                     ON 
-                        G1_COD = B1_COD 
-                    WHERE G1_COMP = '{codigo}' 
+                        STRUT.G1_COD = PROD.B1_COD 
+                    WHERE G1_COMP = '{codigo}'
+                        AND STRUT.G1_REVFIM = (
+                            SELECT MAX(G1_REVFIM) 
+                            FROM PROTHEUS12_R27.dbo.SG1010 
+                            WHERE G1_COD = STRUT.G1_COD 
+                            AND G1_REVFIM <> 'ZZZ' 
+                            AND D_E_L_E_T_ <> '*')
                         AND STRUT.G1_REVFIM <> 'ZZZ' 
                         AND STRUT.D_E_L_E_T_ <> '*'
                         AND PROD.D_E_L_E_T_ <> '*'
