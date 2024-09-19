@@ -22,41 +22,13 @@ from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.utils import exibir_mensagem, copiar_linha, abrir_nova_janela, exportar_excel
 
 
-def add_today_button(date_edit):
-    calendar = date_edit.calendarWidget()
-    calendar.setGeometry(10, 10, 600, 400)
-    btn_today = QPushButton("Hoje", calendar)
-    largura, altura = 50, 20
-    btn_today.setGeometry(20, 5, largura, altura)
-    btn_today.clicked.connect(lambda: date_edit.setDate(QDate.currentDate()))
-
-
-def numero_linhas_consulta(query_consulta):
-    order_by_sc_somente_com_pedido = f"""ORDER BY PC.R_E_C_N_O_ DESC;"""
-    order_by_sc_sem_e_com_pedido = f"""ORDER BY "SC" DESC;"""
-
-    query_sem_order_by = ""
-    if order_by_sc_somente_com_pedido in query_consulta:
-        query_sem_order_by = query_consulta.replace(order_by_sc_somente_com_pedido, "")
-    elif order_by_sc_sem_e_com_pedido in query_consulta:
-        query_sem_order_by = query_consulta.replace(order_by_sc_sem_e_com_pedido, "")
-
-    query = f"""
-        SELECT 
-            COUNT(*) AS total_records
-        FROM 
-            ({query_sem_order_by}
-            )
-        AS combined_results;
-    """
-    return query
-
-
 class ComprasApp(QWidget):
     guia_fechada = pyqtSignal()
 
     def __init__(self):
         super().__init__()
+        self.username, self.password, self.database, self.server = setup_mssql()
+        self.driver = '{SQL Server}'
 
         self.setWindowTitle("Eureka® Compras")
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
@@ -225,7 +197,7 @@ class ComprasApp(QWidget):
         intervalo_meses = 12
         data_inicio = data_atual.addMonths(-intervalo_meses)
         self.campo_data_inicio.setDate(data_inicio)
-        add_today_button(self.campo_data_inicio)
+        self.add_today_button(self.campo_data_inicio)
 
         self.campo_data_fim = QDateEdit(self)
         self.campo_data_fim.setFont(QFont(fonte_campos, 10))
@@ -233,7 +205,7 @@ class ComprasApp(QWidget):
         self.campo_data_fim.setCalendarPopup(True)
         self.campo_data_fim.setDisplayFormat("dd/MM/yyyy")
         self.campo_data_fim.setDate(QDate().currentDate())
-        add_today_button(self.campo_data_fim)
+        self.add_today_button(self.campo_data_fim)
 
         self.btn_consultar = QPushButton("Pesquisar", self)
         self.btn_consultar.clicked.connect(self.executar_consulta)
@@ -505,6 +477,34 @@ class ComprasApp(QWidget):
             }
         """)
 
+    def add_today_button(self, date_edit):
+        calendar = date_edit.calendarWidget()
+        calendar.setGeometry(10, 10, 600, 400)
+        btn_today = QPushButton("Hoje", calendar)
+        largura, altura = 50, 20
+        btn_today.setGeometry(20, 5, largura, altura)
+        btn_today.clicked.connect(lambda: date_edit.setDate(QDate.currentDate()))
+
+    def numero_linhas_consulta(self, query_consulta):
+        order_by_sc_somente_com_pedido = f"""ORDER BY PC.R_E_C_N_O_ DESC;"""
+        order_by_sc_sem_e_com_pedido = f"""ORDER BY "SC" DESC;"""
+
+        query_sem_order_by = ""
+        if order_by_sc_somente_com_pedido in query_consulta:
+            query_sem_order_by = query_consulta.replace(order_by_sc_somente_com_pedido, "")
+        elif order_by_sc_sem_e_com_pedido in query_consulta:
+            query_sem_order_by = query_consulta.replace(order_by_sc_sem_e_com_pedido, "")
+
+        query = f"""
+            SELECT 
+                COUNT(*) AS total_records
+            FROM 
+                ({query_sem_order_by}
+                )
+            AS combined_results;
+        """
+        return query
+
     def fechar_guia(self, index):
         if index >= 0:
             try:
@@ -709,29 +709,29 @@ class ComprasApp(QWidget):
                     PC.S_T_A_M_P_ AS "Aberto em:",
                     SC.C1_OP AS "OP"
                 FROM 
-                    {database}.dbo.SC7010 PC
+                    {self.database}.dbo.SC7010 PC
                 LEFT JOIN
-                    {database}.dbo.SD1010 ITEM_NF
+                    {self.database}.dbo.SD1010 ITEM_NF
                 ON 
                     PC.C7_NUM = ITEM_NF.D1_PEDIDO AND PC.C7_ITEM = ITEM_NF.D1_ITEMPC
                 LEFT JOIN
-                    {database}.dbo.SC1010 SC
+                    {self.database}.dbo.SC1010 SC
                 ON 
                     SC.C1_PEDIDO = PC.C7_NUM AND SC.C1_ITEMPED = PC.C7_ITEM
                 LEFT JOIN
-                    {database}.dbo.SA2010 FORN
+                    {self.database}.dbo.SA2010 FORN
                 ON
                     FORN.A2_COD = PC.C7_FORNECE 
                 LEFT JOIN
-                    {database}.dbo.NNR010 ARM
+                    {self.database}.dbo.NNR010 ARM
                 ON
                     SC.C1_LOCAL = ARM.NNR_CODIGO
                 LEFT JOIN 
-                    {database}.dbo.SYS_USR US
+                    {self.database}.dbo.SYS_USR US
                 ON
                     SC.C1_SOLICIT = US.USR_CODIGO AND US.D_E_L_E_T_ <> '*'
                 INNER JOIN 
-                    {database}.dbo.SB1010 PROD
+                    {self.database}.dbo.SB1010 PROD
                 ON 
                     PROD.B1_COD = SC.C1_PRODUTO
             """
@@ -808,17 +808,17 @@ class ComprasApp(QWidget):
                     NULL AS "Aberto em:",
                     SC.C1_OP AS "OP"
                 FROM 
-                    {database}.dbo.SC1010 SC
+                    {self.database}.dbo.SC1010 SC
                 LEFT JOIN
-                    {database}.dbo.NNR010 ARM
+                    {self.database}.dbo.NNR010 ARM
                 ON 
                     SC.C1_LOCAL = ARM.NNR_CODIGO
                 LEFT JOIN 
-                    {database}.dbo.SYS_USR US
+                    {self.database}.dbo.SYS_USR US
                 ON 
                     SC.C1_SOLICIT = US.USR_CODIGO AND US.D_E_L_E_T_ <> '*'
                 INNER JOIN 
-                    {database}.dbo.SB1010 PROD
+                    {self.database}.dbo.SB1010 PROD
                 ON 
                     PROD.B1_COD = SC.C1_PRODUTO
                 WHERE 
@@ -842,12 +842,12 @@ class ComprasApp(QWidget):
 
     def executar_consulta(self):
         query_consulta_filtro = self.query_consulta_followup()
-        query_contagem_linhas = numero_linhas_consulta(query_consulta_filtro)
+        query_contagem_linhas = self.numero_linhas_consulta(query_consulta_filtro)
 
         self.label_line_number.hide()
         self.controle_campos_formulario(False)
 
-        conn_str = f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+        conn_str = f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};PWD={self.password}'
         self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
 
         try:

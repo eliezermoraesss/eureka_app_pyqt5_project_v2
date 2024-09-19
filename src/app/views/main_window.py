@@ -10,6 +10,7 @@ from PyQt5.QtCore import QProcess, Qt
 from app.config.authorize_decorator import authorize
 from models.engenharia_model import EngenhariaApp
 from models.pcp_model import PcpApp
+from models.compras_model import ComprasApp
 from models.comercial_model import ComercialApp
 from app.utils.load_session import load_session
 from qt.ui.ui_home_window import Ui_HomeWindow
@@ -52,9 +53,8 @@ class MainWindow(QtWidgets.QMainWindow):
             pcp_window.showMaximized()
 
         def execute_compras_model():
-            process = QProcess()
-            script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'compras_model.pyw'))
-            process.startDetached("python", [script_path])
+            compras_window = ComprasApp()
+            compras_window.showMaximized()
 
         def execute_qps_model():
             process = QProcess()
