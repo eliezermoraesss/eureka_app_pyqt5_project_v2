@@ -28,126 +28,6 @@ from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.utils import exibir_mensagem, copiar_linha, obter_dados_tabela, abrir_nova_janela
 
 
-def recalculate_excel_formulas(file_path):
-    app_excel = xw.App(visible=False)
-    wb = xw.Book(file_path)
-    wb.app.calculate()  # Recalcular todas as fórmulas
-    wb.save()
-    wb.close()
-    app_excel.quit()
-
-
-def get_product_name(codigo):
-    query = f"""
-        SELECT B1_DESC
-            FROM 
-                {database}.dbo.SB1010
-            WHERE 
-                B1_COD = N'{codigo}'
-                AND D_E_L_E_T_ <> '*';
-        """
-    try:
-        with pyodbc.connect(
-                f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}') as conn:
-            cursor = conn.cursor()
-            cursor.execute(query)
-
-            resultado = cursor.fetchone()
-            codigo_produto = resultado[0]
-
-            return codigo_produto
-
-    except Exception as ex:
-        exibir_mensagem('Erro banco de dados TOTVS', f'Erro ao consultar tabela de produtos SB1010: {str(ex)}', 'error')
-        return None
-
-
-def query_consulta(codigo):
-
-    query = f"""
-    DECLARE @CodigoPai VARCHAR(50) = '{codigo}'; -- Substitua pelo código pai que deseja consultar
-
-    -- CTE para selecionar as revisões máximas
-    WITH MaxRevisoes AS (
-        SELECT
-            G1_COD,
-            MAX(G1_REVFIM) AS MaxRevisao
-        FROM
-            SG1010
-        WHERE
-            G1_REVFIM <> 'ZZZ'
-            AND D_E_L_E_T_ <> '*'
-        GROUP BY
-            G1_COD
-    ),
-    -- CTE para selecionar os itens pai e seus subitens recursivamente
-    ListMP AS (
-        -- Selecionar o item pai inicialmente
-        SELECT
-            G1.G1_COD AS "CÓDIGO",
-            G1.G1_COMP AS "COMPONENTE",
-            G1.G1_QUANT AS "QUANTIDADE",
-            0 AS Nivel,
-            G1.G1_REVFIM AS "REVISAO"
-        FROM
-            SG1010 G1
-        INNER JOIN MaxRevisoes MR ON G1.G1_COD = MR.G1_COD AND G1.G1_REVFIM = MR.MaxRevisao
-        WHERE
-            G1.G1_COD = @CodigoPai
-            AND G1.G1_REVFIM <> 'ZZZ'
-            AND G1.D_E_L_E_T_ <> '*'
-        UNION ALL
-        -- Selecione os subitens de cada item pai e multiplique as quantidades
-        SELECT
-            filho.G1_COD,
-            filho.G1_COMP,
-            filho.G1_QUANT * pai.QUANTIDADE,
-            pai.Nivel + 1,
-            filho.G1_REVFIM
-        FROM
-            SG1010 AS filho
-        INNER JOIN ListMP AS pai ON
-            filho.G1_COD = pai."COMPONENTE"
-        INNER JOIN MaxRevisoes MR ON filho.G1_COD = MR.G1_COD AND filho.G1_REVFIM = MR.MaxRevisao
-        WHERE
-            pai.Nivel < 100
-            -- Defina o limite máximo de recursão aqui
-            AND filho.G1_REVFIM <> 'ZZZ'
-            AND filho.D_E_L_E_T_ <> '*'
-    )
-    -- Selecionar os componentes, somar as quantidades e evitar componentes duplicados
-    SELECT 
-        "COMPONENTE" AS "CÓDIGO",
-        prod.B1_DESC AS "DESCRIÇÃO",
-        SUM("QUANTIDADE") AS "QUANT.",
-        prod.B1_UM AS "UNID. MED.", 
-        prod.B1_UCOM AS "ULT. ATUALIZ.",
-        prod.B1_TIPO AS "TIPO", 
-        prod.B1_LOCPAD AS "ARMAZÉM", 
-        prod.B1_UPRC AS "VALOR UNIT. (R$)",
-        SUM("QUANTIDADE" * prod.B1_UPRC) AS "SUB-TOTAL (R$)"
-    FROM 
-        ListMP AS listMP
-    INNER JOIN 
-        SB1010 AS prod ON listMP."COMPONENTE" = prod.B1_COD
-    WHERE 
-        prod.B1_TIPO = 'MP'
-        AND prod.B1_LOCPAD IN ('01', '03', '11', '12', '97')
-        AND prod.D_E_L_E_T_ <> '*'
-    GROUP BY 
-        "COMPONENTE",
-        prod.B1_DESC,
-        prod.B1_UM,
-        prod.B1_UCOM,
-        prod.B1_TIPO,
-        prod.B1_LOCPAD,
-        prod.B1_UPRC
-    ORDER BY 
-        "COMPONENTE" ASC;
-    """
-    return query
-
-
 class ComercialApp(QWidget):
     def __init__(self):
         super().__init__()
@@ -157,6 +37,8 @@ class ComercialApp(QWidget):
         self.file_path = None
         self.nova_janela = None
         self.titulo_relatorio_pdf = "Relatório de Custos de Matéria-Prima e Itens Comerciais"
+        self.username, self.password, self.database, self.server = setup_mssql()
+        self.driver = '{SQL Server}'
 
         self.tree = QTableWidget(self)
         self.tree.setColumnCount(0)
@@ -325,6 +207,123 @@ class ComercialApp(QWidget):
                     }
                 """)
 
+    def recalculate_excel_formulas(self, file_path):
+        app_excel = xw.App(visible=False)
+        wb = xw.Book(file_path)
+        wb.app.calculate()  # Recalcular todas as fórmulas
+        wb.save()
+        wb.close()
+        app_excel.quit()
+
+    def get_product_name(self, codigo):
+        query = f"""
+            SELECT B1_DESC
+                FROM 
+                    {self.database}.dbo.SB1010
+                WHERE 
+                    B1_COD = N'{codigo}'
+                    AND D_E_L_E_T_ <> '*';
+            """
+        try:
+            with pyodbc.connect(
+                    f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};PWD={self.password}') as conn:
+                cursor = conn.cursor()
+                cursor.execute(query)
+
+                resultado = cursor.fetchone()
+                codigo_produto = resultado[0]
+
+                return codigo_produto
+
+        except Exception as ex:
+            exibir_mensagem('Erro banco de dados TOTVS', f'Erro ao consultar tabela de produtos SB1010: {str(ex)}', 'error')
+            return None
+
+    def query_consulta(self, codigo):
+
+        query = f"""
+        DECLARE @CodigoPai VARCHAR(50) = '{codigo}'; -- Substitua pelo código pai que deseja consultar
+    
+        -- CTE para selecionar as revisões máximas
+        WITH MaxRevisoes AS (
+            SELECT
+                G1_COD,
+                MAX(G1_REVFIM) AS MaxRevisao
+            FROM
+                SG1010
+            WHERE
+                G1_REVFIM <> 'ZZZ'
+                AND D_E_L_E_T_ <> '*'
+            GROUP BY
+                G1_COD
+        ),
+        -- CTE para selecionar os itens pai e seus subitens recursivamente
+        ListMP AS (
+            -- Selecionar o item pai inicialmente
+            SELECT
+                G1.G1_COD AS "CÓDIGO",
+                G1.G1_COMP AS "COMPONENTE",
+                G1.G1_QUANT AS "QUANTIDADE",
+                0 AS Nivel,
+                G1.G1_REVFIM AS "REVISAO"
+            FROM
+                SG1010 G1
+            INNER JOIN MaxRevisoes MR ON G1.G1_COD = MR.G1_COD AND G1.G1_REVFIM = MR.MaxRevisao
+            WHERE
+                G1.G1_COD = @CodigoPai
+                AND G1.G1_REVFIM <> 'ZZZ'
+                AND G1.D_E_L_E_T_ <> '*'
+            UNION ALL
+            -- Selecione os subitens de cada item pai e multiplique as quantidades
+            SELECT
+                filho.G1_COD,
+                filho.G1_COMP,
+                filho.G1_QUANT * pai.QUANTIDADE,
+                pai.Nivel + 1,
+                filho.G1_REVFIM
+            FROM
+                SG1010 AS filho
+            INNER JOIN ListMP AS pai ON
+                filho.G1_COD = pai."COMPONENTE"
+            INNER JOIN MaxRevisoes MR ON filho.G1_COD = MR.G1_COD AND filho.G1_REVFIM = MR.MaxRevisao
+            WHERE
+                pai.Nivel < 100
+                -- Defina o limite máximo de recursão aqui
+                AND filho.G1_REVFIM <> 'ZZZ'
+                AND filho.D_E_L_E_T_ <> '*'
+        )
+        -- Selecionar os componentes, somar as quantidades e evitar componentes duplicados
+        SELECT 
+            "COMPONENTE" AS "CÓDIGO",
+            prod.B1_DESC AS "DESCRIÇÃO",
+            SUM("QUANTIDADE") AS "QUANT.",
+            prod.B1_UM AS "UNID. MED.", 
+            prod.B1_UCOM AS "ULT. ATUALIZ.",
+            prod.B1_TIPO AS "TIPO", 
+            prod.B1_LOCPAD AS "ARMAZÉM", 
+            prod.B1_UPRC AS "VALOR UNIT. (R$)",
+            SUM("QUANTIDADE" * prod.B1_UPRC) AS "SUB-TOTAL (R$)"
+        FROM 
+            ListMP AS listMP
+        INNER JOIN 
+            SB1010 AS prod ON listMP."COMPONENTE" = prod.B1_COD
+        WHERE 
+            prod.B1_TIPO = 'MP'
+            AND prod.B1_LOCPAD IN ('01', '03', '11', '12', '97')
+            AND prod.D_E_L_E_T_ <> '*'
+        GROUP BY 
+            "COMPONENTE",
+            prod.B1_DESC,
+            prod.B1_UM,
+            prod.B1_UCOM,
+            prod.B1_TIPO,
+            prod.B1_LOCPAD,
+            prod.B1_UPRC
+        ORDER BY 
+            "COMPONENTE" ASC;
+        """
+        return query
+
     def add_clear_button(self, line_edit):
         clear_icon = self.style().standardIcon(QStyle.SP_LineEditClearButton)
         pixmap = clear_icon.pixmap(40, 40)  # Redimensionar o ícone para 20x20 pixels
@@ -407,7 +406,7 @@ class ComercialApp(QWidget):
 
             writer.close()
 
-            recalculate_excel_formulas(self.file_path)
+            self.recalculate_excel_formulas(self.file_path)
 
             if tipo_exportacao == 'excel':
                 os.startfile(self.file_path)
@@ -655,11 +654,11 @@ class ComercialApp(QWidget):
             self.controle_campos_formulario(True)
             return
 
-        query = query_consulta(codigo)
+        query = self.query_consulta(codigo)
         self.label_product_name.hide()
         self.controle_campos_formulario(False)
 
-        conn_str = f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+        conn_str = f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};PWD={self.password}'
         engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
 
         try:
@@ -667,7 +666,7 @@ class ComercialApp(QWidget):
 
             if not dataframe.empty:
 
-                self.descricao = get_product_name(self.codigo)
+                self.descricao = self.get_product_name(self.codigo)
 
                 consolidated_dataframe = dataframe.groupby('CÓDIGO').agg({
                     'DESCRIÇÃO': 'first',

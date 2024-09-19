@@ -9,6 +9,7 @@ from PyQt5.QtCore import QProcess, Qt
 
 from app.config.authorize_decorator import authorize
 from models.engenharia_model import EngenhariaApp
+from models.comercial_model import ComercialApp
 from app.utils.load_session import load_session
 from qt.ui.ui_home_window import Ui_HomeWindow
 
@@ -42,9 +43,8 @@ class MainWindow(QtWidgets.QMainWindow):
             eng_window.showMaximized()
 
         def execute_comercial_model():
-            process = QProcess()
-            script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'comercial_model.pyw'))
-            process.startDetached("python", [script_path])
+            comercial_window = ComercialApp()
+            comercial_window.showMaximized()
 
         def execute_pcp_model():
             process = QProcess()
