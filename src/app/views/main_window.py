@@ -8,7 +8,6 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import QProcess, Qt
 
 from app.config.authorize_decorator import authorize
-from models.dashboard_model import DashboardWindow
 from models.engenharia_model import EngenhariaApp
 from models.pcp_model import PcpApp
 from models.compras_model import ComprasApp
@@ -38,8 +37,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def setup_connections(self):
         @authorize(['admin', 'manager', 'Diretoria'], self)
         def execute_dashboard_model(checked=False):
-            dashboard_window = DashboardWindow()
-            dashboard_window.showMaximized()
+            process = QProcess()
+            script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'dashboard_model.pyw'))
+            process.startDetached("python", [script_path])  # Usa startDetached para execução independente
 
         def execute_engenharia_model():
             eng_window = EngenhariaApp()
