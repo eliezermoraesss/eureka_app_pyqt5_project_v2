@@ -26,12 +26,15 @@ from sqlalchemy import create_engine
 
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.utils import exibir_mensagem, copiar_linha, obter_dados_tabela, abrir_nova_janela
+from src.app.utils.load_session import load_session
 
 
 class ComercialApp(QWidget):
     def __init__(self):
         super().__init__()
-
+        user_data = load_session()
+        username = user_data["username"]
+        role = user_data["role"]
         self.codigo = None
         self.descricao = None
         self.file_path = None
@@ -44,7 +47,7 @@ class ComercialApp(QWidget):
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
 
-        self.setWindowTitle("Eureka® Comercial")
+        self.setWindowTitle(f"Eureka® Comercial . {username} ({role})")
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
         script_dir = os.path.dirname(os.path.abspath(__file__))

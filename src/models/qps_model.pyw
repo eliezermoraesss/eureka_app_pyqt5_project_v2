@@ -16,6 +16,7 @@ from sqlalchemy import create_engine, text
 
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.utils import exibir_mensagem, abrir_nova_janela, copiar_linha, exportar_excel
+from src.app.utils.load_session import load_session
 
 
 class UpdateTableThread(QThread):
@@ -47,10 +48,13 @@ class QpClosedApp(QWidget):
 
     def __init__(self):
         super().__init__()
+        user_data = load_session()
+        username = user_data["username"]
+        role = user_data["role"]
         self.username, self.password, self.database, self.server = setup_mssql()
         self.driver = '{SQL Server}'
 
-        self.setWindowTitle("Eureka® QPS")
+        self.setWindowTitle(f"Eureka® QPS . {username} ({role})")
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
         self.update_thread = None

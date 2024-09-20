@@ -52,7 +52,7 @@ class MainWindow(QtWidgets.QMainWindow):
         def execute_pcp_model():
             pcp_window = PcpApp()
             pcp_window.showMaximized()
-
+            
         def execute_compras_model():
             compras_window = ComprasApp()
             compras_window.showMaximized()

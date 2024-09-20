@@ -21,6 +21,7 @@ from src.app.utils.consultar_onde_usado import executar_consulta_onde_usado
 from src.app.utils.consultar_saldo_estoque import executar_saldo_em_estoque
 from src.app.utils.consultar_ultimos_fornecedores import executar_ultimos_fornecedores
 from src.app.utils.db_mssql import setup_mssql
+from src.app.utils.load_session import load_session
 from src.app.utils.utils import *
 
 
@@ -29,8 +30,11 @@ class EngenhariaApp(QWidget):
 
     def __init__(self):
         super().__init__()
+        user_data = load_session()
+        username = user_data["username"]
+        role = user_data["role"]
         self.engine = None
-        self.setWindowTitle("Eureka® Engenharia")
+        self.setWindowTitle(f"Eureka® Engenharia . {username} ({role})")
         self.username, self.password, self.database, self.server = setup_mssql()
         self.driver = '{SQL Server}'
 

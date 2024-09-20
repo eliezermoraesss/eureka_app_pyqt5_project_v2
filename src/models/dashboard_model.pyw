@@ -1,14 +1,23 @@
+import os
 import sys
+
+# Caminho absoluto para o diretório onde o módulo src está localizado
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtCore import QUrl
+
+from src.app.utils.load_session import load_session
 
 
 class DashboardWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-
-        self.setWindowTitle("Eureka® Enaplic Dashboard - Power BI Viewer")
+        user_data = load_session()
+        username = user_data["username"]
+        role = user_data["role"]
+        self.setWindowTitle(f"Eureka® Enaplic Dashboard - Power BI Viewer . {username} ({role})")
 
         # Cria o widget QWebEngineView
         self.browser = QWebEngineView()
