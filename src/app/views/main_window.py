@@ -5,7 +5,6 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import QProcess, Qt
 
 from app.config.authorize_decorator import authorize
 from models.engenharia_model import EngenhariaApp

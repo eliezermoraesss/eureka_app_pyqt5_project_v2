@@ -137,62 +137,59 @@ class EngenhariaApp(QWidget):
 
         self.btn_consultar = QPushButton("Pesquisar", self)
         self.btn_consultar.clicked.connect(self.executar_consulta)
-        self.btn_consultar.setMinimumWidth(100)
+        self.btn_consultar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_abrir_pcp = QPushButton("PCP", self)
         self.btn_abrir_pcp.setObjectName("PCP")
         self.btn_abrir_pcp.clicked.connect(self.abrir_modulo_pcp)
-        self.btn_abrir_pcp.setMinimumWidth(100)
+        self.btn_abrir_pcp.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_abrir_compras = QPushButton("Compras", self)
         self.btn_abrir_compras.setObjectName("compras")
         self.btn_abrir_compras.clicked.connect(self.abrir_modulo_compras)
-        self.btn_abrir_compras.setMinimumWidth(100)
+        self.btn_abrir_compras.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_consultar_estrutura = QPushButton("Consultar Estrutura", self)
         self.btn_consultar_estrutura.clicked.connect(lambda: executar_consulta_estrutura(self, self.tree))
-        self.btn_consultar_estrutura.setMinimumWidth(150)
-        self.btn_consultar_estrutura.setEnabled(False)
+        self.btn_consultar_estrutura.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.btn_consultar_estrutura.hide()
 
         self.btn_onde_e_usado = QPushButton("Onde é usado?", self)
         self.btn_onde_e_usado.clicked.connect(lambda: executar_consulta_onde_usado(self, self.tree))
-        self.btn_onde_e_usado.setMinimumWidth(150)
-        self.btn_onde_e_usado.setEnabled(False)
+        self.btn_onde_e_usado.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.btn_onde_e_usado.hide()
 
         self.btn_saldo_estoque = QPushButton("Saldos em Estoque", self)
         self.btn_saldo_estoque.clicked.connect(lambda: executar_saldo_em_estoque(self, self.tree))
-        self.btn_saldo_estoque.setMinimumWidth(150)
-        self.btn_saldo_estoque.setEnabled(False)
+        self.btn_saldo_estoque.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.btn_saldo_estoque.hide()
         
         self.btn_ultimos_fornecedores = QPushButton("Fornecedores", self)
         self.btn_ultimos_fornecedores.clicked.connect(lambda: executar_ultimos_fornecedores(self, self.tree))
         self.btn_ultimos_fornecedores.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.btn_ultimos_fornecedores.setEnabled(False)
+        self.btn_ultimos_fornecedores.hide()
 
         self.btn_limpar = QPushButton("Limpar", self)
         self.btn_limpar.clicked.connect(self.limpar_campos)
-        self.btn_limpar.setMinimumWidth(100)
+        self.btn_limpar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_nova_janela = QPushButton("Nova Janela", self)
         self.btn_nova_janela.clicked.connect(lambda: abrir_nova_janela(self, EngenhariaApp()))
-        self.btn_nova_janela.setMinimumWidth(100)
+        self.btn_nova_janela.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_abrir_desenho = QPushButton("Abrir Desenho", self)
         self.btn_abrir_desenho.clicked.connect(lambda: abrir_desenho(self, self.tree))
-        self.btn_abrir_desenho.setMinimumWidth(100)
+        self.btn_abrir_desenho.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.btn_abrir_desenho.hide()
 
         self.btn_exportar_excel = QPushButton("Exportar Excel", self)
         self.btn_exportar_excel.clicked.connect(lambda: exportar_excel(self, self.tree))
-        self.btn_exportar_excel.setMinimumWidth(100)
-        self.btn_exportar_excel.setEnabled(False)  # Desativar inicialmente
-
-        self.btn_calculo_peso = QPushButton("Tabela de pesos", self)
-        self.btn_calculo_peso.clicked.connect(self.abrir_tabela_pesos)
-        self.btn_calculo_peso.setMinimumWidth(100)
+        self.btn_exportar_excel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.btn_exportar_excel.hide()
 
         self.btn_fechar = QPushButton("Fechar", self)
         self.btn_fechar.clicked.connect(self.fechar_janela)
-        self.btn_fechar.setMinimumWidth(100)
+        self.btn_fechar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         layout = QVBoxLayout()
         layout_campos_01 = QHBoxLayout()
@@ -221,15 +218,14 @@ class EngenhariaApp(QWidget):
 
         layout_button_03.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         layout_button_03.addWidget(self.btn_consultar)
+        layout_button_03.addWidget(self.btn_limpar)
         layout_button_03.addWidget(self.btn_consultar_estrutura)
         layout_button_03.addWidget(self.btn_onde_e_usado)
         layout_button_03.addWidget(self.btn_saldo_estoque)
         layout_button_03.addWidget(self.btn_ultimos_fornecedores)
-        layout_button_03.addWidget(self.btn_limpar)
         layout_button_03.addWidget(self.btn_nova_janela)
         layout_button_03.addWidget(self.btn_abrir_desenho)
         layout_button_03.addWidget(self.btn_exportar_excel)
-        layout_button_03.addWidget(self.btn_calculo_peso)
         layout_button_03.addWidget(self.btn_abrir_pcp)
         layout_button_03.addWidget(self.btn_abrir_compras)
         layout_button_03.addWidget(self.btn_fechar)
@@ -447,6 +443,10 @@ class EngenhariaApp(QWidget):
 
             menu = QMenu()
 
+            context_menu_nova_janela = QAction('Nova janela', self)
+            context_menu_nova_janela.triggered.connect(lambda: abrir_nova_janela(self, EngenhariaApp()))
+            menu.addAction(context_menu_nova_janela)
+
             context_menu_abrir_desenho = QAction('Abrir desenho', self)
             context_menu_abrir_desenho.triggered.connect(lambda: abrir_desenho(self, table))
             menu.addAction(context_menu_abrir_desenho)
@@ -471,9 +471,9 @@ class EngenhariaApp(QWidget):
             context_menu_ultimo_fornecedor.triggered.connect(lambda: executar_ultimos_fornecedores(self, table))
             menu.addAction(context_menu_ultimo_fornecedor)
 
-            context_menu_nova_janela = QAction('Nova janela', self)
-            context_menu_nova_janela.triggered.connect(lambda: abrir_nova_janela(self, EngenhariaApp()))
-            menu.addAction(context_menu_nova_janela)
+            context_menu_tabela_pesos = QAction('Abrir Tabela de Pesos', self)
+            context_menu_tabela_pesos.triggered.connect(self.abrir_tabela_pesos)
+            menu.addAction(context_menu_tabela_pesos)
 
             menu.exec_(table.viewport().mapToGlobal(position))
 
@@ -547,11 +547,21 @@ class EngenhariaApp(QWidget):
         self.combobox_armazem.setEnabled(status)
         self.campo_grupo.setEnabled(status)
         self.btn_consultar.setEnabled(status)
-        self.btn_exportar_excel.setEnabled(status)
-        self.btn_consultar_estrutura.setEnabled(status)
-        self.btn_onde_e_usado.setEnabled(status)
-        self.btn_saldo_estoque.setEnabled(status)
-        self.btn_ultimos_fornecedores.setEnabled(status)
+
+        if status == "False":
+            self.btn_abrir_desenho.hide()
+            self.btn_consultar_estrutura.hide()
+            self.btn_exportar_excel.hide()
+            self.btn_onde_e_usado.hide()
+            self.btn_saldo_estoque.hide()
+            self.btn_ultimos_fornecedores.hide()
+        else:
+            self.btn_abrir_desenho.show()
+            self.btn_consultar_estrutura.show()
+            self.btn_exportar_excel.show()
+            self.btn_onde_e_usado.show()
+            self.btn_saldo_estoque.show()
+            self.btn_ultimos_fornecedores.show()
 
     def query_consulta_tabela_produtos(self):
         codigo = self.campo_codigo.text().upper().strip()
