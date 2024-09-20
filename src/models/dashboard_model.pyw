@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtCore import QUrl
 
-from src.app.utils.load_session import load_session
+from app.utils.load_session import load_session
 
 
 class DashboardWindow(QMainWindow):
