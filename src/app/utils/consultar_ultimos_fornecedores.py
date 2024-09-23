@@ -63,7 +63,7 @@ def executar_ultimos_fornecedores(self, table):
                 cursor.execute(query)
 
                 if cursor.rowcount == 0:
-                    QMessageBox.information(None, "Eureka®", "Nenhum fornecedor não encontrado.")
+                    QMessageBox.information(None, "Eureka® ", "Nenhum fornecedor não encontrado.")
                     return
 
                 nova_guia_ult_forn = QWidget()

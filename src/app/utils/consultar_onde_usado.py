@@ -58,7 +58,7 @@ def executar_consulta_onde_usado(self, table):
                 resultado = cursor.execute(query_onde_usado)
 
                 if resultado.rowcount == 0:
-                    QMessageBox.information(None, "Eureka®", "Nenhum item pai encontrado.\nEste item não compõe nenhuma estrutura de produto.")
+                    QMessageBox.information(None, "Eureka® Onde é usado", "Nenhum item pai encontrado.\nEste item não compõe nenhuma estrutura de produto.")
                     return
 
                 nova_guia_estrutura = QWidget()
