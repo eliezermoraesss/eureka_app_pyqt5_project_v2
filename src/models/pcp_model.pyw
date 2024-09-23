@@ -284,9 +284,9 @@ class PcpApp(QWidget):
         self.btn_consultar_estrutura = QPushButton("Consultar Estrutura", self)
         self.btn_consultar_estrutura.clicked.connect(lambda: executar_consulta_estrutura(self, self.tree))
         self.btn_consultar_estrutura.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.btn_consultar_estrutura.setEnabled(False)
+        self.btn_consultar_estrutura.hide()
 
-        self.btn_qps_concluidas = QPushButton("QPS", self)
+        self.btn_qps_concluidas = QPushButton("Gestão QPS", self)
         self.btn_qps_concluidas.setObjectName("btn_qps_concluidas")
         self.btn_qps_concluidas.clicked.connect(self.abrir_modulo_qps_concluidas)
         self.btn_qps_concluidas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -304,15 +304,15 @@ class PcpApp(QWidget):
         self.btn_onde_e_usado = QPushButton("Onde é usado?", self)
         self.btn_onde_e_usado.clicked.connect(lambda: executar_consulta_onde_usado(self, self.tree))
         self.btn_onde_e_usado.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.btn_onde_e_usado.setEnabled(False)
+        self.btn_onde_e_usado.hide()
 
         self.btn_saldo_estoque = QPushButton("Saldos em Estoque", self)
         self.btn_saldo_estoque.clicked.connect(lambda: executar_saldo_em_estoque(self, self.tree))
         self.btn_saldo_estoque.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.btn_saldo_estoque.setEnabled(False)
+        self.btn_saldo_estoque.hide()
 
         self.btn_limpar = QPushButton("Limpar", self)
-        self.btn_limpar.clicked.connect(self.limpar_campos)
+        self.btn_limpar.clicked.connect(self.clean_screen)
         self.btn_limpar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_nova_janela = QPushButton("Nova Janela", self)
@@ -322,12 +322,12 @@ class PcpApp(QWidget):
         self.btn_abrir_desenho = QPushButton("Abrir Desenho", self)
         self.btn_abrir_desenho.clicked.connect(lambda: abrir_desenho(self, self.tree))
         self.btn_abrir_desenho.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.btn_abrir_desenho.setEnabled(False)
+        self.btn_abrir_desenho.hide()
 
         self.btn_exportar_excel = QPushButton("Exportar Excel", self)
         self.btn_exportar_excel.clicked.connect(lambda: exportar_excel(self, self.tree))
         self.btn_exportar_excel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.btn_exportar_excel.setEnabled(False)
+        self.btn_exportar_excel.hide()
 
         self.btn_fechar = QPushButton("Fechar", self)
         self.btn_fechar.clicked.connect(self.fechar_janela)
@@ -396,7 +396,6 @@ class PcpApp(QWidget):
         layout_campos_02.addStretch()
 
         self.layout_buttons.addWidget(self.btn_consultar)
-        self.layout_buttons.addWidget(self.btn_qps_concluidas)
         self.layout_buttons.addWidget(self.btn_consultar_estrutura)
         self.layout_buttons.addWidget(self.btn_onde_e_usado)
         self.layout_buttons.addWidget(self.btn_saldo_estoque)
@@ -404,6 +403,7 @@ class PcpApp(QWidget):
         self.layout_buttons.addWidget(self.btn_limpar)
         self.layout_buttons.addWidget(self.btn_abrir_desenho)
         self.layout_buttons.addWidget(self.btn_exportar_excel)
+        self.layout_buttons.addWidget(self.btn_qps_concluidas)
         self.layout_buttons.addWidget(self.btn_abrir_compras)
         self.layout_buttons.addWidget(self.btn_abrir_engenharia)
         self.layout_buttons.addWidget(self.btn_fechar)
@@ -521,7 +521,7 @@ class PcpApp(QWidget):
 
             menu.exec_(table.viewport().mapToGlobal(position))
 
-    def limpar_campos(self):
+    def clean_screen(self):
         self.campo_codigo.clear()
         self.campo_qp.clear()
         self.campo_OP.clear()
@@ -531,6 +531,35 @@ class PcpApp(QWidget):
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
         self.label_line_number.hide()
+
+        self.btn_abrir_desenho.hide()
+        self.btn_consultar_estrutura.hide()
+        self.btn_exportar_excel.hide()
+        self.btn_onde_e_usado.hide()
+        self.btn_saldo_estoque.hide()
+
+        self.guias_abertas.clear()
+        self.guias_abertas_onde_usado.clear()
+        self.guias_abertas_saldo.clear()
+
+        while self.tabWidget.count():
+            self.tabWidget.removeTab(0)
+        self.tabWidget.setVisible(False)
+        self.guia_fechada.emit()
+
+    def button_visible_control(self, visible):
+        if visible == "False":
+            self.btn_abrir_desenho.hide()
+            self.btn_consultar_estrutura.hide()
+            self.btn_exportar_excel.hide()
+            self.btn_onde_e_usado.hide()
+            self.btn_saldo_estoque.hide()
+        else:
+            self.btn_abrir_desenho.show()
+            self.btn_consultar_estrutura.show()
+            self.btn_exportar_excel.show()
+            self.btn_onde_e_usado.show()
+            self.btn_saldo_estoque.show()
 
     def abrir_modulo_engenharia(self):
         process = QProcess()
@@ -710,6 +739,7 @@ class PcpApp(QWidget):
 
         self.label_line_number.hide()
         self.controle_campos_formulario(False)
+        self.button_visible_control(False)
 
         conn_str = f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};PWD={self.password}'
         self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
@@ -731,6 +761,7 @@ class PcpApp(QWidget):
             else:
                 exibir_mensagem("EUREKA® PCP", 'Nada encontrado!', "info")
                 self.controle_campos_formulario(True)
+                self.button_visible_control(False)
                 return
 
             dataframe = pd.read_sql(query_consulta_op, self.engine)
@@ -789,6 +820,7 @@ class PcpApp(QWidget):
 
             self.tree.setSortingEnabled(True)
             self.controle_campos_formulario(True)
+            self.button_visible_control(True)
 
         except Exception as ex:
             exibir_mensagem('Erro ao consultar tabela', f'Erro: {str(ex)}', 'error')
