@@ -125,7 +125,7 @@ def executar_consulta_estrutura(self, table):
                 btn_exportar_excel_estrutura.clicked.connect(lambda: exportar_excel(self, tree_estrutura))
                 btn_exportar_excel_estrutura.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
-                layout_cabecalho.addWidget(QLabel(f"🏗️ CONSULTA DE ESTRUTURA \n\n{codigo} - {descricao}"),
+                layout_cabecalho.addWidget(QLabel(f"CONSULTA DE ESTRUTURA \n\n{codigo} - {descricao}"),
                                            alignment=Qt.AlignLeft)
                 layout_cabecalho.addSpacerItem(QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
                 layout_cabecalho.addWidget(btn_exportar_excel_estrutura)

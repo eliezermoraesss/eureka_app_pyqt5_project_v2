@@ -1,6 +1,8 @@
 import os
 import sys
 
+from PyQt5.QtCore import QProcess
+
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -14,7 +16,6 @@ from models.comercial_model import ComercialApp
 from models.qps_model import QpClosedApp
 from app.utils.load_session import load_session
 from qt.ui.ui_home_window import Ui_HomeWindow
-from models.dashboard_model import DashboardWindow
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -37,8 +38,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def setup_connections(self):
         @authorize(['admin', 'manager', 'Diretoria'], self)
         def execute_dashboard_model(checked=False):
-            self.dashboard_window = DashboardWindow()
-            self.dashboard_window.showMaximized()
+            process = QProcess()
+            script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'dashboard_model.pyw'))
+            process.startDetached("python", [script_path])  # Usa startDetached para execução
 
         def execute_engenharia_model():
             eng_window = EngenhariaApp()

@@ -140,7 +140,7 @@ def executar_ultimos_fornecedores(self, table):
                     self.layout().addWidget(self.tabWidget)
                     self.tabWidget.setVisible(True)
 
-                self.tabWidget.addTab(nova_guia_ult_forn, f"Saldos em Estoque - {codigo}")
+                self.tabWidget.addTab(nova_guia_ult_forn, f"Fornecedores - {codigo}")
                 tabela_ult_fornecedores.itemDoubleClicked.connect(copiar_linha)
 
             except pyodbc.Error as ex:

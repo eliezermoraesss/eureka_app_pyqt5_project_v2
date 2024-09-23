@@ -545,6 +545,16 @@ class EngenhariaApp(QWidget):
         self.btn_saldo_estoque.hide()
         self.btn_ultimos_fornecedores.hide()
 
+        self.guias_abertas.clear()
+        self.guias_abertas_onde_usado.clear()
+        self.guias_abertas_saldo.clear()
+        self.guias_abertas_ultimos_fornecedores.clear()
+
+        while self.tabWidget.count():
+            self.tabWidget.removeTab(0)
+        self.tabWidget.setVisible(False)
+        self.guia_fechada.emit()
+
     def button_visible_control(self, visible):
         if visible == "False":
             self.btn_abrir_desenho.hide()
@@ -733,7 +743,7 @@ class EngenhariaApp(QWidget):
 
             # Por ter duas listas de controle de abas abertas, 'guias_abertas = []' e 'guias_abertas_onde_usado = []',
             # ao fechar uma guia ocorre uma exceção (ValueError) se o código não for encontrado em uma das listas.
-            # Utilize try/except para contornar esse problema.
+            # Utilizei try/except para contornar esse problema.
             except ValueError:
                 codigo_guia_fechada = self.tabWidget.tabText(index).split(' - ')[1]
                 try:
