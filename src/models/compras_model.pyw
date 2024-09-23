@@ -501,7 +501,7 @@ class ComprasApp(QWidget):
 
     def numero_linhas_consulta(self, query_consulta):
         order_by_sc_somente_com_pedido = f"""ORDER BY PC.R_E_C_N_O_ DESC;"""
-        order_by_sc_sem_e_com_pedido = f"""ORDER BY "SC" DESC;"""
+        order_by_sc_sem_e_com_pedido = f"""ORDER BY "SOLIC. COMPRA" DESC;"""
 
         query_sem_order_by = ""
         if order_by_sc_somente_com_pedido in query_consulta:
@@ -711,40 +711,40 @@ class ComprasApp(QWidget):
         common_select = f"""
                 SELECT
                     SC.C1_ZZNUMQP AS "QP",
-                    SC.C1_NUM AS "SC",
-                    SC.C1_ITEM AS "Item SC",
-                    SC.C1_QUANT AS "Qtd. SC",
-                    SC.C1_PEDIDO AS "Ped. Compra",
-                    SC.C1_ITEMPED AS "Item Ped.",
-                    PC.C7_QUANT AS "Qtd. Ped.",
-                    PC.C7_PRECO AS "Preço Unit. (R$)",
-                    PC.C7_TOTAL AS "Sub-total (R$)",
-                    PC.C7_DATPRF AS "Previsão Entrega",
-                    ITEM_NF.D1_DOC AS "Nota Fiscal Ent.",
-                    ITEM_NF.D1_QUANT AS "Qtd. Entregue",
+                    SC.C1_NUM AS "SOLIC. COMPRA",
+                    SC.C1_PEDIDO AS "PEDIDO COMPRA",
+                    ITEM_NF.D1_DOC AS "DOC. NF ENTRADA",
+                    PC.C7_DATPRF AS "PREVISÃO ENTREGA",
+                    SC.C1_PRODUTO AS "CÓDIGO",
+                    SC.C1_DESCRI AS "DESCRIÇÃO",
+                    SC.C1_UM AS "UNID. MED.",
+                    PC.C7_QUANT AS "QUANT. PEDIDO COMPRA",
+                    ITEM_NF.D1_QUANT AS "QTD. ENTREGUE",
                     CASE 
                         WHEN ITEM_NF.D1_QUANT IS NULL THEN SC.C1_QUJE 
                         ELSE SC.C1_QUJE - ITEM_NF.D1_QUANT
-                    END AS "Qtd. Pendente",
-                    ITEM_NF.D1_DTDIGIT AS "Data Entrega",
-                    PC.C7_ENCER AS "Status Ped. Compra",
-                    SC.C1_PRODUTO AS "Código",
-                    SC.C1_DESCRI AS "Descrição",
-                    SC.C1_UM AS "UM",
-                    PROD.B1_ZZLOCAL AS "Endereço:",
-                    SC.C1_EMISSAO AS "Emissão SC",
-                    PC.C7_EMISSAO AS "Emissão PC",
-                    ITEM_NF.D1_EMISSAO AS "Emissão NF",
+                    END AS "QTD. PENDENTE",
+                    PC.C7_PRECO AS "CUSTO UNITÁRIO (R$)",
+                    PC.C7_TOTAL AS "CUSTO TOTAL (R$)",
+                    ITEM_NF.D1_DTDIGIT AS "DATA DE ENTREGA",
+                    PC.C7_ENCER AS "STATUS PEDIDO COMPRA",
+                    SC.C1_EMISSAO AS "SC aberta em:",
+                    PC.C7_EMISSAO AS "PC aberto em:",
+                    ITEM_NF.D1_EMISSAO AS "Data emissão NF",
+                    SC.C1_ITEM AS "Item SC",
+                    SC.C1_ITEMPED AS "Item PC",
+                    FORN.A2_COD AS "Cód. Forn.",
+                    FORN.A2_NOME AS "Razão social",
+                    FORN.A2_NREDUZ AS "Nome fantasia",
                     SC.C1_ORIGEM AS "Origem",
-                    SC.C1_OBS AS "Observação",
+                    SC.C1_OBS AS "Observação Solic. Compra",
+                    SC.C1_QUANT AS "QUANT. SOLIC. COMPRAS",
                     SC.C1_LOCAL AS "Cod. Armazém",
                     ARM.NNR_DESCRI AS "Desc. Armazém",
+                    PROD.B1_ZZLOCAL AS "Endereço almox.",
                     SC.C1_IMPORT AS "Importado?",
-                    PC.C7_OBS AS "Observações",
-                    PC.C7_OBSM AS "Observações item",
-                    FORN.A2_COD AS "Cód. Forn.",
-                    FORN.A2_NOME AS "Raz. Soc. Forn.",
-                    FORN.A2_NREDUZ AS "Nom. Fantasia Forn.",
+                    PC.C7_OBS AS "Observações Pedido Compra",
+                    PC.C7_OBSM AS "Observação do item no pedido compra",
                     US.USR_NOME AS "Solicitante",
                     PC.S_T_A_M_P_ AS "Aberto em:",
                     SC.C1_OP AS "OP"
@@ -811,39 +811,39 @@ class ComprasApp(QWidget):
 
                 UNION ALL
 
-                SELECT 
+                SELECT
                     SC.C1_ZZNUMQP AS "QP",
-                    SC.C1_NUM AS "SC",
+                    SC.C1_NUM AS "SOLIC. COMPRA",
+                    NULL AS "PEDIDO COMPRA",
+                    NULL AS "DOC. NF ENTRADA",
+                    NULL AS "PREVISÃO ENTREGA",
+                    SC.C1_PRODUTO AS "CÓDIGO",
+                    SC.C1_DESCRI AS "DESCRIÇÃO",
+                    SC.C1_UM AS "UNID. MED.",
+                    NULL AS "QUANT. PEDIDO COMPRA",
+                    NULL AS "QTD. ENTREGUE",
+                    NULL AS "QTD. PENDENTE",
+                    NULL AS "CUSTO UNITÁRIO (R$)",
+                    NULL AS "CUSTO TOTAL (R$)",
+                    NULL AS "DATA DE ENTREGA",
+                    NULL AS "STATUS PEDIDO COMPRA",
+                    SC.C1_EMISSAO AS "SC aberta em:",
+                    NULL AS "PC aberto em:",
+                    NULL AS "Data emissão NF",
                     SC.C1_ITEM AS "Item SC",
-                    SC.C1_QUANT AS "Qtd. SC",
-                    NULL AS "Ped. Compra",
-                    NULL AS "Item Ped.",
-                    NULL AS "Qtd. Ped.",
-                    NULL AS "Preço Unit. (R$)",
-                    NULL AS "Sub-total (R$)",
-                    NULL AS "Previsão Entrega",
-                    NULL AS "Nota Fiscal Ent.",
-                    NULL AS "Qtd. Entregue",
-                    NULL AS "Qtd. Pendente",
-                    NULL AS "Data Entrega",
-                    NULL AS "Status Ped. Compra",
-                    SC.C1_PRODUTO AS "Código",
-                    SC.C1_DESCRI AS "Descrição",
-                    SC.C1_UM AS "UM",
-                    PROD.B1_ZZLOCAL AS "Endereço:",
-                    SC.C1_EMISSAO AS "Emissão SC",
-                    NULL AS "Emissão PC",
-                    NULL AS "Emissão NF",
+                    NULL AS "Item PC",
+                    NULL AS "Cód. Forn.",
+                    NULL AS "Razão social",
+                    NULL AS "Nome fantasia",
                     SC.C1_ORIGEM AS "Origem",
-                    SC.C1_OBS AS "Observação",
+                    SC.C1_OBS AS "Observação Solic. Compra",
+                    SC.C1_QUANT AS "QUANT. SOLIC. COMPRAS",
                     SC.C1_LOCAL AS "Cod. Armazém",
                     ARM.NNR_DESCRI AS "Desc. Armazém",
+                    PROD.B1_ZZLOCAL AS "Endereço almox.",
                     SC.C1_IMPORT AS "Importado?",
-                    NULL AS "Observações",
-                    NULL AS "Observações item",
-                    NULL AS "Cód. Forn.",
-                    NULL AS "Raz. Soc. Forn.",
-                    NULL AS "Nom. Fantasia Forn.",
+                    NULL AS "Observações Pedido Compra",
+                    NULL AS "Observação do item no pedido compra",
                     US.USR_NOME AS "Solicitante",
                     NULL AS "Aberto em:",
                     SC.C1_OP AS "OP"
@@ -872,7 +872,7 @@ class ComprasApp(QWidget):
                     AND SC.C1_LOCAL LIKE '{cod_armazem}%'
                     AND SC.D_E_L_E_T_ <> '*' {filtro_data}
                     AND PROD.D_E_L_E_T_ <> '*'
-                    AND SC.C1_COTACAO <> 'XXXXXX' ORDER BY "SC" DESC;
+                    AND SC.C1_COTACAO <> 'XXXXXX' ORDER BY "SOLIC. COMPRA" DESC;
             """
 
         if checkbox_sc_somente_com_pedido:
@@ -913,9 +913,9 @@ class ComprasApp(QWidget):
                 return
 
             dataframe = pd.read_sql(query_consulta_filtro, self.engine)
-            dataframe.insert(0, 'Status PC', '')
+            dataframe.insert(0, 'STATUS', '')
             dataframe[''] = ''
-            dataframe.insert(11, 'Dias em atraso', '')
+            dataframe.insert(12, 'CONTADOR DE DIAS', '')
 
             self.configurar_tabela(dataframe)
             self.configurar_tabela_tooltips(dataframe)
@@ -941,45 +941,45 @@ class ComprasApp(QWidget):
 
                 for column_name, value in row.items():
                     if value is not None:
-                        if column_name == 'Status PC':
+                        if column_name == 'STATUS':
                             item = QTableWidgetItem()
-                            if row['Status Ped. Compra'] is not None:
-                                if row['Status Ped. Compra'].strip() == '' and row['Nota Fiscal Ent.'] is None:
+                            if row['STATUS PEDIDO COMPRA'] is not None:
+                                if row['STATUS PEDIDO COMPRA'].strip() == '' and row['DOC. NF ENTRADA'] is None:
                                     item.setIcon(no_order)
-                                elif row['Status Ped. Compra'].strip() == '' and row['Nota Fiscal Ent.'] is not None:
+                                elif row['STATUS PEDIDO COMPRA'].strip() == '' and row['DOC. NF ENTRADA'] is not None:
                                     item.setIcon(wait_delivery)
-                                elif row['Status Ped. Compra'] == 'E':
+                                elif row['STATUS PEDIDO COMPRA'] == 'E':
                                     item.setIcon(end_order)
                                 item.setSizeHint(QSize(64, 64))
-                            elif row['Ped. Compra'] is None:
+                            elif row['PEDIDO COMPRA'] is None:
                                 item.setIcon(no_pc)
                         else:
-                            if column_name in ('Qtd. SC', 'Qtd. Ped.', 'Preço Unit. (R$)', 'Sub-total (R$)', 'Qtd. Entregue'):
+                            if column_name in ('QUANT. SOLIC. COMPRAS', 'QUANT. PEDIDO COMPRA', 'CUSTO UNITÁRIO (R$)', 'CUSTO TOTAL (R$)', 'QTD. ENTREGUE'):
                                 value = locale.format_string("%.2f", value, grouping=True)
 
-                            if column_name in ('Qtd. Ped.', 'Preço Unit. (R$)', 'Sub-total (R$)', 'Qtd. Entregue') and value == 'nan':
+                            if column_name in ('QUANT. PEDIDO COMPRA', 'CUSTO UNITÁRIO (R$)', 'CUSTO TOTAL (R$)', 'QTD. ENTREGUE') and value == 'nan':
                                 value = ''
                             if column_name == 'Aberto em:' and pd.isna(value):
                                 value = ''
 
-                            if column_name == 'Dias em atraso' and row['Nota Fiscal Ent.'] is None:
-                                previsao_entrega_sem_formatacao = row['Previsão Entrega']
+                            if column_name == 'CONTADOR DE DIAS' and row['DOC. NF ENTRADA'] is None:
+                                previsao_entrega_sem_formatacao = row['PREVISÃO ENTREGA']
                                 if pd.notna(previsao_entrega_sem_formatacao):
                                     previsao_entrega_obj = datetime.strptime(previsao_entrega_sem_formatacao, "%Y%m%d")
                                     previsao_entrega_formatada = previsao_entrega_obj.strftime("%d/%m/%Y")
                                     previsao_entrega = pd.to_datetime(previsao_entrega_formatada, dayfirst=True)
                                     value = (previsao_entrega - data_atual).days
-                            elif column_name == 'Dias em atraso' and row['Nota Fiscal Ent.'] is not None:
+                            elif column_name == 'CONTADOR DE DIAS' and row['DOC. NF ENTRADA'] is not None:
                                 value = ''
-                            if column_name == 'Qtd. Pendente' and pd.isna(value):
+                            if column_name == 'QTD. PENDENTE' and pd.isna(value):
                                 value = ''
-                            elif column_name == 'Qtd. Pendente' and value:
+                            elif column_name == 'QTD. PENDENTE' and value:
                                 value = round(value, 2)
                                 value = locale.format_string("%.2f", value, grouping=True)
 
-                            if column_name == 'Status Ped. Compra' and value == 'E':
+                            if column_name == 'STATUS PEDIDO COMPRA' and value == 'E':
                                 value = 'Encerrado'
-                            elif column_name == 'Status Ped. Compra' and value.strip() == '':
+                            elif column_name == 'STATUS PEDIDO COMPRA' and value.strip() == '':
                                 value = ''
 
                             if column_name == 'Origem' and value.strip() == 'MATA650':
@@ -992,13 +992,13 @@ class ComprasApp(QWidget):
                             elif column_name == 'Importado?' and value.strip() == '':
                                 value = 'Sim'
 
-                            if column_name in ('Previsão Entrega', 'Data Entrega', 'Emissão SC', 'Emissão PC', 'Emissão NF') and not value.isspace():
+                            if column_name in ('PREVISÃO ENTREGA', 'DATA DE ENTREGA', 'SC aberta em:', 'PC aberto em:', 'Data emissão NF') and not value.isspace():
                                 data_obj = datetime.strptime(value, "%Y%m%d")
                                 value = data_obj.strftime("%d/%m/%Y")
 
                             item = QTableWidgetItem(str(value).strip())
 
-                            if column_name not in ('Descrição', 'Observação', 'Cod. Armazém', 'Observações', 'Observações item', 'Raz. Soc. Forn.', 'Nom. Fantasia Forn.'):
+                            if column_name not in ('DESCRIÇÃO', 'Observação Solic. Compra', 'Cod. Armazém', 'Observações Pedido Compra', 'Observação do item no pedido compra', 'Razão social', 'Nome fantasia'):
                                 item.setTextAlignment(Qt.AlignCenter)
                     else:
                         item = QTableWidgetItem('')
@@ -1023,7 +1023,7 @@ class ComprasApp(QWidget):
     def configurar_tabela_tooltips(self, dataframe):
         # Mapa de tooltips correspondentes às colunas da consulta SQL
         tooltip_map = {
-            "Status PC": "VERMELHO - SC sem Pedido de Compra\nCINZA - Aguardando entrega\nAZUL - Entrega "
+            "STATUS": "VERMELHO - SC sem Pedido de Compra\nCINZA - Aguardando entrega\nAZUL - Entrega "
                          "parcial\nVERDE - Pedido de compra encerrado"
         }
 

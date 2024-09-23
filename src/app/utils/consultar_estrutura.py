@@ -19,10 +19,10 @@ def executar_consulta_estrutura(self, table):
     descricao = None
 
     for col in range(header.count()):
-        header_text = table.horizontalHeaderItem(col).text()
-        if header_text == 'Código':
+        header_text = table.horizontalHeaderItem(col).text().lower()
+        if header_text == 'código':
             codigo_col = col
-        elif header_text == 'Descrição':
+        elif header_text == 'descrição':
             descricao_col = col
 
         if codigo_col is not None and descricao_col is not None:
