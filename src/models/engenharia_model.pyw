@@ -170,7 +170,7 @@ class EngenhariaApp(QWidget):
         self.btn_ultimos_fornecedores.hide()
 
         self.btn_limpar = QPushButton("Limpar", self)
-        self.btn_limpar.clicked.connect(self.limpar_campos)
+        self.btn_limpar.clicked.connect(self.clean_screen)
         self.btn_limpar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_nova_janela = QPushButton("Nova Janela", self)
@@ -524,7 +524,7 @@ class EngenhariaApp(QWidget):
             item.setToolTip(tooltip)
             self.tree.setHorizontalHeaderItem(i, item)
 
-    def limpar_campos(self):
+    def clean_screen(self):
         # Limpar os dados dos campos
         self.campo_codigo.clear()
         self.campo_descricao.clear()
@@ -538,17 +538,15 @@ class EngenhariaApp(QWidget):
         self.tree.setRowCount(0)
         self.label_line_number.hide()
 
-    def controle_campos_formulario(self, status):
-        self.campo_codigo.setEnabled(status)
-        self.campo_descricao.setEnabled(status)
-        self.campo_contem_descricao.setEnabled(status)
-        self.campo_tipo.setEnabled(status)
-        self.campo_um.setEnabled(status)
-        self.combobox_armazem.setEnabled(status)
-        self.campo_grupo.setEnabled(status)
-        self.btn_consultar.setEnabled(status)
+        self.btn_abrir_desenho.hide()
+        self.btn_consultar_estrutura.hide()
+        self.btn_exportar_excel.hide()
+        self.btn_onde_e_usado.hide()
+        self.btn_saldo_estoque.hide()
+        self.btn_ultimos_fornecedores.hide()
 
-        if status == "False":
+    def button_visible_control(self, visible):
+        if visible == "False":
             self.btn_abrir_desenho.hide()
             self.btn_consultar_estrutura.hide()
             self.btn_exportar_excel.hide()
@@ -562,6 +560,16 @@ class EngenhariaApp(QWidget):
             self.btn_onde_e_usado.show()
             self.btn_saldo_estoque.show()
             self.btn_ultimos_fornecedores.show()
+
+    def controle_campos_formulario(self, status):
+        self.campo_codigo.setEnabled(status)
+        self.campo_descricao.setEnabled(status)
+        self.campo_contem_descricao.setEnabled(status)
+        self.campo_tipo.setEnabled(status)
+        self.campo_um.setEnabled(status)
+        self.combobox_armazem.setEnabled(status)
+        self.campo_grupo.setEnabled(status)
+        self.btn_consultar.setEnabled(status)
 
     def query_consulta_tabela_produtos(self):
         codigo = self.campo_codigo.text().upper().strip()
@@ -635,6 +643,7 @@ class EngenhariaApp(QWidget):
 
         self.label_line_number.hide()
         self.controle_campos_formulario(False)
+        self.button_visible_control(False)
 
         conn_str = f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};PWD={self.password}'
         self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
@@ -668,6 +677,7 @@ class EngenhariaApp(QWidget):
             else:
                 exibir_mensagem("EUREKA® engenharia", 'Nada encontrado!', "info")
                 self.controle_campos_formulario(True)
+                self.button_visible_control(False)
                 return
 
             # Preencher a tabela com os resultados
@@ -701,6 +711,7 @@ class EngenhariaApp(QWidget):
             self.tree.setSortingEnabled(True)  # Permitir ordenação
 
             self.controle_campos_formulario(True)
+            self.button_visible_control(True)
 
         except pyodbc.Error as ex:
             print(f"Falha na consulta. Erro: {str(ex)}")
