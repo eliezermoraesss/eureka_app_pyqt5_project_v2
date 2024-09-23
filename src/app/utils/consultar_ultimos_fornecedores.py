@@ -1,7 +1,8 @@
 import pyodbc
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QLabel, QTableWidgetItem, QTableWidget, QHeaderView, QHBoxLayout, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import QLabel, QTableWidgetItem, QTableWidget, QHeaderView, QHBoxLayout, QVBoxLayout, QWidget, \
+    QMessageBox
 
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.utils import copiar_linha
@@ -55,12 +56,15 @@ def executar_ultimos_fornecedores(self, table):
                     ORDER BY FORN.A2_NREDUZ ASC;
                 """
             self.guias_abertas_ultimos_fornecedores.append(codigo)
+            conn = pyodbc.connect(
+                f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}')
             try:
-                conn_saldo = pyodbc.connect(
-                    f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}')
-
-                cursor = conn_saldo.cursor()
+                cursor = conn.cursor()
                 cursor.execute(query)
+
+                if cursor.rowcount == 0:
+                    QMessageBox.information(None, "Eureka®", "Nenhum fornecedor não encontrado.")
+                    return
 
                 nova_guia_ult_forn = QWidget()
                 layout_nova_guia_ult_forn = QVBoxLayout()
@@ -142,13 +146,13 @@ def executar_ultimos_fornecedores(self, table):
 
                 self.tabWidget.addTab(nova_guia_ult_forn, f"Fornecedores - {codigo}")
                 tabela_ult_fornecedores.itemDoubleClicked.connect(copiar_linha)
+                self.tabWidget.setCurrentIndex(self.tabWidget.indexOf(nova_guia_ult_forn))
 
             except pyodbc.Error as ex:
                 print(f"Falha na consulta de estrutura. Erro: {str(ex)}")
 
             finally:
-                self.tabWidget.setCurrentIndex(self.tabWidget.indexOf(nova_guia_ult_forn))
-                conn_saldo.close()
+                conn.close()
 
 
 driver = '{SQL Server}'

@@ -5,7 +5,7 @@ import pyodbc
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QAbstractItemView, QItemDelegate, \
-    QTableWidgetItem, QPushButton, QSizePolicy, QLabel, QSpacerItem
+    QTableWidgetItem, QPushButton, QSizePolicy, QLabel, QSpacerItem, QMessageBox
 
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.utils import ajustar_largura_coluna_descricao, exportar_excel
@@ -54,13 +54,15 @@ def executar_consulta_estrutura(self, table):
                     ORDER BY 
                         B1_DESC ASC;
                 """
-
+            conn = pyodbc.connect(
+            f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}')
             try:
-                conn_estrutura = pyodbc.connect(
-                    f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}')
+                cursor = conn.cursor()
+                cursor.execute(select_query_estrutura)
 
-                cursor_estrutura = conn_estrutura.cursor()
-                resultado = cursor_estrutura.execute(select_query_estrutura)
+                if cursor.rowcount == 0:
+                    QMessageBox.information(None, "Eureka®", "Estrutura não encontrada.")
+                    return
 
                 nova_guia_estrutura = QWidget()
                 layout_nova_guia_estrutura = QVBoxLayout()
@@ -72,8 +74,8 @@ def executar_consulta_estrutura(self, table):
                 tree_estrutura.customContextMenuRequested.connect(
                     lambda pos: self.show_context_menu(pos, tree_estrutura))
 
-                tree_estrutura.setColumnCount(len(cursor_estrutura.description))
-                tree_estrutura.setHorizontalHeaderLabels([desc[0] for desc in cursor_estrutura.description])
+                tree_estrutura.setColumnCount(len(cursor.description))
+                tree_estrutura.setHorizontalHeaderLabels([desc[0] for desc in cursor.description])
 
                 # Tornar a tabela somente leitura
                 tree_estrutura.setEditTriggers(QTableWidget.NoEditTriggers)
@@ -91,7 +93,7 @@ def executar_consulta_estrutura(self, table):
                 altura_linha = 22  # Substitua pelo valor desejado
                 tree_estrutura.verticalHeader().setDefaultSectionSize(altura_linha)
 
-                for i, row in enumerate(resultado.fetchall()):
+                for i, row in enumerate(cursor.fetchall()):
                     tree_estrutura.insertRow(i)
                     for j, value in enumerate(row):
                         if j == 2:
@@ -196,16 +198,16 @@ def executar_consulta_estrutura(self, table):
                     self.tabWidget.setVisible(True)
 
                 self.tabWidget.addTab(nova_guia_estrutura, f"{codigo}")
+                self.tabWidget.setCurrentIndex(self.tabWidget.indexOf(nova_guia_estrutura))
+                tree_estrutura.itemChanged.connect(
+                    lambda item: handle_item_change(item, tree_estrutura, codigo))
+                self.guias_abertas.append(codigo)
 
             except pyodbc.Error as ex:
                 print(f"Falha na consulta de estrutura. Erro: {str(ex)}")
 
             finally:
-                self.tabWidget.setCurrentIndex(self.tabWidget.indexOf(nova_guia_estrutura))
-                tree_estrutura.itemChanged.connect(
-                    lambda item: handle_item_change(item, tree_estrutura, codigo))
-                self.guias_abertas.append(codigo)
-                conn_estrutura.close()
+                conn.close()
 
 
 def alterar_quantidade_estrutura(codigo_pai, codigo_filho, quantidade):

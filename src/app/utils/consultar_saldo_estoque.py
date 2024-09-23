@@ -4,7 +4,8 @@ from datetime import datetime
 import pyodbc
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QLabel, QTableWidgetItem, QTableWidget, QHeaderView, QHBoxLayout, QWidget, QVBoxLayout
+from PyQt5.QtWidgets import QLabel, QTableWidgetItem, QTableWidget, QHeaderView, QHBoxLayout, QWidget, QVBoxLayout, \
+    QMessageBox
 
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.utils import copiar_linha
@@ -59,6 +60,10 @@ def executar_saldo_em_estoque(self, table):
 
                 cursor_saldo_estoque = conn_saldo.cursor()
                 cursor_saldo_estoque.execute(query_saldo)
+
+                if cursor_saldo_estoque.rowcount == 0:
+                    QMessageBox.information(None, "Eureka®", "Saldo estoque.")
+                    return
 
                 nova_guia_saldo = QWidget()
                 layout_nova_guia_saldo = QVBoxLayout()

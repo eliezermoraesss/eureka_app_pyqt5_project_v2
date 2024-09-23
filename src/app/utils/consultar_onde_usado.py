@@ -1,7 +1,7 @@
 import pyodbc
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem, QLabel
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem, QLabel, QMessageBox
 
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.utils import ajustar_largura_coluna_descricao, copiar_linha
@@ -51,12 +51,15 @@ def executar_consulta_onde_usado(self, table):
                     ORDER BY B1_DESC ASC;
                 """
             self.guias_abertas_onde_usado.append(codigo)
+            conn = pyodbc.connect(
+                f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}')
             try:
-                conn_estrutura = pyodbc.connect(
-                    f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}')
+                cursor = conn.cursor()
+                resultado = cursor.execute(query_onde_usado)
 
-                cursor_estrutura = conn_estrutura.cursor()
-                cursor_estrutura.execute(query_onde_usado)
+                if resultado.rowcount == 0:
+                    QMessageBox.information(None, "Eureka®", "Nenhum item pai encontrado.\nEste item não compõe nenhuma estrutura de produto.")
+                    return
 
                 nova_guia_estrutura = QWidget()
                 layout_nova_guia_estrutura = QVBoxLayout()
@@ -68,8 +71,8 @@ def executar_consulta_onde_usado(self, table):
                 tabela_onde_usado.customContextMenuRequested.connect(
                     lambda pos: self.show_context_menu(pos, tabela_onde_usado))
 
-                tabela_onde_usado.setColumnCount(len(cursor_estrutura.description))
-                tabela_onde_usado.setHorizontalHeaderLabels([desc[0] for desc in cursor_estrutura.description])
+                tabela_onde_usado.setColumnCount(len(cursor.description))
+                tabela_onde_usado.setHorizontalHeaderLabels([desc[0] for desc in cursor.description])
 
                 # Tornar a tabela somente leitura
                 tabela_onde_usado.setEditTriggers(QTableWidget.NoEditTriggers)
@@ -82,7 +85,7 @@ def executar_consulta_onde_usado(self, table):
                 altura_linha = 22  # Substitua pelo valor desejado
                 tabela_onde_usado.verticalHeader().setDefaultSectionSize(altura_linha)
 
-                for i, row in enumerate(cursor_estrutura.fetchall()):
+                for i, row in enumerate(cursor.fetchall()):
                     tabela_onde_usado.insertRow(i)
                     for j, value in enumerate(row):
                         valor_formatado = str(value).strip()
@@ -141,13 +144,13 @@ def executar_consulta_onde_usado(self, table):
 
                 self.tabWidget.addTab(nova_guia_estrutura, f"Onde é usado? - {codigo}")
                 tabela_onde_usado.itemDoubleClicked.connect(copiar_linha)
+                self.tabWidget.setCurrentIndex(self.tabWidget.indexOf(nova_guia_estrutura))
 
             except pyodbc.Error as ex:
                 print(f"Falha na consulta de estrutura. Erro: {str(ex)}")
 
             finally:
-                self.tabWidget.setCurrentIndex(self.tabWidget.indexOf(nova_guia_estrutura))
-                conn_estrutura.close()
+                conn.close()
 
 
 driver = '{SQL Server}'

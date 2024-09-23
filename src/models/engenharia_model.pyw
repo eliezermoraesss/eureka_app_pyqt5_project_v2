@@ -443,17 +443,13 @@ class EngenhariaApp(QWidget):
 
             menu = QMenu()
 
-            context_menu_nova_janela = QAction('Nova janela', self)
-            context_menu_nova_janela.triggered.connect(lambda: abrir_nova_janela(self, EngenhariaApp()))
-            menu.addAction(context_menu_nova_janela)
+            editar_action = QAction('Editar...', self)
+            editar_action.triggered.connect(self.editar_item_selecionado)
+            menu.addAction(editar_action)
 
             context_menu_abrir_desenho = QAction('Abrir desenho', self)
             context_menu_abrir_desenho.triggered.connect(lambda: abrir_desenho(self, table))
             menu.addAction(context_menu_abrir_desenho)
-
-            editar_action = QAction('Editar...', self)
-            editar_action.triggered.connect(self.editar_item_selecionado)
-            menu.addAction(editar_action)
 
             context_menu_consultar_estrutura = QAction('Consultar estrutura', self)
             context_menu_consultar_estrutura.triggered.connect(lambda: executar_consulta_estrutura(self, table))
@@ -474,6 +470,10 @@ class EngenhariaApp(QWidget):
             context_menu_tabela_pesos = QAction('Abrir Tabela de Pesos', self)
             context_menu_tabela_pesos.triggered.connect(self.abrir_tabela_pesos)
             menu.addAction(context_menu_tabela_pesos)
+
+            context_menu_nova_janela = QAction('Nova janela', self)
+            context_menu_nova_janela.triggered.connect(lambda: abrir_nova_janela(self, EngenhariaApp()))
+            menu.addAction(context_menu_nova_janela)
 
             menu.exec_(table.viewport().mapToGlobal(position))
 
@@ -685,7 +685,7 @@ class EngenhariaApp(QWidget):
 
                 time.sleep(0.1)
             else:
-                exibir_mensagem("EUREKA® engenharia", 'Nada encontrado!', "info")
+                exibir_mensagem("EUREKA® Engenharia", 'Nada encontrado!', "info")
                 self.controle_campos_formulario(True)
                 self.button_visible_control(False)
                 return
