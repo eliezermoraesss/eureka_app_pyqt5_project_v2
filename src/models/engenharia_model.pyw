@@ -317,7 +317,7 @@ class EngenhariaApp(QWidget):
                 margin: 10px 5px;
             }
 
-            QPushButton#PCP, QPushButton#compras {
+            QPushButton#PCP {
                 background-color: #DC5F00;
             }
 

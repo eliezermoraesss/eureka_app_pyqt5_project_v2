@@ -220,23 +220,28 @@ class ComprasApp(QWidget):
         self.btn_abrir_engenharia.clicked.connect(self.abrir_modulo_engenharia)
         self.btn_abrir_engenharia.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
+        self.btn_abrir_pcp = QPushButton("PCP", self)
+        self.btn_abrir_pcp.setObjectName("PCP")
+        self.btn_abrir_pcp.clicked.connect(self.abrir_modulo_pcp)
+        self.btn_abrir_pcp.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
         self.btn_onde_e_usado = QPushButton("Onde é usado?", self)
         self.btn_onde_e_usado.clicked.connect(lambda: executar_consulta_onde_usado(self, self.tree))
         self.btn_onde_e_usado.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.btn_onde_e_usado.setEnabled(False)
+        self.btn_onde_e_usado.hide()
 
         self.btn_saldo_estoque = QPushButton("Saldos em Estoque", self)
         self.btn_saldo_estoque.clicked.connect(lambda: executar_saldo_em_estoque(self, self.tree))
         self.btn_saldo_estoque.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.btn_saldo_estoque.setEnabled(False)
+        self.btn_saldo_estoque.hide()
 
         self.btn_ultimos_fornecedores = QPushButton("Fornecedores", self)
         self.btn_ultimos_fornecedores.clicked.connect(lambda: executar_ultimos_fornecedores(self, self.tree))
         self.btn_ultimos_fornecedores.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.btn_ultimos_fornecedores.setEnabled(False)
+        self.btn_ultimos_fornecedores.hide()
 
         self.btn_limpar = QPushButton("Limpar", self)
-        self.btn_limpar.clicked.connect(self.limpar_campos)
+        self.btn_limpar.clicked.connect(self.clean_screen)
         self.btn_limpar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_nova_janela = QPushButton("Nova Janela", self)
@@ -246,7 +251,7 @@ class ComprasApp(QWidget):
         self.btn_exportar_excel = QPushButton("Exportar Excel", self)
         self.btn_exportar_excel.clicked.connect(lambda: exportar_excel(self, self.tree))
         self.btn_exportar_excel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.btn_exportar_excel.setEnabled(False)
+        self.btn_exportar_excel.hide()
 
         self.btn_fechar = QPushButton("Fechar", self)
         self.btn_fechar.clicked.connect(self.fechar_janela)
@@ -340,6 +345,7 @@ class ComprasApp(QWidget):
         self.layout_buttons.addWidget(self.btn_limpar)
         self.layout_buttons.addWidget(self.btn_exportar_excel)
         self.layout_buttons.addWidget(self.btn_abrir_engenharia)
+        self.layout_buttons.addWidget(self.btn_abrir_pcp)
         self.layout_buttons.addWidget(self.btn_fechar)
         self.layout_buttons.addStretch()
 
@@ -437,13 +443,18 @@ class ComprasApp(QWidget):
                 border: 2px solid #0a79f8;
                 background-color: #0a79f8;
             }
+            
+            QPushButton#PCP {
+                border: 2px solid #DC5F00;
+                background-color: #DC5F00;
+            }
     
-            QPushButton:hover, QPushButton:hover#btn_engenharia {
+            QPushButton:hover, QPushButton:hover#btn_engenharia, QPushButton#PCP:hover {
                 background-color: #EFF2F1;
                 color: #3A0CA3
             }
     
-            QPushButton:pressed, QPushButton:pressed#btn_engenharia {
+            QPushButton:pressed, QPushButton:pressed#btn_engenharia, QPushButton#PCP:pressed {
                 background-color: #6703c5;
                 color: #fff;
             }
@@ -607,7 +618,7 @@ class ComprasApp(QWidget):
         # Ordenar a tabela pela coluna clicada
         self.tree.sortItems(logical_index, order)
 
-    def limpar_campos(self):
+    def clean_screen(self):
         self.campo_sc.clear()
         self.campo_pedido.clear()
         self.campo_codigo.clear()
@@ -621,6 +632,32 @@ class ComprasApp(QWidget):
         self.tree.setRowCount(0)
         self.checkbox_exibir_somente_sc_com_pedido.setChecked(False)
         self.label_line_number.hide()
+
+        self.btn_exportar_excel.hide()
+        self.btn_onde_e_usado.hide()
+        self.btn_saldo_estoque.hide()
+        self.btn_ultimos_fornecedores.hide()
+
+        self.guias_abertas.clear()
+        self.guias_abertas_onde_usado.clear()
+        self.guias_abertas_saldo.clear()
+
+        while self.tabWidget.count():
+            self.tabWidget.removeTab(0)
+        self.tabWidget.setVisible(False)
+        self.guia_fechada.emit()
+
+    def button_visible_control(self, visible):
+        if visible == "False":
+            self.btn_exportar_excel.hide()
+            self.btn_onde_e_usado.hide()
+            self.btn_saldo_estoque.hide()
+            self.btn_ultimos_fornecedores.hide()
+        else:
+            self.btn_exportar_excel.show()
+            self.btn_onde_e_usado.show()
+            self.btn_saldo_estoque.show()
+            self.btn_ultimos_fornecedores.show()
 
     def controle_campos_formulario(self, status):
         self.campo_sc.setEnabled(status)
@@ -850,6 +887,7 @@ class ComprasApp(QWidget):
 
         self.label_line_number.hide()
         self.controle_campos_formulario(False)
+        self.button_visible_control(False)
 
         conn_str = f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};PWD={self.password}'
         self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
@@ -872,6 +910,7 @@ class ComprasApp(QWidget):
             else:
                 exibir_mensagem("EUREKA® Compras", 'Nada encontrado!', "info")
                 self.controle_campos_formulario(True)
+                self.button_visible_control(False)
                 return
 
             dataframe = pd.read_sql(query_consulta_filtro, self.engine)
@@ -975,6 +1014,7 @@ class ComprasApp(QWidget):
 
             self.tree.setSortingEnabled(True)
             self.controle_campos_formulario(True)
+            self.button_visible_control(True)
 
         except Exception as ex:
             exibir_mensagem('Erro ao consultar TOTVS', f'Erro: {str(ex)}', 'error')
@@ -1010,6 +1050,12 @@ class ComprasApp(QWidget):
         process = QProcess()
         script_dir = os.path.dirname(os.path.abspath(__file__))
         script_path = os.path.join(script_dir, 'engenharia_model.pyw')
+        process.startDetached("python", [script_path])
+
+    def abrir_modulo_pcp(self):
+        process = QProcess()
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        script_path = os.path.join(script_dir, 'pcp_model.pyw')
         process.startDetached("python", [script_path])
 
 
