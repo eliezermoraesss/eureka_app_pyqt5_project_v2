@@ -89,7 +89,6 @@ class ComprasApp(QWidget):
         fonte_campos = "Segoe UI"
         tamanho_fonte_campos = 16
 
-        self.interromper_consulta_sql = False
         self.tree = QTableWidget(self)
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
@@ -463,7 +462,7 @@ class ComprasApp(QWidget):
                 border: 1px solid #000000;
                 background-color: #686D76;
                 padding-left: 10px;
-                margin: 5px 15px 0px 0px;
+                margin: 15px 0;
             }
     
             QTableWidget QHeaderView::section {
@@ -937,15 +936,12 @@ class ComprasApp(QWidget):
             end_order = QIcon(end_order_path)
 
             for i, row in dataframe.iterrows():
-                if self.interromper_consulta_sql:
-                    break
-
                 self.tree.setSortingEnabled(False)
                 self.tree.insertRow(i)
 
-                for j, value in enumerate(row):
+                for column_name, value in row.items():
                     if value is not None:
-                        if j == 0:
+                        if column_name == 'Status PC':
                             item = QTableWidgetItem()
                             if row['Status Ped. Compra'] is not None:
                                 if row['Status Ped. Compra'].strip() == '' and row['Nota Fiscal Ent.'] is None:
@@ -958,57 +954,56 @@ class ComprasApp(QWidget):
                             elif row['Ped. Compra'] is None:
                                 item.setIcon(no_pc)
                         else:
-                            if j in (4, 7, 8, 9, 13):
+                            if column_name in ('Qtd. SC', 'Qtd. Ped.', 'Preço Unit. (R$)', 'Sub-total (R$)', 'Qtd. Entregue'):
                                 value = locale.format_string("%.2f", value, grouping=True)
 
-                            if j in (7, 8, 9, 13) and value == 'nan':
-                                value = '-'
-                            if j == 35 and pd.isna(value):
-                                value = '-'
+                            if column_name in ('Qtd. Ped.', 'Preço Unit. (R$)', 'Sub-total (R$)', 'Qtd. Entregue') and value == 'nan':
+                                value = ''
+                            if column_name == 'Aberto em:' and pd.isna(value):
+                                value = ''
 
-                            if j == 11 and row['Nota Fiscal Ent.'] is None:
+                            if column_name == 'Dias em atraso' and row['Nota Fiscal Ent.'] is None:
                                 previsao_entrega_sem_formatacao = row['Previsão Entrega']
                                 if pd.notna(previsao_entrega_sem_formatacao):
                                     previsao_entrega_obj = datetime.strptime(previsao_entrega_sem_formatacao, "%Y%m%d")
                                     previsao_entrega_formatada = previsao_entrega_obj.strftime("%d/%m/%Y")
                                     previsao_entrega = pd.to_datetime(previsao_entrega_formatada, dayfirst=True)
                                     value = (previsao_entrega - data_atual).days
-                            elif j == 11 and row['Nota Fiscal Ent.'] is not None:
-                                value = '-'
-                            if j == 14 and pd.isna(value):  # COLUNA QTD. ENTREGUE
-                                value = '-'
-                            elif j == 14 and value:  # COLUNA QTD. PENDENTE
+                            elif column_name == 'Dias em atraso' and row['Nota Fiscal Ent.'] is not None:
+                                value = ''
+                            if column_name == 'Qtd. Pendente' and pd.isna(value):
+                                value = ''
+                            elif column_name == 'Qtd. Pendente' and value:
                                 value = round(value, 2)
+                                value = locale.format_string("%.2f", value, grouping=True)
 
-                            if j == 16 and value == 'E':
+                            if column_name == 'Status Ped. Compra' and value == 'E':
                                 value = 'Encerrado'
-                            elif j == 16 and value.strip() == '':
-                                value = '-'
+                            elif column_name == 'Status Ped. Compra' and value.strip() == '':
+                                value = ''
 
-                            if j == 24 and value.strip() == 'MATA650':  # Indica na coluna 'Origem' se o item foi
-                                # empenhado ou será comprado
+                            if column_name == 'Origem' and value.strip() == 'MATA650':
                                 value = 'Empenho'
-                            elif j == 24 and value.strip() == '':
+                            elif column_name == 'Origem' and value.strip() == '':
                                 value = 'Compras'
 
-                            if j == 28 and value.strip() == 'N':  # Escreve sim ou não na coluna 'Importado?'
+                            if column_name == 'Importado?' and value.strip() == 'N':
                                 value = 'Não'
-                            elif j == 28 and value.strip() == '':
+                            elif column_name == 'Importado?' and value.strip() == '':
                                 value = 'Sim'
 
-                            if j in (10, 15, 21, 22, 23) and not value.isspace():  # Formatação das datas no formato
-                                # dd/mm/YYYY
+                            if column_name in ('Previsão Entrega', 'Data Entrega', 'Emissão SC', 'Emissão PC', 'Emissão NF') and not value.isspace():
                                 data_obj = datetime.strptime(value, "%Y%m%d")
                                 value = data_obj.strftime("%d/%m/%Y")
 
                             item = QTableWidgetItem(str(value).strip())
 
-                            if j not in (18, 25, 29, 30, 32, 33):  # Alinhamento a esquerda de colunas
+                            if column_name not in ('Descrição', 'Observação', 'Cod. Armazém', 'Observações', 'Observações item', 'Raz. Soc. Forn.', 'Nom. Fantasia Forn.'):
                                 item.setTextAlignment(Qt.AlignCenter)
                     else:
                         item = QTableWidgetItem('')
 
-                    self.tree.setItem(i, j, item)
+                    self.tree.setItem(i, list(row.index).index(column_name), item)
 
                 # QCoreApplication.processEvents()
 
@@ -1024,7 +1019,6 @@ class ComprasApp(QWidget):
             if hasattr(self, 'engine'):
                 self.engine.dispose()
                 self.engine = None
-            self.interromper_consulta_sql = False
 
     def configurar_tabela_tooltips(self, dataframe):
         # Mapa de tooltips correspondentes às colunas da consulta SQL
