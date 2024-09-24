@@ -129,6 +129,10 @@ def executar_consulta_onde_usado(self, table):
                         QTableWidget QHeaderView::section:horizontal {
                             border-top: 1px solid #333;
                         }
+                        
+                        QTableWidget::item {
+                            color: #EEEEEE;
+                        }   
 
                         QTableWidget::item:selected {
                             background-color: #0066ff;

@@ -137,6 +137,10 @@ def executar_saldo_em_estoque(self, table):
                         QTableWidget QHeaderView::section:horizontal {
                             border-top: 1px solid #333;
                         }
+                        
+                        QTableWidget::item {
+                            color: #EEEEEE;
+                        }   
 
                         QTableWidget::item:selected {
                             background-color: #0066ff;

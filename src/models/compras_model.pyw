@@ -89,9 +89,16 @@ class ComprasApp(QWidget):
         fonte_campos = "Segoe UI"
         tamanho_fonte_campos = 16
 
+        self.table_area = QTableWidget(self)
+        self.table_area.setColumnCount(0)
+        self.table_area.setRowCount(0)
+        self.table_area.setObjectName("table_area")
+
         self.tree = QTableWidget(self)
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
+        self.tree.setObjectName("result_table")
+        self.tree.hide()
 
         self.nova_janela = None
 
@@ -112,9 +119,9 @@ class ComprasApp(QWidget):
         self.checkbox_exibir_somente_sc_com_pedido = QCheckBox("Ocultar Solicitação de Compras EM ABERTO", self)
         self.checkbox_exibir_somente_sc_com_pedido.setObjectName("checkbox-sc")
 
-        self.label_sc = QLabel("Solic. Compra:", self)
+        self.label_sc = QLabel("Solicitação de Compra:", self)
         self.label_sc.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.label_pedido = QLabel("Ped. de Compra:", self)
+        self.label_pedido = QLabel("Pedido de Compra:", self)
         self.label_pedido.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.label_codigo = QLabel("Código:", self)
         self.label_codigo.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -123,15 +130,15 @@ class ComprasApp(QWidget):
         self.label_contem_descricao_prod = QLabel("Contém na descrição:", self)
         self.label_contem_descricao_prod.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        self.label_qp = QLabel("Número QP:", self)
+        self.label_qp = QLabel("Número da QP:", self)
         self.label_qp.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.label_OP = QLabel("Número OP:", self)
+        self.label_OP = QLabel("Número da OP:", self)
         self.label_OP.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.label_data_inicio = QLabel("Data inicial SC:", self)
         self.label_data_fim = QLabel("Data final SC:", self)
         self.label_armazem = QLabel("Armazém:", self)
-        self.label_fornecedor = QLabel("Fornecedor Razão Social:", self)
-        self.label_nm_fantasia_forn = QLabel("Fornecedor Nome Fantasia:", self)
+        self.label_fornecedor = QLabel("Razão social fornecedor:", self)
+        self.label_nm_fantasia_forn = QLabel("Nome Fantasia fornecedor:", self)
 
         self.campo_sc = QLineEdit(self)
         self.campo_sc.setFont(QFont(fonte_campos, tamanho_fonte_campos))
@@ -320,13 +327,15 @@ class ComprasApp(QWidget):
         container_nm_fantasia_forn.addWidget(self.label_nm_fantasia_forn)
         container_nm_fantasia_forn.addWidget(self.campo_nm_fantasia_fornecedor)
 
+        layout_campos_01.addStretch()
+        layout_campos_02.addStretch()
+        layout_campos_01.addLayout(container_qp)
         layout_campos_01.addLayout(container_sc)
         layout_campos_01.addLayout(container_pedido)
-        layout_campos_01.addLayout(container_op)
-        layout_campos_01.addLayout(container_qp)
         layout_campos_01.addLayout(container_codigo)
         layout_campos_01.addLayout(container_descricao_prod)
         layout_campos_01.addLayout(container_contem_descricao_prod)
+        layout_campos_01.addLayout(container_op)
         layout_campos_02.addLayout(container_data_ini)
         layout_campos_02.addLayout(container_data_fim)
         layout_campos_02.addLayout(container_combobox_armazem)
@@ -336,6 +345,7 @@ class ComprasApp(QWidget):
         layout_campos_01.addStretch()
         layout_campos_02.addStretch()
 
+        self.layout_buttons.addStretch()
         self.layout_buttons.addWidget(self.btn_consultar)
         self.layout_buttons.addWidget(self.btn_ultimos_fornecedores)
         self.layout_buttons.addWidget(self.btn_saldo_estoque)
@@ -356,6 +366,7 @@ class ComprasApp(QWidget):
         layout.addLayout(layout_campos_01)
         layout.addLayout(layout_campos_02)
         layout.addLayout(self.layout_buttons)
+        layout.addWidget(self.table_area)
         layout.addWidget(self.tree)
         layout.addLayout(self.layout_footer_label)
 
@@ -363,19 +374,20 @@ class ComprasApp(QWidget):
 
         self.setStyleSheet("""
             * {
-                background-color: #373A40;
+                background-color: #393E46;
             }
     
             QLabel, QCheckBox {
                 color: #DFE0E2;
-                font-size: 12px;
-                font-weight: bold;
+                font-size: 13px;
+                font-weight: regular;
                 padding-left: 10px; 
+                font-style: "Segoe UI";
             }
             
             QCheckBox#checkbox-sc {
                 margin-left: 10px;
-                font-size: 16px;
+                font-size: 13px;
                 font-weight: normal;
             }
             
@@ -386,7 +398,7 @@ class ComprasApp(QWidget):
     
             QDateEdit, QComboBox {
                 background-color: #EEEEEE;
-                border: 1px solid #262626;
+                border: 1px solid #393E46;
                 margin-bottom: 20px;
                 padding: 5px 10px;
                 border-radius: 10px;
@@ -413,9 +425,9 @@ class ComprasApp(QWidget):
     
             QLineEdit {
                 background-color: #EEEEEE;
-                border: 1px solid #262626;
+                border: 1px solid #393E46;
                 padding: 5px 10px;
-                border-radius: 10px;
+                border-radius: 12px;
                 font-size: 16px;
             }
             
@@ -431,10 +443,11 @@ class ComprasApp(QWidget):
                 color: #eeeeee;
                 padding: 7px 10px;
                 border: 2px solid #AF125A;
-                border-radius: 8px;
-                font-size: 12px;
+                border-radius: 12px;
+                font-style: "Segoe UI";
+                font-size: 13px;
                 height: 20px;
-                font-weight: bold;
+                font-weight: regular;
                 margin: 10px 5px 5px 5px;
             }
             
@@ -457,35 +470,35 @@ class ComprasApp(QWidget):
                 background-color: #6703c5;
                 color: #fff;
             }
-    
-            QTableWidget {
-                border: 1px solid #000000;
-                background-color: #686D76;
-                padding-left: 10px;
-                margin: 15px 0;
+            
+            QTableWidget#result_table {
+                background-color: #EEEEEE;
             }
-    
-            QTableWidget QHeaderView::section {
-                background-color: #262626;
-                color: #A7A6A6;
+            
+            QTableWidget#table_area {
+                background-color: #393E46;
+            }
+            
+            QTableWidget QHeaderView::section:vertical {
+                font-weight: bold;
                 padding: 5px;
-                height: 18px;
+                height: 25px;
             }
     
             QTableWidget QHeaderView::section:horizontal {
-                border-top: 1px solid #333;
+                border-bottom: 1px solid #333;
+                font-size: 11px;
+                font-weight: bold;
+                padding: 10px;
+                height: 25px;
             }
     
             QTableWidget::item {
-                background-color: #363636;
-                color: #EEEEEE;
                 font-weight: bold;
-                padding-right: 8px;
-                padding-left: 8px;
+                padding-left: 10px;
             }
-    
+            
             QTableWidget::item:selected {
-                background-color: #000000;
                 color: #EEEEEE;
                 font-weight: bold;
             }
@@ -593,6 +606,9 @@ class ComprasApp(QWidget):
         line_edit.addAction(clear_action, QLineEdit.TrailingPosition)
 
     def configurar_tabela(self, dataframe):
+        self.table_area.hide()
+        self.tree.show()
+        self.tree.setAlternatingRowColors(True)
         self.tree.setColumnCount(len(dataframe.columns))
         self.tree.setHorizontalHeaderLabels(dataframe.columns)
         self.tree.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
@@ -618,6 +634,8 @@ class ComprasApp(QWidget):
         self.tree.sortItems(logical_index, order)
 
     def clean_screen(self):
+        self.table_area.show()
+        self.tree.hide()
         self.campo_sc.clear()
         self.campo_pedido.clear()
         self.campo_codigo.clear()
@@ -714,7 +732,6 @@ class ComprasApp(QWidget):
                     SC.C1_NUM AS "SOLIC. COMPRA",
                     SC.C1_PEDIDO AS "PEDIDO COMPRA",
                     ITEM_NF.D1_DOC AS "DOC. NF ENTRADA",
-                    PC.C7_DATPRF AS "PREVISÃO ENTREGA",
                     SC.C1_PRODUTO AS "CÓDIGO",
                     SC.C1_DESCRI AS "DESCRIÇÃO",
                     SC.C1_UM AS "UNID. MED.",
@@ -724,6 +741,7 @@ class ComprasApp(QWidget):
                         WHEN ITEM_NF.D1_QUANT IS NULL THEN SC.C1_QUJE 
                         ELSE SC.C1_QUJE - ITEM_NF.D1_QUANT
                     END AS "QTD. PENDENTE",
+                    PC.C7_DATPRF AS "PREVISÃO ENTREGA",
                     PC.C7_PRECO AS "CUSTO UNITÁRIO (R$)",
                     PC.C7_TOTAL AS "CUSTO TOTAL (R$)",
                     ITEM_NF.D1_DTDIGIT AS "DATA DE ENTREGA",
@@ -816,13 +834,13 @@ class ComprasApp(QWidget):
                     SC.C1_NUM AS "SOLIC. COMPRA",
                     NULL AS "PEDIDO COMPRA",
                     NULL AS "DOC. NF ENTRADA",
-                    NULL AS "PREVISÃO ENTREGA",
                     SC.C1_PRODUTO AS "CÓDIGO",
                     SC.C1_DESCRI AS "DESCRIÇÃO",
                     SC.C1_UM AS "UNID. MED.",
                     NULL AS "QUANT. PEDIDO COMPRA",
                     NULL AS "QTD. ENTREGUE",
                     NULL AS "QTD. PENDENTE",
+                    NULL AS "PREVISÃO ENTREGA",
                     NULL AS "CUSTO UNITÁRIO (R$)",
                     NULL AS "CUSTO TOTAL (R$)",
                     NULL AS "DATA DE ENTREGA",

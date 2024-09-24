@@ -187,6 +187,10 @@ class EngenhariaApp(QWidget):
         self.btn_exportar_excel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_exportar_excel.hide()
 
+        self.btn_calculo_peso = QPushButton("Tabela de pesos", self)
+        self.btn_calculo_peso.clicked.connect(self.abrir_tabela_pesos)
+        self.btn_calculo_peso.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
         self.btn_fechar = QPushButton("Fechar", self)
         self.btn_fechar.clicked.connect(self.fechar_janela)
         self.btn_fechar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -226,6 +230,7 @@ class EngenhariaApp(QWidget):
         layout_button_03.addWidget(self.btn_nova_janela)
         layout_button_03.addWidget(self.btn_abrir_desenho)
         layout_button_03.addWidget(self.btn_exportar_excel)
+        layout_button_03.addWidget(self.btn_calculo_peso)
         layout_button_03.addWidget(self.btn_abrir_pcp)
         layout_button_03.addWidget(self.btn_abrir_compras)
         layout_button_03.addWidget(self.btn_fechar)
@@ -369,7 +374,7 @@ class EngenhariaApp(QWidget):
                 """)
 
     def abrir_tabela_pesos(self):
-        os.startfile(r'\\192.175.175.4\f\INTEGRANTES\ELIEZER\DOCUMENTOS_UTEIS\TABELA_PESO.xlsx')
+        os.startfile(r'\\192.175.175.4\desenvolvimento\REPOSITORIOS\resources\assets\excel\TABELA_PESO.xlsx')
 
     def numero_linhas_consulta(self, query_consulta):
         order_by_a_remover = "ORDER BY B1_COD ASC"
