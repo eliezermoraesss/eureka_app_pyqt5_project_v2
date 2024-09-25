@@ -25,7 +25,7 @@ class MainWindow(QDialog):
     def open_search_dialog(self, field, entity):
         dialog = SearchWindow(entity)
         if dialog.exec() == QDialog.Accepted:
-            selected_code = dialog.get_selected_code()
+            selected_code = dialog.get_selected_value()
             if selected_code:
                 field.setText(selected_code)
 

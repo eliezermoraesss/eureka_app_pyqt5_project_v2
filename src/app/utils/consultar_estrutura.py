@@ -143,7 +143,7 @@ def executar_consulta_estrutura(self, table):
                         }
 
                         QLabel {
-                            color: #A7A6A6;
+                            color: #EEEEEE;
                             font-size: 18px;
                             font-weight: bold;
                         }
@@ -183,6 +183,10 @@ def executar_consulta_estrutura(self, table):
 
                         QTableWidget QHeaderView::section:horizontal {
                             border-top: 1px solid #333;
+                        }
+                        
+                        QTableWidget::item {
+                            color: #EEEEEE;
                         }
 
                         QTableWidget::item:selected {

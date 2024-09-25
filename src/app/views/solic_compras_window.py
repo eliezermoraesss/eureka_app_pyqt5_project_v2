@@ -3,7 +3,6 @@ import os
 import sys
 
 from src.app.utils.consultar_ultimas_nfe import consultar_ultimas_nfe
-from src.app.views.solic_compras_window import SolicitacaoComprasWindow
 
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -26,7 +25,7 @@ from src.app.utils.load_session import load_session
 from src.app.utils.utils import exibir_mensagem, copiar_linha, abrir_nova_janela, exportar_excel
 
 
-class ComprasApp(QWidget):
+class SolicitacaoComprasWindow(QWidget):
     guia_fechada = pyqtSignal()
 
     def __init__(self):
@@ -37,7 +36,7 @@ class ComprasApp(QWidget):
         self.username, self.password, self.database, self.server = setup_mssql()
         self.driver = '{SQL Server}'
 
-        self.setWindowTitle(f"Eureka® Compras . {username} ({role})")
+        self.setWindowTitle(f"Eureka® Compras - Solicitação de Compras  . {username} ({role})")
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
         self.engine = None
@@ -230,12 +229,7 @@ class ComprasApp(QWidget):
         self.campo_data_fim.setDate(QDate().currentDate())
         self.add_today_button(self.campo_data_fim)
 
-        self.btn_followup = QPushButton("Carregar follow-up", self)
-        self.btn_followup.clicked.connect(self.executar_consulta_followup)
-        self.btn_followup.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-
-        self.btn_sc = QPushButton("Acessar Solicitações de Compra", self)
-        self.btn_sc.setObjectName("SC")
+        self.btn_sc = QPushButton("Solicitação de Compra", self)
         self.btn_sc.clicked.connect(self.executar_consulta_solic_compras)
         self.btn_sc.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
@@ -274,7 +268,7 @@ class ComprasApp(QWidget):
         self.btn_limpar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_nova_janela = QPushButton("Nova Janela", self)
-        self.btn_nova_janela.clicked.connect(lambda : abrir_nova_janela(self, ComprasApp()))
+        self.btn_nova_janela.clicked.connect(lambda : abrir_nova_janela(self, SolicitacaoComprasWindow()))
         self.btn_nova_janela.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_exportar_excel = QPushButton("Exportar Excel", self)
@@ -285,16 +279,6 @@ class ComprasApp(QWidget):
         self.btn_fechar = QPushButton("Fechar", self)
         self.btn_fechar.clicked.connect(self.fechar_janela)
         self.btn_fechar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-
-        self.campo_sc.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_pedido.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_codigo.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_descricao_prod.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_contem_descricao_prod.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_qp.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_OP.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_razao_social_fornecedor.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_nm_fantasia_fornecedor.returnPressed.connect(self.executar_consulta_followup)
 
         layout = QVBoxLayout()
         layout_campos_01 = QHBoxLayout()
@@ -374,7 +358,7 @@ class ComprasApp(QWidget):
         layout_campos_02.addStretch()
 
         self.layout_buttons.addStretch()
-        self.layout_buttons.addWidget(self.btn_followup)
+        self.layout_buttons.addWidget(self.btn_sc)
         self.layout_buttons.addWidget(self.btn_ultimos_fornecedores)
         self.layout_buttons.addWidget(self.btn_ultimas_nfe)
         self.layout_buttons.addWidget(self.btn_saldo_estoque)
@@ -382,7 +366,6 @@ class ComprasApp(QWidget):
         self.layout_buttons.addWidget(self.btn_nova_janela)
         self.layout_buttons.addWidget(self.btn_limpar)
         self.layout_buttons.addWidget(self.btn_exportar_excel)
-        self.layout_buttons.addWidget(self.btn_sc)
         self.layout_buttons.addWidget(self.btn_abrir_engenharia)
         self.layout_buttons.addWidget(self.btn_abrir_pcp)
         self.layout_buttons.addWidget(self.btn_fechar)
@@ -469,21 +452,16 @@ class ComprasApp(QWidget):
             }
     
             QPushButton {
-                background-color: #AF125A;
+                background-color: #347928;
                 color: #eeeeee;
                 padding: 7px 10px;
-                border: 2px solid #AF125A;
+                border: 2px solid #347928;
                 border-radius: 12px;
                 font-style: "Segoe UI";
                 font-size: 13px;
                 height: 20px;
                 font-weight: bold;
                 margin: 10px 5px 5px 5px;
-            }
-            
-            QPushButton#SC {
-                border: 2px solid #347928;
-                background-color: #347928;
             }
             
             QPushButton#btn_engenharia {
@@ -496,12 +474,12 @@ class ComprasApp(QWidget):
                 background-color: #DC5F00;
             }
     
-            QPushButton:hover, QPushButton:hover#btn_engenharia, QPushButton#PCP:hover, QPushButton#SC:hover {
+            QPushButton:hover, QPushButton:hover#btn_engenharia, QPushButton#PCP:hover {
                 background-color: #EFF2F1;
                 color: #3A0CA3
             }
     
-            QPushButton:pressed, QPushButton:pressed#btn_engenharia, QPushButton#PCP:pressed, QPushButton#SC:pressed {
+            QPushButton:pressed, QPushButton:pressed#btn_engenharia, QPushButton#PCP:pressed {
                 background-color: #6703c5;
                 color: #fff;
             }
@@ -629,7 +607,7 @@ class ComprasApp(QWidget):
             context_menu_saldo_estoque.triggered.connect(lambda: executar_saldo_em_estoque(self, table))
 
             context_menu_nova_janela = QAction('Nova janela', self)
-            context_menu_nova_janela.triggered.connect(lambda: abrir_nova_janela(self, ComprasApp()))
+            context_menu_nova_janela.triggered.connect(lambda: abrir_nova_janela(self, SolicitacaoComprasWindow()))
 
             menu.addAction(context_menu_ultimo_fornecedor)
             menu.addAction(context_menu_consultar_onde_usado)
@@ -750,284 +728,10 @@ class ComprasApp(QWidget):
         self.campo_data_inicio.setEnabled(status)
         self.campo_data_fim.setEnabled(status)
         self.combobox_armazem.setEnabled(status)
-        self.btn_followup.setEnabled(status)
         self.btn_exportar_excel.setEnabled(status)
         self.btn_saldo_estoque.setEnabled(status)
         self.btn_onde_e_usado.setEnabled(status)
         self.btn_ultimos_fornecedores.setEnabled(status)
-
-    def query_followup(self):
-        numero_sc = self.campo_sc.text().upper().strip()
-        numero_pedido = self.campo_pedido.text().upper().strip()
-        numero_nf = self.campo_doc_nf.text().upper().strip()
-        numero_qp = self.campo_qp.text().upper().strip()
-        numero_op = self.campo_OP.text().upper().strip()
-        codigo_produto = self.campo_codigo.text().upper().strip()
-        razao_social_fornecedor = self.campo_razao_social_fornecedor.text().upper().strip()
-        nome_fantasia_fornecedor = self.campo_nm_fantasia_fornecedor.text().upper().strip()
-        descricao_produto = self.campo_descricao_prod.text().upper().strip()
-        contem_descricao = self.campo_contem_descricao_prod.text().upper().strip()
-        checkbox_sc_somente_com_pedido = self.checkbox_exibir_somente_sc_com_pedido.isChecked()
-
-        cod_armazem = self.combobox_armazem.currentData()
-        if cod_armazem is None:
-            cod_armazem = ''
-
-        palavras_contem_descricao = contem_descricao.split('*')
-        clausulas_contem_descricao = " AND ".join(
-            [f"SC.C1_DESCRI LIKE '%{palavra}%'" for palavra in palavras_contem_descricao])
-
-        data_inicio_formatada = self.campo_data_inicio.date().toString("yyyyMMdd")
-        data_fim_formatada = self.campo_data_fim.date().toString("yyyyMMdd")
-
-        if data_fim_formatada != '' and data_fim_formatada != '':
-            filtro_data = f"AND C1_EMISSAO >= '{data_inicio_formatada}' AND C1_EMISSAO <= '{data_fim_formatada}'"
-        else:
-            filtro_data = ''
-
-        pedido_compra_query = f"""
-                SELECT
-                    SC.C1_ZZNUMQP AS "QP",
-                    SC.C1_NUM AS "SOLIC. COMPRA",
-                    SC.C1_PEDIDO AS "PEDIDO COMPRA",
-                    ITEM_NF.D1_DOC AS "DOC. NF ENTRADA",
-                    SC.C1_PRODUTO AS "CÓDIGO",
-                    SC.C1_DESCRI AS "DESCRIÇÃO",
-                    SC.C1_UM AS "UN.",
-                    PC.C7_QUANT AS "QTD. PEDIDO COMPRA",
-                    ITEM_NF.D1_QUANT AS "QTD. ENTREGUE",
-                    CASE 
-                        WHEN ITEM_NF.D1_QUANT IS NULL THEN SC.C1_QUJE 
-                        ELSE SC.C1_QUJE - ITEM_NF.D1_QUANT
-                    END AS "QTD. PENDENTE",
-                    PC.C7_PRECO AS "CUSTO UNITÁRIO",
-                    PC.C7_TOTAL AS "CUSTO TOTAL",
-                    PC.C7_DATPRF AS "PREVISÃO ENTREGA",
-                    ITEM_NF.D1_DTDIGIT AS "DATA DE ENTREGA",
-                    PC.C7_ENCER AS "STATUS PEDIDO COMPRA",
-                    SC.C1_EMISSAO AS "SC ABERTA EM:",
-                    SC.C1_QUANT AS "QTD. SOLIC. COMPRAS",
-                    PC.C7_EMISSAO AS "PC ABERTO EM:",
-                    ITEM_NF.D1_EMISSAO AS "DATA EMISSÃO NF",
-                    SC.C1_ITEM AS "ITEM SC",
-                    SC.C1_ITEMPED AS "ITEM PC",
-                    FORN.A2_COD AS "CÓD. FORNECEDOR",
-                    FORN.A2_NOME AS "RAZÃO SOCIAL FORNECEDOR",
-                    FORN.A2_NREDUZ AS "NOME FANTASIA FORNECEDOR",
-                    SC.C1_ORIGEM AS "ORIGEM",
-                    SC.C1_LOCAL AS "CÓD. ARMAZÉM",
-                    ARM.NNR_DESCRI AS "DESCRIÇÃO ARMAZÉM",
-                    PROD.B1_ZZLOCAL AS "ENDEREÇO ALMOXARIFADO",
-                    SC.C1_IMPORT AS "IMPORTADO?",
-                    SC.C1_OBS AS "OBSERVAÇÃO SOLIC. COMPRA",
-                    PC.C7_OBS AS "OBSERVAÇÃO PEDIDO DE COMPRA",
-                    PC.C7_OBSM AS "OBSERVAÇÃO ITEM DO PEDIDO DE COMPRA",
-                    US.USR_NOME AS "SOLICITANTE",
-                    PC.S_T_A_M_P_ AS "PEDIDO DE COMPRA ABERTO EM:",
-                    SC.C1_OP AS "OP"
-                FROM 
-                    {self.database}.dbo.SC7010 PC
-                LEFT JOIN
-                    {self.database}.dbo.SD1010 ITEM_NF
-                ON 
-                    PC.C7_NUM = ITEM_NF.D1_PEDIDO AND PC.C7_ITEM = ITEM_NF.D1_ITEMPC
-                LEFT JOIN
-                    {self.database}.dbo.SC1010 SC
-                ON 
-                    SC.C1_PEDIDO = PC.C7_NUM AND SC.C1_ITEMPED = PC.C7_ITEM
-                LEFT JOIN
-                    {self.database}.dbo.SA2010 FORN
-                ON
-                    FORN.A2_COD = PC.C7_FORNECE 
-                LEFT JOIN
-                    {self.database}.dbo.NNR010 ARM
-                ON
-                    SC.C1_LOCAL = ARM.NNR_CODIGO
-                LEFT JOIN 
-                    {self.database}.dbo.SYS_USR US
-                ON
-                    SC.C1_SOLICIT = US.USR_CODIGO AND US.D_E_L_E_T_ <> '*'
-                INNER JOIN 
-                    {self.database}.dbo.SB1010 PROD
-                ON 
-                    PROD.B1_COD = SC.C1_PRODUTO
-                WHERE
-                    PC.C7_NUM LIKE '%{numero_pedido}'
-                    AND ITEM_NF.D1_DOC LIKE '%{numero_nf}'
-                    AND PC.C7_NUMSC LIKE '%{numero_sc}'
-                    AND PC.C7_ZZNUMQP LIKE '%{numero_qp}'
-                    AND PC.C7_PRODUTO LIKE '{codigo_produto}%'
-                    AND SC.C1_DESCRI LIKE '{descricao_produto}%'
-                    AND {clausulas_contem_descricao}
-                    AND SC.C1_OP LIKE '%{numero_op}' 
-                    AND FORN.A2_NOME LIKE '%{razao_social_fornecedor}'
-                    AND FORN.A2_NREDUZ LIKE '%{nome_fantasia_fornecedor}%'
-                    AND SC.C1_LOCAL LIKE '{cod_armazem}%' {filtro_data}
-                    AND PC.D_E_L_E_T_ <> '*'
-                    AND SC.D_E_L_E_T_ <> '*'
-                    AND PROD.D_E_L_E_T_ <> '*' ORDER BY PC.R_E_C_N_O_ DESC;
-            """
-
-        return pedido_compra_query
-
-    def executar_consulta_followup(self):
-        query_consulta_filtro = self.query_followup()
-        query_contagem_linhas = self.numero_linhas_consulta(query_consulta_filtro)
-
-        self.label_line_number.hide()
-        self.controle_campos_formulario(False)
-        self.button_visible_control(False)
-
-        conn_str = f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};PWD={self.password}'
-        self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
-
-        try:
-            dataframe_line_number = pd.read_sql(query_contagem_linhas, self.engine)
-            line_number = dataframe_line_number.iloc[0, 0]
-
-            if line_number >= 1:
-                if line_number > 1:
-                    message = f"Foram encontradas {line_number} linhas"
-                else:
-                    message = f"Foi encontrada {line_number} linha"
-
-                self.label_line_number.setText(f"{message}")
-                self.label_line_number.show()
-
-                data_atual = datetime.now()
-            else:
-                exibir_mensagem("EUREKA® Compras", 'Nada encontrado!', "info")
-                self.controle_campos_formulario(True)
-                self.button_visible_control(False)
-                return
-
-            dataframe = pd.read_sql(query_consulta_filtro, self.engine)
-            dataframe.insert(0, ' ', '')
-            dataframe[''] = ''
-            dataframe.insert(15, 'CONTADOR DE DIAS', '')
-
-            self.configurar_tabela(dataframe)
-            self.configurar_tabela_tooltips(dataframe)
-
-            self.tree.horizontalHeader().setSortIndicator(-1, Qt.AscendingOrder)
-            self.tree.setRowCount(0)
-
-            # Construir caminhos relativos
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            no_pc = os.path.join(script_dir, '..', 'resources', 'images', 'red.png')
-            no_order_path = os.path.join(script_dir, '..', 'resources', 'images', 'gray.png')
-            wait_order_path = os.path.join(script_dir, '..', 'resources', 'images', 'wait.png')
-            end_order_path = os.path.join(script_dir, '..', 'resources', 'images', 'green.png')
-
-            no_pc = QIcon(no_pc)
-            no_order = QIcon(no_order_path)
-            wait_delivery = QIcon(wait_order_path)
-            end_order = QIcon(end_order_path)
-
-            for i, row in dataframe.iterrows():
-                self.tree.setSortingEnabled(False)
-                self.tree.insertRow(i)
-
-                for column_name, value in row.items():
-                    if value is not None:
-                        if column_name == ' ':
-                            item = QTableWidgetItem()
-                            if row['STATUS PEDIDO COMPRA'] is not None:
-                                if row['STATUS PEDIDO COMPRA'].strip() == '' and row['DOC. NF ENTRADA'] is None:
-                                    item.setIcon(no_order)
-                                elif row['STATUS PEDIDO COMPRA'].strip() == '' and row['DOC. NF ENTRADA'] is not None:
-                                    item.setIcon(wait_delivery)
-                                elif row['STATUS PEDIDO COMPRA'] == 'E':
-                                    item.setIcon(end_order)
-                                item.setSizeHint(QSize(64, 64))
-                            elif row['PEDIDO COMPRA'] is None:
-                                item.setIcon(no_pc)
-                        else:
-                            if column_name in ('QTD. SOLIC. COMPRAS', 'QTD. PEDIDO COMPRA', 'QTD. ENTREGUE', 'CUSTO UNITÁRIO', 'CUSTO TOTAL'):
-                                if column_name in ('CUSTO UNITÁRIO', 'CUSTO TOTAL'):
-                                    value = f"R$ {locale.format_string("%.2f", value, grouping=True)}"
-                                else:
-                                    value = locale.format_string("%.2f", value, grouping=True)
-
-                            if column_name in ('QTD. PEDIDO COMPRA', 'CUSTO UNITÁRIO', 'CUSTO TOTAL', 'QTD. ENTREGUE') and value == 'nan':
-                                value = ''
-
-                            if column_name == 'PEDIDO DE COMPRA ABERTO EM:' and pd.isna(value):
-                                value = ''
-                            if column_name == 'PEDIDO DE COMPRA ABERTO EM:' and not pd.isna(value) and value != '':
-                                try:
-                                    # Converter para objeto datetime
-                                    datetime_value = pd.to_datetime(value, utc=True)
-                                    # Converter para o fuso horário UTC-3
-                                    datetime_value = datetime_value.tz_convert('America/Sao_Paulo')
-                                    # Remover os últimos 7 caracteres equivale a remover segundos e microsegundos
-                                    datetime_value = datetime_value.replace(microsecond=0)
-                                    # Converter de volta para string no formato desejado
-                                    value = datetime_value.strftime('%d/%m/%Y %H:%M:%S')
-                                except ValueError:
-                                    # Lidar com valores que não podem ser convertidos para datetime
-                                    print(f"Erro ao converter {value} para datetime.")
-
-                            if column_name == 'CONTADOR DE DIAS' and row['DOC. NF ENTRADA'] is None:
-                                previsao_entrega_sem_formatacao = row['PREVISÃO ENTREGA']
-                                if pd.notna(previsao_entrega_sem_formatacao):
-                                    previsao_entrega_obj = datetime.strptime(previsao_entrega_sem_formatacao, "%Y%m%d")
-                                    previsao_entrega_formatada = previsao_entrega_obj.strftime("%d/%m/%Y")
-                                    previsao_entrega = pd.to_datetime(previsao_entrega_formatada, dayfirst=True)
-                                    value = (previsao_entrega - data_atual).days
-                            elif column_name == 'CONTADOR DE DIAS' and row['DOC. NF ENTRADA'] is not None:
-                                value = ''
-                            if column_name == 'QTD. PENDENTE' and pd.isna(value):
-                                value = ''
-                            elif column_name == 'QTD. PENDENTE' and value:
-                                value = round(value, 2)
-                                value = locale.format_string("%.2f", value, grouping=True)
-
-                            if column_name == 'STATUS PEDIDO COMPRA' and value == 'E':
-                                value = 'Encerrado'
-                            elif column_name == 'STATUS PEDIDO COMPRA' and value.strip() == '':
-                                value = ''
-
-                            if column_name == 'ORIGEM' and value.strip() == 'MATA650':
-                                value = 'Empenho'
-                            elif column_name == 'ORIGEM' and value.strip() == '':
-                                value = 'Compras'
-
-                            if column_name == 'IMPORTADO?' and value.strip() == 'N':
-                                value = 'Não'
-                            elif column_name == 'IMPORTADO?' and value.strip() == '':
-                                value = 'Sim'
-
-                            if column_name in ('PREVISÃO ENTREGA', 'DATA DE ENTREGA', 'SC ABERTA EM:', 'PC ABERTO EM:', 'DATA EMISSÃO NF') and not value.isspace():
-                                data_obj = datetime.strptime(value, "%Y%m%d")
-                                value = data_obj.strftime("%d/%m/%Y")
-
-                            item = QTableWidgetItem(str(value).strip())
-
-                            if column_name not in ('DESCRIÇÃO', 'OBSERVAÇÃO SOLIC. COMPRA', 'OBSERVAÇÃO PEDIDO DE COMPRA', 'OBSERVAÇÃO ITEM DO PEDIDO DE COMPRA', 'RAZÃO SOCIAL FORNECEDOR', 'NOME FANTASIA FORNECEDOR'):
-                                item.setTextAlignment(Qt.AlignCenter)
-                            if column_name in ('CUSTO UNITÁRIO', 'CUSTO TOTAL'):
-                                item.setTextAlignment(Qt.AlignRight)
-
-                    else:
-                        item = QTableWidgetItem('')
-
-                    self.tree.setItem(i, list(row.index).index(column_name), item)
-
-                # QCoreApplication.processEvents()
-
-            self.tree.setSortingEnabled(True)
-            self.controle_campos_formulario(True)
-            self.button_visible_control(True)
-
-        except Exception as ex:
-            exibir_mensagem('Erro ao consultar TOTVS', f'Erro: {str(ex)}', 'error')
-
-        finally:
-            # Fecha a conexão com o banco de dados se estiver aberta
-            if hasattr(self, 'engine'):
-                self.engine.dispose()
-                self.engine = None
 
     def query_solic_compras(self):
         numero_sc = self.campo_sc.text().upper().strip()
@@ -1104,14 +808,104 @@ class ComprasApp(QWidget):
         return query_solic_compras
 
     def executar_consulta_solic_compras(self):
-        solic_compras_window = SolicitacaoComprasWindow()
-        solic_compras_window.showMaximized()
+        query = self.query_solic_compras()
+        query_contagem_linhas = self.numero_linhas_consulta(query)
+
+        self.label_line_number.hide()
+        self.controle_campos_formulario(False)
+        self.button_visible_control(False)
+
+        conn_str = f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};PWD={self.password}'
+        self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
+
+        try:
+            dataframe_line_number = pd.read_sql(query_contagem_linhas, self.engine)
+            line_number = dataframe_line_number.iloc[0, 0]
+
+            if line_number >= 1:
+                if line_number > 1:
+                    message = f"Foram encontradas {line_number} linhas"
+                else:
+                    message = f"Foi encontrada {line_number} linha"
+
+                self.label_line_number.setText(f"{message}")
+                self.label_line_number.show()
+
+            else:
+                exibir_mensagem("EUREKA® Compras", 'Nada encontrado!', "info")
+                self.controle_campos_formulario(True)
+                self.button_visible_control(False)
+                return
+
+            dataframe = pd.read_sql(query, self.engine)
+            dataframe.insert(0, ' ', '')
+            dataframe[''] = ''
+
+            self.configurar_tabela(dataframe)
+            self.configurar_tabela_tooltips(dataframe)
+
+            self.tree.horizontalHeader().setSortIndicator(-1, Qt.AscendingOrder)
+            self.tree.setRowCount(0)
+
+            # Construir caminhos relativos
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            sc_open = os.path.join(script_dir, '..', 'resources', 'images', 'red.png')
+            end_order_path = os.path.join(script_dir, '..', 'resources', 'images', 'green.png')
+
+            sc_open = QIcon(sc_open)
+            end_order = QIcon(end_order_path)
+
+            for i, row in dataframe.iterrows():
+                self.tree.setSortingEnabled(False)
+                self.tree.insertRow(i)
+
+                for column_name, value in row.items():
+                    if value is not None:
+                        if column_name == ' ':
+                            item = QTableWidgetItem()
+                            if row['PEDIDO DE COMPRA'] is not None:
+                                if row['PEDIDO DE COMPRA'].strip() == '':
+                                    item.setIcon(sc_open)
+                                elif row['PEDIDO DE COMPRA'].strip() != '':
+                                    item.setIcon(end_order)
+                                item.setSizeHint(QSize(64, 64))
+                        else:
+                            if column_name == 'QTD. SOLIC. COMPRA' and pd.isna(value):
+                                value = ''
+                            elif column_name == 'QTD. SOLIC. COMPRA' and value:
+                                value = round(value, 2)
+                                value = locale.format_string("%.2f", value, grouping=True)
+
+                            if column_name == 'C1_EMISSAO' and not value.isspace():
+                                data_obj = datetime.strptime(value, "%Y%m%d")
+                                value = data_obj.strftime("%d/%m/%Y")
+
+                            item = QTableWidgetItem(str(value).strip())
+
+                            if column_name not in ('DESCRIÇÃO', 'OBSERVAÇÃO SOLIC. COMPRA'):
+                                item.setTextAlignment(Qt.AlignCenter)
+                    else:
+                        item = QTableWidgetItem('')
+
+                    self.tree.setItem(i, list(row.index).index(column_name), item)
+
+            self.tree.setSortingEnabled(True)
+            self.controle_campos_formulario(True)
+            self.button_visible_control(True)
+
+        except Exception as ex:
+            exibir_mensagem('Erro ao consultar TOTVS', f'Erro: {str(ex)}', 'error')
+
+        finally:
+            # Fecha a conexão com o banco de dados se estiver aberta
+            if hasattr(self, 'engine'):
+                self.engine.dispose()
+                self.engine = None
 
     def configurar_tabela_tooltips(self, dataframe):
         # Mapa de tooltips correspondentes às colunas da consulta SQL
         tooltip_map = {
-            "STATUS": "VERMELHO - SC sem Pedido de Compra\nCINZA - Aguardando entrega\nAZUL - Entrega "
-                      "parcial\nVERDE - Pedido de compra encerrado"
+            " ": "VERMELHO: SC sem Pedido de Compra\nVERDE: Pedido de compra encerrado"
         }
 
         # Obtenha os cabeçalhos das colunas do dataframe
@@ -1142,7 +936,7 @@ class ComprasApp(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = ComprasApp()
+    window = SolicitacaoComprasWindow()
     username, password, database, server = setup_mssql()
     driver = '{SQL Server}'
     window.showMaximized()

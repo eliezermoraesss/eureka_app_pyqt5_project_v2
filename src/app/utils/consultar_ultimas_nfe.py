@@ -8,7 +8,7 @@ from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.utils import copiar_linha
 
 
-def executar_ultimos_fornecedores(self, table):
+def consultar_ultimas_nfe(self, table):
     item_selecionado = table.currentItem()
     codigo, descricao = None, None
 
@@ -28,34 +28,47 @@ def executar_ultimos_fornecedores(self, table):
             codigo = table.item(item_selecionado.row(), codigo_col).text()
             descricao = table.item(item_selecionado.row(), descricao_col).text()
 
-        if codigo not in self.guias_abertas_ultimos_fornecedores and codigo is not None:
+        if codigo not in self.guias_abertas_ultimas_nfe and codigo is not None:
             query = f"""
-                    SELECT 
-                        A5_FORNECE AS "Cód. Forn.", 
-                        A5_NOMEFOR AS "Razão Social",
-                        FORN.A2_NREDUZ AS "Nome Fantasia",
-                        FORN.A2_CGC AS "CNPJ",
-                        A5_QUANT01 AS "Qtd. 1ª compra",
-                        A5_QUANT02 AS "Qtd. 2ª compra",
-                        A5_QUANT03 AS "Qtd. 3ª compra",
-                        A5_PRECO01 AS "Preço 1ª compra",
-                        A5_PRECO02 AS "Preço 2ª compra",
-                        A5_PRECO03 AS "Preço 3ª compra",
-                        A5_DTCOM01 AS "Data 1ª compra",
-                        A5_DTCOM02 AS "Data 2ª compra",
-                        A5_DTCOM03 AS "Data 3ª compra",
-                        A5_CODPRF AS "Cód. no fornecedor"
+                    SELECT
+                        D1_DTDIGIT AS "Data Entrada",
+                        D1_DOC AS "Documento",
+                        D1_SERIE AS "Série",
+                        livroFiscal.F3_CHVNFE AS "Chave de acesso",
+                        D1_PEDIDO AS "Pedido",
+                        D1_FORNECE AS "Cód. Fornecedor",
+                        FORN.A2_NOME AS "Fornecedor/Cliente",
+                        D1_LOJA AS "Loja",
+                        livroFiscal.F3_ESPECIE AS "Espécie",
+                        D1_ITEM AS "Item NF",
+                        D1_QUANT AS "Quant. NF",
+                        D1_VUNIT AS "Vlr. Unitário",
+                        D1_TOTAL AS "Vlr. Total",
+                        D1_TIPO AS "Tipo NF",
+                        D1_ITEMPC AS "Item Pedido",
+                        D1_QTDPEDI AS "Quant. Pedido",
+                        D1_EMISSAO AS "Data da emissão",
+                        cabNfEntrada.F1_HORA as "Hora entrada/saída"
                     FROM 
-                        {database}.dbo.SA5010 FP
+                        {database}.dbo.SD1010 NFE
                     INNER JOIN
                         {database}.dbo.SA2010 FORN
                     ON
-                        FP.A5_FORNECE = FORN.A2_COD 
+                        FORN.A2_COD = NFE.D1_FORNECE
+                    INNER JOIN
+                        {database}.dbo.SF1010 cabNfEntrada
+                    ON
+                        cabNfEntrada.F1_DOC = NFE.D1_DOC
+                    INNER JOIN
+                        {database}.dbo.SF3010 livroFiscal
+                    ON
+                        livroFiscal.F3_NFISCAL = NFE.D1_DOC
                     WHERE 
-                        A5_PRODUTO LIKE '{codigo}%'
-                    ORDER BY FORN.A2_NREDUZ ASC;
+                        D1_COD LIKE '{codigo}%'
+                    ORDER BY 
+                        NFE.R_E_C_N_O_ DESC;
                 """
-            self.guias_abertas_ultimos_fornecedores.append(codigo)
+            self.guias_abertas_ultimas_nfe.append(codigo)
             conn = pyodbc.connect(
                 f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}')
             try:
@@ -63,50 +76,50 @@ def executar_ultimos_fornecedores(self, table):
                 cursor.execute(query)
 
                 if cursor.rowcount == 0:
-                    QMessageBox.information(None, "Eureka® ", "Nenhum fornecedor não encontrado.")
+                    QMessageBox.information(None, "Eureka® ", "Nenhuma Nota Fiscal foi encontrada.")
                     return
 
-                nova_guia_ult_forn = QWidget()
-                layout_nova_guia_ult_forn = QVBoxLayout()
+                nova_guia = QWidget()
+                layout_nova_guia = QVBoxLayout()
                 layout_cabecalho = QHBoxLayout()
 
-                tabela_ult_fornecedores = QTableWidget(nova_guia_ult_forn)
+                tabela = QTableWidget(nova_guia)
 
-                tabela_ult_fornecedores.setColumnCount(len(cursor.description))
-                tabela_ult_fornecedores.setHorizontalHeaderLabels(
+                tabela.setColumnCount(len(cursor.description))
+                tabela.setHorizontalHeaderLabels(
                     [desc[0] for desc in cursor.description])
 
-                tabela_ult_fornecedores.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+                tabela.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
 
                 # Tornar a tabela somente leitura
-                tabela_ult_fornecedores.setEditTriggers(QTableWidget.NoEditTriggers)
+                tabela.setEditTriggers(QTableWidget.NoEditTriggers)
 
                 # Configurar a fonte da tabela1
                 fonte_tabela = QFont("Segoe UI", 10)  # Substitua por sua fonte desejada e tamanho
-                tabela_ult_fornecedores.setFont(fonte_tabela)
+                tabela.setFont(fonte_tabela)
 
                 # Ajustar a altura das linhas
                 altura_linha = 20  # Substitua pelo valor desejado
-                tabela_ult_fornecedores.verticalHeader().setDefaultSectionSize(altura_linha)
+                tabela.verticalHeader().setDefaultSectionSize(altura_linha)
 
                 for i, row in enumerate(cursor.fetchall()):
-                    tabela_ult_fornecedores.insertRow(i)
+                    tabela.insertRow(i)
                     for j, value in enumerate(row):
                         valor_formatado = str(value).strip()
                         item = QTableWidgetItem(valor_formatado)
                         item.setTextAlignment(Qt.AlignCenter)
-                        tabela_ult_fornecedores.setItem(i, j, item)
+                        tabela.setItem(i, j, item)
 
-                tabela_ult_fornecedores.setSortingEnabled(True)
+                tabela.setSortingEnabled(True)
 
-                layout_cabecalho.addWidget(QLabel(f'Últimos Fornecedores\n\n{codigo} - {descricao}'),
+                layout_cabecalho.addWidget(QLabel(f'Últimas Notas Fiscais\n\n{codigo} - {descricao}'),
                                            alignment=Qt.AlignLeft)
-                layout_nova_guia_ult_forn.addLayout(layout_cabecalho)
+                layout_nova_guia.addLayout(layout_cabecalho)
 
-                layout_nova_guia_ult_forn.addWidget(tabela_ult_fornecedores)
-                nova_guia_ult_forn.setLayout(layout_nova_guia_ult_forn)
+                layout_nova_guia.addWidget(tabela)
+                nova_guia.setLayout(layout_nova_guia)
 
-                nova_guia_ult_forn.setStyleSheet("""                                           
+                nova_guia.setStyleSheet("""                                           
                         * {
                             background-color: #262626;
                         }
@@ -148,9 +161,9 @@ def executar_ultimos_fornecedores(self, table):
                     self.layout().addWidget(self.tabWidget)
                     self.tabWidget.setVisible(True)
 
-                self.tabWidget.addTab(nova_guia_ult_forn, f"Últimos Fornecedores - {codigo}")
-                tabela_ult_fornecedores.itemDoubleClicked.connect(copiar_linha)
-                self.tabWidget.setCurrentIndex(self.tabWidget.indexOf(nova_guia_ult_forn))
+                self.tabWidget.addTab(nova_guia, f"Últimas Notas Fiscais - {codigo}")
+                tabela.itemDoubleClicked.connect(copiar_linha)
+                self.tabWidget.setCurrentIndex(self.tabWidget.indexOf(nova_guia))
 
             except pyodbc.Error as ex:
                 print(f"Falha na consulta de estrutura. Erro: {str(ex)}")

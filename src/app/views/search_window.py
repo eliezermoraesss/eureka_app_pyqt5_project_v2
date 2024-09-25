@@ -16,7 +16,7 @@ class SearchWindow(QDialog):
         self.entity_name = entity_name
         self.engine = None
         self.entity = entity
-        self.selected_code = None
+        self.selected_value = None
         self.altura_linha = 30
         self.tamanho_fonte_tabela = 10
         self.fonte_tabela = 'Segoe UI'
@@ -96,8 +96,8 @@ class SearchWindow(QDialog):
         selected_items = self.ui.search_table.selectedItems()
         if selected_items:
             codigo = selected_items[0].text()  # Pega o código da primeira coluna
-            self.selected_code = codigo
+            self.selected_value = codigo
             self.accept()
 
-    def get_selected_code(self):
-        return getattr(self, 'selected_code', None)
+    def get_selected_value(self):
+        return getattr(self, 'selected_value', None)

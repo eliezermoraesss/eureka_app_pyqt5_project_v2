@@ -110,7 +110,7 @@ def executar_consulta_onde_usado(self, table):
                         }
 
                         QLabel {
-                            color: #A7A6A6;
+                            color: #EEEEEE;
                             font-size: 18px;
                             font-weight: bold;
                         }

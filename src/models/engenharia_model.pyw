@@ -3,6 +3,8 @@ import os
 import sys
 import time
 
+from src.app.utils.consultar_ultimas_nfe import consultar_ultimas_nfe
+
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -45,6 +47,7 @@ class EngenhariaApp(QWidget):
         self.guias_abertas_onde_usado = []
         self.guias_abertas_saldo = []
         self.guias_abertas_ultimos_fornecedores = []
+        self.guias_abertas_ultimas_nfe = []
         fonte = "Segoe UI"
         tamanho_fonte = 10
 
@@ -164,10 +167,15 @@ class EngenhariaApp(QWidget):
         self.btn_saldo_estoque.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_saldo_estoque.hide()
         
-        self.btn_ultimos_fornecedores = QPushButton("Fornecedores", self)
+        self.btn_ultimos_fornecedores = QPushButton("Últimos Fornecedores", self)
         self.btn_ultimos_fornecedores.clicked.connect(lambda: executar_ultimos_fornecedores(self, self.tree))
         self.btn_ultimos_fornecedores.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_ultimos_fornecedores.hide()
+
+        self.btn_ultimas_nfe = QPushButton("Últimas Notas Fiscais", self)
+        self.btn_ultimas_nfe.clicked.connect(lambda: consultar_ultimas_nfe(self, self.tree))
+        self.btn_ultimas_nfe.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.btn_ultimas_nfe.hide()
 
         self.btn_limpar = QPushButton("Limpar", self)
         self.btn_limpar.clicked.connect(self.clean_screen)
@@ -227,6 +235,7 @@ class EngenhariaApp(QWidget):
         layout_button_03.addWidget(self.btn_onde_e_usado)
         layout_button_03.addWidget(self.btn_saldo_estoque)
         layout_button_03.addWidget(self.btn_ultimos_fornecedores)
+        layout_button_03.addWidget(self.btn_ultimas_nfe)
         layout_button_03.addWidget(self.btn_nova_janela)
         layout_button_03.addWidget(self.btn_abrir_desenho)
         layout_button_03.addWidget(self.btn_exportar_excel)
@@ -468,9 +477,13 @@ class EngenhariaApp(QWidget):
             context_menu_saldo_estoque.triggered.connect(lambda: executar_saldo_em_estoque(self, table))
             menu.addAction(context_menu_saldo_estoque)
 
-            context_menu_ultimo_fornecedor = QAction('Fornecedores', self)
+            context_menu_ultimo_fornecedor = QAction('Últimos Fornecedores', self)
             context_menu_ultimo_fornecedor.triggered.connect(lambda: executar_ultimos_fornecedores(self, table))
             menu.addAction(context_menu_ultimo_fornecedor)
+
+            context_menu_ultimas_nfe = QAction('Últimas Notas Fiscais', self)
+            context_menu_ultimas_nfe.triggered.connect(lambda: consultar_ultimas_nfe(self, table))
+            menu.addAction(context_menu_ultimas_nfe)
 
             context_menu_tabela_pesos = QAction('Abrir Tabela de Pesos', self)
             context_menu_tabela_pesos.triggered.connect(self.abrir_tabela_pesos)
@@ -549,11 +562,13 @@ class EngenhariaApp(QWidget):
         self.btn_onde_e_usado.hide()
         self.btn_saldo_estoque.hide()
         self.btn_ultimos_fornecedores.hide()
+        self.btn_ultimas_nfe.hide()
 
         self.guias_abertas.clear()
         self.guias_abertas_onde_usado.clear()
         self.guias_abertas_saldo.clear()
         self.guias_abertas_ultimos_fornecedores.clear()
+        self.guias_abertas_ultimas_nfe.clear()
 
         while self.tabWidget.count():
             self.tabWidget.removeTab(0)
@@ -568,6 +583,7 @@ class EngenhariaApp(QWidget):
             self.btn_onde_e_usado.hide()
             self.btn_saldo_estoque.hide()
             self.btn_ultimos_fornecedores.hide()
+            self.btn_ultimas_nfe.hide()
         else:
             self.btn_abrir_desenho.show()
             self.btn_consultar_estrutura.show()
@@ -575,6 +591,7 @@ class EngenhariaApp(QWidget):
             self.btn_onde_e_usado.show()
             self.btn_saldo_estoque.show()
             self.btn_ultimos_fornecedores.show()
+            self.btn_ultimas_nfe.show()
 
     def controle_campos_formulario(self, status):
         self.campo_codigo.setEnabled(status)
@@ -757,8 +774,10 @@ class EngenhariaApp(QWidget):
                     try:
                         self.guias_abertas_saldo.remove(codigo_guia_fechada)
                     except ValueError:
-                        self.guias_abertas_ultimos_fornecedores.remove(codigo_guia_fechada)
-
+                        try:
+                            self.guias_abertas_ultimos_fornecedores.remove(codigo_guia_fechada)
+                        except ValueError:
+                            self.guias_abertas_ultimas_nfe.remove(codigo_guia_fechada)
             finally:
                 self.tabWidget.removeTab(index)
 

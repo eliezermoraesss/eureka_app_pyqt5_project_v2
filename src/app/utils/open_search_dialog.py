@@ -8,6 +8,6 @@ def open_search_dialog(entity_name, field, entity):
     dialog = SearchWindow(entity_name, entity)
     dialog.setWindowModality(Qt.ApplicationModal)
     if dialog.exec() == QDialog.Accepted:
-        selected_code = dialog.get_selected_code()
-        if selected_code:
-            field.setText(selected_code)
+        get_value = dialog.get_selected_value()
+        if get_value:
+            field.setText(get_value)

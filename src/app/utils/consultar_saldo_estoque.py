@@ -118,7 +118,7 @@ def executar_saldo_em_estoque(self, table):
                         }
 
                         QLabel {
-                            color: #A7A6A6;
+                            color: #EEEEEE;
                             font-size: 18px;
                             font-weight: bold;
                         }
