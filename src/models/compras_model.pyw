@@ -118,27 +118,30 @@ class ComprasApp(QWidget):
 
         self.checkbox_exibir_somente_sc_com_pedido = QCheckBox("Ocultar Solic. de Compras SEM Pedido de Compras", self)
         self.checkbox_exibir_somente_sc_com_pedido.setObjectName("checkbox-sc")
+        self.checkbox_exibir_somente_sc_com_pedido.setVisible(False)
 
-        self.label_sc = QLabel("Solicitação de Compra", self)
+        self.label_sc = QLabel("Solicitação de Compra:", self)
         self.label_sc.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.label_pedido = QLabel("Pedido de Compra", self)
+        self.label_pedido = QLabel("Pedido de Compra:", self)
         self.label_pedido.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.label_codigo = QLabel("Código", self)
+        self.label_codigo = QLabel("Código:", self)
         self.label_codigo.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.label_descricao_prod = QLabel("Descrição", self)
+        self.label_descricao_prod = QLabel("Descrição:", self)
         self.label_descricao_prod.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.label_contem_descricao_prod = QLabel("Contém na descrição", self)
+        self.label_contem_descricao_prod = QLabel("Contém na descrição:", self)
         self.label_contem_descricao_prod.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        self.label_qp = QLabel("Número da QP", self)
+        self.label_qp = QLabel("Número da QP:", self)
         self.label_qp.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.label_OP = QLabel("Número da OP", self)
+        self.label_nf = QLabel("NF entrada:", self)
+        self.label_nf.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.label_OP = QLabel("Número da OP:", self)
         self.label_OP.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.label_data_inicio = QLabel("Data inicial", self)
-        self.label_data_fim = QLabel("Data final", self)
-        self.label_armazem = QLabel("Armazém", self)
-        self.label_fornecedor = QLabel("Razão social fornecedor", self)
-        self.label_nm_fantasia_forn = QLabel("Nome Fantasia fornecedor", self)
+        self.label_data_inicio = QLabel("A partir de:", self)
+        self.label_data_fim = QLabel("Até:", self)
+        self.label_armazem = QLabel("Armazém:", self)
+        self.label_fornecedor = QLabel("Razão social fornecedor:", self)
+        self.label_nm_fantasia_forn = QLabel("Nome Fantasia fornecedor:", self)
 
         self.campo_sc = QLineEdit(self)
         self.campo_sc.setFont(QFont(fonte_campos, tamanho_fonte_campos))
@@ -175,6 +178,12 @@ class ComprasApp(QWidget):
         self.campo_qp.setMaxLength(6)
         self.campo_qp.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.add_clear_button(self.campo_qp)
+
+        self.campo_doc_nf = QLineEdit(self)
+        self.campo_doc_nf.setFont(QFont(fonte_campos, tamanho_fonte_campos))
+        self.campo_doc_nf.setMaxLength(9)
+        self.campo_doc_nf.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.add_clear_button(self.campo_doc_nf)
 
         self.campo_OP = QLineEdit(self)
         self.campo_OP.setFont(QFont(fonte_campos, tamanho_fonte_campos))
@@ -217,9 +226,13 @@ class ComprasApp(QWidget):
         self.campo_data_fim.setDate(QDate().currentDate())
         self.add_today_button(self.campo_data_fim)
 
-        self.btn_consultar = QPushButton("Pesquisar", self)
-        self.btn_consultar.clicked.connect(self.executar_consulta)
-        self.btn_consultar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.btn_followup = QPushButton("Follow-up", self)
+        self.btn_followup.clicked.connect(self.executar_consulta_followup)
+        self.btn_followup.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+        self.btn_sc = QPushButton("Solicitação de Compra", self)
+        self.btn_sc.clicked.connect(self.executar_consulta_solic_compras)
+        self.btn_sc.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_abrir_engenharia = QPushButton("Engenharia", self)
         self.btn_abrir_engenharia.setObjectName("btn_engenharia")
@@ -263,16 +276,6 @@ class ComprasApp(QWidget):
         self.btn_fechar.clicked.connect(self.fechar_janela)
         self.btn_fechar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        self.campo_sc.returnPressed.connect(self.executar_consulta)
-        self.campo_pedido.returnPressed.connect(self.executar_consulta)
-        self.campo_codigo.returnPressed.connect(self.executar_consulta)
-        self.campo_descricao_prod.returnPressed.connect(self.executar_consulta)
-        self.campo_contem_descricao_prod.returnPressed.connect(self.executar_consulta)
-        self.campo_qp.returnPressed.connect(self.executar_consulta)
-        self.campo_OP.returnPressed.connect(self.executar_consulta)
-        self.campo_razao_social_fornecedor.returnPressed.connect(self.executar_consulta)
-        self.campo_nm_fantasia_fornecedor.returnPressed.connect(self.executar_consulta)
-
         layout = QVBoxLayout()
         layout_campos_01 = QHBoxLayout()
         layout_campos_02 = QHBoxLayout()
@@ -307,6 +310,10 @@ class ComprasApp(QWidget):
         container_qp.addWidget(self.label_qp)
         container_qp.addWidget(self.campo_qp)
 
+        container_doc_nf = QVBoxLayout()
+        container_doc_nf.addWidget(self.label_nf)
+        container_doc_nf.addWidget(self.campo_doc_nf)
+
         container_data_ini = QVBoxLayout()
         container_data_ini.addWidget(self.label_data_inicio)
         container_data_ini.addWidget(self.campo_data_inicio)
@@ -332,6 +339,7 @@ class ComprasApp(QWidget):
         layout_campos_01.addLayout(container_qp)
         layout_campos_01.addLayout(container_sc)
         layout_campos_01.addLayout(container_pedido)
+        layout_campos_01.addLayout(container_doc_nf)
         layout_campos_01.addLayout(container_codigo)
         layout_campos_01.addLayout(container_descricao_prod)
         layout_campos_01.addLayout(container_contem_descricao_prod)
@@ -346,7 +354,8 @@ class ComprasApp(QWidget):
         layout_campos_02.addStretch()
 
         self.layout_buttons.addStretch()
-        self.layout_buttons.addWidget(self.btn_consultar)
+        self.layout_buttons.addWidget(self.btn_followup)
+        self.layout_buttons.addWidget(self.btn_sc)
         self.layout_buttons.addWidget(self.btn_ultimos_fornecedores)
         self.layout_buttons.addWidget(self.btn_saldo_estoque)
         self.layout_buttons.addWidget(self.btn_onde_e_usado)
@@ -479,17 +488,18 @@ class ComprasApp(QWidget):
                 background-color: #393E46;
             }
             
-            QTableWidget QHeaderView::section:vertical {
+            QTableWidget QHeaderView::section {
+                background-color: #262626;
+                color: #EEEEEE;
                 font-weight: bold;
-                padding: 5px;
                 height: 25px;
             }
     
             QTableWidget QHeaderView::section:horizontal {
-                border-bottom: 1px solid #333;
+                border-top: 1px solid #333;
                 font-size: 11px;
                 font-weight: bold;
-                padding: 10px;
+                padding: 5px;
                 height: 25px;
             }
     
@@ -514,14 +524,14 @@ class ComprasApp(QWidget):
         btn_today.clicked.connect(lambda: date_edit.setDate(QDate.currentDate()))
 
     def numero_linhas_consulta(self, query_consulta):
-        order_by_sc_somente_com_pedido = f"""ORDER BY PC.R_E_C_N_O_ DESC;"""
-        order_by_sc_sem_e_com_pedido = f"""ORDER BY "SOLIC. COMPRA" DESC;"""
+        order_by_followup = f"""ORDER BY PC.R_E_C_N_O_ DESC;"""
+        order_by_sc = f"""ORDER BY "SOLIC. COMPRA" DESC;"""
 
         query_sem_order_by = ""
-        if order_by_sc_somente_com_pedido in query_consulta:
-            query_sem_order_by = query_consulta.replace(order_by_sc_somente_com_pedido, "")
-        elif order_by_sc_sem_e_com_pedido in query_consulta:
-            query_sem_order_by = query_consulta.replace(order_by_sc_sem_e_com_pedido, "")
+        if order_by_followup in query_consulta:
+            query_sem_order_by = query_consulta.replace(order_by_followup, "")
+        elif order_by_sc in query_consulta:
+            query_sem_order_by = query_consulta.replace(order_by_sc, "")
 
         query = f"""
             SELECT 
@@ -610,17 +620,31 @@ class ComprasApp(QWidget):
         self.table_area.hide()
         self.tree.show()
         self.tree.setAlternatingRowColors(True)
+
+        # Definir número de colunas e cabeçalhos
         self.tree.setColumnCount(len(dataframe.columns))
         self.tree.setHorizontalHeaderLabels(dataframe.columns)
-        self.tree.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+
+        # Definir largura de colunas específicas
+        self.tree.setColumnWidth(0, 20)  # Coluna 'ICONES DE STATUS' (índice 0) com 100px
+        for col in range(1, len(dataframe.columns)):
+            self.tree.horizontalHeader().setSectionResizeMode(col, QHeaderView.ResizeToContents)
+
+        # Configurar propriedades da tabela
         self.tree.setEditTriggers(QTableWidget.NoEditTriggers)
         self.tree.setSelectionBehavior(QTableWidget.SelectRows)
         self.tree.setSelectionMode(QTableWidget.SingleSelection)
         self.tree.itemDoubleClicked.connect(copiar_linha)
         self.tree.setFont(QFont(self.fonte_tabela, self.tamanho_fonte_tabela))
         self.tree.verticalHeader().setDefaultSectionSize(self.altura_linha)
+
+        # Conectar sinal de clique para ordenar a tabela
         self.tree.horizontalHeader().sectionClicked.connect(self.ordenar_tabela)
+
+        # Permitir que a última coluna se estenda para preencher o espaço
         self.tree.horizontalHeader().setStretchLastSection(True)
+
+        # Menu de contexto personalizado
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(lambda pos: self.show_context_menu(pos, self.tree))
 
@@ -688,15 +712,16 @@ class ComprasApp(QWidget):
         self.campo_data_inicio.setEnabled(status)
         self.campo_data_fim.setEnabled(status)
         self.combobox_armazem.setEnabled(status)
-        self.btn_consultar.setEnabled(status)
+        self.btn_followup.setEnabled(status)
         self.btn_exportar_excel.setEnabled(status)
         self.btn_saldo_estoque.setEnabled(status)
         self.btn_onde_e_usado.setEnabled(status)
         self.btn_ultimos_fornecedores.setEnabled(status)
 
-    def query_consulta_followup(self):
+    def query_followup(self):
         numero_sc = self.campo_sc.text().upper().strip()
         numero_pedido = self.campo_pedido.text().upper().strip()
+        numero_nf = self.campo_doc_nf.text().upper().strip()
         numero_qp = self.campo_qp.text().upper().strip()
         numero_op = self.campo_OP.text().upper().strip()
         codigo_produto = self.campo_codigo.text().upper().strip()
@@ -705,11 +730,6 @@ class ComprasApp(QWidget):
         descricao_produto = self.campo_descricao_prod.text().upper().strip()
         contem_descricao = self.campo_contem_descricao_prod.text().upper().strip()
         checkbox_sc_somente_com_pedido = self.checkbox_exibir_somente_sc_com_pedido.isChecked()
-
-        if numero_pedido.strip() != '':
-            numero_pedido_tabela_solic = numero_pedido
-        else:
-            numero_pedido_tabela_solic = '      '
 
         cod_armazem = self.combobox_armazem.currentData()
         if cod_armazem is None:
@@ -727,7 +747,7 @@ class ComprasApp(QWidget):
         else:
             filtro_data = ''
 
-        common_select = f"""
+        pedido_compra_query = f"""
                 SELECT
                     SC.C1_ZZNUMQP AS "QP",
                     SC.C1_NUM AS "SOLIC. COMPRA",
@@ -735,37 +755,37 @@ class ComprasApp(QWidget):
                     ITEM_NF.D1_DOC AS "DOC. NF ENTRADA",
                     SC.C1_PRODUTO AS "CÓDIGO",
                     SC.C1_DESCRI AS "DESCRIÇÃO",
-                    SC.C1_UM AS "UNID. MED.",
-                    PC.C7_QUANT AS "QUANT. PEDIDO COMPRA",
+                    SC.C1_UM AS "UN.",
+                    PC.C7_QUANT AS "QTD. PEDIDO COMPRA",
                     ITEM_NF.D1_QUANT AS "QTD. ENTREGUE",
                     CASE 
                         WHEN ITEM_NF.D1_QUANT IS NULL THEN SC.C1_QUJE 
                         ELSE SC.C1_QUJE - ITEM_NF.D1_QUANT
                     END AS "QTD. PENDENTE",
+                    PC.C7_PRECO AS "CUSTO UNITÁRIO",
+                    PC.C7_TOTAL AS "CUSTO TOTAL",
                     PC.C7_DATPRF AS "PREVISÃO ENTREGA",
-                    PC.C7_PRECO AS "CUSTO UNITÁRIO (R$)",
-                    PC.C7_TOTAL AS "CUSTO TOTAL (R$)",
                     ITEM_NF.D1_DTDIGIT AS "DATA DE ENTREGA",
                     PC.C7_ENCER AS "STATUS PEDIDO COMPRA",
-                    SC.C1_EMISSAO AS "SC aberta em:",
-                    PC.C7_EMISSAO AS "PC aberto em:",
-                    ITEM_NF.D1_EMISSAO AS "Data emissão NF",
-                    SC.C1_ITEM AS "Item SC",
-                    SC.C1_ITEMPED AS "Item PC",
-                    FORN.A2_COD AS "Cód. Forn.",
-                    FORN.A2_NOME AS "Razão social",
-                    FORN.A2_NREDUZ AS "Nome fantasia",
-                    SC.C1_ORIGEM AS "Origem",
-                    SC.C1_OBS AS "Observação Solic. Compra",
-                    SC.C1_QUANT AS "QUANT. SOLIC. COMPRAS",
-                    SC.C1_LOCAL AS "Cod. Armazém",
-                    ARM.NNR_DESCRI AS "Desc. Armazém",
-                    PROD.B1_ZZLOCAL AS "Endereço almox.",
-                    SC.C1_IMPORT AS "Importado?",
-                    PC.C7_OBS AS "Observações Pedido Compra",
-                    PC.C7_OBSM AS "Observação do item no pedido compra",
-                    US.USR_NOME AS "Solicitante",
-                    PC.S_T_A_M_P_ AS "Aberto em:",
+                    SC.C1_EMISSAO AS "SC ABERTA EM:",
+                    SC.C1_QUANT AS "QTD. SOLIC. COMPRAS",
+                    PC.C7_EMISSAO AS "PC ABERTO EM:",
+                    ITEM_NF.D1_EMISSAO AS "DATA EMISSÃO NF",
+                    SC.C1_ITEM AS "ITEM SC",
+                    SC.C1_ITEMPED AS "ITEM PC",
+                    FORN.A2_COD AS "CÓD. FORNECEDOR",
+                    FORN.A2_NOME AS "RAZÃO SOCIAL FORNECEDOR",
+                    FORN.A2_NREDUZ AS "NOME FANTASIA FORNECEDOR",
+                    SC.C1_ORIGEM AS "ORIGEM",
+                    SC.C1_LOCAL AS "CÓD. ARMAZÉM",
+                    ARM.NNR_DESCRI AS "DESCRIÇÃO ARMAZÉM",
+                    PROD.B1_ZZLOCAL AS "ENDEREÇO ALMOXARIFADO",
+                    SC.C1_IMPORT AS "IMPORTADO?",
+                    SC.C1_OBS AS "OBSERVAÇÃO SOLIC. COMPRA",
+                    PC.C7_OBS AS "OBSERVAÇÃO PEDIDO DE COMPRA",
+                    PC.C7_OBSM AS "OBSERVAÇÃO ITEM DO PEDIDO DE COMPRA",
+                    US.USR_NOME AS "SOLICITANTE",
+                    PC.S_T_A_M_P_ AS "PEDIDO DE COMPRA ABERTO EM:",
                     SC.C1_OP AS "OP"
                 FROM 
                     {self.database}.dbo.SC7010 PC
@@ -793,11 +813,9 @@ class ComprasApp(QWidget):
                     {self.database}.dbo.SB1010 PROD
                 ON 
                     PROD.B1_COD = SC.C1_PRODUTO
-            """
-
-        solic_com_pedido_where = f"""
                 WHERE
                     PC.C7_NUM LIKE '%{numero_pedido}'
+                    AND ITEM_NF.D1_DOC LIKE '%{numero_nf}'
                     AND PC.C7_NUMSC LIKE '%{numero_sc}'
                     AND PC.C7_ZZNUMQP LIKE '%{numero_qp}'
                     AND PC.C7_PRODUTO LIKE '{codigo_produto}%'
@@ -812,95 +830,10 @@ class ComprasApp(QWidget):
                     AND PROD.D_E_L_E_T_ <> '*' ORDER BY PC.R_E_C_N_O_ DESC;
             """
 
-        solic_sem_pedido_where = f"""
-                WHERE
-                    PC.C7_NUM LIKE '%{numero_pedido}'
-                    AND PC.C7_NUMSC LIKE '%{numero_sc}'
-                    AND PC.C7_ZZNUMQP LIKE '%{numero_qp}'
-                    AND PC.C7_PRODUTO LIKE '{codigo_produto}%'
-                    AND SC.C1_DESCRI LIKE '{descricao_produto}%'
-                    AND {clausulas_contem_descricao}
-                    AND SC.C1_OP LIKE '%{numero_op}' 
-                    AND FORN.A2_NOME LIKE '%{razao_social_fornecedor}'
-                    AND FORN.A2_NREDUZ LIKE '%{nome_fantasia_fornecedor}%'
-                    AND SC.C1_LOCAL LIKE '{cod_armazem}%' {filtro_data}
-                    AND PC.D_E_L_E_T_ <> '*'
-                    AND SC.D_E_L_E_T_ <> '*'
-                    AND PROD.D_E_L_E_T_ <> '*' 
+        return pedido_compra_query
 
-                UNION ALL
-
-                SELECT
-                    SC.C1_ZZNUMQP AS "QP",
-                    SC.C1_NUM AS "SOLIC. COMPRA",
-                    NULL AS "PEDIDO COMPRA",
-                    NULL AS "DOC. NF ENTRADA",
-                    SC.C1_PRODUTO AS "CÓDIGO",
-                    SC.C1_DESCRI AS "DESCRIÇÃO",
-                    SC.C1_UM AS "UNID. MED.",
-                    NULL AS "QUANT. PEDIDO COMPRA",
-                    NULL AS "QTD. ENTREGUE",
-                    NULL AS "QTD. PENDENTE",
-                    NULL AS "PREVISÃO ENTREGA",
-                    NULL AS "CUSTO UNITÁRIO (R$)",
-                    NULL AS "CUSTO TOTAL (R$)",
-                    NULL AS "DATA DE ENTREGA",
-                    NULL AS "STATUS PEDIDO COMPRA",
-                    SC.C1_EMISSAO AS "SC aberta em:",
-                    NULL AS "PC aberto em:",
-                    NULL AS "Data emissão NF",
-                    SC.C1_ITEM AS "Item SC",
-                    NULL AS "Item PC",
-                    NULL AS "Cód. Forn.",
-                    NULL AS "Razão social",
-                    NULL AS "Nome fantasia",
-                    SC.C1_ORIGEM AS "Origem",
-                    SC.C1_OBS AS "Observação Solic. Compra",
-                    SC.C1_QUANT AS "QUANT. SOLIC. COMPRAS",
-                    SC.C1_LOCAL AS "Cod. Armazém",
-                    ARM.NNR_DESCRI AS "Desc. Armazém",
-                    PROD.B1_ZZLOCAL AS "Endereço almox.",
-                    SC.C1_IMPORT AS "Importado?",
-                    NULL AS "Observações Pedido Compra",
-                    NULL AS "Observação do item no pedido compra",
-                    US.USR_NOME AS "Solicitante",
-                    NULL AS "Aberto em:",
-                    SC.C1_OP AS "OP"
-                FROM 
-                    {self.database}.dbo.SC1010 SC
-                LEFT JOIN
-                    {self.database}.dbo.NNR010 ARM
-                ON 
-                    SC.C1_LOCAL = ARM.NNR_CODIGO
-                LEFT JOIN 
-                    {self.database}.dbo.SYS_USR US
-                ON 
-                    SC.C1_SOLICIT = US.USR_CODIGO AND US.D_E_L_E_T_ <> '*'
-                INNER JOIN 
-                    {self.database}.dbo.SB1010 PROD
-                ON 
-                    PROD.B1_COD = SC.C1_PRODUTO
-                WHERE 
-                    SC.C1_PEDIDO LIKE '%{numero_pedido_tabela_solic}'
-                    AND SC.C1_NUM LIKE '%{numero_sc}'
-                    AND SC.C1_ZZNUMQP LIKE '%{numero_qp}'
-                    AND SC.C1_PRODUTO LIKE '{codigo_produto}%'
-                    AND SC.C1_DESCRI LIKE '{descricao_produto}%'
-                    AND {clausulas_contem_descricao}
-                    AND SC.C1_OP LIKE '%{numero_op}'
-                    AND SC.C1_LOCAL LIKE '{cod_armazem}%'
-                    AND SC.D_E_L_E_T_ <> '*' {filtro_data}
-                    AND PROD.D_E_L_E_T_ <> '*'
-                    AND SC.C1_COTACAO <> 'XXXXXX' ORDER BY "SOLIC. COMPRA" DESC;
-            """
-
-        if checkbox_sc_somente_com_pedido:
-            return common_select + solic_com_pedido_where
-        else:
-            return common_select + solic_sem_pedido_where
-
-    def executar_consulta(self):
-        query_consulta_filtro = self.query_consulta_followup()
+    def executar_consulta_followup(self):
+        query_consulta_filtro = self.query_followup()
         query_contagem_linhas = self.numero_linhas_consulta(query_consulta_filtro)
 
         self.label_line_number.hide()
@@ -915,7 +848,6 @@ class ComprasApp(QWidget):
             line_number = dataframe_line_number.iloc[0, 0]
 
             if line_number >= 1:
-
                 if line_number > 1:
                     message = f"Foram encontradas {line_number} linhas"
                 else:
@@ -932,9 +864,9 @@ class ComprasApp(QWidget):
                 return
 
             dataframe = pd.read_sql(query_consulta_filtro, self.engine)
-            dataframe.insert(0, 'STATUS', '')
+            dataframe.insert(0, ' ', '')
             dataframe[''] = ''
-            dataframe.insert(12, 'CONTADOR DE DIAS', '')
+            dataframe.insert(15, 'CONTADOR DE DIAS', '')
 
             self.configurar_tabela(dataframe)
             self.configurar_tabela_tooltips(dataframe)
@@ -960,7 +892,7 @@ class ComprasApp(QWidget):
 
                 for column_name, value in row.items():
                     if value is not None:
-                        if column_name == 'STATUS':
+                        if column_name == ' ':
                             item = QTableWidgetItem()
                             if row['STATUS PEDIDO COMPRA'] is not None:
                                 if row['STATUS PEDIDO COMPRA'].strip() == '' and row['DOC. NF ENTRADA'] is None:
@@ -973,13 +905,30 @@ class ComprasApp(QWidget):
                             elif row['PEDIDO COMPRA'] is None:
                                 item.setIcon(no_pc)
                         else:
-                            if column_name in ('QUANT. SOLIC. COMPRAS', 'QUANT. PEDIDO COMPRA', 'CUSTO UNITÁRIO (R$)', 'CUSTO TOTAL (R$)', 'QTD. ENTREGUE'):
-                                value = locale.format_string("%.2f", value, grouping=True)
+                            if column_name in ('QTD. SOLIC. COMPRAS', 'QTD. PEDIDO COMPRA', 'QTD. ENTREGUE', 'CUSTO UNITÁRIO', 'CUSTO TOTAL'):
+                                if column_name in ('CUSTO UNITÁRIO', 'CUSTO TOTAL'):
+                                    value = f"R$ {locale.format_string("%.2f", value, grouping=True)}"
+                                else:
+                                    value = locale.format_string("%.2f", value, grouping=True)
 
-                            if column_name in ('QUANT. PEDIDO COMPRA', 'CUSTO UNITÁRIO (R$)', 'CUSTO TOTAL (R$)', 'QTD. ENTREGUE') and value == 'nan':
+                            if column_name in ('QTD. PEDIDO COMPRA', 'CUSTO UNITÁRIO', 'CUSTO TOTAL', 'QTD. ENTREGUE') and value == 'nan':
                                 value = ''
-                            if column_name == 'Aberto em:' and pd.isna(value):
+
+                            if column_name == 'PEDIDO DE COMPRA ABERTO EM:' and pd.isna(value):
                                 value = ''
+                            if column_name == 'PEDIDO DE COMPRA ABERTO EM:' and not pd.isna(value) and value != '':
+                                try:
+                                    # Converter para objeto datetime
+                                    datetime_value = pd.to_datetime(value, utc=True)
+                                    # Converter para o fuso horário UTC-3
+                                    datetime_value = datetime_value.tz_convert('America/Sao_Paulo')
+                                    # Remover os últimos 7 caracteres equivale a remover segundos e microsegundos
+                                    datetime_value = datetime_value.replace(microsecond=0)
+                                    # Converter de volta para string no formato desejado
+                                    value = datetime_value.strftime('%d/%m/%Y %H:%M:%S')
+                                except ValueError:
+                                    # Lidar com valores que não podem ser convertidos para datetime
+                                    print(f"Erro ao converter {value} para datetime.")
 
                             if column_name == 'CONTADOR DE DIAS' and row['DOC. NF ENTRADA'] is None:
                                 previsao_entrega_sem_formatacao = row['PREVISÃO ENTREGA']
@@ -1001,24 +950,27 @@ class ComprasApp(QWidget):
                             elif column_name == 'STATUS PEDIDO COMPRA' and value.strip() == '':
                                 value = ''
 
-                            if column_name == 'Origem' and value.strip() == 'MATA650':
+                            if column_name == 'ORIGEM' and value.strip() == 'MATA650':
                                 value = 'Empenho'
-                            elif column_name == 'Origem' and value.strip() == '':
+                            elif column_name == 'ORIGEM' and value.strip() == '':
                                 value = 'Compras'
 
-                            if column_name == 'Importado?' and value.strip() == 'N':
+                            if column_name == 'IMPORTADO?' and value.strip() == 'N':
                                 value = 'Não'
-                            elif column_name == 'Importado?' and value.strip() == '':
+                            elif column_name == 'IMPORTADO?' and value.strip() == '':
                                 value = 'Sim'
 
-                            if column_name in ('PREVISÃO ENTREGA', 'DATA DE ENTREGA', 'SC aberta em:', 'PC aberto em:', 'Data emissão NF') and not value.isspace():
+                            if column_name in ('PREVISÃO ENTREGA', 'DATA DE ENTREGA', 'SC ABERTA EM:', 'PC ABERTO EM:', 'DATA EMISSÃO NF') and not value.isspace():
                                 data_obj = datetime.strptime(value, "%Y%m%d")
                                 value = data_obj.strftime("%d/%m/%Y")
 
                             item = QTableWidgetItem(str(value).strip())
 
-                            if column_name not in ('DESCRIÇÃO', 'Observação Solic. Compra', 'Cod. Armazém', 'Observações Pedido Compra', 'Observação do item no pedido compra', 'Razão social', 'Nome fantasia'):
+                            if column_name not in ('DESCRIÇÃO', 'OBSERVAÇÃO SOLIC. COMPRA', 'OBSERVAÇÃO PEDIDO DE COMPRA', 'OBSERVAÇÃO ITEM DO PEDIDO DE COMPRA', 'RAZÃO SOCIAL FORNECEDOR', 'NOME FANTASIA FORNECEDOR'):
                                 item.setTextAlignment(Qt.AlignCenter)
+                            if column_name in ('CUSTO UNITÁRIO', 'CUSTO TOTAL'):
+                                item.setTextAlignment(Qt.AlignRight)
+
                     else:
                         item = QTableWidgetItem('')
 
@@ -1039,10 +991,179 @@ class ComprasApp(QWidget):
                 self.engine.dispose()
                 self.engine = None
 
+    def query_solic_compras(self):
+        numero_sc = self.campo_sc.text().upper().strip()
+        numero_pedido = self.campo_pedido.text().upper().strip()
+        numero_qp = self.campo_qp.text().upper().strip()
+        numero_op = self.campo_OP.text().upper().strip()
+        codigo_produto = self.campo_codigo.text().upper().strip()
+        descricao_produto = self.campo_descricao_prod.text().upper().strip()
+        contem_descricao = self.campo_contem_descricao_prod.text().upper().strip()
+
+        cod_armazem = self.combobox_armazem.currentData()
+        if cod_armazem is None:
+            cod_armazem = ''
+
+        palavras_contem_descricao = contem_descricao.split('*')
+        clausulas_contem_descricao = " AND ".join(
+            [f"SC.C1_DESCRI LIKE '%{palavra}%'" for palavra in palavras_contem_descricao])
+
+        data_inicio_formatada = self.campo_data_inicio.date().toString("yyyyMMdd")
+        data_fim_formatada = self.campo_data_fim.date().toString("yyyyMMdd")
+
+        if data_fim_formatada != '' and data_fim_formatada != '':
+            filtro_data = f"AND C1_EMISSAO >= '{data_inicio_formatada}' AND C1_EMISSAO <= '{data_fim_formatada}'"
+        else:
+            filtro_data = ''
+
+        query_solic_compras = f"""
+                SELECT
+                    SC.C1_ZZNUMQP AS "QP",
+                    SC.C1_PEDIDO AS "PEDIDO DE COMPRA",
+                    SC.C1_NUM AS "SOLIC. COMPRA",
+                    SC.C1_PRODUTO AS "CÓDIGO",
+                    SC.C1_DESCRI AS "DESCRIÇÃO",
+                    SC.C1_QUANT AS "QTD. SOLIC. COMPRAS",
+                    SC.C1_UM AS "UN.",
+                    SC.C1_EMISSAO AS "SC ABERTA EM:",
+                    SC.C1_ITEM AS "ITEM SC",
+                    SC.C1_ITEMPED AS "ITEM PC",
+                    SC.C1_GRPRD AS "GRUPO",
+                    SC.C1_LOCAL AS "CÓD. ARMAZÉM",
+                    ARM.NNR_DESCRI AS "DESCRIÇÃO ARMAZÉM",
+                    SC.C1_FORNECE AS "CÓD. FORNECEDOR",
+                    PROD.B1_ZZLOCAL AS "ENDEREÇO ALMOXARIFADO",
+                    SC.C1_OBS AS "OBSERVAÇÃO SOLIC. COMPRA",
+                    US.USR_NOME AS "SOLICITANTE",
+                    SC.C1_OP AS "OP"
+                FROM 
+                    {self.database}.dbo.SC1010 SC
+                LEFT JOIN
+                    {self.database}.dbo.NNR010 ARM
+                ON 
+                    SC.C1_LOCAL = ARM.NNR_CODIGO
+                LEFT JOIN 
+                    {self.database}.dbo.SYS_USR US
+                ON 
+                    SC.C1_SOLICIT = US.USR_CODIGO AND US.D_E_L_E_T_ <> '*'
+                INNER JOIN 
+                    {self.database}.dbo.SB1010 PROD
+                ON 
+                    PROD.B1_COD = SC.C1_PRODUTO
+                WHERE 
+                    SC.C1_NUM LIKE '%{numero_sc}'
+                    AND SC.C1_PEDIDO LIKE '%{numero_pedido}'
+                    AND SC.C1_ZZNUMQP LIKE '%{numero_qp}'
+                    AND SC.C1_PRODUTO LIKE '{codigo_produto}%'
+                    AND SC.C1_DESCRI LIKE '{descricao_produto}%'
+                    AND {clausulas_contem_descricao}
+                    AND SC.C1_OP LIKE '%{numero_op}'
+                    AND SC.C1_LOCAL LIKE '{cod_armazem}%'
+                    AND SC.D_E_L_E_T_ <> '*' {filtro_data}
+                    AND PROD.D_E_L_E_T_ <> '*'
+                    ORDER BY "SOLIC. COMPRA" DESC;
+            """
+        return query_solic_compras
+
+    def executar_consulta_solic_compras(self):
+        query = self.query_solic_compras()
+        query_contagem_linhas = self.numero_linhas_consulta(query)
+
+        self.label_line_number.hide()
+        self.controle_campos_formulario(False)
+        self.button_visible_control(False)
+
+        conn_str = f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};PWD={self.password}'
+        self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
+
+        try:
+            dataframe_line_number = pd.read_sql(query_contagem_linhas, self.engine)
+            line_number = dataframe_line_number.iloc[0, 0]
+
+            if line_number >= 1:
+                if line_number > 1:
+                    message = f"Foram encontradas {line_number} linhas"
+                else:
+                    message = f"Foi encontrada {line_number} linha"
+
+                self.label_line_number.setText(f"{message}")
+                self.label_line_number.show()
+
+            else:
+                exibir_mensagem("EUREKA® Compras", 'Nada encontrado!', "info")
+                self.controle_campos_formulario(True)
+                self.button_visible_control(False)
+                return
+
+            dataframe = pd.read_sql(query, self.engine)
+            dataframe.insert(0, ' ', '')
+            dataframe[''] = ''
+
+            self.configurar_tabela(dataframe)
+            self.configurar_tabela_tooltips(dataframe)
+
+            self.tree.horizontalHeader().setSortIndicator(-1, Qt.AscendingOrder)
+            self.tree.setRowCount(0)
+
+            # Construir caminhos relativos
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            sc_open = os.path.join(script_dir, '..', 'resources', 'images', 'red.png')
+            end_order_path = os.path.join(script_dir, '..', 'resources', 'images', 'green.png')
+
+            sc_open = QIcon(sc_open)
+            end_order = QIcon(end_order_path)
+
+            for i, row in dataframe.iterrows():
+                self.tree.setSortingEnabled(False)
+                self.tree.insertRow(i)
+
+                for column_name, value in row.items():
+                    if value is not None:
+                        if column_name == ' ':
+                            item = QTableWidgetItem()
+                            if row['PEDIDO DE COMPRA'] is not None:
+                                if row['PEDIDO DE COMPRA'].strip() == '':
+                                    item.setIcon(sc_open)
+                                elif row['PEDIDO DE COMPRA'].strip() != '':
+                                    item.setIcon(end_order)
+                                item.setSizeHint(QSize(64, 64))
+                        else:
+                            if column_name == 'QTD. SOLIC. COMPRA' and pd.isna(value):
+                                value = ''
+                            elif column_name == 'QTD. SOLIC. COMPRA' and value:
+                                value = round(value, 2)
+                                value = locale.format_string("%.2f", value, grouping=True)
+
+                            if column_name == 'C1_EMISSAO' and not value.isspace():
+                                data_obj = datetime.strptime(value, "%Y%m%d")
+                                value = data_obj.strftime("%d/%m/%Y")
+
+                            item = QTableWidgetItem(str(value).strip())
+
+                            if column_name not in ('DESCRIÇÃO', 'OBSERVAÇÃO SOLIC. COMPRA'):
+                                item.setTextAlignment(Qt.AlignCenter)
+                    else:
+                        item = QTableWidgetItem('')
+
+                    self.tree.setItem(i, list(row.index).index(column_name), item)
+
+            self.tree.setSortingEnabled(True)
+            self.controle_campos_formulario(True)
+            self.button_visible_control(True)
+
+        except Exception as ex:
+            exibir_mensagem('Erro ao consultar TOTVS', f'Erro: {str(ex)}', 'error')
+
+        finally:
+            # Fecha a conexão com o banco de dados se estiver aberta
+            if hasattr(self, 'engine'):
+                self.engine.dispose()
+                self.engine = None
+
     def configurar_tabela_tooltips(self, dataframe):
         # Mapa de tooltips correspondentes às colunas da consulta SQL
         tooltip_map = {
-            "STATUS": "VERMELHO - SC sem Pedido de Compra\nCINZA - Aguardando entrega\nAZUL - Entrega "
+            " ": "VERMELHO - SC sem Pedido de Compra\nCINZA - Aguardando entrega\nAZUL - Entrega "
                          "parcial\nVERDE - Pedido de compra encerrado"
         }
 
