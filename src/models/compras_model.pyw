@@ -229,7 +229,7 @@ class ComprasApp(QWidget):
         self.campo_data_fim.setDate(QDate().currentDate())
         self.add_today_button(self.campo_data_fim)
 
-        self.btn_followup = QPushButton("Carregar follow-up", self)
+        self.btn_followup = QPushButton("Carregar Follow-up", self)
         self.btn_followup.clicked.connect(self.executar_consulta_followup)
         self.btn_followup.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
@@ -287,6 +287,7 @@ class ComprasApp(QWidget):
 
         self.campo_sc.returnPressed.connect(self.executar_consulta_followup)
         self.campo_pedido.returnPressed.connect(self.executar_consulta_followup)
+        self.campo_doc_nf.returnPressed.connect(self.executar_consulta_followup)
         self.campo_codigo.returnPressed.connect(self.executar_consulta_followup)
         self.campo_descricao_prod.returnPressed.connect(self.executar_consulta_followup)
         self.campo_contem_descricao_prod.returnPressed.connect(self.executar_consulta_followup)
@@ -619,7 +620,6 @@ class ComprasApp(QWidget):
 
             context_menu_ultimas_nfe = QAction('Últimas Notas Fiscais', self)
             context_menu_ultimas_nfe.triggered.connect(lambda: consultar_ultimas_nfe(self, table))
-            menu.addAction(context_menu_ultimas_nfe)
 
             context_menu_consultar_onde_usado = QAction('Onde é usado?', self)
             context_menu_consultar_onde_usado.triggered.connect(lambda: executar_consulta_onde_usado(self, table))
@@ -631,6 +631,7 @@ class ComprasApp(QWidget):
             context_menu_nova_janela.triggered.connect(lambda: abrir_nova_janela(self, ComprasApp()))
 
             menu.addAction(context_menu_ultimo_fornecedor)
+            menu.addAction(context_menu_ultimas_nfe)
             menu.addAction(context_menu_consultar_onde_usado)
             menu.addAction(context_menu_saldo_estoque)
             menu.addAction(context_menu_nova_janela)

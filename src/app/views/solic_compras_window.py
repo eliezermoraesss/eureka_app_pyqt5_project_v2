@@ -76,7 +76,7 @@ class SolicitacaoComprasWindow(QWidget):
             self.combobox_armazem.addItem(key + ' - ' + value, key)
 
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        logo_enaplic_path = os.path.join(script_dir, '..', 'resources', 'images', 'LOGO.jpeg')
+        logo_enaplic_path = os.path.join(script_dir, '..', '..', 'resources', 'images', 'LOGO.jpeg')
         self.logo_label = QLabel(self)
         self.logo_label.setObjectName('logo-enaplic')
         pixmap_logo = QPixmap(logo_enaplic_path).scaledToWidth(60)
@@ -135,8 +135,6 @@ class SolicitacaoComprasWindow(QWidget):
 
         self.label_qp = QLabel("Número da QP:", self)
         self.label_qp.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.label_nf = QLabel("NF entrada:", self)
-        self.label_nf.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.label_OP = QLabel("Número da OP:", self)
         self.label_OP.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.label_data_inicio = QLabel("A partir de:", self)
@@ -181,12 +179,6 @@ class SolicitacaoComprasWindow(QWidget):
         self.campo_qp.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.add_clear_button(self.campo_qp)
 
-        self.campo_doc_nf = QLineEdit(self)
-        self.campo_doc_nf.setFont(QFont(fonte_campos, tamanho_fonte_campos))
-        self.campo_doc_nf.setMaxLength(9)
-        self.campo_doc_nf.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.add_clear_button(self.campo_doc_nf)
-
         self.campo_OP = QLineEdit(self)
         self.campo_OP.setFont(QFont(fonte_campos, tamanho_fonte_campos))
         self.campo_OP.setMaxLength(6)
@@ -228,7 +220,7 @@ class SolicitacaoComprasWindow(QWidget):
         self.campo_data_fim.setDate(QDate().currentDate())
         self.add_today_button(self.campo_data_fim)
 
-        self.btn_sc = QPushButton("Solicitação de Compra", self)
+        self.btn_sc = QPushButton("Carregar Solicitações de Compra", self)
         self.btn_sc.clicked.connect(self.executar_consulta_solic_compras)
         self.btn_sc.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
@@ -279,6 +271,16 @@ class SolicitacaoComprasWindow(QWidget):
         self.btn_fechar.clicked.connect(self.fechar_janela)
         self.btn_fechar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
+        self.campo_sc.returnPressed.connect(self.executar_consulta_solic_compras)
+        self.campo_pedido.returnPressed.connect(self.executar_consulta_solic_compras)
+        self.campo_codigo.returnPressed.connect(self.executar_consulta_solic_compras)
+        self.campo_descricao_prod.returnPressed.connect(self.executar_consulta_solic_compras)
+        self.campo_contem_descricao_prod.returnPressed.connect(self.executar_consulta_solic_compras)
+        self.campo_qp.returnPressed.connect(self.executar_consulta_solic_compras)
+        self.campo_OP.returnPressed.connect(self.executar_consulta_solic_compras)
+        self.campo_razao_social_fornecedor.returnPressed.connect(self.executar_consulta_solic_compras)
+        self.campo_nm_fantasia_fornecedor.returnPressed.connect(self.executar_consulta_solic_compras)
+
         layout = QVBoxLayout()
         layout_campos_01 = QHBoxLayout()
         layout_campos_02 = QHBoxLayout()
@@ -313,10 +315,6 @@ class SolicitacaoComprasWindow(QWidget):
         container_qp.addWidget(self.label_qp)
         container_qp.addWidget(self.campo_qp)
 
-        container_doc_nf = QVBoxLayout()
-        container_doc_nf.addWidget(self.label_nf)
-        container_doc_nf.addWidget(self.campo_doc_nf)
-
         container_data_ini = QVBoxLayout()
         container_data_ini.addWidget(self.label_data_inicio)
         container_data_ini.addWidget(self.campo_data_inicio)
@@ -342,7 +340,6 @@ class SolicitacaoComprasWindow(QWidget):
         layout_campos_01.addLayout(container_qp)
         layout_campos_01.addLayout(container_sc)
         layout_campos_01.addLayout(container_pedido)
-        layout_campos_01.addLayout(container_doc_nf)
         layout_campos_01.addLayout(container_codigo)
         layout_campos_01.addLayout(container_descricao_prod)
         layout_campos_01.addLayout(container_contem_descricao_prod)

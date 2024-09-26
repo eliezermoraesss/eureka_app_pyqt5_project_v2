@@ -34,7 +34,7 @@ def executar_consulta_estrutura(self, table):
                     SELECT 
                         struct.G1_COMP AS "Código", 
                         prod.B1_DESC AS "Descrição", 
-                        struct.G1_QUANT AS "Qtd..", 
+                        struct.G1_QUANT AS "Quantidade", 
                         struct.G1_XUM AS "Unid.", 
                         struct.G1_REVFIM AS "Revisão", 
                         struct.G1_INI AS "Inserido em:",
@@ -133,7 +133,6 @@ def executar_consulta_estrutura(self, table):
                 layout_cabecalho.addWidget(btn_exportar_excel_estrutura)
 
                 layout_nova_guia_estrutura.addLayout(layout_cabecalho)
-                # layout_nova_guia_estrutura.addLayout(layout_buttons)
                 layout_nova_guia_estrutura.addWidget(tree_estrutura)
                 nova_guia_estrutura.setLayout(layout_nova_guia_estrutura)
 

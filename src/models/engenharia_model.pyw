@@ -208,7 +208,6 @@ class EngenhariaApp(QWidget):
         layout_button_03 = QHBoxLayout()
         layout_button_04 = QHBoxLayout()
         self.layout_footer_label = QHBoxLayout()
-        layout_footer_logo = QHBoxLayout()
 
         layout_campos_01.addWidget(QLabel("Código:"))
         layout_campos_01.addWidget(self.campo_codigo)
@@ -247,8 +246,7 @@ class EngenhariaApp(QWidget):
         self.layout_footer_label.addStretch(1)
         self.layout_footer_label.addWidget(self.label_line_number)
         self.layout_footer_label.addStretch(1)
-
-        layout_footer_logo.addWidget(self.logo_label)
+        self.layout_footer_label.addWidget(self.logo_label)
 
         layout.addLayout(layout_campos_01)
         layout.addLayout(layout_campos_02)
@@ -256,7 +254,6 @@ class EngenhariaApp(QWidget):
         layout.addLayout(layout_button_04)
         layout.addWidget(self.tree)
         layout.addLayout(self.layout_footer_label)
-        layout.addLayout(layout_footer_logo)
         self.setLayout(layout)
 
         self.campo_codigo.returnPressed.connect(self.executar_consulta)

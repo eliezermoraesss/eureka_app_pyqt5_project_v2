@@ -2,10 +2,10 @@ import pyodbc
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QLabel, QTableWidgetItem, QTableWidget, QHeaderView, QHBoxLayout, QVBoxLayout, QWidget, \
-    QMessageBox
+    QMessageBox, QPushButton, QSizePolicy, QSpacerItem
 
 from src.app.utils.db_mssql import setup_mssql
-from src.app.utils.utils import copiar_linha
+from src.app.utils.utils import copiar_linha, exportar_excel
 
 
 def consultar_ultimas_nfe(self, table):
@@ -34,37 +34,33 @@ def consultar_ultimas_nfe(self, table):
                         D1_DTDIGIT AS "Data Entrada",
                         D1_DOC AS "Documento",
                         D1_SERIE AS "Série",
-                        livroFiscal.F3_CHVNFE AS "Chave de acesso",
                         D1_PEDIDO AS "Pedido",
                         D1_FORNECE AS "Cód. Fornecedor",
                         FORN.A2_NOME AS "Fornecedor/Cliente",
                         D1_LOJA AS "Loja",
                         livroFiscal.F3_ESPECIE AS "Espécie",
+                        D1_TIPO AS "Tipo NF",
                         D1_ITEM AS "Item NF",
                         D1_QUANT AS "Quant. NF",
                         D1_VUNIT AS "Vlr. Unitário",
                         D1_TOTAL AS "Vlr. Total",
-                        D1_TIPO AS "Tipo NF",
                         D1_ITEMPC AS "Item Pedido",
                         D1_QTDPEDI AS "Quant. Pedido",
                         D1_EMISSAO AS "Data da emissão",
-                        cabNfEntrada.F1_HORA as "Hora entrada/saída"
+                        livroFiscal.F3_CHVNFE AS "Chave de acesso"
                     FROM 
                         {database}.dbo.SD1010 NFE
-                    INNER JOIN
+                    LEFT JOIN
                         {database}.dbo.SA2010 FORN
                     ON
                         FORN.A2_COD = NFE.D1_FORNECE
-                    INNER JOIN
-                        {database}.dbo.SF1010 cabNfEntrada
-                    ON
-                        cabNfEntrada.F1_DOC = NFE.D1_DOC
-                    INNER JOIN
+                    LEFT JOIN
                         {database}.dbo.SF3010 livroFiscal
                     ON
                         livroFiscal.F3_NFISCAL = NFE.D1_DOC
                     WHERE 
                         D1_COD LIKE '{codigo}%'
+                        AND NFE.D_E_L_E_T_ <> '*'
                     ORDER BY 
                         NFE.R_E_C_N_O_ DESC;
                 """
@@ -112,10 +108,16 @@ def consultar_ultimas_nfe(self, table):
 
                 tabela.setSortingEnabled(True)
 
+                btn_exportar_excel_estrutura = QPushButton("Exportar Excel", self)
+                btn_exportar_excel_estrutura.clicked.connect(lambda: exportar_excel(self, tabela))
+                btn_exportar_excel_estrutura.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+
                 layout_cabecalho.addWidget(QLabel(f'Últimas Notas Fiscais\n\n{codigo} - {descricao}'),
                                            alignment=Qt.AlignLeft)
-                layout_nova_guia.addLayout(layout_cabecalho)
+                layout_cabecalho.addSpacerItem(QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
+                layout_cabecalho.addWidget(btn_exportar_excel_estrutura)
 
+                layout_nova_guia.addLayout(layout_cabecalho)
                 layout_nova_guia.addWidget(tabela)
                 nova_guia.setLayout(layout_nova_guia)
 
@@ -128,6 +130,28 @@ def consultar_ultimas_nfe(self, table):
                             color: #EEEEEE;
                             font-size: 18px;
                             font-weight: bold;
+                        }
+                        
+                        QPushButton {
+                            background-color: #0a79f8;
+                            color: #fff;
+                            padding: 5px 15px;
+                            border: 2px;
+                            border-radius: 8px;
+                            font-size: 11px;
+                            height: 20px;
+                            font-weight: bold;
+                            margin: 10px 5px;
+                        }
+                        
+                        QPushButton:hover {
+                            background-color: #fff;
+                            color: #0a79f8
+                        }
+
+                        QPushButton:pressed {
+                            background-color: #6703c5;
+                            color: #fff;
                         }
 
                         QTableWidget {
