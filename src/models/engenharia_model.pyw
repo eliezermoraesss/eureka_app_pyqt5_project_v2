@@ -15,6 +15,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButto
     QCheckBox, QMenu, QAction, QComboBox, QStyle
 from sqlalchemy import create_engine
 
+from src.app.views.new_product_window import NewProductWindow
 from src.app.views.edit_product_window import EditarProdutoItemWindow
 from src.app.utils.consultar_estrutura import executar_consulta_estrutura
 from src.app.utils.consultar_onde_usado import executar_consulta_onde_usado
@@ -141,6 +142,10 @@ class EngenhariaApp(QWidget):
         self.btn_consultar.clicked.connect(self.executar_consulta)
         self.btn_consultar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
+        self.btn_new_product = QPushButton("Cadastrar novo produto", self)
+        self.btn_new_product.clicked.connect(self.abrir_janela_novo_produto)
+        self.btn_new_product.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
         self.btn_abrir_pcp = QPushButton("PCP", self)
         self.btn_abrir_pcp.setObjectName("PCP")
         self.btn_abrir_pcp.clicked.connect(self.abrir_modulo_pcp)
@@ -228,15 +233,18 @@ class EngenhariaApp(QWidget):
 
         layout_button_03.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         layout_button_03.addWidget(self.btn_consultar)
+        layout_button_03.addWidget(self.btn_new_product)
         layout_button_03.addWidget(self.btn_limpar)
-        layout_button_03.addWidget(self.btn_consultar_estrutura)
-        layout_button_03.addWidget(self.btn_onde_e_usado)
-        layout_button_03.addWidget(self.btn_saldo_estoque)
-        layout_button_03.addWidget(self.btn_ultimos_fornecedores)
-        layout_button_03.addWidget(self.btn_ultimas_nfe)
+        layout_button_04.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        layout_button_04.addWidget(self.btn_consultar_estrutura)
+        layout_button_04.addWidget(self.btn_onde_e_usado)
+        layout_button_04.addWidget(self.btn_saldo_estoque)
+        layout_button_04.addWidget(self.btn_ultimos_fornecedores)
+        layout_button_04.addWidget(self.btn_ultimas_nfe)
         layout_button_03.addWidget(self.btn_nova_janela)
-        layout_button_03.addWidget(self.btn_abrir_desenho)
-        layout_button_03.addWidget(self.btn_exportar_excel)
+        layout_button_04.addWidget(self.btn_abrir_desenho)
+        layout_button_04.addWidget(self.btn_exportar_excel)
+        layout_button_04.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         layout_button_03.addWidget(self.btn_calculo_peso)
         layout_button_03.addWidget(self.btn_abrir_pcp)
         layout_button_03.addWidget(self.btn_abrir_compras)
@@ -453,6 +461,10 @@ class EngenhariaApp(QWidget):
 
             menu = QMenu()
 
+            new_product = QAction('Cadastrar...', self)
+            new_product.triggered.connect(self.abrir_janela_novo_produto)
+            menu.addAction(new_product)
+
             editar_action = QAction('Editar...', self)
             editar_action.triggered.connect(self.editar_item_selecionado)
             menu.addAction(editar_action)
@@ -490,6 +502,10 @@ class EngenhariaApp(QWidget):
             menu.addAction(context_menu_nova_janela)
 
             menu.exec_(table.viewport().mapToGlobal(position))
+
+    def abrir_janela_novo_produto(self):
+        new_product_window = NewProductWindow()
+        new_product_window.exec_()
 
     def editar_item_selecionado(self):
         selected_row = self.tree.currentRow()

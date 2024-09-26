@@ -55,7 +55,7 @@ def executar_consulta_estrutura(self, table):
                         B1_DESC ASC;
                 """
             conn = pyodbc.connect(
-            f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}')
+                f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}')
             try:
                 cursor = conn.cursor()
                 cursor.execute(select_query_estrutura)

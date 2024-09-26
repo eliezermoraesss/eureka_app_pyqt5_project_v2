@@ -57,7 +57,7 @@ def consultar_ultimas_nfe(self, table):
                     LEFT JOIN
                         {database}.dbo.SF3010 livroFiscal
                     ON
-                        livroFiscal.F3_NFISCAL = NFE.D1_DOC
+                        F3_NFISCAL = D1_DOC AND F3_CLIEFOR = D1_FORNECE
                     WHERE 
                         D1_COD LIKE '{codigo}%'
                         AND NFE.D_E_L_E_T_ <> '*'
@@ -112,7 +112,7 @@ def consultar_ultimas_nfe(self, table):
                 btn_exportar_excel_estrutura.clicked.connect(lambda: exportar_excel(self, tabela))
                 btn_exportar_excel_estrutura.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
-                layout_cabecalho.addWidget(QLabel(f'Últimas Notas Fiscais\n\n{codigo} - {descricao}'),
+                layout_cabecalho.addWidget(QLabel(f'Histórico de compras - Últimas Notas Fiscais\n\n{codigo} - {descricao}'),
                                            alignment=Qt.AlignLeft)
                 layout_cabecalho.addSpacerItem(QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
                 layout_cabecalho.addWidget(btn_exportar_excel_estrutura)
@@ -185,7 +185,7 @@ def consultar_ultimas_nfe(self, table):
                     self.layout().addWidget(self.tabWidget)
                     self.tabWidget.setVisible(True)
 
-                self.tabWidget.addTab(nova_guia, f"Últimas Notas Fiscais - {codigo}")
+                self.tabWidget.addTab(nova_guia, f"Histórico de NFe - {codigo}")
                 tabela.itemDoubleClicked.connect(copiar_linha)
                 self.tabWidget.setCurrentIndex(self.tabWidget.indexOf(nova_guia))
 
