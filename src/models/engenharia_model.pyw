@@ -3,8 +3,6 @@ import os
 import sys
 import time
 
-from src.app.utils.consultar_ultimas_nfe import consultar_ultimas_nfe
-
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -22,6 +20,7 @@ from src.app.utils.consultar_estrutura import executar_consulta_estrutura
 from src.app.utils.consultar_onde_usado import executar_consulta_onde_usado
 from src.app.utils.consultar_saldo_estoque import executar_saldo_em_estoque
 from src.app.utils.consultar_ultimos_fornecedores import executar_ultimos_fornecedores
+from src.app.utils.consultar_ultimas_nfe import consultar_ultimas_nfe
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.load_session import load_session
 from src.app.utils.utils import *
