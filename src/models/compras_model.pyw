@@ -674,7 +674,7 @@ class ComprasApp(QWidget):
         self.tree.verticalHeader().setDefaultSectionSize(self.altura_linha)
 
         # Conectar sinal de clique para abrir o filtro
-        # self.tree.horizontalHeader().sectionClicked.connect(self.abrir_filtro)
+        self.tree.horizontalHeader().sectionClicked.connect(self.abrir_filtro)
 
         # Menu de contexto personalizado
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
