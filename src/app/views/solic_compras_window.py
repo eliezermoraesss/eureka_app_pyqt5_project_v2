@@ -220,7 +220,7 @@ class SolicitacaoComprasWindow(QWidget):
         self.campo_data_fim.setDate(QDate().currentDate())
         self.add_today_button(self.campo_data_fim)
 
-        self.btn_sc = QPushButton("Carregar Solicitações de Compra", self)
+        self.btn_sc = QPushButton("Pesquisar", self)
         self.btn_sc.clicked.connect(self.executar_consulta_solic_compras)
         self.btn_sc.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 

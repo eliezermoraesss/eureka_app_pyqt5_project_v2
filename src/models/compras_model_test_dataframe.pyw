@@ -124,6 +124,7 @@ class ComprasApp(QWidget):
 
         self.checkbox_exibir_somente_sc_com_pedido = QCheckBox("Ocultar Solic. de Compras SEM Pedido de Compras", self)
         self.checkbox_exibir_somente_sc_com_pedido.setObjectName("checkbox-sc")
+        self.checkbox_exibir_somente_sc_com_pedido.setVisible(False)
 
         self.label_sc = QLabel("Solicitação de Compra:", self)
         self.label_sc.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -674,7 +675,7 @@ class ComprasApp(QWidget):
         self.tree.verticalHeader().setDefaultSectionSize(self.altura_linha)
 
         # Conectar sinal de clique para abrir o filtro
-        # self.tree.horizontalHeader().sectionClicked.connect(self.abrir_filtro)
+        self.tree.horizontalHeader().sectionClicked.connect(self.abrir_filtro)
 
         # Menu de contexto personalizado
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -1015,7 +1016,7 @@ class ComprasApp(QWidget):
             self.configurar_tabela(self.dataframe)
             self.configurar_tabela_tooltips(self.dataframe)
 
-            self.tree.horizontalHeader().setSortIndicator(-1, Qt.AscendingOrder)
+            # self.tree.horizontalHeader().setSortIndicator(-1, Qt.AscendingOrder)
             self.tree.setRowCount(0)
 
             # Construir caminhos relativos
@@ -1133,6 +1134,80 @@ class ComprasApp(QWidget):
             if hasattr(self, 'engine'):
                 self.engine.dispose()
                 self.engine = None
+
+    def query_solic_compras(self):
+        numero_sc = self.campo_sc.text().upper().strip()
+        numero_pedido = self.campo_pedido.text().upper().strip()
+        numero_qp = self.campo_qp.text().upper().strip()
+        numero_op = self.campo_OP.text().upper().strip()
+        codigo_produto = self.campo_codigo.text().upper().strip()
+        descricao_produto = self.campo_descricao_prod.text().upper().strip()
+        contem_descricao = self.campo_contem_descricao_prod.text().upper().strip()
+
+        cod_armazem = self.combobox_armazem.currentData()
+        if cod_armazem is None:
+            cod_armazem = ''
+
+        palavras_contem_descricao = contem_descricao.split('*')
+        clausulas_contem_descricao = " AND ".join(
+            [f"SC.C1_DESCRI LIKE '%{palavra}%'" for palavra in palavras_contem_descricao])
+
+        data_inicio_formatada = self.campo_data_inicio.date().toString("yyyyMMdd")
+        data_fim_formatada = self.campo_data_fim.date().toString("yyyyMMdd")
+
+        if data_fim_formatada != '' and data_fim_formatada != '':
+            filtro_data = f"AND C1_EMISSAO >= '{data_inicio_formatada}' AND C1_EMISSAO <= '{data_fim_formatada}'"
+        else:
+            filtro_data = ''
+
+        query_solic_compras = f"""
+                SELECT
+                    SC.C1_ZZNUMQP AS "QP",
+                    SC.C1_PEDIDO AS "PEDIDO DE COMPRA",
+                    SC.C1_NUM AS "SOLIC. COMPRA",
+                    SC.C1_PRODUTO AS "CÓDIGO",
+                    SC.C1_DESCRI AS "DESCRIÇÃO",
+                    SC.C1_QUANT AS "QTD. SOLIC. COMPRAS",
+                    SC.C1_UM AS "UN.",
+                    SC.C1_EMISSAO AS "SC ABERTA EM:",
+                    SC.C1_ITEM AS "ITEM SC",
+                    SC.C1_ITEMPED AS "ITEM PC",
+                    SC.C1_GRPRD AS "GRUPO",
+                    SC.C1_LOCAL AS "CÓD. ARMAZÉM",
+                    ARM.NNR_DESCRI AS "DESCRIÇÃO ARMAZÉM",
+                    SC.C1_FORNECE AS "CÓD. FORNECEDOR",
+                    PROD.B1_ZZLOCAL AS "ENDEREÇO ALMOXARIFADO",
+                    SC.C1_OBS AS "OBSERVAÇÃO SOLIC. COMPRA",
+                    US.USR_NOME AS "SOLICITANTE",
+                    SC.C1_OP AS "OP"
+                FROM 
+                    {self.database}.dbo.SC1010 SC
+                LEFT JOIN
+                    {self.database}.dbo.NNR010 ARM
+                ON 
+                    SC.C1_LOCAL = ARM.NNR_CODIGO
+                LEFT JOIN 
+                    {self.database}.dbo.SYS_USR US
+                ON 
+                    SC.C1_SOLICIT = US.USR_CODIGO AND US.D_E_L_E_T_ <> '*'
+                INNER JOIN 
+                    {self.database}.dbo.SB1010 PROD
+                ON 
+                    PROD.B1_COD = SC.C1_PRODUTO
+                WHERE 
+                    SC.C1_NUM LIKE '%{numero_sc}'
+                    AND SC.C1_PEDIDO LIKE '%{numero_pedido}'
+                    AND SC.C1_ZZNUMQP LIKE '%{numero_qp}'
+                    AND SC.C1_PRODUTO LIKE '{codigo_produto}%'
+                    AND SC.C1_DESCRI LIKE '{descricao_produto}%'
+                    AND {clausulas_contem_descricao}
+                    AND SC.C1_OP LIKE '%{numero_op}'
+                    AND SC.C1_LOCAL LIKE '{cod_armazem}%'
+                    AND SC.D_E_L_E_T_ <> '*' {filtro_data}
+                    AND PROD.D_E_L_E_T_ <> '*'
+                    ORDER BY "SOLIC. COMPRA" DESC;
+            """
+        return query_solic_compras
 
     def executar_consulta_solic_compras(self):
         solic_compras_window = SolicitacaoComprasWindow()
