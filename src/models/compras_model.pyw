@@ -674,7 +674,7 @@ class ComprasApp(QWidget):
         self.tree.verticalHeader().setDefaultSectionSize(self.altura_linha)
 
         # Conectar sinal de clique para abrir o filtro
-        self.tree.horizontalHeader().sectionClicked.connect(self.abrir_filtro)
+        # self.tree.horizontalHeader().sectionClicked.connect(self.abrir_filtro)
 
         # Menu de contexto personalizado
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -687,6 +687,7 @@ class ComprasApp(QWidget):
         # Abrir a janela com QListWidget para filtro
         filtro_dialog = FiltroDialog(None, nome_coluna, self.dataframe)
         filtro_dialog.exec_()
+        filtro_dialog.close()
 
         # Atualiza o DataFrame com os filtros selecionados
         filtro_selecionado = filtro_dialog.get_filtros_selecionados()
@@ -1141,7 +1142,7 @@ class ComprasApp(QWidget):
     def configurar_tabela_tooltips(self, dataframe):
         # Mapa de tooltips correspondentes às colunas da consulta SQL
         tooltip_map = {
-            "STATUS": "VERMELHO - SC sem Pedido de Compra\nCINZA - Aguardando entrega\nAZUL - Entrega "
+            " ": "VERMELHO - SC sem Pedido de Compra\nCINZA - Aguardando entrega\nAZUL - Entrega "
                       "parcial\nVERDE - Pedido de compra encerrado"
         }
 

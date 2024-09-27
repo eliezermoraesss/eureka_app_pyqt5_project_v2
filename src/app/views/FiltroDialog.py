@@ -11,7 +11,7 @@ class FiltroDialog(QDialog):
         self.ordenacao_crescente = True  # Controle de ordenação
 
         self.setWindowTitle(f"Filtrar: {self.nome_coluna}")
-        self.setGeometry(100, 100, 250, 500)
+        self.setGeometry(100, 100, 200, 500)
 
         layout = QVBoxLayout()
 
@@ -39,11 +39,6 @@ class FiltroDialog(QDialog):
         self.list_widget.addItems(self.itens_originais)
 
         layout.addWidget(self.list_widget)
-
-        # Campo de texto para exibir as seleções
-        self.resultado_texto = QTextEdit()
-        self.resultado_texto.setReadOnly(True)
-        layout.addWidget(self.resultado_texto)
 
         # Botão de aplicar filtro
         btn_aplicar = QPushButton("Aplicar Filtro")
