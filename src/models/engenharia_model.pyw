@@ -120,6 +120,10 @@ class EngenhariaApp(QWidget):
         self.campo_grupo.setFont(QFont(fonte, tamanho_fonte))
         self.add_clear_button(self.campo_grupo)
 
+        self.campo_cc = CustomLineEdit('Centro de custo', 'centro_custo', self)
+        self.campo_cc.setFont(QFont(fonte, tamanho_fonte))
+        self.add_clear_button(self.campo_cc)
+
         self.combobox_bloqueio = QComboBox(self)
         self.combobox_bloqueio.setEditable(False)
         self.combobox_bloqueio.setObjectName("combobox_bloqueio")
@@ -218,6 +222,8 @@ class EngenhariaApp(QWidget):
         layout_campos_02.addWidget(self.campo_armazem)
         layout_campos_02.addWidget(QLabel("Grupo:"))
         layout_campos_02.addWidget(self.campo_grupo)
+        layout_campos_02.addWidget(QLabel("Centro Custo:"))
+        layout_campos_02.addWidget(self.campo_cc)
         layout_campos_02.addWidget(QLabel("Bloqueio:"))
         layout_campos_02.addWidget(self.combobox_bloqueio)
 
@@ -553,6 +559,7 @@ class EngenhariaApp(QWidget):
         self.campo_um.clear()
         self.campo_armazem.clear()
         self.campo_grupo.clear()
+        self.campo_cc.clear()
         self.combobox_bloqueio.clear()
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
@@ -603,6 +610,7 @@ class EngenhariaApp(QWidget):
         self.campo_um.setEnabled(status)
         self.campo_armazem.setEnabled(status)
         self.campo_grupo.setEnabled(status)
+        self.campo_cc.setEnabled(status)
         self.btn_consultar.setEnabled(status)
         self.combobox_bloqueio.setEnabled(status)
 
@@ -614,9 +622,10 @@ class EngenhariaApp(QWidget):
         um = self.campo_um.text().upper().strip()
         armazem = self.campo_armazem.text().upper().strip()
         grupo = self.campo_grupo.text().upper().strip()
+        centro_custo = self.campo_cc.text().upper().strip()
         status_bloqueio = self.combobox_bloqueio.currentData()
 
-        lista_campos = [codigo, descricao, descricao2, tipo, um, armazem, grupo]
+        lista_campos = [codigo, descricao, descricao2, tipo, um, armazem, grupo, centro_custo]
 
         if all(valor == '' for valor in lista_campos):
             self.btn_consultar.setEnabled(False)
@@ -658,6 +667,7 @@ class EngenhariaApp(QWidget):
             AND B1_UM LIKE '{um}%' 
             AND B1_LOCPAD LIKE '{armazem}%' 
             AND B1_GRUPO LIKE '{grupo}%'
+            AND B1_CC LIKE '{centro_custo}%'
             {filtro_bloqueio}
             AND D_E_L_E_T_ <> '*'
             ORDER BY B1_COD ASC
