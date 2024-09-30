@@ -2,7 +2,7 @@ import locale
 import os
 import sys
 
-from src.app.views.FiltroDialog import FiltroDialog
+from src.app.views.FilterDialog import FilterDialog
 
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -685,7 +685,7 @@ class ComprasApp(QWidget):
         nome_coluna = self.tree.horizontalHeaderItem(logical_index).text()
 
         # Abrir a janela com QListWidget para filtro
-        filtro_dialog = FiltroDialog(None, nome_coluna, self.dataframe)
+        filtro_dialog = FilterDialog(None, nome_coluna, self.dataframe)
         filtro_dialog.exec_()
         filtro_dialog.close()
 
@@ -893,7 +893,7 @@ class ComprasApp(QWidget):
         solic_sem_pedido_where = f"""
                 WHERE
                     PC.C7_NUM LIKE '%{numero_pedido}'
-                    AND ITEM_NF.D1_DOC LIKE '%{numero_nf}'
+                    --AND ITEM_NF.D1_DOC LIKE '%{numero_nf}'
                     AND PC.C7_NUMSC LIKE '%{numero_sc}'
                     AND PC.C7_ZZNUMQP LIKE '%{numero_qp}'
                     AND PC.C7_PRODUTO LIKE '{codigo_produto}%'
@@ -975,6 +975,8 @@ class ComprasApp(QWidget):
         if checkbox_sc_somente_com_pedido:
             return common_select + solic_com_pedido_where
         else:
+            if numero_nf != '':
+                solic_sem_pedido_where = solic_sem_pedido_where.replace('--', '')
             return common_select + solic_sem_pedido_where
 
     def executar_consulta_followup(self):
