@@ -12,7 +12,7 @@ from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, \
     QTableWidgetItem, QSizePolicy, QSpacerItem, QTabWidget, \
-    QCheckBox, QMenu, QAction, QComboBox, QStyle
+    QMenu, QAction, QComboBox, QStyle
 from sqlalchemy import create_engine
 
 from src.app.views.new_product_window import NewProductWindow
@@ -36,7 +36,7 @@ class CustomLineEdit(QLineEdit):
 
     def mousePressEvent(self, event):
         # Chama a função open_search_dialog quando o QLineEdit for clicado
-        open_search_dialog(self.entity_name, self, self.entity, self)
+        open_search_dialog(self.entity_name, self, self.entity, self.parentWidget())
         # Continue com o comportamento padrão
         super(CustomLineEdit, self).mousePressEvent(event)
 

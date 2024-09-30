@@ -234,12 +234,13 @@ class NewProductWindow(QtWidgets.QDialog):
         return query
 
     def insert_product(self):
+        codigo = self.ui.codigo_field.text().upper()
         try:
             self.verify_blank_required_fields()
             if self.required_field_is_blank:
                 return
 
-            if self.verificar_se_existe_cadastro(self.ui.codigo_field.text().upper()):
+            if self.verificar_se_existe_cadastro(codigo):
                 return
             else:
                 with pyodbc.connect(
@@ -251,11 +252,11 @@ class NewProductWindow(QtWidgets.QDialog):
 
                 # Fechar a janela após salvar
                 self.accept()
-
-                # save_log_database(self.user_data, selected_row_before_changed, selected_row_after_changed)
+                log_description = f"Cadastro de novo produto"
+                save_log_database(self.user_data, log_description, codigo)
 
                 QMessageBox.information(self, f"Eureka® Engenharia",
-                                   f"Produto cadastrado com sucesso!\n\n( ͡° ͜ʖ ͡°)")
+                                   f"Produto cadastrado com sucesso!")
 
         except Exception as ex:
             QMessageBox.warning(self, f"Eureka® - Falha ao conectar no banco de dados",

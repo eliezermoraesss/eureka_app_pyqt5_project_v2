@@ -7,51 +7,17 @@ from PyQt5.QtWidgets import QMessageBox
 from src.app.utils.db_mssql import setup_mssql
 
 
-def format_log_description(selected_row_before_changed, selected_row_after_changed):
-    before_change = {}
-    after_change = {}
-    column_names = {
-        1: 'Descricao: ',
-        2: 'Desc. Compl.: ',
-        3: 'Tipo: ',
-        4: 'Unid. Med.: ',
-        5: 'Armazem: ',
-        6: 'Grupo: ',
-        7: 'Desc. Grupo: ',
-        8: 'Centro Custo: ',
-        9: 'Bloqueio: ',
-        13: 'Endereco: '
-    }
-    for value in selected_row_after_changed:
-        if value not in selected_row_before_changed:
-            index = selected_row_after_changed.index(value)
-            after_change[index] = value
-    for value in selected_row_before_changed:
-        if value not in selected_row_after_changed:
-            index = selected_row_before_changed.index(value)
-            before_change[index] = value
-    result = 'Antes:\n'
-    for key, value in before_change.items():
-        result += column_names[key] + value + '\n'
-    result += '\nDepois:\n'
-    for key, value in after_change.items():
-        result += column_names[key] + value + '\n'
-    return result
-
-
-def save_log_database(user_data, selected_row_before_changed, selected_row_after_changed):
+def save_log_database(user_data, log_description, part_number):
     full_name = user_data["full_name"]
     email = user_data["email"]
     user_role = user_data["role"]
-
-    log_description = format_log_description(selected_row_before_changed, selected_row_after_changed)
 
     query = f"""
     INSERT INTO 
         enaplic_management.dbo.tb_user_logs 
         (full_name, email, user_role, part_number, log_description, created_at) 
     VALUES
-        ('{full_name}', '{email}', '{user_role}', '{selected_row_after_changed[0]}', '{log_description}', switchoffset(sysdatetimeoffset(),'-03:00'));
+        ('{full_name}', '{email}', '{user_role}', '{part_number}', '{log_description}', switchoffset(sysdatetimeoffset(),'-03:00'));
     """
 
     driver = '{SQL Server}'

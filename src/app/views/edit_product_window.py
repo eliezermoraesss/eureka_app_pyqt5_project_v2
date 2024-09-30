@@ -7,6 +7,7 @@ from src.app.utils.load_session import load_session
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.app.utils.save_log_database import save_log_database
 from src.app.utils.search_queries import select_query
+from src.app.utils.utils import format_log_description
 from src.qt.ui.ui_edit_product_window import Ui_EditProductWindow
 
 
@@ -176,7 +177,8 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
             # Fechar a janela após salvar
             self.accept()
 
-            save_log_database(self.user_data, selected_row_before_changed, selected_row_after_changed)
+            log_description = "Alteração de produto\n" + format_log_description(selected_row_before_changed, selected_row_after_changed)
+            save_log_database(self.user_data, log_description, selected_row_after_changed[0])
 
             QMessageBox.information(self, f"Eureka®",
                                f"Alteração realizada com sucesso!")
