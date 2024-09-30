@@ -625,6 +625,8 @@ class EngenhariaApp(QWidget):
         centro_custo = self.campo_cc.text().upper().strip()
         status_bloqueio = self.combobox_bloqueio.currentData()
 
+        status_bloqueio = status_bloqueio if status_bloqueio is not None else ''
+
         lista_campos = [codigo, descricao, descricao2, tipo, um, armazem, grupo, centro_custo]
 
         if all(valor == '' for valor in lista_campos):
