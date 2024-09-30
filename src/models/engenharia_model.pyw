@@ -80,41 +80,6 @@ class EngenhariaApp(QWidget):
         self.tabWidget.tabCloseRequested.connect(self.fechar_guia)
         self.tabWidget.setVisible(False)  # Inicialmente, a guia está invisível
 
-        self.combobox_armazem = QComboBox(self)
-        self.combobox_armazem.setEditable(False)
-        self.combobox_armazem.setObjectName('combobox-armazem')
-        self.combobox_armazem.addItem("", None)
-
-        armazens = {
-            "01": "MATERIA PRIMA",
-            "02": "PROD. INTERMEDIARIO",
-            "03": "PROD. COMERCIAIS",
-            "04": "PROD. ACABADOS",
-            "05": "MAT.PRIMA IMP.INDIR.",
-            "06": "PROD. ELETR.NACIONAL",
-            "07": "PROD.ELETR.IMP.DIRET",
-            "08": "SRV INDUSTRIALIZACAO",
-            "09": "SRV TERCEIROS",
-            "10": "PROD.COM.IMP.INDIR.",
-            "11": "PROD.COM.IMP.DIRETO",
-            "12": "MAT.PRIMA IMP.DIR.ME",
-            "13": "E.P.I-MAT.SEGURANCA",
-            "14": "PROD.ELETR.IMP.INDIR",
-            "22": "ATIVOS",
-            "60": "PROD-FERR CONSUMIVEI",
-            "61": "EMBALAGENS",
-            "70": "SERVICOS GERAIS",
-            "71": "PRODUTOS AUTOMOTIVOS",
-            "77": "OUTROS",
-            "80": "SUCATAS",
-            "85": "SERVICOS PRESTADOS",
-            "96": "ARMAZ.NAO APLICAVEL",
-            "97": "TRAT. SUPERFICIAL"
-        }
-
-        for key, value in armazens.items():
-            self.combobox_armazem.addItem(key + ' - ' + value, key)
-
         self.label_line_number = QLabel("", self)
         self.label_line_number.setObjectName("label-line-number")
         self.label_line_number.setVisible(False)
@@ -143,15 +108,24 @@ class EngenhariaApp(QWidget):
         self.campo_tipo.setFont(QFont(fonte, tamanho_fonte))
         self.add_clear_button(self.campo_tipo)
 
-        self.campo_um = QLineEdit(self)
+        self.campo_um = CustomLineEdit('Unidade de medida', 'unidade_medida', self)
         self.campo_um.setFont(QFont(fonte, tamanho_fonte))
         self.add_clear_button(self.campo_um)
 
-        self.campo_grupo = QLineEdit(self)
+        self.campo_armazem = CustomLineEdit('Armazém', 'armazem', self)
+        self.campo_armazem.setFont(QFont(fonte, tamanho_fonte))
+        self.add_clear_button(self.campo_armazem)
+
+        self.campo_grupo = CustomLineEdit('Grupo', 'grupo', self)
         self.campo_grupo.setFont(QFont(fonte, tamanho_fonte))
         self.add_clear_button(self.campo_grupo)
 
-        self.checkbox_bloqueado = QCheckBox("Bloqueado?", self)
+        self.combobox_bloqueio = QComboBox(self)
+        self.combobox_bloqueio.setEditable(False)
+        self.combobox_bloqueio.setObjectName("combobox_bloqueio")
+        self.combobox_bloqueio.addItem("-", "")
+        self.combobox_bloqueio.addItem("Sim", '1')
+        self.combobox_bloqueio.addItem("Não", '2')
 
         self.btn_consultar = QPushButton("Pesquisar", self)
         self.btn_consultar.clicked.connect(self.executar_consulta)
@@ -241,10 +215,11 @@ class EngenhariaApp(QWidget):
         layout_campos_02.addWidget(QLabel("Unid. Medida:"))
         layout_campos_02.addWidget(self.campo_um)
         layout_campos_02.addWidget(QLabel("Armazém:"))
-        layout_campos_02.addWidget(self.combobox_armazem)
+        layout_campos_02.addWidget(self.campo_armazem)
         layout_campos_02.addWidget(QLabel("Grupo:"))
         layout_campos_02.addWidget(self.campo_grupo)
-        layout_campos_02.addWidget(self.checkbox_bloqueado)
+        layout_campos_02.addWidget(QLabel("Bloqueio:"))
+        layout_campos_02.addWidget(self.combobox_bloqueio)
 
         layout_button_03.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         layout_button_03.addWidget(self.btn_consultar)
@@ -576,9 +551,9 @@ class EngenhariaApp(QWidget):
         self.campo_contem_descricao.clear()
         self.campo_tipo.clear()
         self.campo_um.clear()
-        self.combobox_armazem.clear()
+        self.campo_armazem.clear()
         self.campo_grupo.clear()
-        self.checkbox_bloqueado.setChecked(False)
+        self.combobox_bloqueio.clear()
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
         self.label_line_number.hide()
@@ -626,9 +601,10 @@ class EngenhariaApp(QWidget):
         self.campo_contem_descricao.setEnabled(status)
         self.campo_tipo.setEnabled(status)
         self.campo_um.setEnabled(status)
-        self.combobox_armazem.setEnabled(status)
+        self.campo_armazem.setEnabled(status)
         self.campo_grupo.setEnabled(status)
         self.btn_consultar.setEnabled(status)
+        self.combobox_bloqueio.setEnabled(status)
 
     def query_consulta_tabela_produtos(self):
         codigo = self.campo_codigo.text().upper().strip()
@@ -636,11 +612,9 @@ class EngenhariaApp(QWidget):
         descricao2 = self.campo_contem_descricao.text().upper().strip()
         tipo = self.campo_tipo.text().upper().strip()
         um = self.campo_um.text().upper().strip()
-        armazem = self.combobox_armazem.currentData()
+        armazem = self.campo_armazem.text().upper().strip()
         grupo = self.campo_grupo.text().upper().strip()
-        status_checkbox = self.checkbox_bloqueado.isChecked()
-
-        armazem = armazem if armazem is not None else ''
+        status_bloqueio = self.combobox_bloqueio.currentData()
 
         lista_campos = [codigo, descricao, descricao2, tipo, um, armazem, grupo]
 
@@ -657,9 +631,7 @@ class EngenhariaApp(QWidget):
         # Construir cláusulas LIKE dinamicamente para descricao2
         descricao2_clauses = " AND ".join([f"B1_DESC LIKE '%{part}%'" for part in descricao2_parts])
 
-        # Montar a query com base no status do checkbox
-        status_bloqueado = '1' if status_checkbox else ''
-        status_clause = f"AND B1_MSBLQL = '{status_bloqueado}'" if status_checkbox else ''
+        filtro_bloqueio = f"AND B1_MSBLQL = '{status_bloqueio}'" if status_bloqueio != '' else ''
 
         query = f"""
         SELECT B1_COD AS "Código", 
@@ -685,7 +657,8 @@ class EngenhariaApp(QWidget):
             AND B1_TIPO LIKE '{tipo}%' 
             AND B1_UM LIKE '{um}%' 
             AND B1_LOCPAD LIKE '{armazem}%' 
-            AND B1_GRUPO LIKE '{grupo}%' {status_clause}
+            AND B1_GRUPO LIKE '{grupo}%'
+            {filtro_bloqueio}
             AND D_E_L_E_T_ <> '*'
             ORDER BY B1_COD ASC
         """
