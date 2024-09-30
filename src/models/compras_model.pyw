@@ -2,8 +2,6 @@ import locale
 import os
 import sys
 
-from src.app.views.FilterDialog import FilterDialog
-
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -25,6 +23,7 @@ from src.app.views.solic_compras_window import SolicitacaoComprasWindow
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.load_session import load_session
 from src.app.utils.utils import exibir_mensagem, copiar_linha, abrir_nova_janela, exportar_excel
+from src.app.views.FilterDialog import FilterDialog
 
 
 class ComprasApp(QWidget):

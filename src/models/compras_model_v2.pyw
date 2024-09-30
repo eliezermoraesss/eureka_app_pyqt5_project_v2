@@ -2,15 +2,13 @@ import locale
 import os
 import sys
 
-from src.app.views.FiltroDialog import FiltroDialog
-
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from datetime import datetime
 
 import pandas as pd
-from PyQt5.QtCore import Qt, QDate, QProcess, pyqtSignal, QSize
+from PyQt5.QtCore import Qt, QDate, pyqtSignal, QSize
 from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtWidgets import QApplication, QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QDateEdit, QLabel, \
@@ -25,6 +23,9 @@ from src.app.views.solic_compras_window import SolicitacaoComprasWindow
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.load_session import load_session
 from src.app.utils.utils import exibir_mensagem, copiar_linha, abrir_nova_janela, exportar_excel
+from src.app.views.FilterDialog import FilterDialog
+from src.models.engenharia_model import EngenhariaApp
+from src.models.pcp_model import PcpApp
 
 
 class ComprasApp(QWidget):
@@ -32,6 +33,7 @@ class ComprasApp(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.dataframe_original = None
         user_data = load_session()
         username = user_data["username"]
         role = user_data["role"]
@@ -285,7 +287,7 @@ class ComprasApp(QWidget):
         self.btn_exportar_excel.hide()
 
         self.btn_fechar = QPushButton("Fechar", self)
-        self.btn_fechar.clicked.connect(self.fechar_janela)
+        self.btn_fechar.clicked.connect(self.close)
         self.btn_fechar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.campo_sc.returnPressed.connect(self.executar_consulta_followup)
@@ -478,9 +480,9 @@ class ComprasApp(QWidget):
                 border: 2px solid #AF125A;
                 border-radius: 8px;
                 font-style: "Segoe UI";
-                font-size: 13px;
+                font-size: 16px;
                 height: 20px;
-                font-weight: bold;
+                font-weight: semibold;
                 margin: 10px 5px 5px 5px;
             }
             
@@ -542,6 +544,18 @@ class ComprasApp(QWidget):
                 font-weight: bold;
             }
         """)
+
+    def executar_consulta_solic_compras(self):
+        solic_compras_window = SolicitacaoComprasWindow()
+        solic_compras_window.showMaximized()
+
+    def abrir_modulo_engenharia(self):
+        eng_window = EngenhariaApp()
+        eng_window.showMaximized()
+
+    def abrir_modulo_pcp(self):
+        pcp_window = PcpApp()
+        pcp_window.showMaximized()
 
     def add_today_button(self, date_edit):
         calendar = date_edit.calendarWidget()
@@ -681,24 +695,22 @@ class ComprasApp(QWidget):
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(lambda pos: self.show_context_menu(pos, self.tree))
 
-    def abrir_filtro(self, logical_index):
-        # Pega o nome da coluna clicada
-        nome_coluna = self.tree.horizontalHeaderItem(logical_index).text()
+    def configurar_tabela_tooltips(self, dataframe):
+        # Mapa de tooltips correspondentes às colunas da consulta SQL
+        tooltip_map = {
+            " ": "VERMELHO - SC sem Pedido de Compra\nCINZA - Aguardando entrega\nAZUL - Entrega "
+                 "parcial\nVERDE - Pedido de compra encerrado"
+        }
 
-        # Abrir a janela com QListWidget para filtro
-        filtro_dialog = FiltroDialog(self, nome_coluna, self.dataframe)
-        filtro_dialog.exec_()
+        # Obtenha os cabeçalhos das colunas do dataframe
+        headers = dataframe.columns
 
-        # Atualiza o DataFrame com os filtros selecionados
-        filtro_selecionado = filtro_dialog.get_filtros_selecionados()
-        if filtro_selecionado:
-            self.dataframe = self.dataframe[self.dataframe[nome_coluna].isin(filtro_selecionado)]
-            self.atualizar_tabela_com_filtro(self.dataframe)
-
-    def atualizar_tabela_com_filtro(self, dataframe):
-        self.tree.setRowCount(0)
-        self.atualizar_tabela(dataframe)
-        self.table_line_number(dataframe.shape[0])
+        # Adicione os cabeçalhos e os tooltips
+        for i, header in enumerate(headers):
+            item = QTableWidgetItem(header)
+            tooltip = tooltip_map.get(header)
+            item.setToolTip(tooltip)
+            self.tree.setHorizontalHeaderItem(i, item)
 
     def clean_screen(self):
         self.table_area.show()
@@ -972,9 +984,12 @@ class ComprasApp(QWidget):
             return common_select + solic_sem_pedido_where
 
     def atualizar_tabela(self, dataframe):
+        self.tree.clearContents()
+        self.tree.setRowCount(0)
+        self.tree.setColumnCount(0)
         self.configurar_tabela(dataframe)
         self.configurar_tabela_tooltips(dataframe)
-        self.tree.setRowCount(0)
+        self.tree.setSortingEnabled(False)
 
         # Construir caminhos relativos
         script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -989,9 +1004,7 @@ class ComprasApp(QWidget):
         end_order = QIcon(end_order_path)
 
         for i, row in dataframe.iterrows():
-            self.tree.setSortingEnabled(False)
             self.tree.insertRow(i)
-
             for column_name, value in row.items():
                 if value is not None:
                     if column_name == ' ':
@@ -1124,6 +1137,7 @@ class ComprasApp(QWidget):
             self.dataframe.insert(15, 'CONTADOR DE DIAS', '')
 
             self.atualizar_tabela(self.dataframe)
+            self.dataframe_original = self.dataframe.copy()
 
         except Exception as ex:
             exibir_mensagem('Erro ao consultar TOTVS', f'Erro: {str(ex)}', 'error')
@@ -1134,41 +1148,25 @@ class ComprasApp(QWidget):
                 self.engine.dispose()
                 self.engine = None
 
-    def executar_consulta_solic_compras(self):
-        solic_compras_window = SolicitacaoComprasWindow()
-        solic_compras_window.showMaximized()
+    def abrir_filtro(self, logical_index):
+        # Pega o nome da coluna clicada
+        nome_coluna = self.tree.horizontalHeaderItem(logical_index).text()
 
-    def configurar_tabela_tooltips(self, dataframe):
-        # Mapa de tooltips correspondentes às colunas da consulta SQL
-        tooltip_map = {
-            " ": "VERMELHO - SC sem Pedido de Compra\nCINZA - Aguardando entrega\nAZUL - Entrega "
-                      "parcial\nVERDE - Pedido de compra encerrado"
-        }
+        # Abrir a janela com QListWidget para filtro
+        filtro_dialog = FilterDialog(self, nome_coluna, self.dataframe)
+        filtro_dialog.exec_()
 
-        # Obtenha os cabeçalhos das colunas do dataframe
-        headers = dataframe.columns
+        # Atualiza o DataFrame com os filtros selecionados
+        filtro_selecionado = filtro_dialog.get_filtros_selecionados()
+        if filtro_selecionado:
+            self.dataframe = self.dataframe[self.dataframe[nome_coluna].isin(filtro_selecionado)]
+            self.atualizar_tabela_com_filtro(self.dataframe)
 
-        # Adicione os cabeçalhos e os tooltips
-        for i, header in enumerate(headers):
-            item = QTableWidgetItem(header)
-            tooltip = tooltip_map.get(header)
-            item.setToolTip(tooltip)
-            self.tree.setHorizontalHeaderItem(i, item)
-
-    def fechar_janela(self):
-        self.close()
-
-    def abrir_modulo_engenharia(self):
-        process = QProcess()
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        script_path = os.path.join(script_dir, 'engenharia_model.pyw')
-        process.startDetached("python", [script_path])
-
-    def abrir_modulo_pcp(self):
-        process = QProcess()
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        script_path = os.path.join(script_dir, 'pcp_model.pyw')
-        process.startDetached("python", [script_path])
+    def atualizar_tabela_com_filtro(self, dataframe):
+        dataframe_filtrado = dataframe.copy()
+        self.atualizar_tabela(dataframe_filtrado)
+        self.dataframe = dataframe_filtrado.copy()
+        self.table_line_number(dataframe_filtrado.shape[0])
 
 
 if __name__ == "__main__":

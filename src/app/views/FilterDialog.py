@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QListWidget, QPushButton, QLabel, QLineEdit, QTextEdit
 
 
-class FiltroDialog(QDialog):
+class FilterDialog(QDialog):
     def __init__(self, parent, nome_coluna, dataframe):
         super().__init__(parent)
 
@@ -11,7 +11,7 @@ class FiltroDialog(QDialog):
         self.ordenacao_crescente = True  # Controle de ordenação
 
         self.setWindowTitle(f"Filtrar: {self.nome_coluna}")
-        self.setGeometry(100, 100, 200, 500)
+        self.setGeometry(300, 300, 200, 500)
 
         layout = QVBoxLayout()
 
@@ -45,6 +45,12 @@ class FiltroDialog(QDialog):
         btn_aplicar.clicked.connect(self.aplicar_filtro)
         layout.addWidget(btn_aplicar)
 
+        self.setStyleSheet("""
+            QListWidget {
+                color: #EEEEEE;
+                font-size: 14px;
+            }
+            """)
         self.setLayout(layout)
 
     def filtrar_itens(self):

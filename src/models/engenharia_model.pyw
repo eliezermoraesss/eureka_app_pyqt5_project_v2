@@ -24,7 +24,21 @@ from src.app.utils.consultar_ultimos_fornecedores import executar_ultimos_fornec
 from src.app.utils.consultar_ultimas_nfe import consultar_ultimas_nfe
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.load_session import load_session
+from src.app.utils.open_search_dialog import open_search_dialog
 from src.app.utils.utils import *
+
+
+class CustomLineEdit(QLineEdit):
+    def __init__(self, entity_name, entity, parent=None):
+        super(CustomLineEdit, self).__init__(parent)
+        self.entity_name = entity_name
+        self.entity = entity
+
+    def mousePressEvent(self, event):
+        # Chama a função open_search_dialog quando o QLineEdit for clicado
+        open_search_dialog(self.entity_name, self, self.entity, self)
+        # Continue com o comportamento padrão
+        super(CustomLineEdit, self).mousePressEvent(event)
 
 
 class EngenhariaApp(QWidget):
@@ -36,6 +50,7 @@ class EngenhariaApp(QWidget):
         username = user_data["username"]
         role = user_data["role"]
         self.engine = None
+        self.dialog_open = False
         self.setWindowTitle(f"Eureka® Engenharia . {username} ({role})")
         self.username, self.password, self.database, self.server = setup_mssql()
         self.driver = '{SQL Server}'
@@ -124,7 +139,7 @@ class EngenhariaApp(QWidget):
         self.campo_contem_descricao.setFont(QFont(fonte, tamanho_fonte))
         self.add_clear_button(self.campo_contem_descricao)
 
-        self.campo_tipo = QLineEdit(self)
+        self.campo_tipo = CustomLineEdit('Tipo', 'tipo', self)
         self.campo_tipo.setFont(QFont(fonte, tamanho_fonte))
         self.add_clear_button(self.campo_tipo)
 

@@ -318,6 +318,8 @@ class QpClosedApp(QWidget):
         layout.addLayout(self.layout_footer_label)
         self.setLayout(layout)
 
+        self.consultar_qps('T')
+
     def atualizar_tabela(self, tipo_qp):
         exibir_mensagem("Atualização em andamento",
                         "A atualização está em andamento e demorará cerca de 5 minutos.",
