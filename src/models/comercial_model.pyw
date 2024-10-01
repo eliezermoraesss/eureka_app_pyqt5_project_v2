@@ -645,7 +645,6 @@ class ComercialApp(QWidget):
         self.btn_limpar.setEnabled(status)
 
     def executar_consulta(self):
-
         codigo = self.campo_codigo.text().upper().strip()
         self.codigo = codigo
 
@@ -730,8 +729,8 @@ class ComercialApp(QWidget):
                 self.label_product_name.setText(f"{self.codigo} - {self.descricao}")
                 self.label_product_name.show()
             else:
-                exibir_mensagem("EUREKA® Comercial", 'Produto não encontrado!', "info")
                 self.controle_campos_formulario(True)
+                exibir_mensagem("EUREKA® Comercial", 'Produto não encontrado!', "info")
                 return
 
         except pyodbc.Error as ex:

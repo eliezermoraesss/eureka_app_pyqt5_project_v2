@@ -1,5 +1,107 @@
 def select_query(entity):
     query_dict = {
+        "produto": [
+            """
+            SELECT 
+                B1_COD, 
+                B1_DESC,
+                B1_UM
+            FROM
+                PROTHEUS12_R27.dbo.SB1010
+            WHERE D_E_L_E_T_ <> '*'""",
+            """
+            SELECT 
+                B1_COD, 
+                B1_DESC,
+                B1_UM
+            FROM
+                PROTHEUS12_R27.dbo.SB1010
+            WHERE 
+                B1_COD LIKE ':search_field%'
+                AND D_E_L_E_T_ <> '*'""",
+            """
+            SELECT 
+                B1_COD, 
+                B1_DESC,
+                B1_UM
+            FROM
+                PROTHEUS12_R27.dbo.SB1010
+            WHERE 
+                B1_DESC LIKE '%:search_field%'
+                AND D_E_L_E_T_ <> '*'"""
+        ],
+        "qps": ["""
+        SELECT 
+            cod_qp AS "Código", 
+            des_qp AS "Descrição", 
+            status_qp AS "Status"
+        FROM 
+            enaplic_management.dbo.tb_qps
+        ORDER BY 
+            cod_qp DESC;""",
+                """
+        SELECT 
+            cod_qp AS "Código", 
+            des_qp AS "Descrição", 
+            status_qp AS "Status"
+        FROM 
+            enaplic_management.dbo.tb_qps
+        WHERE cod_qp LIKE '%:search_field'
+        ORDER BY 
+            cod_qp DESC;""",
+                """
+        SELECT 
+            cod_qp AS "Código", 
+            des_qp AS "Descrição", 
+            status_qp AS "Status"
+        FROM 
+            enaplic_management.dbo.tb_qps
+        WHERE des_qp LIKE ':search_field%'
+        ORDER BY
+            cod_qp DESC;"""],
+        "fornecedor": ["""
+        SELECT 
+            A2_COD AS "Código", 
+            A2_NOME AS "Razão social",
+            A2_NREDUZ AS "Nome fantasia",
+            A2_END AS "Endereço",
+            A2_BAIRRO AS "Bairro",
+            A2_MUN AS "Município",
+            A2_EST AS "Estado"
+        FROM 
+            PROTHEUS12_R27.dbo.SA2010
+        WHERE D_E_L_E_T_ <> '*'
+        ORDER BY 
+            A2_NOME ASC;""",
+                       """
+               SELECT 
+                    A2_COD AS "Código", 
+                    A2_NOME AS "Razão social",
+                    A2_NREDUZ AS "Nome fantasia",
+                    A2_END AS "Endereço",
+                    A2_BAIRRO AS "Bairro",
+                    A2_MUN AS "Município",
+                    A2_EST AS "Estado"
+                FROM 
+                    PROTHEUS12_R27.dbo.SA2010
+               WHERE A2_COD LIKE ':search_field%'
+               AND D_E_L_E_T_ <> '*'
+               ORDER BY 
+                   A2_NOME ASC;""",
+                       """
+               SELECT 
+                    A2_COD AS "Código", 
+                    A2_NOME AS "Razão social",
+                    A2_NREDUZ AS "Nome fantasia",
+                    A2_END AS "Endereço",
+                    A2_BAIRRO AS "Bairro",
+                    A2_MUN AS "Município",
+                    A2_EST AS "Estado"
+                FROM 
+                    PROTHEUS12_R27.dbo.SA2010
+               WHERE A2_NOME LIKE '%:search_field%'
+               ORDER BY
+                   A2_NOME ASC;"""],
         "unidade_medida": ["""
                             SELECT 
                                 AH_UNIMED AS "Código", 

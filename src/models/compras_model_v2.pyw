@@ -12,7 +12,7 @@ from PyQt5.QtCore import Qt, QDate, pyqtSignal, QSize
 from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtWidgets import QApplication, QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QDateEdit, QLabel, \
-    QComboBox, QSizePolicy, QTabWidget, QMenu, QCheckBox
+    QSizePolicy, QTabWidget, QMenu, QCheckBox
 from sqlalchemy import create_engine
 
 from src.app.utils.consultar_onde_usado import executar_consulta_onde_usado
@@ -26,6 +26,21 @@ from src.app.utils.utils import exibir_mensagem, copiar_linha, abrir_nova_janela
 from src.app.views.FilterDialog import FilterDialog
 from src.models.engenharia_model import EngenhariaApp
 from src.models.pcp_model import PcpApp
+from src.app.utils.open_search_dialog import open_search_dialog
+
+
+class CustomLineEdit(QLineEdit):
+    def __init__(self, entity_name, entity, nome_coluna=None, parent=None):
+        super(CustomLineEdit, self).__init__(parent)
+        self.entity_name = entity_name
+        self.entity = entity
+        self.nome_coluna = nome_coluna
+
+    def mousePressEvent(self, event):
+        # Chama a função open_search_dialog quando o QLineEdit for clicado
+        open_search_dialog(self.entity_name, self, self.entity, self.nome_coluna, self.parentWidget())
+        # Continue com o comportamento padrão
+        super(CustomLineEdit, self).mousePressEvent(event)
 
 
 class ComprasApp(QWidget):
@@ -45,41 +60,6 @@ class ComprasApp(QWidget):
 
         self.engine = None
         self.dataframe = pd.DataFrame()
-        self.combobox_armazem = QComboBox(self)
-        self.combobox_armazem.setEditable(False)
-        self.combobox_armazem.setObjectName('combobox-armazem')
-
-        self.combobox_armazem.addItem("", None)
-
-        armazens = {
-            "01": "MATERIA PRIMA",
-            "02": "PROD. INTERMEDIARIO",
-            "03": "PROD. COMERCIAIS",
-            "04": "PROD. ACABADOS",
-            "05": "MAT.PRIMA IMP.INDIR.",
-            "06": "PROD. ELETR.NACIONAL",
-            "07": "PROD.ELETR.IMP.DIRET",
-            "08": "SRV INDUSTRIALIZACAO",
-            "09": "SRV TERCEIROS",
-            "10": "PROD.COM.IMP.INDIR.",
-            "11": "PROD.COM.IMP.DIRETO",
-            "12": "MAT.PRIMA IMP.DIR.ME",
-            "13": "E.P.I-MAT.SEGURANCA",
-            "14": "PROD.ELETR.IMP.INDIR",
-            "22": "ATIVOS",
-            "60": "PROD-FERR CONSUMIVEI",
-            "61": "EMBALAGENS",
-            "70": "SERVICOS GERAIS",
-            "71": "PRODUTOS AUTOMOTIVOS",
-            "77": "OUTROS",
-            "80": "SUCATAS",
-            "85": "SERVICOS PRESTADOS",
-            "96": "ARMAZ.NAO APLICAVEL",
-            "97": "TRAT. SUPERFICIAL"
-        }
-
-        for key, value in armazens.items():
-            self.combobox_armazem.addItem(key + ' - ' + value, key)
 
         script_dir = os.path.dirname(os.path.abspath(__file__))
         logo_enaplic_path = os.path.join(script_dir, '..', 'resources', 'images', 'LOGO.jpeg')
@@ -126,7 +106,6 @@ class ComprasApp(QWidget):
 
         self.checkbox_exibir_somente_sc_com_pedido = QCheckBox("Ocultar Solic. de Compras SEM Pedido de Compras", self)
         self.checkbox_exibir_somente_sc_com_pedido.setObjectName("checkbox-sc")
-        self.checkbox_exibir_somente_sc_com_pedido.setVisible(False)
 
         self.label_sc = QLabel("Solicitação de Compra:", self)
         self.label_sc.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -181,7 +160,7 @@ class ComprasApp(QWidget):
         self.campo_contem_descricao_prod.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.add_clear_button(self.campo_contem_descricao_prod)
 
-        self.campo_qp = QLineEdit(self)
+        self.campo_qp = CustomLineEdit('QPS', 'qps', 'Código', self)
         self.campo_qp.setFont(QFont(fonte_campos, tamanho_fonte_campos))
         self.campo_qp.setMaxLength(6)
         self.campo_qp.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -199,19 +178,24 @@ class ComprasApp(QWidget):
         self.campo_OP.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.add_clear_button(self.campo_OP)
 
-        self.campo_razao_social_fornecedor = QLineEdit(self)
+        self.campo_armazem = CustomLineEdit('Armazém', 'armazem', 'Código', self)
+        self.campo_armazem.setMaxLength(2)
+        self.campo_armazem.setObjectName('armazem')
+        self.campo_armazem.setFont(QFont(fonte_campos, tamanho_fonte_campos))
+        # self.add_clear_button(self.campo_armazem)
+
+        self.campo_razao_social_fornecedor = CustomLineEdit('Fornecedor', 'fornecedor', 'Razão social', self)
         self.campo_razao_social_fornecedor.setObjectName("forn-raz")
         self.campo_razao_social_fornecedor.setFont(QFont(fonte_campos, tamanho_fonte_campos))
-        self.campo_razao_social_fornecedor.setMaximumWidth(250)  # Ajuste conforme necessário
+        self.campo_razao_social_fornecedor.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.campo_razao_social_fornecedor.setMaxLength(40)
         # self.add_clear_button(self.campo_razao_social_fornecedor)
 
-        self.campo_nm_fantasia_fornecedor = QLineEdit(self)
+        self.campo_nm_fantasia_fornecedor = CustomLineEdit('Fornecedor', 'fornecedor', 'Nome fantasia', self)
         self.campo_nm_fantasia_fornecedor.setObjectName("forn-fantasia")
         self.campo_nm_fantasia_fornecedor.setFont(QFont(fonte_campos, tamanho_fonte_campos))
-        self.campo_nm_fantasia_fornecedor.setMaximumWidth(250)  # Ajuste conforme necessário
-        self.campo_nm_fantasia_fornecedor.setMaxLength(40)
-        self.campo_nm_fantasia_fornecedor.setMaxLength(40)
+        self.campo_nm_fantasia_fornecedor.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.campo_nm_fantasia_fornecedor.setMaxLength(20)
         # self.add_clear_button(self.campo_nm_fantasia_fornecedor)
 
         self.campo_data_inicio = QDateEdit(self)
@@ -272,6 +256,11 @@ class ComprasApp(QWidget):
         self.btn_ultimas_nfe.clicked.connect(lambda: consultar_ultimas_nfe(self, self.tree))
         self.btn_ultimas_nfe.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_ultimas_nfe.hide()
+
+        self.btn_limpar_filtro = QPushButton("Limpar filtros", self)
+        self.btn_limpar_filtro.clicked.connect(self.limpar_filtros)
+        self.btn_limpar_filtro.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.btn_limpar_filtro.hide()
 
         self.btn_limpar = QPushButton("Limpar", self)
         self.btn_limpar.clicked.connect(self.clean_screen)
@@ -347,9 +336,9 @@ class ComprasApp(QWidget):
         container_data_fim.addWidget(self.label_data_fim)
         container_data_fim.addWidget(self.campo_data_fim)
 
-        container_combobox_armazem = QVBoxLayout()
-        container_combobox_armazem.addWidget(self.label_armazem)
-        container_combobox_armazem.addWidget(self.combobox_armazem)
+        container_campo_armazem = QVBoxLayout()
+        container_campo_armazem.addWidget(self.label_armazem)
+        container_campo_armazem.addWidget(self.campo_armazem)
 
         container_fornecedor = QVBoxLayout()
         container_fornecedor.addWidget(self.label_fornecedor)
@@ -371,7 +360,7 @@ class ComprasApp(QWidget):
         layout_campos_01.addLayout(container_op)
         layout_campos_02.addLayout(container_data_ini)
         layout_campos_02.addLayout(container_data_fim)
-        layout_campos_02.addLayout(container_combobox_armazem)
+        layout_campos_02.addLayout(container_campo_armazem)
         layout_campos_02.addLayout(container_fornecedor)
         layout_campos_02.addLayout(container_nm_fantasia_forn)
         layout_campos_02.addWidget(self.checkbox_exibir_somente_sc_com_pedido)
@@ -385,6 +374,7 @@ class ComprasApp(QWidget):
         self.layout_buttons.addWidget(self.btn_saldo_estoque)
         self.layout_buttons.addWidget(self.btn_onde_e_usado)
         self.layout_buttons.addWidget(self.btn_nova_janela)
+        self.layout_buttons.addWidget(self.btn_limpar_filtro)
         self.layout_buttons.addWidget(self.btn_limpar)
         self.layout_buttons.addWidget(self.btn_exportar_excel)
         self.layout_buttons.addWidget(self.btn_sc)
@@ -434,7 +424,7 @@ class ComprasApp(QWidget):
             QDateEdit, QComboBox {
                 background-color: #EEEEEE;
                 border: 1px solid #393E46;
-                margin-bottom: 20px;
+                margin-bottom: 10px;
                 padding: 5px 10px;
                 border-radius: 10px;
                 height: 24px;
@@ -466,11 +456,11 @@ class ComprasApp(QWidget):
                 font-size: 16px;
             }
             
-            QLineEdit#forn-raz, QLineEdit#forn-fantasia {
+            QLineEdit#forn-raz, QLineEdit#forn-fantasia, QLineEdit#armazem {
                 padding: 5px 10px;
                 border-radius: 10px;
                 font-size: 16px;
-                margin-bottom:  20px;
+                margin-bottom:  10px;
             }
     
             QPushButton {
@@ -480,10 +470,10 @@ class ComprasApp(QWidget):
                 border: 2px solid #AF125A;
                 border-radius: 8px;
                 font-style: "Segoe UI";
-                font-size: 16px;
+                font-size: 14px;
                 height: 20px;
-                font-weight: semibold;
-                margin: 10px 5px 5px 5px;
+                font-weight: bold;
+                margin: 5px 5px 5px 5px;
             }
             
             QPushButton#SC {
@@ -724,6 +714,7 @@ class ComprasApp(QWidget):
         self.campo_nm_fantasia_fornecedor.clear()
         self.campo_qp.clear()
         self.campo_OP.clear()
+        self.campo_armazem.clear()
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
         self.checkbox_exibir_somente_sc_com_pedido.setChecked(False)
@@ -734,6 +725,7 @@ class ComprasApp(QWidget):
         self.btn_saldo_estoque.hide()
         self.btn_ultimos_fornecedores.hide()
         self.btn_ultimas_nfe.hide()
+        self.btn_limpar_filtro.hide()
 
         self.guias_abertas.clear()
         self.guias_abertas_onde_usado.clear()
@@ -770,7 +762,7 @@ class ComprasApp(QWidget):
         self.campo_OP.setEnabled(status)
         self.campo_data_inicio.setEnabled(status)
         self.campo_data_fim.setEnabled(status)
-        self.combobox_armazem.setEnabled(status)
+        self.campo_armazem.setEnabled(status)
         self.btn_followup.setEnabled(status)
         self.btn_exportar_excel.setEnabled(status)
         self.btn_saldo_estoque.setEnabled(status)
@@ -784,6 +776,7 @@ class ComprasApp(QWidget):
         numero_qp = self.campo_qp.text().upper().strip()
         numero_op = self.campo_OP.text().upper().strip()
         codigo_produto = self.campo_codigo.text().upper().strip()
+        cod_armazem = self.campo_armazem.text().upper().strip()
         razao_social_fornecedor = self.campo_razao_social_fornecedor.text().upper().strip()
         nome_fantasia_fornecedor = self.campo_nm_fantasia_fornecedor.text().upper().strip()
         descricao_produto = self.campo_descricao_prod.text().upper().strip()
@@ -794,10 +787,6 @@ class ComprasApp(QWidget):
             numero_pedido_tabela_solic = numero_pedido
         else:
             numero_pedido_tabela_solic = '      '
-
-        cod_armazem = self.combobox_armazem.currentData()
-        if cod_armazem is None:
-            cod_armazem = ''
 
         palavras_contem_descricao = contem_descricao.split('*')
         clausulas_contem_descricao = " AND ".join(
@@ -864,7 +853,7 @@ class ComprasApp(QWidget):
                 LEFT JOIN
                     {self.database}.dbo.SA2010 FORN
                 ON
-                    FORN.A2_COD = PC.C7_FORNECE 
+                    FORN.A2_COD = PC.C7_FORNECE
                 LEFT JOIN
                     {self.database}.dbo.NNR010 ARM
                 ON
@@ -899,7 +888,7 @@ class ComprasApp(QWidget):
         solic_sem_pedido_where = f"""
                 WHERE
                     PC.C7_NUM LIKE '%{numero_pedido}'
-                    AND ITEM_NF.D1_DOC LIKE '%{numero_nf}'
+                    --AND ITEM_NF.D1_DOC LIKE '%{numero_nf}'
                     AND PC.C7_NUMSC LIKE '%{numero_sc}'
                     AND PC.C7_ZZNUMQP LIKE '%{numero_qp}'
                     AND PC.C7_PRODUTO LIKE '{codigo_produto}%'
@@ -978,18 +967,21 @@ class ComprasApp(QWidget):
                     AND PROD.D_E_L_E_T_ <> '*'
                     AND SC.C1_COTACAO <> 'XXXXXX' ORDER BY "SOLIC. COMPRA" DESC;
             """
-        if checkbox_sc_somente_com_pedido:
+        if checkbox_sc_somente_com_pedido or numero_nf != '' or nome_fantasia_fornecedor != '' or razao_social_fornecedor != '':
             return common_select + solic_com_pedido_where
         else:
+            if numero_nf != '':
+                solic_sem_pedido_where = solic_sem_pedido_where.replace('--', '')
             return common_select + solic_sem_pedido_where
 
     def atualizar_tabela(self, dataframe):
+        self.tree.setRowCount(len(dataframe.index))
         self.tree.clearContents()
         self.tree.setRowCount(0)
         self.tree.setColumnCount(0)
         self.configurar_tabela(dataframe)
         self.configurar_tabela_tooltips(dataframe)
-        self.tree.setSortingEnabled(False)
+        # self.tree.setSortingEnabled(False)
 
         # Construir caminhos relativos
         script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -1003,7 +995,7 @@ class ComprasApp(QWidget):
         wait_delivery = QIcon(wait_order_path)
         end_order = QIcon(end_order_path)
 
-        for i, row in dataframe.iterrows():
+        for i, (index, row) in enumerate(dataframe.iterrows()):
             self.tree.insertRow(i)
             for column_name, value in row.items():
                 if value is not None:
@@ -1093,7 +1085,9 @@ class ComprasApp(QWidget):
                     item = QTableWidgetItem('')
                 self.tree.setItem(i, list(row.index).index(column_name), item)
 
-        self.tree.setSortingEnabled(True)
+        self.table_line_number(dataframe.shape[0])
+        self.tree.viewport().update()
+        # self.tree.setSortingEnabled(True)
         self.controle_campos_formulario(True)
         self.button_visible_control(True)
 
@@ -1108,7 +1102,6 @@ class ComprasApp(QWidget):
             self.label_line_number.show()
             return False
         else:
-            exibir_mensagem("EUREKA® Compras", 'Nada encontrado!', "info")
             self.controle_campos_formulario(True)
             self.button_visible_control(False)
             return True
@@ -1129,6 +1122,8 @@ class ComprasApp(QWidget):
             line_number = dataframe_line_number.iloc[0, 0]
 
             if self.table_line_number(line_number):
+                self.clean_screen()
+                exibir_mensagem("EUREKA® Compras", 'Nenhum resultado encontrado nesta pesquisa.', "info")
                 return
 
             self.dataframe = pd.read_sql(query_consulta_filtro, self.engine)
@@ -1160,13 +1155,10 @@ class ComprasApp(QWidget):
         filtro_selecionado = filtro_dialog.get_filtros_selecionados()
         if filtro_selecionado:
             self.dataframe = self.dataframe[self.dataframe[nome_coluna].isin(filtro_selecionado)]
-            self.atualizar_tabela_com_filtro(self.dataframe)
+            self.atualizar_tabela(self.dataframe)
 
-    def atualizar_tabela_com_filtro(self, dataframe):
-        dataframe_filtrado = dataframe.copy()
-        self.atualizar_tabela(dataframe_filtrado)
-        self.dataframe = dataframe_filtrado.copy()
-        self.table_line_number(dataframe_filtrado.shape[0])
+    def limpar_filtros(self):
+        self.atualizar_tabela(self.dataframe_original)
 
 
 if __name__ == "__main__":

@@ -13,3 +13,9 @@ def config_search_table(self, table, dataframe):
     table.setFont(QFont(self.fonte_tabela, self.tamanho_fonte_tabela))
     table.verticalHeader().setDefaultSectionSize(self.altura_linha)
     table.horizontalHeader().setStretchLastSection(True)
+
+    # Alinhar todas as colunas com o alinhamento padrão (centro)
+    table.horizontalHeader().setDefaultAlignment(Qt.AlignCenter)
+
+    # Alinhar o nome da segunda coluna da tabela, índice 1, para a esquerda
+    table.horizontalHeaderItem(1).setTextAlignment(Qt.AlignLeft)

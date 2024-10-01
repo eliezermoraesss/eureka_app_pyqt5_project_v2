@@ -21,6 +21,21 @@ from src.app.utils.consultar_saldo_estoque import executar_saldo_em_estoque
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.load_session import load_session
 from src.app.utils.utils import exibir_mensagem, abrir_desenho, abrir_nova_janela, exportar_excel, copiar_linha
+from src.app.utils.open_search_dialog import open_search_dialog
+
+
+class CustomLineEdit(QLineEdit):
+    def __init__(self, entity_name, entity, nome_coluna=None, parent=None):
+        super(CustomLineEdit, self).__init__(parent)
+        self.entity_name = entity_name
+        self.entity = entity
+        self.nome_coluna = nome_coluna
+
+    def mousePressEvent(self, event):
+        # Chama a função open_search_dialog quando o QLineEdit for clicado
+        open_search_dialog(self.entity_name, self, self.entity, self.nome_coluna, self.parentWidget())
+        # Continue com o comportamento padrão
+        super(CustomLineEdit, self).mousePressEvent(event)
 
 
 class PcpApp(QWidget):
@@ -154,7 +169,7 @@ class PcpApp(QWidget):
                 border: 1px solid #000000;
                 background-color: #686D76;
                 padding-left: 10px;
-                margin: 15px 0;
+                margin: 0;
             }
 
             QTableWidget QHeaderView::section {
@@ -238,7 +253,7 @@ class PcpApp(QWidget):
         self.campo_contem_descricao_prod.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.add_clear_button(self.campo_contem_descricao_prod)
 
-        self.campo_qp = QLineEdit(self)
+        self.campo_qp = CustomLineEdit('QPS', 'qps', 'Código', self)
         self.campo_qp.setFont(QFont(fonte_campos, tamanho_fonte_campos))
         self.campo_qp.setMaxLength(6)
         self.campo_qp.setFixedWidth(110)
@@ -384,11 +399,11 @@ class PcpApp(QWidget):
         container_observacao.addWidget(self.label_campo_observacao)
         container_observacao.addWidget(self.campo_observacao)
 
+        layout_campos_01.addLayout(container_qp)
+        layout_campos_01.addLayout(container_op)
         layout_campos_01.addLayout(container_codigo)
         layout_campos_01.addLayout(container_descricao_prod)
         layout_campos_01.addLayout(container_contem_descricao_prod)
-        layout_campos_01.addLayout(container_op)
-        layout_campos_01.addLayout(container_qp)
         layout_campos_01.addLayout(container_observacao)
         layout_campos_02.addLayout(container_data_ini)
         layout_campos_02.addLayout(container_data_fim)
@@ -621,7 +636,7 @@ class PcpApp(QWidget):
         self.tree.setFont(QFont(self.fonte_tabela, self.tamanho_fonte_tabela))
         self.tree.verticalHeader().setDefaultSectionSize(self.altura_linha)
         self.tree.horizontalHeader().sectionClicked.connect(self.ordenar_tabela)
-        self.tree.horizontalHeader().setStretchLastSection(True)
+        self.tree.horizontalHeader().setStretchLastSection(False)
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(lambda pos: self.show_context_menu(pos, self.tree))
 
@@ -766,7 +781,6 @@ class PcpApp(QWidget):
 
             dataframe = pd.read_sql(query_consulta_op, self.engine)
             dataframe.insert(0, 'Status OP', '')
-            dataframe[''] = ''
 
             self.configurar_tabela(dataframe)
             self.configurar_tabela_tooltips(dataframe)

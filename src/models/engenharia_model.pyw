@@ -29,14 +29,15 @@ from src.app.utils.utils import *
 
 
 class CustomLineEdit(QLineEdit):
-    def __init__(self, entity_name, entity, parent=None):
+    def __init__(self, entity_name, entity, nome_coluna, parent=None):
         super(CustomLineEdit, self).__init__(parent)
         self.entity_name = entity_name
         self.entity = entity
+        self.nome_coluna = nome_coluna
 
     def mousePressEvent(self, event):
         # Chama a função open_search_dialog quando o QLineEdit for clicado
-        open_search_dialog(self.entity_name, self, self.entity, self.parentWidget())
+        open_search_dialog(self.entity_name, self, self.entity, self.nome_coluna, self.parentWidget())
         # Continue com o comportamento padrão
         super(CustomLineEdit, self).mousePressEvent(event)
 
@@ -93,34 +94,42 @@ class EngenhariaApp(QWidget):
         self.logo_label.setAlignment(Qt.AlignRight)
 
         self.campo_codigo = QLineEdit(self)
+        self.campo_codigo.setMaxLength(15)
         self.campo_codigo.setFont(QFont(fonte, tamanho_fonte))
         self.add_clear_button(self.campo_codigo)
 
         self.campo_descricao = QLineEdit(self)
+        self.campo_descricao.setMaxLength(100)
         self.campo_descricao.setFont(QFont(fonte, tamanho_fonte))
         self.add_clear_button(self.campo_descricao)
 
         self.campo_contem_descricao = QLineEdit(self)
+        self.campo_descricao.setMaxLength(100)
         self.campo_contem_descricao.setFont(QFont(fonte, tamanho_fonte))
         self.add_clear_button(self.campo_contem_descricao)
 
-        self.campo_tipo = CustomLineEdit('Tipo', 'tipo', self)
+        self.campo_tipo = CustomLineEdit('Tipo', 'tipo', 'Código', self)
+        self.campo_tipo.setMaxLength(2)
         self.campo_tipo.setFont(QFont(fonte, tamanho_fonte))
         self.add_clear_button(self.campo_tipo)
 
-        self.campo_um = CustomLineEdit('Unidade de medida', 'unidade_medida', self)
+        self.campo_um = CustomLineEdit('Unidade de medida', 'unidade_medida', 'Código', self)
+        self.campo_um.setMaxLength(2)
         self.campo_um.setFont(QFont(fonte, tamanho_fonte))
         self.add_clear_button(self.campo_um)
 
-        self.campo_armazem = CustomLineEdit('Armazém', 'armazem', self)
+        self.campo_armazem = CustomLineEdit('Armazém', 'armazem', 'Código', self)
+        self.campo_armazem.setMaxLength(2)
         self.campo_armazem.setFont(QFont(fonte, tamanho_fonte))
         self.add_clear_button(self.campo_armazem)
 
-        self.campo_grupo = CustomLineEdit('Grupo', 'grupo', self)
+        self.campo_grupo = CustomLineEdit('Grupo', 'grupo', 'Código', self)
+        self.campo_grupo.setMaxLength(4)
         self.campo_grupo.setFont(QFont(fonte, tamanho_fonte))
         self.add_clear_button(self.campo_grupo)
 
-        self.campo_cc = CustomLineEdit('Centro de custo', 'centro_custo', self)
+        self.campo_cc = CustomLineEdit('Centro de custo', 'centro_custo', 'Código', self)
+        self.campo_cc.setMaxLength(9)
         self.campo_cc.setFont(QFont(fonte, tamanho_fonte))
         self.add_clear_button(self.campo_cc)
 
@@ -430,7 +439,7 @@ class EngenhariaApp(QWidget):
         self.tree.setFont(QFont(self.fonte_tabela, self.tamanho_fonte_tabela))
         self.tree.verticalHeader().setDefaultSectionSize(self.altura_linha)
         self.tree.horizontalHeader().sectionClicked.connect(self.ordenar_tabela)
-        self.tree.horizontalHeader().setStretchLastSection(True)
+        self.tree.horizontalHeader().setStretchLastSection(False)
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(lambda pos: self.show_context_menu(pos, self.tree))
 
@@ -696,7 +705,6 @@ class EngenhariaApp(QWidget):
             dataframe_line_number = pd.read_sql(query_contagem_linhas, self.engine)
             line_number = dataframe_line_number.iloc[0, 0]
             dataframe = pd.read_sql(query_consulta, self.engine)
-            dataframe[''] = ''
 
             if not dataframe.empty:
 
@@ -719,9 +727,9 @@ class EngenhariaApp(QWidget):
 
                 time.sleep(0.1)
             else:
-                exibir_mensagem("EUREKA® Engenharia", 'Nada encontrado!', "info")
                 self.controle_campos_formulario(True)
-                self.button_visible_control(False)
+                self.clean_screen()
+                exibir_mensagem("EUREKA® Engenharia", 'Nada encontrado!', "info")
                 return
 
             # Preencher a tabela com os resultados

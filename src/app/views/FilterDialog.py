@@ -9,26 +9,24 @@ class FilterDialog(QDialog):
         self.dataframe = dataframe
         self.selecionados = []
         self.ordenacao_crescente = True  # Controle de ordenação
+        self.vazio_label = "Vazio"
 
-        self.setWindowTitle(f"Filtrar: {self.nome_coluna}")
+        self.setWindowTitle(f"{self.nome_coluna}")
         self.setGeometry(300, 300, 200, 500)
 
         layout = QVBoxLayout()
 
         # Título
-        titulo = QLabel(f"Filtrar valores na coluna: {self.nome_coluna}")
-        layout.addWidget(titulo)
+        titulo = QLabel(f"Filtrar por: {self.nome_coluna}")
 
         # Botão para ordenar os itens
-        self.btn_ordenar = QPushButton("Ordenar Itens (Crescente)")
+        self.btn_ordenar = QPushButton("Ordenar itens (crescente)")
         self.btn_ordenar.clicked.connect(self.ordenar_itens)
-        layout.addWidget(self.btn_ordenar)
 
         # Campo de pesquisa
         self.search_box = QLineEdit()
         self.search_box.setPlaceholderText("Pesquisar...")
         self.search_box.textChanged.connect(self.filtrar_itens)  # Filtrar enquanto o usuário digita
-        layout.addWidget(self.search_box)
 
         # Criação do QListWidget com seleção múltipla
         self.list_widget = QListWidget()
@@ -36,19 +34,32 @@ class FilterDialog(QDialog):
 
         # Pegar valores únicos da coluna
         self.itens_originais = list(map(str, self.dataframe[self.nome_coluna].dropna().unique()))
+        if self.dataframe[self.nome_coluna].isnull().any():
+            self.itens_originais.append(self.vazio_label)
         self.list_widget.addItems(self.itens_originais)
-
-        layout.addWidget(self.list_widget)
 
         # Botão de aplicar filtro
         btn_aplicar = QPushButton("Aplicar Filtro")
         btn_aplicar.clicked.connect(self.aplicar_filtro)
+
+        layout.addWidget(titulo)
+        layout.addWidget(self.search_box)
+        layout.addWidget(self.list_widget)
+        layout.addWidget(self.btn_ordenar)
         layout.addWidget(btn_aplicar)
 
         self.setStyleSheet("""
+            QLineEdit {
+                font-size: 14px;
+            }
             QListWidget {
                 color: #EEEEEE;
                 font-size: 14px;
+            }
+            QPushButton {
+                font-size: 12px;
+                height: 15px;
+                font-weight: semibold;
             }
             """)
         self.setLayout(layout)
@@ -65,7 +76,14 @@ class FilterDialog(QDialog):
     def aplicar_filtro(self):
         # Coletar seleção
         itens_selecionados = self.list_widget.selectedItems()
-        self.selecionados = [item.text() for item in itens_selecionados]
+        self.selecionados = []
+
+        for item in itens_selecionados:
+            if item.text() == self.vazio_label:
+                self.selecionados.append(None)
+            else:
+                self.selecionados.append(item.text())
+
         self.accept()
 
     def ordenar_itens(self):
@@ -85,9 +103,9 @@ class FilterDialog(QDialog):
 
         # Atualiza o texto do botão de ordenação
         if self.ordenacao_crescente:
-            self.btn_ordenar.setText("Ordenar Itens (Crescente)")
+            self.btn_ordenar.setText("Ordenar itens (crescente)")
         else:
-            self.btn_ordenar.setText("Ordenar Itens (Decrescente)")
+            self.btn_ordenar.setText("Ordenar itens (decrescente)")
 
     def get_filtros_selecionados(self):
         return self.selecionados

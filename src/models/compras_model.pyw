@@ -476,9 +476,9 @@ class ComprasApp(QWidget):
                 border: 2px solid #AF125A;
                 border-radius: 8px;
                 font-style: "Segoe UI";
-                font-size: 13px;
+                font-size: 16px;
                 height: 20px;
-                font-weight: bold;
+                font-weight: semibold;
                 margin: 10px 5px 5px 5px;
             }
             

@@ -11,12 +11,13 @@ from src.qt.ui.ui_search_window import Ui_SearchWindow
 
 
 class SearchWindow(QDialog):
-    def __init__(self, entity_name, entity, parent=None):
+    def __init__(self, entity_name, entity, nome_coluna=None, parent=None):
         super(SearchWindow, self).__init__(parent)
         self.entity_name = entity_name
         self.engine = None
         self.entity = entity
         self.selected_value = None
+        self.nome_coluna = nome_coluna
         self.altura_linha = 30
         self.tamanho_fonte_tabela = 10
         self.fonte_tabela = 'Segoe UI'
@@ -94,10 +95,19 @@ class SearchWindow(QDialog):
 
     def accept_selection(self):
         selected_items = self.ui.search_table.selectedItems()
-        if selected_items:
+        if self.nome_coluna is None and selected_items:
             codigo = selected_items[0].text()  # Pega o código da primeira coluna
             self.selected_value = codigo
             self.accept()
+        else:
+            header_items = [self.ui.search_table.horizontalHeaderItem(i).text() for i in range(self.ui.search_table.columnCount())]
+            try:
+                indice_coluna = header_items.index(self.nome_coluna)
+                valor_campo = selected_items[indice_coluna].text()
+                self.selected_value = valor_campo
+                self.accept()
+            except ValueError:
+                QMessageBox.warning(None, 'Eureka® Search Window', f"Coluna '{self.nome_coluna}' não encontrada.")
 
     def get_selected_value(self):
         return getattr(self, 'selected_value', None)
