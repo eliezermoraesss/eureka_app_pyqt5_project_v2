@@ -293,6 +293,8 @@ class ComprasApp(QWidget):
         layout = QVBoxLayout()
         layout_campos_01 = QHBoxLayout()
         layout_campos_02 = QHBoxLayout()
+        layout_button_03 = QHBoxLayout()
+        layout_button_04 = QHBoxLayout()
         self.layout_buttons = QHBoxLayout()
         self.layout_footer_label = QHBoxLayout()
 
@@ -367,21 +369,23 @@ class ComprasApp(QWidget):
         layout_campos_01.addStretch()
         layout_campos_02.addStretch()
 
-        self.layout_buttons.addStretch()
-        self.layout_buttons.addWidget(self.btn_followup)
-        self.layout_buttons.addWidget(self.btn_ultimos_fornecedores)
-        self.layout_buttons.addWidget(self.btn_ultimas_nfe)
-        self.layout_buttons.addWidget(self.btn_saldo_estoque)
-        self.layout_buttons.addWidget(self.btn_onde_e_usado)
-        self.layout_buttons.addWidget(self.btn_nova_janela)
-        self.layout_buttons.addWidget(self.btn_limpar_filtro)
-        self.layout_buttons.addWidget(self.btn_limpar)
-        self.layout_buttons.addWidget(self.btn_exportar_excel)
-        self.layout_buttons.addWidget(self.btn_sc)
-        self.layout_buttons.addWidget(self.btn_abrir_engenharia)
-        self.layout_buttons.addWidget(self.btn_abrir_pcp)
-        self.layout_buttons.addWidget(self.btn_fechar)
-        self.layout_buttons.addStretch()
+        layout_button_03.addStretch()
+        layout_button_03.addWidget(self.btn_followup)
+        layout_button_04.addStretch()
+        layout_button_04.addWidget(self.btn_ultimos_fornecedores)
+        layout_button_04.addWidget(self.btn_ultimas_nfe)
+        layout_button_04.addWidget(self.btn_saldo_estoque)
+        layout_button_04.addWidget(self.btn_onde_e_usado)
+        layout_button_03.addWidget(self.btn_nova_janela)
+        layout_button_04.addWidget(self.btn_limpar_filtro)
+        layout_button_03.addWidget(self.btn_limpar)
+        layout_button_04.addWidget(self.btn_exportar_excel)
+        layout_button_04.addStretch()
+        layout_button_03.addWidget(self.btn_sc)
+        layout_button_03.addWidget(self.btn_abrir_engenharia)
+        layout_button_03.addWidget(self.btn_abrir_pcp)
+        layout_button_03.addWidget(self.btn_fechar)
+        layout_button_03.addStretch()
 
         self.layout_footer_label.addStretch(1)
         self.layout_footer_label.addWidget(self.label_line_number)
@@ -390,6 +394,8 @@ class ComprasApp(QWidget):
 
         layout.addLayout(layout_campos_01)
         layout.addLayout(layout_campos_02)
+        layout.addLayout(layout_button_03)
+        layout.addLayout(layout_button_04)
         layout.addLayout(self.layout_buttons)
         layout.addWidget(self.table_area)
         layout.addWidget(self.tree)
@@ -466,14 +472,14 @@ class ComprasApp(QWidget):
             QPushButton {
                 background-color: #AF125A;
                 color: #eeeeee;
-                padding: 7px 10px;
+                padding: 5px 10px;
                 border: 2px solid #AF125A;
                 border-radius: 8px;
                 font-style: "Segoe UI";
                 font-size: 14px;
                 height: 20px;
                 font-weight: bold;
-                margin: 5px 5px 5px 5px;
+                margin: 10px 5px;
             }
             
             QPushButton#SC {
@@ -1156,9 +1162,11 @@ class ComprasApp(QWidget):
         if filtro_selecionado:
             self.dataframe = self.dataframe[self.dataframe[nome_coluna].isin(filtro_selecionado)]
             self.atualizar_tabela(self.dataframe)
+            self.btn_limpar_filtro.show()
 
     def limpar_filtros(self):
         self.atualizar_tabela(self.dataframe_original)
+        self.btn_limpar_filtro.hide()
 
 
 if __name__ == "__main__":
