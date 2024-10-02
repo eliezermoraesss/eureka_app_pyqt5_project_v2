@@ -223,11 +223,6 @@ class ComprasApp(QWidget):
         self.btn_followup.clicked.connect(self.executar_consulta_followup)
         self.btn_followup.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        self.btn_sc = QPushButton("Solicitações de Compra", self)
-        self.btn_sc.setObjectName("SC")
-        self.btn_sc.clicked.connect(executar_consulta_solic_compras)
-        self.btn_sc.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-
         self.btn_abrir_engenharia = QPushButton("Engenharia", self)
         self.btn_abrir_engenharia.setObjectName("btn_engenharia")
         self.btn_abrir_engenharia.clicked.connect(abrir_modulo_engenharia)
@@ -382,7 +377,6 @@ class ComprasApp(QWidget):
         layout_button_03.addWidget(self.btn_limpar)
         layout_button_04.addWidget(self.btn_exportar_excel)
         layout_button_04.addStretch()
-        layout_button_03.addWidget(self.btn_sc)
         layout_button_03.addWidget(self.btn_abrir_engenharia)
         layout_button_03.addWidget(self.btn_abrir_pcp)
         layout_button_03.addWidget(self.btn_fechar)
