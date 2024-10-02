@@ -12,7 +12,7 @@ from PyQt5.QtCore import Qt, QDate, pyqtSignal, QSize
 from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtWidgets import QApplication, QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QDateEdit, QLabel, \
-    QSizePolicy, QTabWidget, QMenu, QCheckBox
+    QSizePolicy, QTabWidget, QMenu, QCheckBox, QDialog
 from sqlalchemy import create_engine
 
 from src.app.utils.consultar_onde_usado import executar_consulta_onde_usado
@@ -48,6 +48,7 @@ class ComprasApp(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.filtro_dialog = None
         self.dataframe_original = None
         user_data = load_session()
         username = user_data["username"]
@@ -684,6 +685,10 @@ class ComprasApp(QWidget):
         self.tree.setFont(QFont(self.fonte_tabela, self.tamanho_fonte_tabela))
         self.tree.verticalHeader().setDefaultSectionSize(self.altura_linha)
 
+        try:
+            self.tree.horizontalHeader().sectionClicked.disconnect(self.abrir_filtro)
+        except TypeError:
+            pass
         # Conectar sinal de clique para abrir o filtro
         self.tree.horizontalHeader().sectionClicked.connect(self.abrir_filtro)
 
@@ -694,8 +699,8 @@ class ComprasApp(QWidget):
     def configurar_tabela_tooltips(self, dataframe):
         # Mapa de tooltips correspondentes às colunas da consulta SQL
         tooltip_map = {
-            " ": "VERMELHO - SC sem Pedido de Compra\nCINZA - Aguardando entrega\nAZUL - Entrega "
-                 "parcial\nVERDE - Pedido de compra encerrado"
+            " ": "VERMELHO:\nSC sem Pedido de Compra\n\nCINZA:\nAguardando entrega\n\nAZUL:\nEntrega "
+                 "parcial\n\nVERDE:\nPedido de compra encerrado"
         }
 
         # Obtenha os cabeçalhos das colunas do dataframe
@@ -1150,19 +1155,29 @@ class ComprasApp(QWidget):
                 self.engine = None
 
     def abrir_filtro(self, logical_index):
+        # Bloqueia sinais temporiariamente
+        self.tree.horizontalHeader().blockSignals(True)
         # Pega o nome da coluna clicada
         nome_coluna = self.tree.horizontalHeaderItem(logical_index).text()
 
-        # Abrir a janela com QListWidget para filtro
-        filtro_dialog = FilterDialog(self, nome_coluna, self.dataframe)
-        filtro_dialog.exec_()
+        # Check if filtro_dialog is already created and visible
+        if getattr(self, 'filtro_dialog', None) is not None and self.filtro_dialog.isVisible():
+            self.filtro_dialog.close()
 
-        # Atualiza o DataFrame com os filtros selecionados
-        filtro_selecionado = filtro_dialog.get_filtros_selecionados()
-        if filtro_selecionado:
-            self.dataframe = self.dataframe[self.dataframe[nome_coluna].isin(filtro_selecionado)]
-            self.atualizar_tabela(self.dataframe)
-            self.btn_limpar_filtro.show()
+        # Create and show a new instance of FilterDialog
+        self.filtro_dialog = FilterDialog(self, nome_coluna, self.dataframe)
+
+        # Execute the dialog and wait for the user to close it
+        if self.filtro_dialog.exec_() == QDialog.Accepted:
+            # Get the selected filters from the dialog
+            filtro_selecionado = self.filtro_dialog.get_filtros_selecionados()
+            if filtro_selecionado:
+                # Apply the filter to the dataframe
+                self.dataframe = self.dataframe[self.dataframe[nome_coluna].isin(filtro_selecionado)]
+                self.atualizar_tabela(self.dataframe)
+                self.btn_limpar_filtro.show()
+        # Reativa os sinais do cabeçalho
+        self.tree.horizontalHeader().blockSignals(False)
 
     def limpar_filtros(self):
         self.atualizar_tabela(self.dataframe_original)
