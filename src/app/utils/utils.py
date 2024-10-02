@@ -150,3 +150,24 @@ def format_log_description(selected_row_before_changed, selected_row_after_chang
     for key, value in after_change.items():
         result += column_names[key] + value + '\n'
     return result
+
+
+def numero_linhas_consulta(query_consulta):
+    order_by_followup = f"""ORDER BY PC.R_E_C_N_O_ DESC;"""
+    order_by_sc = f"""ORDER BY "SOLIC. COMPRA" DESC;"""
+
+    query_sem_order_by = ""
+    if order_by_followup in query_consulta:
+        query_sem_order_by = query_consulta.replace(order_by_followup, "")
+    elif order_by_sc in query_consulta:
+        query_sem_order_by = query_consulta.replace(order_by_sc, "")
+
+    query = f"""
+            SELECT 
+                COUNT(*) AS total_records
+            FROM 
+                ({query_sem_order_by}
+                )
+            AS combined_results;
+        """
+    return query

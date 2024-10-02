@@ -12,21 +12,21 @@ from PyQt5.QtCore import Qt, QDate, pyqtSignal, QSize
 from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtWidgets import QApplication, QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QDateEdit, QLabel, \
-    QSizePolicy, QTabWidget, QMenu, QCheckBox, QDialog
+    QSizePolicy, QTabWidget, QMenu, QCheckBox, QDialog, QProgressDialog, QProgressBar
 from sqlalchemy import create_engine
 
 from src.app.utils.consultar_onde_usado import executar_consulta_onde_usado
 from src.app.utils.consultar_saldo_estoque import executar_saldo_em_estoque
 from src.app.utils.consultar_ultimos_fornecedores import executar_ultimos_fornecedores
 from src.app.utils.consultar_ultimas_nfe import consultar_ultimas_nfe
-from src.app.views.solic_compras_window import SolicitacaoComprasWindow
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.load_session import load_session
-from src.app.utils.utils import exibir_mensagem, copiar_linha, abrir_nova_janela, exportar_excel
+from src.app.utils.utils import exibir_mensagem, copiar_linha, abrir_nova_janela, exportar_excel, numero_linhas_consulta
 from src.app.views.FilterDialog import FilterDialog
-from src.models.engenharia_model import EngenhariaApp
-from src.models.pcp_model import PcpApp
 from src.app.utils.open_search_dialog import open_search_dialog
+from src.dialog.buttons import executar_consulta_solic_compras, abrir_modulo_engenharia, \
+    abrir_modulo_pcp
+from src.dialog.loading_dialog import loading_dialog
 
 
 class CustomLineEdit(QLineEdit):
@@ -225,17 +225,17 @@ class ComprasApp(QWidget):
 
         self.btn_sc = QPushButton("Solicitações de Compra", self)
         self.btn_sc.setObjectName("SC")
-        self.btn_sc.clicked.connect(self.executar_consulta_solic_compras)
+        self.btn_sc.clicked.connect(executar_consulta_solic_compras)
         self.btn_sc.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_abrir_engenharia = QPushButton("Engenharia", self)
         self.btn_abrir_engenharia.setObjectName("btn_engenharia")
-        self.btn_abrir_engenharia.clicked.connect(self.abrir_modulo_engenharia)
+        self.btn_abrir_engenharia.clicked.connect(abrir_modulo_engenharia)
         self.btn_abrir_engenharia.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_abrir_pcp = QPushButton("PCP", self)
         self.btn_abrir_pcp.setObjectName("PCP")
-        self.btn_abrir_pcp.clicked.connect(self.abrir_modulo_pcp)
+        self.btn_abrir_pcp.clicked.connect(abrir_modulo_pcp)
         self.btn_abrir_pcp.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_onde_e_usado = QPushButton("Onde é usado?", self)
@@ -542,18 +542,6 @@ class ComprasApp(QWidget):
             }
         """)
 
-    def executar_consulta_solic_compras(self):
-        solic_compras_window = SolicitacaoComprasWindow()
-        solic_compras_window.showMaximized()
-
-    def abrir_modulo_engenharia(self):
-        eng_window = EngenhariaApp()
-        eng_window.showMaximized()
-
-    def abrir_modulo_pcp(self):
-        pcp_window = PcpApp()
-        pcp_window.showMaximized()
-
     def add_today_button(self, date_edit):
         calendar = date_edit.calendarWidget()
         calendar.setGeometry(10, 10, 600, 400)
@@ -562,26 +550,6 @@ class ComprasApp(QWidget):
         largura, altura = 50, 20
         btn_today.setGeometry(20, 5, largura, altura)
         btn_today.clicked.connect(lambda: date_edit.setDate(QDate.currentDate()))
-
-    def numero_linhas_consulta(self, query_consulta):
-        order_by_followup = f"""ORDER BY PC.R_E_C_N_O_ DESC;"""
-        order_by_sc = f"""ORDER BY "SOLIC. COMPRA" DESC;"""
-
-        query_sem_order_by = ""
-        if order_by_followup in query_consulta:
-            query_sem_order_by = query_consulta.replace(order_by_followup, "")
-        elif order_by_sc in query_consulta:
-            query_sem_order_by = query_consulta.replace(order_by_sc, "")
-
-        query = f"""
-            SELECT 
-                COUNT(*) AS total_records
-            FROM 
-                ({query_sem_order_by}
-                )
-            AS combined_results;
-        """
-        return query
 
     def fechar_guia(self, index):
         if index >= 0:
@@ -978,7 +946,8 @@ class ComprasApp(QWidget):
                     AND PROD.D_E_L_E_T_ <> '*'
                     AND SC.C1_COTACAO <> 'XXXXXX' ORDER BY "SOLIC. COMPRA" DESC;
             """
-        if checkbox_sc_somente_com_pedido or numero_nf != '' or nome_fantasia_fornecedor != '' or razao_social_fornecedor != '':
+        if (checkbox_sc_somente_com_pedido or numero_nf != '' or nome_fantasia_fornecedor != '' or
+                razao_social_fornecedor != ''):
             return common_select + solic_com_pedido_where
         else:
             if numero_nf != '':
@@ -1023,7 +992,8 @@ class ComprasApp(QWidget):
                         elif row['PEDIDO COMPRA'] is None:
                             item.setIcon(no_pc)
                     else:
-                        if column_name in ('QTD. SOLIC. COMPRAS', 'QTD. PEDIDO COMPRA', 'QTD. ENTREGUE', 'CUSTO UNITÁRIO', 'CUSTO TOTAL'):
+                        if column_name in ('QTD. SOLIC. COMPRAS', 'QTD. PEDIDO COMPRA', 'QTD. ENTREGUE',
+                                           'CUSTO UNITÁRIO', 'CUSTO TOTAL'):
                             if column_name in ('CUSTO UNITÁRIO', 'CUSTO TOTAL'):
                                 if not pd.isna(value):
                                     value = f"R$ {locale.format_string("%.2f", value, grouping=True)}"
@@ -1032,7 +1002,8 @@ class ComprasApp(QWidget):
                             else:
                                 value = locale.format_string("%.2f", value, grouping=True)
 
-                        if column_name in ('QTD. PEDIDO COMPRA', 'CUSTO UNITÁRIO', 'CUSTO TOTAL', 'QTD. ENTREGUE') and value == 'nan':
+                        if (column_name in ('QTD. PEDIDO COMPRA', 'CUSTO UNITÁRIO', 'CUSTO TOTAL', 'QTD. ENTREGUE') and
+                                value == 'nan'):
                             value = ''
 
                         if column_name == 'PEDIDO DE COMPRA ABERTO EM:' and pd.isna(value):
@@ -1082,13 +1053,16 @@ class ComprasApp(QWidget):
                         elif column_name == 'IMPORTADO?' and value.strip() == '':
                             value = 'Sim'
 
-                        if column_name in ('PREVISÃO ENTREGA', 'DATA DE ENTREGA', 'SC ABERTA EM:', 'PC ABERTO EM:', 'DATA EMISSÃO NF') and not value.isspace():
+                        if column_name in ('PREVISÃO ENTREGA', 'DATA DE ENTREGA', 'SC ABERTA EM:', 'PC ABERTO EM:',
+                                           'DATA EMISSÃO NF') and not value.isspace():
                             data_obj = datetime.strptime(value, "%Y%m%d")
                             value = data_obj.strftime("%d/%m/%Y")
 
                         item = QTableWidgetItem(str(value).strip())
 
-                        if column_name not in ('DESCRIÇÃO', 'OBSERVAÇÃO SOLIC. COMPRA', 'OBSERVAÇÃO PEDIDO DE COMPRA', 'OBSERVAÇÃO ITEM DO PEDIDO DE COMPRA', 'RAZÃO SOCIAL FORNECEDOR', 'NOME FANTASIA FORNECEDOR'):
+                        if column_name not in ('DESCRIÇÃO', 'OBSERVAÇÃO SOLIC. COMPRA', 'OBSERVAÇÃO PEDIDO DE COMPRA',
+                                               'OBSERVAÇÃO ITEM DO PEDIDO DE COMPRA', 'RAZÃO SOCIAL FORNECEDOR',
+                                               'NOME FANTASIA FORNECEDOR'):
                             item.setTextAlignment(Qt.AlignCenter)
                         if column_name in ('CUSTO UNITÁRIO', 'CUSTO TOTAL'):
                             item.setTextAlignment(Qt.AlignRight)
@@ -1117,15 +1091,18 @@ class ComprasApp(QWidget):
             self.button_visible_control(False)
             return True
 
+
+
     def executar_consulta_followup(self):
         query_consulta_filtro = self.query_followup()
-        query_contagem_linhas = self.numero_linhas_consulta(query_consulta_filtro)
+        query_contagem_linhas = numero_linhas_consulta(query_consulta_filtro)
 
         self.label_line_number.hide()
         self.controle_campos_formulario(False)
         self.button_visible_control(False)
 
-        conn_str = f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};PWD={self.password}'
+        conn_str = (f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};'
+                    f'PWD={self.password}')
         self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
 
         try:
@@ -1137,6 +1114,8 @@ class ComprasApp(QWidget):
                 exibir_mensagem("EUREKA® Compras", 'Nenhum resultado encontrado nesta pesquisa.', "info")
                 return
 
+            dialog = loading_dialog(self, "Eureka® Processando...", "Carregando dados do TOTVS...\n\nPor favor, aguarde")
+
             self.dataframe = pd.read_sql(query_consulta_filtro, self.engine)
             self.dataframe.insert(0, ' ', '')
             self.dataframe[''] = ''
@@ -1144,6 +1123,7 @@ class ComprasApp(QWidget):
 
             self.atualizar_tabela(self.dataframe)
             self.dataframe_original = self.dataframe.copy()
+            dialog.close()
 
         except Exception as ex:
             exibir_mensagem('Erro ao consultar TOTVS', f'Erro: {str(ex)}', 'error')
