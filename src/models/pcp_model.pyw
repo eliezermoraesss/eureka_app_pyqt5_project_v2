@@ -22,6 +22,7 @@ from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.load_session import load_session
 from src.app.utils.utils import exibir_mensagem, abrir_desenho, abrir_nova_janela, exportar_excel, copiar_linha
 from src.app.utils.open_search_dialog import open_search_dialog
+from src.dialog.loading_dialog import loading_dialog
 
 
 class CustomLineEdit(QLineEdit):
@@ -779,6 +780,8 @@ class PcpApp(QWidget):
                 self.button_visible_control(False)
                 return
 
+            dialog = loading_dialog(self, "Eureka® Processando...", "Carregando dados do TOTVS...\n\nPor favor, aguarde")
+
             dataframe = pd.read_sql(query_consulta_op, self.engine)
             dataframe.insert(0, 'Status OP', '')
 
@@ -840,6 +843,7 @@ class PcpApp(QWidget):
             exibir_mensagem('Erro ao consultar tabela', f'Erro: {str(ex)}', 'error')
 
         finally:
+            dialog.close()
             # Fecha a conexão com o banco de dados se estiver aberta
             if hasattr(self, 'engine'):
                 self.engine.dispose()

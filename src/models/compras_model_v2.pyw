@@ -268,7 +268,7 @@ class ComprasApp(QWidget):
         self.btn_limpar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_nova_janela = QPushButton("Nova Janela", self)
-        self.btn_nova_janela.clicked.connect(lambda : abrir_nova_janela(self, ComprasApp()))
+        self.btn_nova_janela.clicked.connect(lambda: abrir_nova_janela(self, ComprasApp()))
         self.btn_nova_janela.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_exportar_excel = QPushButton("Exportar Excel", self)
@@ -641,7 +641,7 @@ class ComprasApp(QWidget):
         self.tree.setHorizontalHeaderLabels(dataframe.columns)
 
         # Definir largura de colunas específicas
-        self.tree.setColumnWidth(0, 20)  # Coluna 'ICONES DE STATUS'
+        self.tree.setColumnWidth(0, 190)  # Coluna 'ICONES DE STATUS'
         for col in range(1, len(dataframe.columns)):
             self.tree.horizontalHeader().setSectionResizeMode(col, QHeaderView.ResizeToContents)
 
@@ -808,11 +808,9 @@ class ComprasApp(QWidget):
                     FORN.A2_COD AS "CÓD. FORNECEDOR",
                     FORN.A2_NOME AS "RAZÃO SOCIAL FORNECEDOR",
                     FORN.A2_NREDUZ AS "NOME FANTASIA FORNECEDOR",
-                    SC.C1_ORIGEM AS "ORIGEM",
                     SC.C1_LOCAL AS "CÓD. ARMAZÉM",
                     ARM.NNR_DESCRI AS "DESCRIÇÃO ARMAZÉM",
                     PROD.B1_ZZLOCAL AS "ENDEREÇO ALMOXARIFADO",
-                    SC.C1_IMPORT AS "IMPORTADO?",
                     SC.C1_OBS AS "OBSERVAÇÃO SOLIC. COMPRA",
                     PC.C7_OBS AS "OBSERVAÇÃO PEDIDO DE COMPRA",
                     PC.C7_OBSM AS "OBSERVAÇÃO ITEM DO PEDIDO DE COMPRA",
@@ -908,11 +906,9 @@ class ComprasApp(QWidget):
                     NULL AS "CÓD. FORNECEDOR",
                     NULL AS "RAZÃO SOCIAL FORNECEDOR",
                     NULL AS "NOME FANTASIA FORNECEDOR",
-                    SC.C1_ORIGEM AS "ORIGEM",
                     SC.C1_LOCAL AS "CÓD. ARMAZÉM",
                     ARM.NNR_DESCRI AS "DESCRIÇÃO ARMAZÉM",
                     PROD.B1_ZZLOCAL AS "ENDEREÇO ALMOXARIFADO",
-                    SC.C1_IMPORT AS "IMPORTADO?",
                     SC.C1_OBS AS "OBSERVAÇÃO SOLIC. COMPRA",
                     NULL AS "OBSERVAÇÃO PEDIDO DE COMPRA",
                     NULL AS "OBSERVAÇÃO ITEM DO PEDIDO DE COMPRA",
@@ -984,23 +980,35 @@ class ComprasApp(QWidget):
                         if row['STATUS PEDIDO COMPRA'] is not None:
                             if row['STATUS PEDIDO COMPRA'].strip() == '' and row['DOC. NF ENTRADA'] is None:
                                 item.setIcon(no_order)
+                                item.setText('AGUARDANDO ENTREGA')
+                                dataframe.at[index, ' '] = 'AGUARDANDO ENTREGA'
                             elif row['STATUS PEDIDO COMPRA'].strip() == '' and row['DOC. NF ENTRADA'] is not None:
                                 item.setIcon(wait_delivery)
+                                item.setText('ENTREGA PARCIAL')
+                                dataframe.at[index, ' '] = 'ENTREGA PARCIAL'
                             elif row['STATUS PEDIDO COMPRA'] == 'E':
                                 item.setIcon(end_order)
+                                item.setText('PEDIDO ENCERRADO')
+                                dataframe.at[index, ' '] = 'PEDIDO ENCERRADO'
                             item.setSizeHint(QSize(64, 64))
                         elif row['PEDIDO COMPRA'] is None:
                             item.setIcon(no_pc)
+                            item.setText('SEM PEDIDO COMPRA')
+                            dataframe.at[index, ' '] = 'SEM PEDIDO COMPRA'
                     else:
                         if column_name in ('QTD. SOLIC. COMPRAS', 'QTD. PEDIDO COMPRA', 'QTD. ENTREGUE',
                                            'CUSTO UNITÁRIO', 'CUSTO TOTAL'):
                             if column_name in ('CUSTO UNITÁRIO', 'CUSTO TOTAL'):
                                 if not pd.isna(value):
-                                    value = f"R$ {locale.format_string("%.2f", value, grouping=True)}"
+                                    value = f"R$ {locale.format_string("%.2f", float(value), grouping=True)}"
                                 else:
                                     value = ''
                             else:
-                                value = locale.format_string("%.2f", value, grouping=True)
+                                value = float(value)
+                                if value.is_integer():
+                                    value = int(value)
+                                else:
+                                    value = locale.format_string("%.2f", value, grouping=True)
 
                         if (column_name in ('QTD. PEDIDO COMPRA', 'CUSTO UNITÁRIO', 'CUSTO TOTAL', 'QTD. ENTREGUE') and
                                 value == 'nan'):
@@ -1035,23 +1043,16 @@ class ComprasApp(QWidget):
                         if column_name == 'QTD. PENDENTE' and pd.isna(value):
                             value = ''
                         elif column_name == 'QTD. PENDENTE' and value:
-                            value = round(value, 2)
-                            value = locale.format_string("%.2f", value, grouping=True)
+                            value = float(value)
+                            if value.is_integer():
+                                value = int(value)
+                            else:
+                                value = locale.format_string("%.2f", float(value), grouping=True)
 
                         if column_name == 'STATUS PEDIDO COMPRA' and value == 'E':
                             value = 'Encerrado'
                         elif column_name == 'STATUS PEDIDO COMPRA' and value.strip() == '':
                             value = ''
-
-                        if column_name == 'ORIGEM' and value.strip() == 'MATA650':
-                            value = 'Empenho'
-                        elif column_name == 'ORIGEM' and value.strip() == '':
-                            value = 'Compras'
-
-                        if column_name == 'IMPORTADO?' and value.strip() == 'N':
-                            value = 'Não'
-                        elif column_name == 'IMPORTADO?' and value.strip() == '':
-                            value = 'Sim'
 
                         if column_name in ('PREVISÃO ENTREGA', 'DATA DE ENTREGA', 'SC ABERTA EM:', 'PC ABERTO EM:',
                                            'DATA EMISSÃO NF') and not value.isspace():
@@ -1091,8 +1092,6 @@ class ComprasApp(QWidget):
             self.button_visible_control(False)
             return True
 
-
-
     def executar_consulta_followup(self):
         query_consulta_filtro = self.query_followup()
         query_contagem_linhas = numero_linhas_consulta(query_consulta_filtro)
@@ -1114,7 +1113,8 @@ class ComprasApp(QWidget):
                 exibir_mensagem("EUREKA® Compras", 'Nenhum resultado encontrado nesta pesquisa.', "info")
                 return
 
-            dialog = loading_dialog(self, "Eureka® Processando...", "Carregando dados do TOTVS...\n\nPor favor, aguarde")
+            dialog = loading_dialog(self, "Processando...", "🤖 Carregando dados do TOTVS..."
+                                                            "\n\n🤖 Por favor, aguarde\n\nEureka®")
 
             self.dataframe = pd.read_sql(query_consulta_filtro, self.engine)
             self.dataframe.insert(0, ' ', '')
@@ -1123,12 +1123,12 @@ class ComprasApp(QWidget):
 
             self.atualizar_tabela(self.dataframe)
             self.dataframe_original = self.dataframe.copy()
-            dialog.close()
 
         except Exception as ex:
             exibir_mensagem('Erro ao consultar TOTVS', f'Erro: {str(ex)}', 'error')
 
         finally:
+            dialog.close()
             # Fecha a conexão com o banco de dados se estiver aberta
             if hasattr(self, 'engine'):
                 self.engine.dispose()
@@ -1152,17 +1152,32 @@ class ComprasApp(QWidget):
             # Get the selected filters from the dialog
             filtro_selecionado = self.filtro_dialog.get_filtros_selecionados()
             if filtro_selecionado:
+                colunas_formatar = ['QTD. PEDIDO COMPRA', 'QTD. ENTREGUE', 'QTD. PENDENTE', 'CUSTO UNITÁRIO',
+                                    'CUSTO TOTAL', 'QTD. SOLIC. COMPRAS']
+
+                # Função para formatação dos valores
+                def formatar_valor(valor):
+                    if isinstance(valor, float):
+                        return '{:.1f}'.format(valor) if valor.is_integer() else '{:.2f}'.format(valor)
+                    return valor
+
+                # Aplicar formatação nas colunas especificas
+                self.dataframe[colunas_formatar] = self.dataframe[colunas_formatar].map(formatar_valor)
+
                 # Apply the filter to the dataframe
                 self.dataframe = self.dataframe[self.dataframe[nome_coluna].isin(filtro_selecionado)]
+
                 self.atualizar_tabela(self.dataframe)
                 self.btn_limpar_filtro.show()
         # Reativa os sinais do cabeçalho
         self.tree.horizontalHeader().blockSignals(False)
 
     def limpar_filtros(self):
+        dialog = loading_dialog(self, "Eureka®", "🤖 Removendo filtros...\n\nRestaurando a consulta inicial")
         self.atualizar_tabela(self.dataframe_original)
         self.btn_limpar_filtro.hide()
         self.dataframe = self.dataframe_original.copy()
+        dialog.close()
 
 
 if __name__ == "__main__":

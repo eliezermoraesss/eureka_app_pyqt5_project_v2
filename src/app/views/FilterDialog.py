@@ -1,3 +1,4 @@
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QListWidget, QPushButton, QLabel, QLineEdit, QTextEdit
 
 
@@ -13,6 +14,7 @@ class FilterDialog(QDialog):
 
         self.setWindowTitle(f"{self.nome_coluna}")
         self.setGeometry(300, 300, 200, 500)
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)  # Remove botão de ajuda
 
         layout = QVBoxLayout()
 
@@ -33,10 +35,14 @@ class FilterDialog(QDialog):
         self.list_widget.setSelectionMode(QListWidget.MultiSelection)
 
         # Pegar valores únicos da coluna
-        self.itens_originais = list(map(str, self.dataframe[self.nome_coluna].dropna().unique()))
-        if self.dataframe[self.nome_coluna].isnull().any():
-            self.itens_originais.append(self.vazio_label)
-        self.list_widget.addItems(self.itens_originais)
+        if self.nome_coluna == ' ':
+            self.itens_originais = ['SEM PEDIDO COMPRA', 'AGUARDANDO ENTREGA', 'ENTREGA PARCIAL', 'PEDIDO ENCERRADO']
+            self.list_widget.addItems(self.itens_originais)
+        else:
+            self.itens_originais = list(map(str, self.dataframe[self.nome_coluna].dropna().unique()))
+            if self.dataframe[self.nome_coluna].isnull().any():
+                self.itens_originais.append(self.vazio_label)
+            self.list_widget.addItems(self.itens_originais)
 
         # Botão de aplicar filtro
         btn_aplicar = QPushButton("Aplicar Filtro")
