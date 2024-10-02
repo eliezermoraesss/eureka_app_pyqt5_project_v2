@@ -1167,6 +1167,7 @@ class ComprasApp(QWidget):
     def limpar_filtros(self):
         self.atualizar_tabela(self.dataframe_original)
         self.btn_limpar_filtro.hide()
+        self.dataframe = self.dataframe_original.copy()
 
 
 if __name__ == "__main__":
