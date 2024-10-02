@@ -26,6 +26,7 @@ from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.load_session import load_session
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.app.utils.utils import *
+from src.app.views.copy_product_window import CopyProdutoItemWindow
 
 
 class CustomLineEdit(QLineEdit):
@@ -470,6 +471,10 @@ class EngenhariaApp(QWidget):
             new_product.triggered.connect(self.abrir_janela_novo_produto)
             menu.addAction(new_product)
 
+            cadastro_copia_produto = QAction('Copiar para cadastrar...', self)
+            cadastro_copia_produto.triggered.connect(self.copiar_item_selecionado)
+            menu.addAction(cadastro_copia_produto)
+
             editar_action = QAction('Editar...', self)
             editar_action.triggered.connect(self.editar_item_selecionado)
             menu.addAction(editar_action)
@@ -511,6 +516,20 @@ class EngenhariaApp(QWidget):
     def abrir_janela_novo_produto(self):
         new_product_window = NewProductWindow()
         new_product_window.exec_()
+
+    def copiar_item_selecionado(self):
+        selected_row = self.tree.currentRow()
+        if selected_row != -1:
+            selected_row_table = []
+            for column in range(self.tree.columnCount()):
+                item = self.tree.item(selected_row, column)
+                selected_row_table.append(item.text() if item else "")
+
+            self.abrir_janela_copiar_produto(selected_row_table)
+
+    def abrir_janela_copiar_produto(self, selected_row_table):
+        copy_window = CopyProdutoItemWindow(selected_row_table)
+        copy_window.exec_()
 
     def editar_item_selecionado(self):
         selected_row = self.tree.currentRow()
