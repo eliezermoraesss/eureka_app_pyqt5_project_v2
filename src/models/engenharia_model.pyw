@@ -467,17 +467,19 @@ class EngenhariaApp(QWidget):
 
             menu = QMenu()
 
-            new_product = QAction('Cadastrar...', self)
+            new_product = QAction('Cadastrar novo produto...', self)
             new_product.triggered.connect(self.abrir_janela_novo_produto)
             menu.addAction(new_product)
 
-            cadastro_copia_produto = QAction('Copiar para cadastrar...', self)
+            cadastro_copia_produto = QAction('Cadastro semelhante...', self)
             cadastro_copia_produto.triggered.connect(self.copiar_item_selecionado)
             menu.addAction(cadastro_copia_produto)
 
-            editar_action = QAction('Editar...', self)
+            editar_action = QAction('Editar cadastro...', self)
             editar_action.triggered.connect(self.editar_item_selecionado)
             menu.addAction(editar_action)
+
+            menu.addSeparator()
 
             context_menu_abrir_desenho = QAction('Abrir desenho', self)
             context_menu_abrir_desenho.triggered.connect(lambda: abrir_desenho(self, table))
@@ -491,6 +493,8 @@ class EngenhariaApp(QWidget):
             context_menu_consultar_onde_usado.triggered.connect(lambda: executar_consulta_onde_usado(self, table))
             menu.addAction(context_menu_consultar_onde_usado)
 
+            menu.addSeparator()
+
             context_menu_saldo_estoque = QAction('Saldo em estoque', self)
             context_menu_saldo_estoque.triggered.connect(lambda: executar_saldo_em_estoque(self, table))
             menu.addAction(context_menu_saldo_estoque)
@@ -503,13 +507,15 @@ class EngenhariaApp(QWidget):
             context_menu_ultimas_nfe.triggered.connect(lambda: consultar_ultimas_nfe(self, table))
             menu.addAction(context_menu_ultimas_nfe)
 
-            context_menu_tabela_pesos = QAction('Abrir Tabela de Pesos', self)
-            context_menu_tabela_pesos.triggered.connect(self.abrir_tabela_pesos)
-            menu.addAction(context_menu_tabela_pesos)
+            menu.addSeparator()
 
             context_menu_nova_janela = QAction('Nova janela', self)
             context_menu_nova_janela.triggered.connect(lambda: abrir_nova_janela(self, EngenhariaApp()))
             menu.addAction(context_menu_nova_janela)
+
+            context_menu_tabela_pesos = QAction('Abrir Tabela de Pesos', self)
+            context_menu_tabela_pesos.triggered.connect(self.abrir_tabela_pesos)
+            menu.addAction(context_menu_tabela_pesos)
 
             menu.exec_(table.viewport().mapToGlobal(position))
 
