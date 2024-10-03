@@ -838,12 +838,12 @@ class PcpApp(QWidget):
             self.tree.setSortingEnabled(True)
             self.controle_campos_formulario(True)
             self.button_visible_control(True)
+            dialog.close()
 
         except Exception as ex:
             exibir_mensagem('Erro ao consultar tabela', f'Erro: {str(ex)}', 'error')
 
         finally:
-            dialog.close()
             # Fecha a conexão com o banco de dados se estiver aberta
             if hasattr(self, 'engine'):
                 self.engine.dispose()

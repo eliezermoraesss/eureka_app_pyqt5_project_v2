@@ -1136,12 +1136,12 @@ class ComprasApp(QWidget):
 
             self.atualizar_tabela(self.dataframe)
             self.dataframe_original = self.dataframe.copy()
+            dialog.close()
 
         except Exception as ex:
             exibir_mensagem('Erro ao consultar TOTVS', f'Erro: {str(ex)}', 'error')
 
         finally:
-            dialog.close()
             # Fecha a conexão com o banco de dados se estiver aberta
             if hasattr(self, 'engine'):
                 self.engine.dispose()
