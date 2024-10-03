@@ -12,7 +12,7 @@ from PyQt5.QtCore import Qt, QDate, pyqtSignal, QSize
 from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtWidgets import QApplication, QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QDateEdit, QLabel, \
-    QSizePolicy, QTabWidget, QMenu, QCheckBox, QDialog, QProgressDialog, QProgressBar
+    QSizePolicy, QTabWidget, QMenu, QCheckBox, QDialog
 from sqlalchemy import create_engine
 
 from src.app.utils.consultar_onde_usado import executar_consulta_onde_usado
@@ -24,9 +24,10 @@ from src.app.utils.load_session import load_session
 from src.app.utils.utils import exibir_mensagem, copiar_linha, abrir_nova_janela, exportar_excel, numero_linhas_consulta
 from src.app.views.FilterDialog import FilterDialog
 from src.app.utils.open_search_dialog import open_search_dialog
-from src.dialog.buttons import executar_consulta_solic_compras, abrir_modulo_engenharia, \
+from src.dialog.buttons import abrir_modulo_engenharia, \
     abrir_modulo_pcp
 from src.dialog.loading_dialog import loading_dialog
+from src.app.utils.visualizar_nfe import visualizar_nfe
 
 
 class CustomLineEdit(QLineEdit):
@@ -100,6 +101,7 @@ class ComprasApp(QWidget):
         self.guias_abertas_saldo = []
         self.guias_abertas_ultimos_fornecedores = []
         self.guias_abertas_ultimas_nfe = []
+        self.guias_abertas_visualizar_nfe = []
 
         self.label_line_number = QLabel("", self)
         self.label_line_number.setObjectName("label-line-number")
@@ -253,6 +255,11 @@ class ComprasApp(QWidget):
         self.btn_ultimas_nfe.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_ultimas_nfe.hide()
 
+        self.btn_visualizar_nf = QPushButton("Visualizar Nota Fiscal", self)
+        self.btn_visualizar_nf.clicked.connect(lambda: visualizar_nfe(self, self.tree))
+        self.btn_visualizar_nf.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.btn_visualizar_nf.hide()
+
         self.btn_limpar_filtro = QPushButton("Limpar filtros", self)
         self.btn_limpar_filtro.clicked.connect(self.limpar_filtros)
         self.btn_limpar_filtro.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -368,8 +375,9 @@ class ComprasApp(QWidget):
         layout_button_03.addStretch()
         layout_button_03.addWidget(self.btn_followup)
         layout_button_04.addStretch()
-        layout_button_04.addWidget(self.btn_ultimos_fornecedores)
+        layout_button_04.addWidget(self.btn_visualizar_nf)
         layout_button_04.addWidget(self.btn_ultimas_nfe)
+        layout_button_04.addWidget(self.btn_ultimos_fornecedores)
         layout_button_04.addWidget(self.btn_saldo_estoque)
         layout_button_04.addWidget(self.btn_onde_e_usado)
         layout_button_03.addWidget(self.btn_nova_janela)
@@ -471,7 +479,7 @@ class ComprasApp(QWidget):
                 border: 2px solid #AF125A;
                 border-radius: 8px;
                 font-style: "Segoe UI";
-                font-size: 14px;
+                font-size: 11px;
                 height: 20px;
                 font-weight: bold;
                 margin: 10px 5px;
@@ -565,7 +573,10 @@ class ComprasApp(QWidget):
                         try:
                             self.guias_abertas_ultimos_fornecedores.remove(codigo_guia_fechada)
                         except ValueError:
-                            self.guias_abertas_ultimas_nfe.remove(codigo_guia_fechada)
+                            try:
+                                self.guias_abertas_ultimas_nfe.remove(codigo_guia_fechada)
+                            except ValueError:
+                                self.guias_abertas_visualizar_nfe.remove(codigo_guia_fechada)
 
             finally:
                 self.tabWidget.removeTab(index)
@@ -591,6 +602,9 @@ class ComprasApp(QWidget):
 
             menu = QMenu()
 
+            context_menu_visualizar_nf = QAction('Visualizar Nota Fiscal', self)
+            context_menu_visualizar_nf.triggered.connect(lambda: visualizar_nfe(self, table))
+
             context_menu_ultimo_fornecedor = QAction('Últimos fornecedores', self)
             context_menu_ultimo_fornecedor.triggered.connect(lambda: executar_ultimos_fornecedores(self, table))
 
@@ -606,6 +620,7 @@ class ComprasApp(QWidget):
             context_menu_nova_janela = QAction('Nova janela', self)
             context_menu_nova_janela.triggered.connect(lambda: abrir_nova_janela(self, ComprasApp()))
 
+            menu.addAction(context_menu_visualizar_nf)
             menu.addAction(context_menu_ultimo_fornecedor)
             menu.addAction(context_menu_ultimas_nfe)
             menu.addAction(context_menu_consultar_onde_usado)
@@ -699,12 +714,14 @@ class ComprasApp(QWidget):
         self.btn_ultimos_fornecedores.hide()
         self.btn_ultimas_nfe.hide()
         self.btn_limpar_filtro.hide()
+        self.btn_visualizar_nf.hide()
 
         self.guias_abertas.clear()
         self.guias_abertas_onde_usado.clear()
         self.guias_abertas_saldo.clear()
         self.guias_abertas_ultimos_fornecedores.clear()
         self.guias_abertas_ultimas_nfe.clear()
+        self.guias_abertas_visualizar_nfe.clear()
 
         while self.tabWidget.count():
             self.tabWidget.removeTab(0)
@@ -718,12 +735,14 @@ class ComprasApp(QWidget):
             self.btn_saldo_estoque.hide()
             self.btn_ultimos_fornecedores.hide()
             self.btn_ultimas_nfe.hide()
+            self.btn_visualizar_nf.hide()
         else:
             self.btn_exportar_excel.show()
             self.btn_onde_e_usado.show()
             self.btn_saldo_estoque.show()
             self.btn_ultimos_fornecedores.show()
             self.btn_ultimas_nfe.show()
+            self.btn_visualizar_nf.show()
 
     def controle_campos_formulario(self, status):
         self.campo_sc.setEnabled(status)
@@ -1107,8 +1126,8 @@ class ComprasApp(QWidget):
                 exibir_mensagem("EUREKA® Compras", 'Nenhum resultado encontrado nesta pesquisa.', "info")
                 return
 
-            dialog = loading_dialog(self, "Processando...", "🤖 Carregando dados do TOTVS..."
-                                                            "\n\n🤖 Por favor, aguarde\n\nEureka®")
+            dialog = loading_dialog(self, "Carregando...", "🤖 Processando dados do TOTVS..."
+                                                            "\n\n🤖 Por favor, aguarde.\n\nEureka®")
 
             self.dataframe = pd.read_sql(query_consulta_filtro, self.engine)
             self.dataframe.insert(0, ' ', '')

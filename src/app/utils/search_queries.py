@@ -3,17 +3,17 @@ def select_query(entity):
         "produto": [
             """
             SELECT 
-                B1_COD, 
-                B1_DESC,
-                B1_UM
+                B1_COD AS "Código", 
+                B1_DESC AS "Descrição",
+                B1_UM AS "UN."
             FROM
                 PROTHEUS12_R27.dbo.SB1010
             WHERE D_E_L_E_T_ <> '*'""",
             """
             SELECT 
-                B1_COD, 
-                B1_DESC,
-                B1_UM
+                B1_COD AS "Código", 
+                B1_DESC AS "Descrição",
+                B1_UM AS "UN."
             FROM
                 PROTHEUS12_R27.dbo.SB1010
             WHERE 
@@ -21,9 +21,9 @@ def select_query(entity):
                 AND D_E_L_E_T_ <> '*'""",
             """
             SELECT 
-                B1_COD, 
-                B1_DESC,
-                B1_UM
+                B1_COD AS "Código", 
+                B1_DESC AS "Descrição",
+                B1_UM AS "UN."
             FROM
                 PROTHEUS12_R27.dbo.SB1010
             WHERE 

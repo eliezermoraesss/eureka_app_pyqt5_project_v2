@@ -65,6 +65,7 @@ class EngenhariaApp(QWidget):
         self.guias_abertas_saldo = []
         self.guias_abertas_ultimos_fornecedores = []
         self.guias_abertas_ultimas_nfe = []
+        self.guias_abertas_visualizar_nfe = []
         fonte = "Segoe UI"
         tamanho_fonte = 10
 
@@ -612,6 +613,7 @@ class EngenhariaApp(QWidget):
         self.guias_abertas_saldo.clear()
         self.guias_abertas_ultimos_fornecedores.clear()
         self.guias_abertas_ultimas_nfe.clear()
+        self.guias_abertas_visualizar_nfe.clear()
 
         while self.tabWidget.count():
             self.tabWidget.removeTab(0)
@@ -822,7 +824,10 @@ class EngenhariaApp(QWidget):
                         try:
                             self.guias_abertas_ultimos_fornecedores.remove(codigo_guia_fechada)
                         except ValueError:
-                            self.guias_abertas_ultimas_nfe.remove(codigo_guia_fechada)
+                            try:
+                                self.guias_abertas_ultimas_nfe.remove(codigo_guia_fechada)
+                            except ValueError:
+                                self.guias_abertas_visualizar_nfe.remove(codigo_guia_fechada)
             finally:
                 self.tabWidget.removeTab(index)
 
