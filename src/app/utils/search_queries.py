@@ -62,12 +62,23 @@ def select_query(entity):
         "fornecedor": ["""
         SELECT 
             A2_COD AS "Código", 
-            A2_NOME AS "Razão social",
-            A2_NREDUZ AS "Nome fantasia",
-            A2_END AS "Endereço",
-            A2_BAIRRO AS "Bairro",
-            A2_MUN AS "Município",
-            A2_EST AS "Estado"
+                    A2_NOME AS "Razão social",
+                    A2_NREDUZ AS "Nome fantasia",
+                    A2_END AS "Endereço",
+                    A2_NR_END AS "Número",
+                    A2_BAIRRO AS "Bairro",
+                    A2_MUN AS "Município",
+                    A2_EST AS "Estado",
+                    A2_CEP AS "CEP",
+                    A2_CGC AS "CNPJ",
+                    A2_INSCR AS "Insc. Estadual",
+                    A2_DDD AS "DDD",
+                    A2_TEL AS "Telefone",
+                    A2_CONTATO AS "Contato",
+                    A2_EMAIL AS "E-mail",
+                    A2_HPAGE AS "Site",
+                    A2_COMPLEM AS "Complemento",
+                    A2_ULTCOM AS "Última Compra"
         FROM 
             PROTHEUS12_R27.dbo.SA2010
         WHERE D_E_L_E_T_ <> '*'
@@ -79,9 +90,20 @@ def select_query(entity):
                     A2_NOME AS "Razão social",
                     A2_NREDUZ AS "Nome fantasia",
                     A2_END AS "Endereço",
+                    A2_NR_END AS "Número",
                     A2_BAIRRO AS "Bairro",
                     A2_MUN AS "Município",
-                    A2_EST AS "Estado"
+                    A2_EST AS "Estado",
+                    A2_CEP AS "CEP",
+                    A2_CGC AS "CNPJ",
+                    A2_INSCR AS "Insc. Estadual",
+                    A2_DDD AS "DDD",
+                    A2_TEL AS "Telefone",
+                    A2_CONTATO AS "Contato",
+                    A2_EMAIL AS "E-mail",
+                    A2_HPAGE AS "Site",
+                    A2_COMPLEM AS "Complemento",
+                    A2_ULTCOM AS "Última Compra"
                 FROM 
                     PROTHEUS12_R27.dbo.SA2010
                WHERE A2_COD LIKE ':search_field%'
@@ -94,9 +116,20 @@ def select_query(entity):
                     A2_NOME AS "Razão social",
                     A2_NREDUZ AS "Nome fantasia",
                     A2_END AS "Endereço",
+                    A2_NR_END AS "Número",
                     A2_BAIRRO AS "Bairro",
                     A2_MUN AS "Município",
-                    A2_EST AS "Estado"
+                    A2_EST AS "Estado",
+                    A2_CEP AS "CEP",
+                    A2_CGC AS "CNPJ",
+                    A2_INSCR AS "Insc. Estadual",
+                    A2_DDD AS "DDD",
+                    A2_TEL AS "Telefone",
+                    A2_CONTATO AS "Contato",
+                    A2_EMAIL AS "E-mail",
+                    A2_HPAGE AS "Site",
+                    A2_COMPLEM AS "Complemento",
+                    A2_ULTCOM AS "Última Compra"
                 FROM 
                     PROTHEUS12_R27.dbo.SA2010
                WHERE A2_NOME LIKE '%:search_field%'
