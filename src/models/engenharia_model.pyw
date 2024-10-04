@@ -7,9 +7,9 @@ import time
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 import pyodbc
-from PyQt5.QtCore import Qt, pyqtSignal, QProcess
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QFont, QIcon, QPixmap
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
+from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, \
     QTableWidgetItem, QSizePolicy, QSpacerItem, QTabWidget, \
     QMenu, QAction, QComboBox, QStyle
@@ -46,8 +46,9 @@ class CustomLineEdit(QLineEdit):
 class EngenhariaApp(QWidget):
     guia_fechada = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, main_window):
         super().__init__()
+        self.main_window = main_window
         user_data = load_session()
         username = user_data["username"]
         role = user_data["role"]
@@ -150,15 +151,10 @@ class EngenhariaApp(QWidget):
         self.btn_new_product.clicked.connect(self.abrir_janela_novo_produto)
         self.btn_new_product.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        self.btn_abrir_pcp = QPushButton("PCP", self)
-        self.btn_abrir_pcp.setObjectName("PCP")
-        self.btn_abrir_pcp.clicked.connect(self.abrir_modulo_pcp)
-        self.btn_abrir_pcp.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-
-        self.btn_abrir_compras = QPushButton("Compras", self)
-        self.btn_abrir_compras.setObjectName("compras")
-        self.btn_abrir_compras.clicked.connect(self.abrir_modulo_compras)
-        self.btn_abrir_compras.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.btn_home = QPushButton("HOME", self)
+        self.btn_home.setObjectName("btn_home")
+        self.btn_home.clicked.connect(self.return_to_main)
+        self.btn_home.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_consultar_estrutura = QPushButton("Consultar Estrutura", self)
         self.btn_consultar_estrutura.clicked.connect(lambda: executar_consulta_estrutura(self, self.tree))
@@ -190,7 +186,7 @@ class EngenhariaApp(QWidget):
         self.btn_limpar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_nova_janela = QPushButton("Nova Janela", self)
-        self.btn_nova_janela.clicked.connect(lambda: abrir_nova_janela(self, EngenhariaApp()))
+        self.btn_nova_janela.clicked.connect(self.abrir_nova_janela)
         self.btn_nova_janela.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_abrir_desenho = QPushButton("Abrir Desenho", self)
@@ -253,9 +249,8 @@ class EngenhariaApp(QWidget):
         layout_button_04.addWidget(self.btn_exportar_excel)
         layout_button_04.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         layout_button_03.addWidget(self.btn_calculo_peso)
-        layout_button_03.addWidget(self.btn_abrir_pcp)
-        layout_button_03.addWidget(self.btn_abrir_compras)
         layout_button_03.addWidget(self.btn_fechar)
+        layout_button_03.addWidget(self.btn_home)
         layout_button_03.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
 
         self.layout_footer_label.addStretch(1)
@@ -342,20 +337,16 @@ class EngenhariaApp(QWidget):
                 margin: 10px 5px;
             }
 
-            QPushButton#PCP {
-                background-color: #DC5F00;
+            QPushButton#btn_home {
+                background-color: #c1121f;
             }
 
-            QPushButton#compras {
-                background-color: #836FFF;
-            }
-
-            QPushButton:hover, QPushButton#PCP:hover, QPushButton#compras:hover {
+            QPushButton:hover, QPushButton#btn_home:hover {
                 background-color: #fff;
                 color: #0a79f8
             }
 
-            QPushButton:pressed, QPushButton#PCP:pressed, QPushButton#compras:pressed {
+            QPushButton:pressed, QPushButton#btn_home:pressed{
                 background-color: #6703c5;
                 color: #fff;
             }
@@ -393,6 +384,15 @@ class EngenhariaApp(QWidget):
             }
                 """)
 
+    def return_to_main(self):
+        self.close()  # Fecha a janela atual
+        self.main_window.reopen()  # Reabre ou traz a janela principal ao foco
+
+    def abrir_nova_janela(self):
+        eng_window = EngenhariaApp(self.main_window)
+        eng_window.showMaximized()
+        self.main_window.sub_windows.append(eng_window)
+
     def abrir_tabela_pesos(self):
         os.startfile(r'\\192.175.175.4\desenvolvimento\REPOSITORIOS\resources\assets\excel\TABELA_PESO.xlsx')
 
@@ -406,18 +406,6 @@ class EngenhariaApp(QWidget):
                     FROM ({query_sem_order_by}) AS combined_results;
                 """
         return query
-
-    def abrir_modulo_pcp(self):
-        process = QProcess()
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        script_path = os.path.join(script_dir, 'pcp_model.pyw')
-        process.startDetached("python", [script_path])
-
-    def abrir_modulo_compras(self):
-        process = QProcess()
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        script_path = os.path.join(script_dir, 'compras_model.pyw')
-        process.startDetached("python", [script_path])
 
     def add_clear_button(self, line_edit):
         clear_icon = self.style().standardIcon(QStyle.SP_LineEditClearButton)
@@ -511,7 +499,7 @@ class EngenhariaApp(QWidget):
             menu.addSeparator()
 
             context_menu_nova_janela = QAction('Nova janela', self)
-            context_menu_nova_janela.triggered.connect(lambda: abrir_nova_janela(self, EngenhariaApp()))
+            context_menu_nova_janela.triggered.connect(self.abrir_nova_janela)
             menu.addAction(context_menu_nova_janela)
 
             context_menu_tabela_pesos = QAction('Abrir Tabela de Pesos', self)
@@ -736,9 +724,9 @@ class EngenhariaApp(QWidget):
             if not dataframe.empty:
 
                 if line_number > 1:
-                    message = f"Foram encontrados {line_number} resultados"
+                    message = f"Foram encontrados {line_number} itens"
                 else:
-                    message = f"Foi encontrado {line_number} resultado"
+                    message = f"Foi encontrado {line_number} item"
 
                 self.label_line_number.setText(f"{message}")
                 self.label_line_number.show()
@@ -838,13 +826,3 @@ class EngenhariaApp(QWidget):
 
     def existe_guias_abertas(self):
         return self.tabWidget.count() > 0
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = EngenhariaApp()
-    username, password, database, server = setup_mssql()
-    driver = '{SQL Server}'
-
-    window.showMaximized()
-    sys.exit(app.exec_())

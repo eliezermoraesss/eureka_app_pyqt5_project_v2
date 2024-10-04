@@ -47,8 +47,9 @@ class CustomLineEdit(QLineEdit):
 class ComprasApp(QWidget):
     guia_fechada = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, main_window):
         super().__init__()
+        self.main_window = main_window
         self.filtro_dialog = None
         self.dataframe_original = None
         user_data = load_session()
@@ -225,16 +226,6 @@ class ComprasApp(QWidget):
         self.btn_followup.clicked.connect(self.executar_consulta_followup)
         self.btn_followup.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        self.btn_abrir_engenharia = QPushButton("Engenharia", self)
-        self.btn_abrir_engenharia.setObjectName("btn_engenharia")
-        self.btn_abrir_engenharia.clicked.connect(abrir_modulo_engenharia)
-        self.btn_abrir_engenharia.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-
-        self.btn_abrir_pcp = QPushButton("PCP", self)
-        self.btn_abrir_pcp.setObjectName("PCP")
-        self.btn_abrir_pcp.clicked.connect(abrir_modulo_pcp)
-        self.btn_abrir_pcp.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-
         self.btn_onde_e_usado = QPushButton("Onde é usado?", self)
         self.btn_onde_e_usado.clicked.connect(lambda: executar_consulta_onde_usado(self, self.tree))
         self.btn_onde_e_usado.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -270,7 +261,7 @@ class ComprasApp(QWidget):
         self.btn_limpar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_nova_janela = QPushButton("Nova Janela", self)
-        self.btn_nova_janela.clicked.connect(lambda: abrir_nova_janela(self, ComprasApp()))
+        self.btn_nova_janela.clicked.connect(self.abrir_nova_janela)
         self.btn_nova_janela.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_exportar_excel = QPushButton("Exportar Excel", self)
@@ -281,6 +272,11 @@ class ComprasApp(QWidget):
         self.btn_fechar = QPushButton("Fechar", self)
         self.btn_fechar.clicked.connect(self.close)
         self.btn_fechar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+        self.btn_home = QPushButton("HOME", self)
+        self.btn_home.setObjectName("btn_home")
+        self.btn_home.clicked.connect(self.return_to_main)
+        self.btn_home.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.campo_sc.returnPressed.connect(self.executar_consulta_followup)
         self.campo_pedido.returnPressed.connect(self.executar_consulta_followup)
@@ -385,9 +381,8 @@ class ComprasApp(QWidget):
         layout_button_03.addWidget(self.btn_limpar)
         layout_button_04.addWidget(self.btn_exportar_excel)
         layout_button_04.addStretch()
-        layout_button_03.addWidget(self.btn_abrir_engenharia)
-        layout_button_03.addWidget(self.btn_abrir_pcp)
         layout_button_03.addWidget(self.btn_fechar)
+        layout_button_03.addWidget(self.btn_home)
         layout_button_03.addStretch()
 
         self.layout_footer_label.addStretch(1)
@@ -485,27 +480,16 @@ class ComprasApp(QWidget):
                 margin: 10px 5px;
             }
             
-            QPushButton#SC {
-                border: 2px solid #347928;
-                background-color: #347928;
-            }
-            
-            QPushButton#btn_engenharia {
-                border: 2px solid #0a79f8;
-                background-color: #0a79f8;
-            }
-            
-            QPushButton#PCP {
-                border: 2px solid #DC5F00;
-                background-color: #DC5F00;
+            QPushButton#btn_home {
+                background-color: #c1121f;
             }
     
-            QPushButton:hover, QPushButton:hover#btn_engenharia, QPushButton#PCP:hover, QPushButton#SC:hover {
+            QPushButton:hover, QPushButton:hover#btn_home {
                 background-color: #EFF2F1;
                 color: #3A0CA3
             }
     
-            QPushButton:pressed, QPushButton:pressed#btn_engenharia, QPushButton#PCP:pressed, QPushButton#SC:pressed {
+            QPushButton:pressed, QPushButton:pressed#btn_home {
                 background-color: #6703c5;
                 color: #fff;
             }
@@ -543,6 +527,15 @@ class ComprasApp(QWidget):
                 font-weight: bold;
             }
         """)
+
+    def return_to_main(self):
+        self.close()  # Fecha a janela atual
+        self.main_window.reopen()  # Reabre ou traz a janela principal ao foco
+
+    def abrir_nova_janela(self):
+        eng_window = ComprasApp(self.main_window)
+        eng_window.showMaximized()
+        self.main_window.sub_windows.append(eng_window)
 
     def add_today_button(self, date_edit):
         calendar = date_edit.calendarWidget()
@@ -618,7 +611,7 @@ class ComprasApp(QWidget):
             context_menu_saldo_estoque.triggered.connect(lambda: executar_saldo_em_estoque(self, table))
 
             context_menu_nova_janela = QAction('Nova janela', self)
-            context_menu_nova_janela.triggered.connect(lambda: abrir_nova_janela(self, ComprasApp()))
+            context_menu_nova_janela.triggered.connect(self.abrir_nova_janela)
 
             menu.addAction(context_menu_visualizar_nf)
             menu.addAction(context_menu_ultimo_fornecedor)
@@ -1093,9 +1086,9 @@ class ComprasApp(QWidget):
     def table_line_number(self, line_number):
         if line_number >= 1:
             if line_number > 1:
-                message = f"Foram encontradas {line_number} linhas"
+                message = f"Foram encontrados {line_number} itens"
             else:
-                message = f"Foi encontrada {line_number} linha"
+                message = f"Foi encontrado {line_number} item"
 
             self.label_line_number.setText(f"{message}")
             self.label_line_number.show()

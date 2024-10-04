@@ -46,8 +46,9 @@ class UpdateTableThread(QThread):
 class QpClosedApp(QWidget):
     guia_fechada = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, main_window):
         super().__init__()
+        self.main_window = main_window
         user_data = load_session()
         username = user_data["username"]
         role = user_data["role"]
@@ -108,13 +109,17 @@ class QpClosedApp(QWidget):
             QPushButton {
                 background-color: #00ADB5;
                 color: #EEEEEE;
-                padding: 10px;
+                padding: 5px 10px;
                 border: 2px;
                 border-radius: 8px;
-                font-size: 12px;
+                font-size: 11px;
                 height: 20px;
                 font-weight: bold;
                 margin: 10px 5px;
+            }
+            
+            QPushButton#btn_home {
+                background-color: #c1121f;
             }
             
             QPushButton#btn_qps_finalizadas {
@@ -137,10 +142,10 @@ class QpClosedApp(QWidget):
             }
 
             QPushButton:hover, QPushButton:hover#btn_qps_finalizadas, QPushButton:hover#btn_qps_abertas, 
-            QPushButton:hover#btn_qps, QPushButton:hover#btn_atualizar_qp { background-color: #E84545; color: #fff }
+            QPushButton:hover#btn_qps, QPushButton:hover#btn_atualizar_qp, QPushButton:hover#btn_home { background-color: #E84545; color: #fff }
     
             QPushButton:pressed, QPushButton:pressed#btn_qps_finalizadas, QPushButton:pressed#btn_qps_abertas, 
-            QPushButton:pressed#btn_qps, QPushButton:pressed#btn_atualizar_qp { background-color: #6703c5; color: #fff; }
+            QPushButton:pressed#btn_qps, QPushButton:pressed#btn_atualizar_qp, QPushButton:pressed#btn_home { background-color: #6703c5; color: #fff; }
 
             QTableWidget {
                 border: 1px solid #000000;
@@ -257,6 +262,11 @@ class QpClosedApp(QWidget):
         self.btn_fechar.clicked.connect(self.fechar_janela)
         self.btn_fechar.setFixedWidth(110)
 
+        self.btn_home = QPushButton("HOME", self)
+        self.btn_home.setObjectName("btn_home")
+        self.btn_home.clicked.connect(self.return_to_main)
+        self.btn_home.setFixedWidth(110)
+
         self.calendar = QCalendarWidget(self)
         self.calendar.setFixedSize(350, 200)
         self.calendar.setGridVisible(True)
@@ -304,6 +314,7 @@ class QpClosedApp(QWidget):
         self.layout_buttons.addWidget(self.btn_exportar_excel)
         self.layout_buttons.addWidget(self.btn_limpar)
         self.layout_buttons.addWidget(self.btn_fechar)
+        self.layout_buttons.addWidget(self.btn_home)
         self.layout_buttons.addStretch()
 
         self.layout_footer_label.addStretch(1)
@@ -319,6 +330,15 @@ class QpClosedApp(QWidget):
         self.setLayout(layout)
 
         self.consultar_qps('T')
+
+    def return_to_main(self):
+        self.close()  # Fecha a janela atual
+        self.main_window.reopen()  # Reabre ou traz a janela principal ao foco
+
+    def abrir_nova_janela(self):
+        eng_window = QpClosedApp(self.main_window)
+        eng_window.showMaximized()
+        self.main_window.sub_windows.append(eng_window)
 
     def atualizar_tabela(self, tipo_qp):
         exibir_mensagem("Atualização em andamento",
@@ -359,7 +379,7 @@ class QpClosedApp(QWidget):
             table.selectRow(index.row())
             menu = QMenu()
             context_menu_nova_janela = QAction('Nova janela', self)
-            context_menu_nova_janela.triggered.connect(lambda: abrir_nova_janela(self, QpClosedApp()))
+            context_menu_nova_janela.triggered.connect(self.abrir_nova_janela)
             menu.addAction(context_menu_nova_janela)
             menu.exec_(table.viewport().mapToGlobal(position))
 

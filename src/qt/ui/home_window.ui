@@ -85,6 +85,7 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
+       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -125,6 +126,7 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
+       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -162,6 +164,7 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
+       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -199,6 +202,7 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
+       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -236,6 +240,7 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
+       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -273,6 +278,7 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
+       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -307,7 +313,7 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI Semibold</family>
+       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
        <weight>75</weight>
        <bold>true</bold>
@@ -358,7 +364,7 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI Semibold</family>
+       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
        <weight>75</weight>
        <bold>true</bold>
@@ -375,25 +381,6 @@ QPushButton:pressed {
      </property>
      <property name="text">
       <string>Olá {user}</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="logo_enaplic">
-     <property name="geometry">
-      <rect>
-       <x>980</x>
-       <y>690</y>
-       <width>81</width>
-       <height>81</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="pixmap">
-      <pixmap resource="../static/resource.qrc">:/image/image/LOGO.jpeg</pixmap>
-     </property>
-     <property name="scaledContents">
-      <bool>true</bool>
      </property>
     </widget>
     <widget class="QFrame" name="frame_2">
@@ -417,37 +404,11 @@ QPushButton:pressed {
       <enum>QFrame::Raised</enum>
      </property>
     </widget>
-    <zorder>btn_qps</zorder>
-    <zorder>btn_comercial</zorder>
-    <zorder>btn_compras</zorder>
-    <zorder>btn_pcp</zorder>
-    <zorder>btn_engenharia</zorder>
-    <zorder>btn_dashboard</zorder>
-    <zorder>welcome_label</zorder>
-    <zorder>frame</zorder>
-    <zorder>user_label</zorder>
-    <zorder>logo_enaplic</zorder>
-    <zorder>frame_2</zorder>
-   </widget>
-   <widget class="QWidget" name="sidebar_enaplic" native="true">
-    <property name="geometry">
-     <rect>
-      <x>-10</x>
-      <y>0</y>
-      <width>241</width>
-      <height>801</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">* {
-background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(186, 24, 27, 255), stop:1 rgba(102, 7, 8, 255));
-}</string>
-    </property>
     <widget class="QPushButton" name="btn_logout">
      <property name="geometry">
       <rect>
-       <x>70</x>
-       <y>730</y>
+       <x>850</x>
+       <y>700</y>
        <width>101</width>
        <height>51</height>
       </rect>
@@ -460,6 +421,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgb
      </property>
      <property name="font">
       <font>
+       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -493,6 +455,32 @@ QPushButton:hover {
       </size>
      </property>
     </widget>
+    <zorder>btn_qps</zorder>
+    <zorder>btn_comercial</zorder>
+    <zorder>btn_compras</zorder>
+    <zorder>btn_pcp</zorder>
+    <zorder>btn_engenharia</zorder>
+    <zorder>btn_dashboard</zorder>
+    <zorder>welcome_label</zorder>
+    <zorder>frame</zorder>
+    <zorder>user_label</zorder>
+    <zorder>frame_2</zorder>
+    <zorder>btn_logout</zorder>
+   </widget>
+   <widget class="QWidget" name="sidebar_enaplic" native="true">
+    <property name="geometry">
+     <rect>
+      <x>-10</x>
+      <y>0</y>
+      <width>241</width>
+      <height>801</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">* {
+background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(186, 24, 27, 255), stop:1 rgba(102, 7, 8, 255));
+}</string>
+    </property>
     <widget class="QLabel" name="label">
      <property name="geometry">
       <rect>
@@ -517,8 +505,25 @@ QPushButton:hover {
       <bool>true</bool>
      </property>
     </widget>
-    <zorder>label</zorder>
-    <zorder>btn_logout</zorder>
+    <widget class="QLabel" name="logo_enaplic">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>390</y>
+       <width>81</width>
+       <height>81</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="../static/resource.qrc">:/image/image/LOGO.jpeg</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
+    </widget>
    </widget>
    <zorder>sidebar_enaplic</zorder>
    <zorder>widget</zorder>

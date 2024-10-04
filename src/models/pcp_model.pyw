@@ -10,7 +10,7 @@ from datetime import datetime
 import pandas as pd
 from PyQt5.QtCore import Qt, QDate, QProcess, pyqtSignal
 from PyQt5.QtGui import QFont, QIcon, QPixmap
-from PyQt5.QtWidgets import QApplication, QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
+from PyQt5.QtWidgets import QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QDateEdit, QLabel, QSizePolicy, QTabWidget, QMenu, \
     QFrame
 from sqlalchemy import create_engine
@@ -42,8 +42,9 @@ class CustomLineEdit(QLineEdit):
 class PcpApp(QWidget):
     guia_fechada = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, main_window):
         super().__init__()
+        self.main_window = main_window
         user_data = load_session()
         username = user_data["username"]
         role = user_data["role"]
@@ -148,23 +149,13 @@ class PcpApp(QWidget):
                 margin: 0px 5px 10px 5px;
             }
             
-            QPushButton#btn_engenharia {
-                background-color: #0a79f8;
-            }
-            
-            QPushButton#btn_compras {
-                background-color: #836FFF;
-            }
-            
-             QPushButton#btn_qps_concluidas {
-                background-color: #00ADB5;
+            QPushButton#btn_home {
+                background-color: #c1121f;
             }
 
-            QPushButton:hover, QPushButton:hover#btn_engenharia, QPushButton:hover#btn_compras, 
-            QPushButton:hover#btn_qps_concluidas { background-color: #E84545; color: #fff }
+            QPushButton:hover, QPushButton:hover#btn_home { background-color: #E84545; color: #fff }
     
-            QPushButton:pressed, QPushButton:pressed#btn_engenharia, QPushButton:pressed#btn_compras, 
-            QPushButton:pressed#btn_qps_concluidas { background-color: #6703c5; color: #fff; }
+            QPushButton:pressed, QPushButton:pressed#btn_home { background-color: #6703c5; color: #fff; }
 
             QTableWidget {
                 border: 1px solid #000000;
@@ -302,20 +293,10 @@ class PcpApp(QWidget):
         self.btn_consultar_estrutura.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_consultar_estrutura.hide()
 
-        self.btn_qps_concluidas = QPushButton("Gestão QPS", self)
-        self.btn_qps_concluidas.setObjectName("btn_qps_concluidas")
-        self.btn_qps_concluidas.clicked.connect(self.abrir_modulo_qps_concluidas)
-        self.btn_qps_concluidas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-
-        self.btn_abrir_compras = QPushButton("Compras", self)
-        self.btn_abrir_compras.setObjectName("btn_compras")
-        self.btn_abrir_compras.clicked.connect(self.abrir_modulo_compras)
-        self.btn_abrir_compras.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-
-        self.btn_abrir_engenharia = QPushButton("Engenharia", self)
-        self.btn_abrir_engenharia.setObjectName("btn_engenharia")
-        self.btn_abrir_engenharia.clicked.connect(self.abrir_modulo_engenharia)
-        self.btn_abrir_engenharia.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.btn_home = QPushButton("HOME", self)
+        self.btn_home.setObjectName("btn_home")
+        self.btn_home.clicked.connect(self.return_to_main)
+        self.btn_home.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_onde_e_usado = QPushButton("Onde é usado?", self)
         self.btn_onde_e_usado.clicked.connect(lambda: executar_consulta_onde_usado(self, self.tree))
@@ -332,7 +313,7 @@ class PcpApp(QWidget):
         self.btn_limpar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_nova_janela = QPushButton("Nova Janela", self)
-        self.btn_nova_janela.clicked.connect(lambda: abrir_nova_janela(self, PcpApp()))
+        self.btn_nova_janela.clicked.connect(self.abrir_nova_janela)
         self.btn_nova_janela.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_abrir_desenho = QPushButton("Abrir Desenho", self)
@@ -419,10 +400,8 @@ class PcpApp(QWidget):
         self.layout_buttons.addWidget(self.btn_limpar)
         self.layout_buttons.addWidget(self.btn_abrir_desenho)
         self.layout_buttons.addWidget(self.btn_exportar_excel)
-        self.layout_buttons.addWidget(self.btn_qps_concluidas)
-        self.layout_buttons.addWidget(self.btn_abrir_compras)
-        self.layout_buttons.addWidget(self.btn_abrir_engenharia)
         self.layout_buttons.addWidget(self.btn_fechar)
+        self.layout_buttons.addWidget(self.btn_home)
         self.layout_buttons.addStretch()
 
         self.layout_footer_label.addStretch(1)
@@ -438,6 +417,15 @@ class PcpApp(QWidget):
         layout.addWidget(self.tree)
         layout.addLayout(self.layout_footer_label)
         self.setLayout(layout)
+
+    def return_to_main(self):
+        self.close()  # Fecha a janela atual
+        self.main_window.reopen()  # Reabre ou traz a janela principal ao foco
+
+    def abrir_nova_janela(self):
+        eng_window = PcpApp(self.main_window)
+        eng_window.showMaximized()
+        self.main_window.sub_windows.append(eng_window)
 
     def validar_campos(self, codigo_produto, numero_qp, numero_op):
 
@@ -527,7 +515,7 @@ class PcpApp(QWidget):
             context_menu_saldo_estoque.triggered.connect(lambda: executar_saldo_em_estoque(self, table))
 
             context_menu_nova_janela = QAction('Nova janela', self)
-            context_menu_nova_janela.triggered.connect(lambda: abrir_nova_janela(self, PcpApp()))
+            context_menu_nova_janela.triggered.connect(self.abrir_nova_janela)
 
             menu.addAction(context_menu_abrir_desenho)
             menu.addAction(context_menu_consultar_estrutura)
@@ -767,9 +755,9 @@ class PcpApp(QWidget):
             if line_number >= 1:
 
                 if line_number > 1:
-                    message = f"Foram encontrados {line_number} resultados"
+                    message = f"Foram encontrados {line_number} itens"
                 else:
-                    message = f"Foi encontrado {line_number} resultado"
+                    message = f"Foi encontrado {line_number} item"
 
                 self.label_line_number.setText(f"{message}")
                 self.label_line_number.show()
@@ -780,7 +768,8 @@ class PcpApp(QWidget):
                 self.button_visible_control(False)
                 return
 
-            dialog = loading_dialog(self, "Eureka® Processando...", "Carregando dados do TOTVS...\n\nPor favor, aguarde")
+            dialog = loading_dialog(self, "Carregando...", "🤖 Processando dados do TOTVS..."
+                                                           "\n\n🤖 Por favor, aguarde.\n\nEureka®")
 
             dataframe = pd.read_sql(query_consulta_op, self.engine)
             dataframe.insert(0, 'Status OP', '')
@@ -852,12 +841,3 @@ class PcpApp(QWidget):
 
     def fechar_janela(self):
         self.close()
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = PcpApp()
-    username, password, database, server = setup_mssql()
-    driver = '{SQL Server}'
-    window.showMaximized()
-    sys.exit(app.exec_())

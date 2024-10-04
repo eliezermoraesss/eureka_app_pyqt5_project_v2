@@ -15,7 +15,7 @@ from PyPDF2 import PdfReader
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QPixmap, QIcon
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
-    QTableWidget, QTableWidgetItem, QHeaderView, QFileDialog, QStyle, QAction
+    QTableWidget, QTableWidgetItem, QHeaderView, QFileDialog, QStyle, QAction, QSizePolicy
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import A4
@@ -30,8 +30,9 @@ from src.app.utils.load_session import load_session
 
 
 class ComercialApp(QWidget):
-    def __init__(self):
+    def __init__(self, main_window):
         super().__init__()
+        self.main_window = main_window
         user_data = load_session()
         username = user_data["username"]
         role = user_data["role"]
@@ -79,7 +80,7 @@ class ComercialApp(QWidget):
         self.btn_limpar.setEnabled(False)
 
         self.btn_nova_janela = QPushButton("Nova Janela", self)
-        self.btn_nova_janela.clicked.connect(lambda: abrir_nova_janela(self, ComercialApp()))
+        self.btn_nova_janela.clicked.connect(self.abrir_nova_janela)
         self.btn_nova_janela.setMinimumWidth(100)
 
         self.btn_exportar_pdf = QPushButton("Exportar PDF", self)
@@ -95,6 +96,11 @@ class ComercialApp(QWidget):
         self.btn_fechar = QPushButton("Fechar", self)
         self.btn_fechar.clicked.connect(self.fechar_janela)
         self.btn_fechar.setMinimumWidth(100)
+
+        self.btn_home = QPushButton("HOME", self)
+        self.btn_home.setObjectName("btn_home")
+        self.btn_home.clicked.connect(self.return_to_main)
+        self.btn_home.setMinimumWidth(100)
 
         self.campo_codigo.returnPressed.connect(self.executar_consulta)
 
@@ -114,6 +120,7 @@ class ComercialApp(QWidget):
         layout_header.addWidget(self.btn_exportar_excel)
         layout_header.addWidget(self.btn_exportar_pdf)
         layout_header.addWidget(self.btn_fechar)
+        layout_header.addWidget(self.btn_home)
         layout_header.addStretch()
 
         layout_footer.addStretch(1)
@@ -166,13 +173,17 @@ class ComercialApp(QWidget):
                         margin-top: 20px;
                         margin-left: 10px;
                     }
+                    
+                    QPushButton#btn_home {
+                        background-color: #c1121f;
+                    }
 
-                    QPushButton:hover {
+                    QPushButton:hover, QPushButton:hover#btn_home {
                         background-color: #DC5F00;
                         color: #EEEEEE;
                     }
 
-                    QPushButton:pressed {
+                    QPushButton:pressed, QPushButton:pressed#btn_home {
                         background-color: #6703c5;
                         color: #fff;
                     }
@@ -209,6 +220,15 @@ class ComercialApp(QWidget):
                         font-weight: bold;
                     }
                 """)
+
+    def return_to_main(self):
+        self.close()  # Fecha a janela atual
+        self.main_window.reopen()  # Reabre ou traz a janela principal ao foco
+
+    def abrir_nova_janela(self):
+        eng_window = ComercialApp(self.main_window)
+        eng_window.showMaximized()
+        self.main_window.sub_windows.append(eng_window)
 
     def recalculate_excel_formulas(self, file_path):
         app_excel = xw.App(visible=False)
