@@ -261,4 +261,4 @@ class Ui_HomeWindow(object):
         self.welcome_label.setText(_translate("HomeWindow", "Bem-vindo(a) ao Eureka®!"))
         self.user_label.setText(_translate("HomeWindow", "Olá {user}"))
         self.btn_logout.setText(_translate("HomeWindow", "Sair"))
-import resource_rc
+from qt.ui import resource_rc
