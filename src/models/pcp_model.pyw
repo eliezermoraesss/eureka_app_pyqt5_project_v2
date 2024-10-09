@@ -800,8 +800,10 @@ class PcpApp(QWidget):
                             item = QTableWidgetItem()
                             if row['Fechamento'].strip() == '':
                                 item.setIcon(open_icon)
+                                item.setText('OP ABERTA')
                             else:
                                 item.setIcon(closed_icon)
+                                item.setText('OP FECHADA')
                             item.setTextAlignment(Qt.AlignCenter)
                         else:
                             if j == 14 and value == 'S':
