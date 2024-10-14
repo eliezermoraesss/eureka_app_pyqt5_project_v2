@@ -94,7 +94,7 @@ class ComercialApp(QWidget):
         self.btn_exportar_excel.hide()
 
         self.btn_fechar = QPushButton("Fechar", self)
-        self.btn_fechar.clicked.connect(self.fechar_janela)
+        self.btn_fechar.clicked.connect(self.close)
         self.btn_fechar.setMinimumWidth(100)
 
         self.btn_home = QPushButton("HOME", self)
@@ -762,6 +762,3 @@ class ComercialApp(QWidget):
             # Fecha a conexão com o banco de dados se estiver aberta
             if 'engine' in locals():
                 engine.dispose()
-
-    def fechar_janela(self):
-        self.close()

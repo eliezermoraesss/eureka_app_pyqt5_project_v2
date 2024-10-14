@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from datetime import datetime
 
 import pandas as pd
-from PyQt5.QtCore import Qt, QDate, QProcess, pyqtSignal
+from PyQt5.QtCore import Qt, QDate, pyqtSignal
 from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtWidgets import QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QDateEdit, QLabel, QSizePolicy, QTabWidget, QMenu, \
@@ -90,9 +90,9 @@ class PcpApp(QWidget):
                 padding-left: 3px;
             }
             
-            QLabel#label-line-number {
-                font-size: 16px;
-                font-weight: normal;
+            QLabel#label-line-number, QLabel#label-indicators {
+                font-size: 14px;
+                font-weight: bold;
             }
             
             QLabel#label-title {
@@ -205,6 +205,14 @@ class PcpApp(QWidget):
         self.line.setFrameShape(QFrame.HLine)
         self.line.setFrameShadow(QFrame.Sunken)
 
+        self.label_line_number = QLabel("", self)
+        self.label_line_number.setObjectName("label-line-number")
+        self.label_line_number.setVisible(False)
+
+        self.label_indicators = QLabel("", self)
+        self.label_indicators.setObjectName("label-indicators")
+        self.label_indicators.setVisible(False)
+
         script_dir = os.path.dirname(os.path.abspath(__file__))
         logo_enaplic_path = os.path.join(script_dir, '..', 'resources', 'images', 'LOGO.jpeg')
         self.logo_label = QLabel(self)
@@ -224,8 +232,6 @@ class PcpApp(QWidget):
         self.label_data_fim = QLabel("Data final:", self)
         self.label_data_fim.setObjectName("data-fim")
         self.label_campo_observacao = QLabel("Observação:", self)
-        self.label_line_number = QLabel("", self)
-        self.label_line_number.setVisible(False)
 
         self.campo_codigo = QLineEdit(self)
         self.campo_codigo.setFont(QFont(fonte_campos, tamanho_fonte_campos))
@@ -327,7 +333,7 @@ class PcpApp(QWidget):
         self.btn_exportar_excel.hide()
 
         self.btn_fechar = QPushButton("Fechar", self)
-        self.btn_fechar.clicked.connect(self.fechar_janela)
+        self.btn_fechar.clicked.connect(self.close)
         self.btn_fechar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.campo_codigo.returnPressed.connect(self.executar_consulta)
@@ -406,6 +412,7 @@ class PcpApp(QWidget):
 
         self.layout_footer_label.addStretch(1)
         self.layout_footer_label.addWidget(self.label_line_number)
+        self.layout_footer_label.addWidget(self.label_indicators)
         self.layout_footer_label.addStretch(1)
 
         layout.addLayout(layout_title)
@@ -535,6 +542,7 @@ class PcpApp(QWidget):
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
         self.label_line_number.hide()
+        self.label_indicators.hide()
 
         self.btn_abrir_desenho.hide()
         self.btn_consultar_estrutura.hide()
@@ -564,24 +572,6 @@ class PcpApp(QWidget):
             self.btn_exportar_excel.show()
             self.btn_onde_e_usado.show()
             self.btn_saldo_estoque.show()
-
-    def abrir_modulo_engenharia(self):
-        process = QProcess()
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        script_path = os.path.join(script_dir, 'engenharia_model.pyw')
-        process.startDetached("python", [script_path])
-
-    def abrir_modulo_compras(self):
-        process = QProcess()
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        script_path = os.path.join(script_dir, 'compras_model.pyw')
-        process.startDetached("python", [script_path])
-
-    def abrir_modulo_qps_concluidas(self):
-        process = QProcess()
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        script_path = os.path.join(script_dir, 'qps_model.pyw')
-        process.startDetached("python", [script_path])
 
     def add_today_button(self, date_edit):
         calendar = date_edit.calendarWidget()
@@ -742,6 +732,7 @@ class PcpApp(QWidget):
         query_contagem_linhas = self.numero_linhas_consulta(query_consulta_op)
 
         self.label_line_number.hide()
+        self.label_indicators.hide()
         self.controle_campos_formulario(False)
         self.button_visible_control(False)
 
@@ -754,9 +745,9 @@ class PcpApp(QWidget):
 
             if line_number >= 1:
                 if line_number > 1:
-                    message = f"Foram encontrados {line_number} itens"
+                    message = f"Foram encontrados {line_number} OPs"
                 else:
-                    message = f"Foi encontrado {line_number} item"
+                    message = f"Foi encontrado {line_number} OP"
 
                 self.label_line_number.setText(f"{message}")
                 self.label_line_number.show()
@@ -773,12 +764,7 @@ class PcpApp(QWidget):
             dataframe = pd.read_sql(query_consulta_op, self.engine)
             dataframe.insert(0, 'Status OP', '')
 
-            quantidade_op_aberta = dataframe['Fechamento'].apply(lambda x: x.strip() == '' if isinstance(x, str) else True).sum()
-            quantidade_op_fechada = dataframe['Fechamento'].apply(lambda x: x.strip() != '' if isinstance(x, str) else True).sum()
-
-            message += f"\n\nOPS ABERTAS: {quantidade_op_aberta}\n\nOPS FECHADAS: {quantidade_op_fechada}"
-            self.label_line_number.setText(f"{message}")
-
+            self.exibir_indicadores(dataframe)
             self.configurar_tabela(dataframe)
             self.configurar_tabela_tooltips(dataframe)
 
@@ -828,9 +814,6 @@ class PcpApp(QWidget):
                         item = QTableWidgetItem('')
 
                     self.tree.setItem(i, j, item)
-
-                # QCoreApplication.processEvents()
-
             self.tree.setSortingEnabled(True)
             self.controle_campos_formulario(True)
             self.button_visible_control(True)
@@ -846,5 +829,9 @@ class PcpApp(QWidget):
                 self.engine = None
             self.interromper_consulta_sql = False
 
-    def fechar_janela(self):
-        self.close()
+    def exibir_indicadores(self, dataframe):
+        quantidade_op_aberta = dataframe['Fechamento'].apply(lambda x: x.strip() == '' if isinstance(x, str) else True).sum()
+        quantidade_op_fechada = dataframe['Fechamento'].apply(lambda x: x.strip() != '' if isinstance(x, str) else True).sum()
+        message = f"OP ABERTA: {quantidade_op_aberta}\nOP FECHADA: {quantidade_op_fechada}"
+        self.label_indicators.setText(message)
+        self.label_indicators.show()

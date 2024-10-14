@@ -106,6 +106,10 @@ class ComprasApp(QWidget):
         self.label_line_number.setObjectName("label-line-number")
         self.label_line_number.setVisible(False)
 
+        self.label_indicators = QLabel("", self)
+        self.label_indicators.setObjectName("label-indicators")
+        self.label_indicators.setVisible(False)
+
         self.checkbox_exibir_somente_sc_com_pedido = QCheckBox("Ocultar Solic. de Compras SEM Pedido de Compras", self)
         self.checkbox_exibir_somente_sc_com_pedido.setObjectName("checkbox-sc")
 
@@ -385,6 +389,7 @@ class ComprasApp(QWidget):
 
         self.layout_footer_label.addStretch(1)
         self.layout_footer_label.addWidget(self.label_line_number)
+        self.layout_footer_label.addWidget(self.label_indicators)
         self.layout_footer_label.addStretch(1)
         self.layout_footer_label.addWidget(self.logo_label)
 
@@ -698,6 +703,7 @@ class ComprasApp(QWidget):
         self.tree.setRowCount(0)
         self.checkbox_exibir_somente_sc_com_pedido.setChecked(False)
         self.label_line_number.hide()
+        self.label_indicators.hide()
 
         self.btn_exportar_excel.hide()
         self.btn_onde_e_usado.hide()
@@ -792,11 +798,12 @@ class ComprasApp(QWidget):
                     SC.C1_PRODUTO AS "CÓDIGO",
                     SC.C1_DESCRI AS "DESCRIÇÃO",
                     SC.C1_UM AS "UN.",
+                    SC.C1_QUANT AS "QTD. SOLIC. COMPRAS",
                     PC.C7_QUANT AS "QTD. PEDIDO COMPRA",
                     ITEM_NF.D1_QUANT AS "QTD. ENTREGUE",
                     CASE 
-                        WHEN ITEM_NF.D1_QUANT IS NULL THEN SC.C1_QUJE 
-                        ELSE SC.C1_QUJE - ITEM_NF.D1_QUANT
+                        WHEN ITEM_NF.D1_QUANT IS NULL THEN PC.C7_QUANT 
+                        ELSE PC.C7_QUANT - ITEM_NF.D1_QUANT
                     END AS "QTD. PENDENTE",
                     PC.C7_PRECO AS "CUSTO UNITÁRIO",
                     PC.C7_TOTAL AS "CUSTO TOTAL",
@@ -804,7 +811,6 @@ class ComprasApp(QWidget):
                     ITEM_NF.D1_DTDIGIT AS "DATA DE ENTREGA",
                     PC.C7_ENCER AS "STATUS PEDIDO COMPRA",
                     SC.C1_EMISSAO AS "SC ABERTA EM:",
-                    SC.C1_QUANT AS "QTD. SOLIC. COMPRAS",
                     PC.C7_EMISSAO AS "PC ABERTO EM:",
                     ITEM_NF.D1_EMISSAO AS "DATA EMISSÃO NF",
                     SC.C1_ITEM AS "ITEM SC",
@@ -893,6 +899,7 @@ class ComprasApp(QWidget):
                     SC.C1_PRODUTO AS "CÓDIGO",
                     SC.C1_DESCRI AS "DESCRIÇÃO",
                     SC.C1_UM AS "UN.",
+                    SC.C1_QUANT AS "QTD. SOLIC. COMPRAS",
                     NULL AS "QTD. PEDIDO COMPRA",
                     NULL AS "QTD. ENTREGUE",
                     NULL AS "QTD. PENDENTE",
@@ -902,7 +909,6 @@ class ComprasApp(QWidget):
                     NULL AS "DATA DE ENTREGA",
                     NULL AS "STATUS PEDIDO COMPRA",
                     SC.C1_EMISSAO AS "SC ABERTA EM:",
-                    SC.C1_QUANT AS "QTD. SOLIC. COMPRAS",
                     NULL AS "PC ABERTO EM:",
                     NULL AS "DATA EMISSÃO NF",
                     SC.C1_ITEM AS "ITEM SC",
@@ -1076,10 +1082,21 @@ class ComprasApp(QWidget):
                 self.tree.setItem(i, list(row.index).index(column_name), item)
 
         self.table_line_number(dataframe.shape[0])
+        self.exibir_indicadores(dataframe)
         self.tree.viewport().update()
         # self.tree.setSortingEnabled(True)
         self.controle_campos_formulario(True)
         self.button_visible_control(True)
+
+    def exibir_indicadores(self, dataframe):
+        coluna_status = ' '
+        sem_pc = dataframe[coluna_status].apply(lambda x: x.strip() == 'SEM PEDIDO COMPRA' if isinstance(x, str) else True).sum()
+        pc_encerrado = dataframe[coluna_status].apply(lambda x: x.strip() == 'PEDIDO ENCERRADO' if isinstance(x, str) else True).sum()
+        entrega_parcial = dataframe[coluna_status].apply(lambda x: x.strip() == 'ENTREGA PARCIAL' if isinstance(x, str) else True).sum()
+        aguardando_entrega = dataframe[coluna_status].apply(lambda x: x.strip() == 'AGUARDANDO ENTREGA' if isinstance(x, str) else True).sum()
+        message = f"SEM PEDIDO DE COMPRA: {sem_pc}\nAGUARDANDO ENTREGA: {aguardando_entrega}\nENTREGA PARCIAL: {entrega_parcial}\nPEDIDO ENCERRADO: {pc_encerrado}"
+        self.label_indicators.setText(message)
+        self.label_indicators.show()
 
     def table_line_number(self, line_number):
         if line_number >= 1:
@@ -1101,6 +1118,7 @@ class ComprasApp(QWidget):
         query_contagem_linhas = numero_linhas_consulta(query_consulta_filtro)
 
         self.label_line_number.hide()
+        self.label_indicators.hide()
         self.controle_campos_formulario(False)
         self.button_visible_control(False)
 

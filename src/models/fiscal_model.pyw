@@ -8,18 +8,15 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from datetime import datetime
 
 import pandas as pd
-from PyQt5.QtCore import Qt, QDate, QProcess, pyqtSignal, QSize
+from PyQt5.QtCore import Qt, QDate, pyqtSignal
 from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtWidgets import QApplication, QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QDateEdit, QLabel, \
     QComboBox, QSizePolicy, QTabWidget, QMenu, QCheckBox
 from sqlalchemy import create_engine
 
-from src.app.utils.consultar_onde_usado import executar_consulta_onde_usado
 from src.app.utils.consultar_saldo_estoque import executar_saldo_em_estoque
 from src.app.utils.consultar_ultimos_fornec import executar_ultimos_fornecedores
-from src.app.utils.consultar_ultimas_nfe import consultar_ultimas_nfe
-from src.app.views.solic_compras_window import SolicitacaoComprasWindow
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.load_session import load_session
 from src.app.utils.utils import exibir_mensagem, copiar_linha, abrir_nova_janela, exportar_excel
@@ -229,16 +226,6 @@ class FiscalApp(QWidget):
         self.btn_nf_saida.clicked.connect(self.executar_consulta_nf_saida)
         self.btn_nf_saida.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        self.btn_abrir_engenharia = QPushButton("Engenharia", self)
-        self.btn_abrir_engenharia.setObjectName("btn_engenharia")
-        self.btn_abrir_engenharia.clicked.connect(self.abrir_modulo_engenharia)
-        self.btn_abrir_engenharia.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-
-        self.btn_abrir_compras = QPushButton("Compras", self)
-        self.btn_abrir_compras.setObjectName("compras")
-        self.btn_abrir_compras.clicked.connect(self.abrir_modulo_compras)
-        self.btn_abrir_compras.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-
         self.btn_limpar = QPushButton("Limpar", self)
         self.btn_limpar.clicked.connect(self.clean_screen)
         self.btn_limpar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -253,7 +240,7 @@ class FiscalApp(QWidget):
         self.btn_exportar_excel.hide()
 
         self.btn_fechar = QPushButton("Fechar", self)
-        self.btn_fechar.clicked.connect(self.fechar_janela)
+        self.btn_fechar.clicked.connect(self.close)
         self.btn_fechar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.campo_pedido.returnPressed.connect(self.executar_consulta_nf_entrada)
@@ -344,8 +331,6 @@ class FiscalApp(QWidget):
         self.layout_buttons.addWidget(self.btn_nova_janela)
         self.layout_buttons.addWidget(self.btn_limpar)
         self.layout_buttons.addWidget(self.btn_exportar_excel)
-        self.layout_buttons.addWidget(self.btn_abrir_engenharia)
-        self.layout_buttons.addWidget(self.btn_abrir_compras)
         self.layout_buttons.addWidget(self.btn_fechar)
         self.layout_buttons.addStretch()
 
@@ -821,21 +806,6 @@ class FiscalApp(QWidget):
             tooltip = tooltip_map.get(header)
             item.setToolTip(tooltip)
             self.tree.setHorizontalHeaderItem(i, item)
-
-    def fechar_janela(self):
-        self.close()
-
-    def abrir_modulo_engenharia(self):
-        process = QProcess()
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        script_path = os.path.join(script_dir, 'engenharia_model.pyw')
-        process.startDetached("python", [script_path])
-
-    def abrir_modulo_compras(self):
-        process = QProcess()
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        script_path = os.path.join(script_dir, 'compras_model.pyw')
-        process.startDetached("python", [script_path])
 
 
 if __name__ == "__main__":
