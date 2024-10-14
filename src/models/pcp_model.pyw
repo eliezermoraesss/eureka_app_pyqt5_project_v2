@@ -20,7 +20,7 @@ from src.app.utils.consultar_onde_usado import executar_consulta_onde_usado
 from src.app.utils.consultar_saldo_estoque import executar_saldo_em_estoque
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.load_session import load_session
-from src.app.utils.utils import exibir_mensagem, abrir_desenho, abrir_nova_janela, exportar_excel, copiar_linha
+from src.app.utils.utils import exibir_mensagem, abrir_desenho, exportar_excel, copiar_linha
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.dialog.loading_dialog import loading_dialog
 
@@ -753,7 +753,6 @@ class PcpApp(QWidget):
             line_number = dataframe_line_number.iloc[0, 0]
 
             if line_number >= 1:
-
                 if line_number > 1:
                     message = f"Foram encontrados {line_number} itens"
                 else:
@@ -773,6 +772,12 @@ class PcpApp(QWidget):
 
             dataframe = pd.read_sql(query_consulta_op, self.engine)
             dataframe.insert(0, 'Status OP', '')
+
+            quantidade_op_aberta = dataframe['Fechamento'].apply(lambda x: x.strip() == '' if isinstance(x, str) else True).sum()
+            quantidade_op_fechada = dataframe['Fechamento'].apply(lambda x: x.strip() != '' if isinstance(x, str) else True).sum()
+
+            message += f"\n\nOPS ABERTAS: {quantidade_op_aberta}\n\nOPS FECHADAS: {quantidade_op_fechada}"
+            self.label_line_number.setText(f"{message}")
 
             self.configurar_tabela(dataframe)
             self.configurar_tabela_tooltips(dataframe)

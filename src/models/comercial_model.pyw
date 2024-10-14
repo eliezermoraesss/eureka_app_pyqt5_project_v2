@@ -14,8 +14,8 @@ import xlwings as xw
 from PyPDF2 import PdfReader
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QPixmap, QIcon
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
-    QTableWidget, QTableWidgetItem, QHeaderView, QFileDialog, QStyle, QAction, QSizePolicy
+from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
+    QTableWidget, QTableWidgetItem, QHeaderView, QFileDialog, QStyle, QAction
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import A4
@@ -25,7 +25,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, 
 from sqlalchemy import create_engine
 
 from src.app.utils.db_mssql import setup_mssql
-from src.app.utils.utils import exibir_mensagem, copiar_linha, obter_dados_tabela, abrir_nova_janela
+from src.app.utils.utils import exibir_mensagem, copiar_linha, obter_dados_tabela
 from src.app.utils.load_session import load_session
 
 
@@ -765,12 +765,3 @@ class ComercialApp(QWidget):
 
     def fechar_janela(self):
         self.close()
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = ComercialApp()
-    username, password, database, server = setup_mssql()
-    driver = '{SQL Server}'
-    window.showMaximized()
-    sys.exit(app.exec_())

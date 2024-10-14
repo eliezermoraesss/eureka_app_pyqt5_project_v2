@@ -9,13 +9,13 @@ import pandas as pd
 import requests
 from PyQt5.QtCore import Qt, QProcess, pyqtSignal, QEvent, QThread
 from PyQt5.QtGui import QFont, QIcon, QPixmap
-from PyQt5.QtWidgets import QApplication, QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
+from PyQt5.QtWidgets import QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QLabel, QSizePolicy, QMenu, QFrame, \
     QCalendarWidget
 from sqlalchemy import create_engine, text
 
 from src.app.utils.db_mssql import setup_mssql
-from src.app.utils.utils import exibir_mensagem, abrir_nova_janela, copiar_linha, exportar_excel
+from src.app.utils.utils import exibir_mensagem, copiar_linha, exportar_excel
 from src.app.utils.load_session import load_session
 
 
@@ -651,12 +651,3 @@ class QpClosedApp(QWidget):
                             self.tree.setItem(current_row, current_column, QTableWidgetItem(''))
                         except Exception as ex:
                             exibir_mensagem('Erro ao remover data da tabela', f'Erro: {str(ex)}', 'error')
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = QpClosedApp()
-    username, password, database, server = setup_mssql()
-    driver = '{SQL Server}'
-    window.showMaximized()
-    sys.exit(app.exec_())
