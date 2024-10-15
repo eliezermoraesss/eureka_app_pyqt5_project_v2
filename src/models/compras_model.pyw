@@ -109,6 +109,7 @@ class ComprasApp(QWidget):
         self.label_indicators = QLabel("", self)
         self.label_indicators.setObjectName("label-indicators")
         self.label_indicators.setVisible(False)
+        self.label_indicators.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
 
         self.checkbox_exibir_somente_sc_com_pedido = QCheckBox("Ocultar Solic. de Compras SEM Pedido de Compras", self)
         self.checkbox_exibir_somente_sc_com_pedido.setObjectName("checkbox-sc")
@@ -1094,8 +1095,32 @@ class ComprasApp(QWidget):
         pc_encerrado = dataframe[coluna_status].apply(lambda x: x.strip() == 'PEDIDO ENCERRADO' if isinstance(x, str) else True).sum()
         entrega_parcial = dataframe[coluna_status].apply(lambda x: x.strip() == 'ENTREGA PARCIAL' if isinstance(x, str) else True).sum()
         aguardando_entrega = dataframe[coluna_status].apply(lambda x: x.strip() == 'AGUARDANDO ENTREGA' if isinstance(x, str) else True).sum()
-        message = f"SEM PEDIDO DE COMPRA: {sem_pc}\nAGUARDANDO ENTREGA: {aguardando_entrega}\nENTREGA PARCIAL: {entrega_parcial}\nPEDIDO ENCERRADO: {pc_encerrado}"
-        self.label_indicators.setText(message)
+
+        indicadores_table = f"""
+                <table border="1" cellspacing="2" cellpadding="4" style="border-collapse: collapse; text-align: left; width: 100%;">
+                    <tr>
+                        <th style="text-align: middle; vertical-align: middle;">Status</th>
+                        <th style="text-align: right; vertical-align: middle;">Quantidade</th>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: middle;">SEM PEDIDO DE COMPRA</td>
+                        <td style="text-align: right; vertical-align: middle;">{sem_pc}</td>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: middle;">AGUARDANDO ENTREGA</td>
+                        <td style="text-align: right; vertical-align: middle;">{aguardando_entrega}</td>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: middle;">ENTREGA PARCIAL</td>
+                        <td style="text-align: right; vertical-align: middle;">{entrega_parcial}</td>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: middle;">PEDIDO ENCERRADO</td>
+                        <td style="text-align: right; vertical-align: middle;">{pc_encerrado}</td>
+                    </tr>
+                </table>
+            """
+        self.label_indicators.setText(indicadores_table)
         self.label_indicators.show()
 
     def table_line_number(self, line_number):

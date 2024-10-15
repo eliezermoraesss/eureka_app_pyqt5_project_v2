@@ -550,8 +550,10 @@ class QpClosedApp(QWidget):
                             item = QTableWidgetItem()
                             if row['STATUS QP'] == 'A':
                                 item.setIcon(open_icon)
+                                item.setText('ABERTO')
                             elif row['STATUS QP'] == 'F':
                                 item.setIcon(closed_icon)
+                                item.setText('FINALIZADO')
                             item.setTextAlignment(Qt.AlignCenter)
                         else:
                             if j == 1:
@@ -566,6 +568,7 @@ class QpClosedApp(QWidget):
 
                     self.tree.setItem(i, j, item)
 
+            self.tree.hideColumn(3)  # Ocultar a coluna STATUS QP
             self.tree.setSortingEnabled(True)
             self.controle_ativacao_de_objetos(True)
             if not self.status_atualizacao:

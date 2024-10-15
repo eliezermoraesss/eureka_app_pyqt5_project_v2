@@ -212,6 +212,7 @@ class PcpApp(QWidget):
         self.label_indicators = QLabel("", self)
         self.label_indicators.setObjectName("label-indicators")
         self.label_indicators.setVisible(False)
+        self.label_indicators.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
 
         script_dir = os.path.dirname(os.path.abspath(__file__))
         logo_enaplic_path = os.path.join(script_dir, '..', 'resources', 'images', 'LOGO.jpeg')
@@ -832,6 +833,21 @@ class PcpApp(QWidget):
     def exibir_indicadores(self, dataframe):
         quantidade_op_aberta = dataframe['Fechamento'].apply(lambda x: x.strip() == '' if isinstance(x, str) else True).sum()
         quantidade_op_fechada = dataframe['Fechamento'].apply(lambda x: x.strip() != '' if isinstance(x, str) else True).sum()
-        message = f"OP ABERTA: {quantidade_op_aberta}\nOP FECHADA: {quantidade_op_fechada}"
-        self.label_indicators.setText(message)
+        indicadores_table = f"""
+                <table border="1" cellspacing="2" cellpadding="4" style="border-collapse: collapse; text-align: left; width: 100%;">
+                    <tr>
+                        <th style="text-align: middle; vertical-align: middle;">Status</th>
+                        <th style="text-align: right; vertical-align: middle;">Quantidade</th>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: middle;">OP ABERTA</td>
+                        <td style="text-align: right; vertical-align: middle;">{quantidade_op_aberta}</td>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: middle;">OP FECHADA</td>
+                        <td style="text-align: right; vertical-align: middle;">{quantidade_op_fechada}</td>
+                    </tr>
+                </table>
+            """
+        self.label_indicators.setText(indicadores_table)
         self.label_indicators.show()

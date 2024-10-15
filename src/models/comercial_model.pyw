@@ -25,8 +25,9 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, 
 from sqlalchemy import create_engine
 
 from src.app.utils.db_mssql import setup_mssql
-from src.app.utils.utils import exibir_mensagem, copiar_linha, obter_dados_tabela
+from src.app.utils.utils import exibir_mensagem, copiar_linha, obter_dados_tabela, abrir_desenho
 from src.app.utils.load_session import load_session
+from src.dialog.loading_dialog import loading_dialog
 
 
 def query_consulta(codigo):
@@ -124,11 +125,14 @@ def recalculate_excel_formulas(file_path):
     app_excel.quit()
 
 
+def format_decimal(value):
+    return f'{value:,.2f}'.replace(',', 'X').replace('.', ',').replace('X', '.')
+
+
 class ComercialApp(QWidget):
-    def __init__(self):
+    def __init__(self, main_window):
         super().__init__()
-        # self.main_window = main_window
-        self.main_window = None
+        self.main_window = main_window
         user_data = load_session()
         username = user_data["username"]
         role = user_data["role"]
@@ -204,6 +208,10 @@ class ComercialApp(QWidget):
         self.btn_home.clicked.connect(self.return_to_main)
         self.btn_home.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
+        self.btn_abrir_desenho = QPushButton("Abrir Desenho", self)
+        self.btn_abrir_desenho.clicked.connect(lambda: abrir_desenho(self, None, self.codigo))
+        self.btn_abrir_desenho.hide()
+
         self.campo_codigo.returnPressed.connect(self.executar_consulta)
 
         layout = QVBoxLayout()
@@ -212,6 +220,11 @@ class ComercialApp(QWidget):
         container_codigo.addWidget(self.campo_codigo)
         layout_header = QHBoxLayout()
         layout_table = QHBoxLayout()
+        layout_sidebar = QVBoxLayout()
+        layout_sidebar.addStretch(1)
+        layout_sidebar.addWidget(self.label_costs)
+        layout_sidebar.addWidget(self.btn_abrir_desenho)
+        layout_sidebar.addStretch(1)
         layout_toolbar = QHBoxLayout()
         layout_footer = QHBoxLayout()
 
@@ -229,7 +242,7 @@ class ComercialApp(QWidget):
         layout_toolbar.addStretch(1)
 
         layout_table.addWidget(self.tree)
-        layout_table.addWidget(self.label_costs)
+        layout_table.addLayout(layout_sidebar)
 
         layout_footer.addStretch(1)
         layout_footer.addWidget(self.logo_label)
@@ -260,7 +273,7 @@ class ComercialApp(QWidget):
                     }
                     
                     QLabel#label-costs {
-                        font-size: 18px;
+                        font-size: 16px;
                         font-weight: regular;
                     }
 
@@ -478,9 +491,6 @@ class ComercialApp(QWidget):
 
         df_valores = df_valores.dropna(axis=1, how='all').fillna('')
 
-        def format_decimal(value):
-            return f'{value:,.2f}'.replace(',', 'X').replace('.', ',').replace('X', '.')
-
         if 'QUANT.' in df_dados.columns:
             df_dados['QUANT.'] = df_dados['QUANT.'].apply(format_decimal)
         if 'VALOR UNIT. (R$)' in df_dados.columns:
@@ -678,6 +688,7 @@ class ComercialApp(QWidget):
         self.label_costs.hide()
         self.btn_exportar_excel.hide()
         self.btn_exportar_pdf.hide()
+        self.btn_abrir_desenho.hide()
 
     def controle_campos_formulario(self, status):
         self.campo_codigo.setEnabled(status)
@@ -685,6 +696,7 @@ class ComercialApp(QWidget):
         self.btn_exportar_excel.setEnabled(status)
         self.btn_exportar_pdf.setEnabled(status)
         self.btn_limpar.setEnabled(status)
+        self.btn_abrir_desenho.setEnabled(status)
 
     def executar_consulta(self):
         codigo = self.campo_codigo.text().upper().strip()
@@ -698,6 +710,8 @@ class ComercialApp(QWidget):
             self.controle_campos_formulario(True)
             return
 
+        dialog = loading_dialog(self, "Carregando...", "🤖 Processando dados do TOTVS..."
+                                                       "\n\n🤖 Por favor, aguarde.\n\nEureka®")
         query = query_consulta(codigo)
         self.label_product_name.hide()
         self.label_costs.hide()
@@ -761,6 +775,7 @@ class ComercialApp(QWidget):
                 self.label_product_name.setText(f"{self.codigo} - {self.descricao}")
                 self.label_product_name.show()
                 self.formatar_indicadores_custos(consolidated_dataframe)
+                dialog.close()
             else:
                 self.controle_campos_formulario(True)
                 exibir_mensagem("EUREKA® Comercial", 'Produto não encontrado!', "info")
@@ -772,11 +787,14 @@ class ComercialApp(QWidget):
         finally:
             self.btn_exportar_excel.show()
             self.btn_exportar_pdf.show()
+            self.btn_abrir_desenho.show()
             # Fecha a conexão com o banco de dados se estiver aberta
             if 'engine' in locals():
                 engine.dispose()
 
     def formatar_indicadores_custos(self, dataframe):
+        column_interval_kg = 'UNID. MED.'
+        column_quantity_kg = 'QUANT.'
         column_interval = 'ARMAZÉM'
         column_subtotal = 'SUB-TOTAL (R$)'
         armazens = {
@@ -787,46 +805,52 @@ class ComercialApp(QWidget):
             'custo_trat_superf': '97',
         }
 
-        resultados = {key: dataframe[dataframe[column_interval] == valor][column_subtotal].sum() for key, valor in
+        resultados = {key: dataframe[dataframe[column_interval] == value][column_subtotal].sum() for key, value in
                       armazens.items()}
+        custos_formatados = {key: format_decimal(value) for key, value in resultados.items()}
 
-        custos_formatados = {key: f"{value:.2f}" for key, value in resultados.items()}
+        resultado_quantidade_kg = dataframe[dataframe[column_interval_kg] == 'KG'][column_quantity_kg].sum()
+        total_geral = dataframe[column_subtotal].sum()
 
-        message = f"""
+        costs_table = f"""
             <table border="1" cellspacing="2" cellpadding="4" style="border-collapse: collapse; text-align: left; width: 100%;">
                 <tr>
                     <th style="text-align: middle; vertical-align: middle;">TOTAL POR ARMAZÉM</th>
                     <th style="text-align: right; vertical-align: middle;">CUSTO (R$)</th>
+                    <th style="text-align: right; vertical-align: middle;">QUANTIDADE (kg)</th>
                 </tr>
                 <tr>
                     <td style="vertical-align: middle;">Comercial</td>
                     <td style="text-align: right; vertical-align: middle;">{custos_formatados['custo_comercial']}</td>
+                    <td style="text-align: right; vertical-align: middle;"></td>
                 </tr>
                 <tr>
                     <td style="vertical-align: middle;">Matéria-prima</td>
                     <td style="text-align: right; vertical-align: middle;">{custos_formatados['custo_mp']}</td>
+                    <td style="text-align: right; vertical-align: middle;">{format_decimal(resultado_quantidade_kg)}</td>
                 </tr>
                 <tr>
                     <td style="vertical-align: middle;">Produto comercial importado</td>
                     <td style="text-align: right; vertical-align: middle;">{custos_formatados['custo_comer_importado']}</td>
+                    <td style="text-align: right; vertical-align: middle;"></td>
                 </tr>
                 <tr>
                     <td style="vertical-align: middle;">Matéria-prima importada</td>
                     <td style="text-align: right; vertical-align: middle;">{custos_formatados['custo_mp_importado']}</td>
+                    <td style="text-align: right; vertical-align: middle;"></td>
                 </tr>
                 <tr>
                     <td style="vertical-align: middle;">Tratamento superficial</td>
                     <td style="text-align: right; vertical-align: middle;">{custos_formatados['custo_trat_superf']}</td>
+                    <td style="text-align: right; vertical-align: middle;"></td>
+                </tr>
+                <tr>
+                    <td style="text-align: middle; vertical-align: middle;"><b>TOTAL GERAL</b></td>
+                    <td style="text-align: right; vertical-align: middle;"><b>{format_decimal(total_geral)}</b></td>
+                    <td style="text-align: right; vertical-align: middle;"></td>
                 </tr>
             </table>
         """
 
-        self.label_costs.setText(message)
+        self.label_costs.setText(costs_table)
         self.label_costs.show()
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = ComercialApp()
-    window.showMaximized()
-    sys.exit(app.exec_())
