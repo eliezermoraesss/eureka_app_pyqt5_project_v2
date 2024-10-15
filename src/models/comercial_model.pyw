@@ -15,7 +15,7 @@ from PyPDF2 import PdfReader
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QPixmap, QIcon
 from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
-    QTableWidget, QTableWidgetItem, QHeaderView, QFileDialog, QStyle, QAction
+    QTableWidget, QTableWidgetItem, QHeaderView, QFileDialog, QStyle, QAction, QApplication, QSizePolicy
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import A4
@@ -29,10 +29,106 @@ from src.app.utils.utils import exibir_mensagem, copiar_linha, obter_dados_tabel
 from src.app.utils.load_session import load_session
 
 
+def query_consulta(codigo):
+
+    query = f"""
+    DECLARE @CodigoPai VARCHAR(50) = '{codigo}'; -- Substitua pelo código pai que deseja consultar
+
+    -- CTE para selecionar as revisões máximas
+    WITH MaxRevisoes AS (
+        SELECT
+            G1_COD,
+            MAX(G1_REVFIM) AS MaxRevisao
+        FROM
+            SG1010
+        WHERE
+            G1_REVFIM <> 'ZZZ'
+            AND D_E_L_E_T_ <> '*'
+        GROUP BY
+            G1_COD
+    ),
+    -- CTE para selecionar os itens pai e seus subitens recursivamente
+    ListMP AS (
+        -- Selecionar o item pai inicialmente
+        SELECT
+            G1.G1_COD AS "CÓDIGO",
+            G1.G1_COMP AS "COMPONENTE",
+            G1.G1_QUANT AS "QUANTIDADE",
+            0 AS Nivel,
+            G1.G1_REVFIM AS "REVISAO"
+        FROM
+            SG1010 G1
+        INNER JOIN MaxRevisoes MR ON G1.G1_COD = MR.G1_COD AND G1.G1_REVFIM = MR.MaxRevisao
+        WHERE
+            G1.G1_COD = @CodigoPai
+            AND G1.G1_REVFIM <> 'ZZZ'
+            AND G1.D_E_L_E_T_ <> '*'
+        UNION ALL
+        -- Selecione os subitens de cada item pai e multiplique as quantidades
+        SELECT
+            filho.G1_COD,
+            filho.G1_COMP,
+            filho.G1_QUANT * pai.QUANTIDADE,
+            pai.Nivel + 1,
+            filho.G1_REVFIM
+        FROM
+            SG1010 AS filho
+        INNER JOIN ListMP AS pai ON
+            filho.G1_COD = pai."COMPONENTE"
+        INNER JOIN MaxRevisoes MR ON filho.G1_COD = MR.G1_COD AND filho.G1_REVFIM = MR.MaxRevisao
+        WHERE
+            pai.Nivel < 100
+            -- Defina o limite máximo de recursão aqui
+            AND filho.G1_REVFIM <> 'ZZZ'
+            AND filho.D_E_L_E_T_ <> '*'
+    )
+    -- Selecionar os componentes, somar as quantidades e evitar componentes duplicados
+    SELECT 
+        "COMPONENTE" AS "CÓDIGO",
+        prod.B1_DESC AS "DESCRIÇÃO",
+        SUM("QUANTIDADE") AS "QUANT.",
+        prod.B1_UM AS "UNID. MED.", 
+        prod.B1_UCOM AS "ULT. ATUALIZ.",
+        prod.B1_TIPO AS "TIPO", 
+        prod.B1_LOCPAD AS "ARMAZÉM", 
+        prod.B1_UPRC AS "VALOR UNIT. (R$)",
+        SUM("QUANTIDADE" * prod.B1_UPRC) AS "SUB-TOTAL (R$)"
+    FROM 
+        ListMP AS listMP
+    INNER JOIN 
+        SB1010 AS prod ON listMP."COMPONENTE" = prod.B1_COD
+    WHERE 
+        prod.B1_TIPO = 'MP'
+        AND prod.B1_LOCPAD IN ('01', '03', '11', '12', '97')
+        AND prod.D_E_L_E_T_ <> '*'
+    GROUP BY 
+        "COMPONENTE",
+        prod.B1_DESC,
+        prod.B1_UM,
+        prod.B1_UCOM,
+        prod.B1_TIPO,
+        prod.B1_LOCPAD,
+        prod.B1_UPRC
+    ORDER BY 
+        "COMPONENTE" ASC;
+    """
+    return query
+
+
+def recalculate_excel_formulas(file_path):
+    app_excel = xw.App(visible=False)
+    wb = xw.Book(file_path)
+    wb.app.calculate()  # Recalcular todas as fórmulas
+    wb.save()
+    wb.close()
+    app_excel.quit()
+
+
 class ComercialApp(QWidget):
-    def __init__(self, main_window):
+    def __init__(self):
         super().__init__()
-        self.main_window = main_window
+        # self.main_window = main_window
+        self.main_window = None
         user_data = load_session()
         username = user_data["username"]
         role = user_data["role"]
@@ -40,7 +136,7 @@ class ComercialApp(QWidget):
         self.descricao = None
         self.file_path = None
         self.nova_janela = None
-        self.titulo_relatorio_pdf = "Relatório de Custos de Matéria-Prima e Itens Comerciais"
+        self.titulo_relatorio = "Relatório de Custos de Matéria-Prima e Itens Comerciais"
         self.username, self.password, self.database, self.server = setup_mssql()
         self.driver = '{SQL Server}'
 
@@ -59,85 +155,96 @@ class ComercialApp(QWidget):
         self.logo_label.setPixmap(pixmap_logo)
         self.logo_label.setAlignment(Qt.AlignRight)
 
-        self.label_codigo = QLabel("Código do produto:", self)
+        self.label_codigo = QLabel("", self)
+
         self.label_product_name = QLabel("", self)
         self.label_product_name.setObjectName('product-name')
         self.label_product_name.setVisible(False)
 
+        self.label_costs = QLabel("", self)
+        self.label_costs.setObjectName('label-costs')
+        self.label_costs.setVisible(False)
+        self.label_costs.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
+
         self.campo_codigo = QLineEdit(self)
-        self.campo_codigo.setFont(QFont("Segoe UI", 10))
-        self.campo_codigo.setFixedWidth(210)
+        self.campo_codigo.setPlaceholderText("Digite o código do produto...")
+        self.campo_codigo.setFixedWidth(240)
         self.campo_codigo.setMaxLength(13)
         self.add_clear_button(self.campo_codigo)
 
-        self.btn_consultar = QPushButton("Calcular Custo ($)", self)
+        self.btn_consultar = QPushButton("Pesquisar", self)
         self.btn_consultar.clicked.connect(self.executar_consulta)
-        self.btn_consultar.setMinimumWidth(100)
+        self.btn_consultar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_limpar = QPushButton("Limpar", self)
         self.btn_limpar.clicked.connect(self.limpar_campos)
-        self.btn_limpar.setMinimumWidth(100)
+        self.btn_limpar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_limpar.setEnabled(False)
 
         self.btn_nova_janela = QPushButton("Nova Janela", self)
         self.btn_nova_janela.clicked.connect(self.abrir_nova_janela)
-        self.btn_nova_janela.setMinimumWidth(100)
+        self.btn_nova_janela.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_exportar_pdf = QPushButton("Exportar PDF", self)
         self.btn_exportar_pdf.clicked.connect(self.exportar_pdf)
-        self.btn_exportar_pdf.setMinimumWidth(100)
+        self.btn_exportar_pdf.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_exportar_pdf.hide()
 
         self.btn_exportar_excel = QPushButton("Exportar Excel", self)
         self.btn_exportar_excel.clicked.connect(lambda: self.exportar_excel('excel'))
-        self.btn_exportar_excel.setMinimumWidth(100)
+        self.btn_exportar_excel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_exportar_excel.hide()
 
         self.btn_fechar = QPushButton("Fechar", self)
         self.btn_fechar.clicked.connect(self.close)
-        self.btn_fechar.setMinimumWidth(100)
+        self.btn_fechar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_home = QPushButton("HOME", self)
         self.btn_home.setObjectName("btn_home")
         self.btn_home.clicked.connect(self.return_to_main)
-        self.btn_home.setMinimumWidth(100)
+        self.btn_home.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.campo_codigo.returnPressed.connect(self.executar_consulta)
 
         layout = QVBoxLayout()
         container_codigo = QVBoxLayout()
-        layout_header = QHBoxLayout()
-        layout_footer = QHBoxLayout()
-        layout_footer_logo = QHBoxLayout()
-
         container_codigo.addWidget(self.label_codigo)
         container_codigo.addWidget(self.campo_codigo)
+        layout_header = QHBoxLayout()
+        layout_table = QHBoxLayout()
+        layout_toolbar = QHBoxLayout()
+        layout_footer = QHBoxLayout()
 
-        layout_header.addLayout(container_codigo)
-        layout_header.addWidget(self.btn_consultar)
-        layout_header.addWidget(self.btn_limpar)
-        layout_header.addWidget(self.btn_nova_janela)
-        layout_header.addWidget(self.btn_exportar_excel)
-        layout_header.addWidget(self.btn_exportar_pdf)
-        layout_header.addWidget(self.btn_fechar)
-        layout_header.addWidget(self.btn_home)
-        layout_header.addStretch()
+        layout_header.addStretch(1)
+        layout_header.addWidget(self.label_product_name)
+        layout_header.addStretch(1)
+        layout_toolbar.addLayout(container_codigo)
+        layout_toolbar.addWidget(self.btn_consultar)
+        layout_toolbar.addWidget(self.btn_limpar)
+        layout_toolbar.addWidget(self.btn_nova_janela)
+        layout_toolbar.addWidget(self.btn_exportar_excel)
+        layout_toolbar.addWidget(self.btn_exportar_pdf)
+        layout_toolbar.addWidget(self.btn_fechar)
+        layout_toolbar.addWidget(self.btn_home)
+        layout_toolbar.addStretch(1)
+
+        layout_table.addWidget(self.tree)
+        layout_table.addWidget(self.label_costs)
 
         layout_footer.addStretch(1)
-        layout_footer.addWidget(self.label_product_name)
-        layout_footer.addStretch(1)
-        layout_footer_logo.addWidget(self.logo_label)
+        layout_footer.addWidget(self.logo_label)
 
         layout.addLayout(layout_header)
-        layout.addWidget(self.tree)
+        layout.addLayout(layout_toolbar)
+        layout.addLayout(layout_table)
         layout.addLayout(layout_footer)
-        layout.addLayout(layout_footer_logo)
 
         self.setLayout(layout)
 
         self.setStyleSheet("""
                     * {
                         background-color: #363636;
+                        font-family: "Segoe UI";
                     }
 
                     QLabel {
@@ -151,25 +258,30 @@ class ComercialApp(QWidget):
                         font-size: 20px;
                         font-weight: bold;
                     }
+                    
+                    QLabel#label-costs {
+                        font-size: 18px;
+                        font-weight: regular;
+                    }
 
                     QLineEdit {
                         background-color: #EEEEEE;
                         border: 1px solid #C9C9C9;
                         padding: 10px;
-                        border-radius: 15px;
+                        border-radius: 14px;
                         height: 20px;
-                        font-size: 18px;
+                        font-size: 14px;
                     }
 
                     QPushButton {
                         background-color: #3f7c24;
                         color: #fff;
-                        padding: 15px;
+                        padding: 10px;
                         border: 2px;
-                        border-radius: 20px;
-                        font-size: 12px;
-                        height: 14px;
-                        font-weight: bold;
+                        border-radius: 18px;
+                        font-size: 14px;
+                        height: 24px;
+                        font-weight: regular;
                         margin-top: 20px;
                         margin-left: 10px;
                     }
@@ -189,8 +301,9 @@ class ComercialApp(QWidget):
                     }
 
                     QTableWidget {
+                        font-family: "Segoe UI";
                         border: 1px solid #000000;
-                        background-color: #686D76;
+                        background-color: #262626;
                         padding-left: 10px;
                         margin: 15px 0;
                     }
@@ -230,14 +343,6 @@ class ComercialApp(QWidget):
         eng_window.showMaximized()
         self.main_window.sub_windows.append(eng_window)
 
-    def recalculate_excel_formulas(self, file_path):
-        app_excel = xw.App(visible=False)
-        wb = xw.Book(file_path)
-        wb.app.calculate()  # Recalcular todas as fórmulas
-        wb.save()
-        wb.close()
-        app_excel.quit()
-
     def get_product_name(self, codigo):
         query = f"""
             SELECT B1_DESC
@@ -249,7 +354,8 @@ class ComercialApp(QWidget):
             """
         try:
             with pyodbc.connect(
-                    f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};PWD={self.password}') as conn:
+                    f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};'
+                    f'PWD={self.password}') as conn:
                 cursor = conn.cursor()
                 cursor.execute(query)
 
@@ -259,93 +365,9 @@ class ComercialApp(QWidget):
                 return codigo_produto
 
         except Exception as ex:
-            exibir_mensagem('Erro banco de dados TOTVS', f'Erro ao consultar tabela de produtos SB1010: {str(ex)}', 'error')
+            exibir_mensagem('Erro banco de dados TOTVS', f'Erro ao consultar tabela de produtos SB1010: '
+                                                         f'{str(ex)}', 'error')
             return None
-
-    def query_consulta(self, codigo):
-
-        query = f"""
-        DECLARE @CodigoPai VARCHAR(50) = '{codigo}'; -- Substitua pelo código pai que deseja consultar
-    
-        -- CTE para selecionar as revisões máximas
-        WITH MaxRevisoes AS (
-            SELECT
-                G1_COD,
-                MAX(G1_REVFIM) AS MaxRevisao
-            FROM
-                SG1010
-            WHERE
-                G1_REVFIM <> 'ZZZ'
-                AND D_E_L_E_T_ <> '*'
-            GROUP BY
-                G1_COD
-        ),
-        -- CTE para selecionar os itens pai e seus subitens recursivamente
-        ListMP AS (
-            -- Selecionar o item pai inicialmente
-            SELECT
-                G1.G1_COD AS "CÓDIGO",
-                G1.G1_COMP AS "COMPONENTE",
-                G1.G1_QUANT AS "QUANTIDADE",
-                0 AS Nivel,
-                G1.G1_REVFIM AS "REVISAO"
-            FROM
-                SG1010 G1
-            INNER JOIN MaxRevisoes MR ON G1.G1_COD = MR.G1_COD AND G1.G1_REVFIM = MR.MaxRevisao
-            WHERE
-                G1.G1_COD = @CodigoPai
-                AND G1.G1_REVFIM <> 'ZZZ'
-                AND G1.D_E_L_E_T_ <> '*'
-            UNION ALL
-            -- Selecione os subitens de cada item pai e multiplique as quantidades
-            SELECT
-                filho.G1_COD,
-                filho.G1_COMP,
-                filho.G1_QUANT * pai.QUANTIDADE,
-                pai.Nivel + 1,
-                filho.G1_REVFIM
-            FROM
-                SG1010 AS filho
-            INNER JOIN ListMP AS pai ON
-                filho.G1_COD = pai."COMPONENTE"
-            INNER JOIN MaxRevisoes MR ON filho.G1_COD = MR.G1_COD AND filho.G1_REVFIM = MR.MaxRevisao
-            WHERE
-                pai.Nivel < 100
-                -- Defina o limite máximo de recursão aqui
-                AND filho.G1_REVFIM <> 'ZZZ'
-                AND filho.D_E_L_E_T_ <> '*'
-        )
-        -- Selecionar os componentes, somar as quantidades e evitar componentes duplicados
-        SELECT 
-            "COMPONENTE" AS "CÓDIGO",
-            prod.B1_DESC AS "DESCRIÇÃO",
-            SUM("QUANTIDADE") AS "QUANT.",
-            prod.B1_UM AS "UNID. MED.", 
-            prod.B1_UCOM AS "ULT. ATUALIZ.",
-            prod.B1_TIPO AS "TIPO", 
-            prod.B1_LOCPAD AS "ARMAZÉM", 
-            prod.B1_UPRC AS "VALOR UNIT. (R$)",
-            SUM("QUANTIDADE" * prod.B1_UPRC) AS "SUB-TOTAL (R$)"
-        FROM 
-            ListMP AS listMP
-        INNER JOIN 
-            SB1010 AS prod ON listMP."COMPONENTE" = prod.B1_COD
-        WHERE 
-            prod.B1_TIPO = 'MP'
-            AND prod.B1_LOCPAD IN ('01', '03', '11', '12', '97')
-            AND prod.D_E_L_E_T_ <> '*'
-        GROUP BY 
-            "COMPONENTE",
-            prod.B1_DESC,
-            prod.B1_UM,
-            prod.B1_UCOM,
-            prod.B1_TIPO,
-            prod.B1_LOCPAD,
-            prod.B1_UPRC
-        ORDER BY 
-            "COMPONENTE" ASC;
-        """
-        return query
 
     def add_clear_button(self, line_edit):
         clear_icon = self.style().standardIcon(QStyle.SP_LineEditClearButton)
@@ -395,32 +417,31 @@ class ComercialApp(QWidget):
             accounting_format = workbook.add_format({'num_format': '[$R$-pt-BR] #,##0.00'})
 
             # Adicionar fórmulas na planilha 'Dados' na última linha + 1
-            worksheet_dados.write(f'A{last_row}', 'TOTAL COMERCIAL')
+            worksheet_dados.write(f'A{last_row}', 'COMERCIAL')
             worksheet_dados.write_formula(f'B{last_row}',
                                           f'=SUMIF(G2:G{last_row - 2}, "COMERCIAL", I2:I{last_row - 2})',
                                           accounting_format)
 
-            worksheet_dados.write(f'A{last_row + 1}', 'TOTAL MP')
+            worksheet_dados.write(f'A{last_row + 1}', 'MP')
             worksheet_dados.write_formula(f'B{last_row + 1}',
                                           f'=SUMIF(G2:G{last_row - 2}, "MATÉRIA-PRIMA", I2:I{last_row - 2})',
                                           accounting_format)
 
-            worksheet_dados.write(f'A{last_row + 2}', 'TOTAL PROD. COMER. IMPORT. DIR.')
+            worksheet_dados.write(f'A{last_row + 2}', 'PROD. COMER. IMPORT. DIR.')
             worksheet_dados.write_formula(f'B{last_row + 2}',
                                           f'=SUMIF(G2:G{last_row - 2}, "PROD. COMER. IMPORT. DIRETO", I2:I{last_row - 2})',
                                           accounting_format)
 
-            worksheet_dados.write(f'A{last_row + 3}', 'TOTAL MAT. PRIMA IMPORTADA')
+            worksheet_dados.write(f'A{last_row + 3}', 'MAT. PRIMA IMPORTADA')
             worksheet_dados.write_formula(f'B{last_row + 3}',
                                           f'=SUMIF(G2:G{last_row - 2}, "MAT. PRIMA IMPORT. DIRETO", I2:I{last_row - 2})',
                                           accounting_format)
 
-            worksheet_dados.write(f'A{last_row + 4}', 'TOTAL TRAT. SUPERF.')
+            worksheet_dados.write(f'A{last_row + 4}', 'TRAT. SUPERF.')
             worksheet_dados.write_formula(f'B{last_row + 4}',
                                           f'=SUMIF(G2:G{last_row - 2}, "TRAT. SUPERFICIAL", I2:I{last_row - 2})',
                                           accounting_format)
 
-            worksheet_dados.write(f'C{last_row + 1}', 'TOTAL (kg)')
             worksheet_dados.write_formula(f'C{last_row + 1}', f'=SUMIF(D2:D{last_row - 2}, "KG", C2:C{last_row - 2})')
 
             worksheet_dados.write(f'A{last_row + 6}', 'TOTAL GERAL')
@@ -429,7 +450,7 @@ class ComercialApp(QWidget):
 
             writer.close()
 
-            self.recalculate_excel_formulas(self.file_path)
+            recalculate_excel_formulas(self.file_path)
 
             if tipo_exportacao == 'excel':
                 os.startfile(self.file_path)
@@ -516,7 +537,7 @@ class ComercialApp(QWidget):
             product_style = ParagraphStyle(name='ProductStyle', fontSize=12, leading=20, fontName='Helvetica-Bold',
                                            spaceAfter=12)
 
-            title = Paragraph(f"{self.titulo_relatorio_pdf}", title_style)
+            title = Paragraph(f"{self.titulo_relatorio}", title_style)
             date_time = Paragraph(datetime.now().strftime("%d/%m/%Y %H:%M"), normal_style)
             elements_pdf.append(Paragraph("<br/><br/>", normal_style))
             product = Paragraph(f'{self.codigo} {self.descricao}', product_style)
@@ -637,7 +658,7 @@ class ComercialApp(QWidget):
         altura_linha = 35
         self.tree.verticalHeader().setDefaultSectionSize(altura_linha)
         self.tree.horizontalHeader().sectionClicked.connect(self.ordenar_tabela)
-        self.tree.horizontalHeader().setStretchLastSection(True)
+        self.tree.horizontalHeader().setStretchLastSection(False)
 
     def ordenar_tabela(self, logical_index):
         # Obter o índice real da coluna (considerando a ordem de classificação)
@@ -654,6 +675,7 @@ class ComercialApp(QWidget):
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
         self.label_product_name.hide()
+        self.label_costs.hide()
         self.btn_exportar_excel.hide()
         self.btn_exportar_pdf.hide()
 
@@ -676,8 +698,9 @@ class ComercialApp(QWidget):
             self.controle_campos_formulario(True)
             return
 
-        query = self.query_consulta(codigo)
+        query = query_consulta(codigo)
         self.label_product_name.hide()
+        self.label_costs.hide()
         self.controle_campos_formulario(False)
 
         conn_str = f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};PWD={self.password}'
@@ -685,11 +708,8 @@ class ComercialApp(QWidget):
 
         try:
             dataframe = pd.read_sql(query, engine)
-
             if not dataframe.empty:
-
                 self.descricao = self.get_product_name(self.codigo)
-
                 consolidated_dataframe = dataframe.groupby('CÓDIGO').agg({
                     'DESCRIÇÃO': 'first',
                     'QUANT.': 'sum',
@@ -705,23 +725,18 @@ class ComercialApp(QWidget):
                 columns_to_convert = ['QUANT.', 'VALOR UNIT. (R$)', 'SUB-TOTAL (R$)']
                 consolidated_dataframe[columns_to_convert] = (consolidated_dataframe[columns_to_convert]
                                                               .map(lambda x: round(float(x), 2)))
-                consolidated_dataframe[''] = ''
-
                 self.configurar_tabela(consolidated_dataframe)
-
                 self.tree.horizontalHeader().setSortIndicator(-1, Qt.AscendingOrder)
                 self.tree.setRowCount(0)
 
                 for i, row in consolidated_dataframe.iterrows():
                     self.tree.setSortingEnabled(False)
                     self.tree.insertRow(i)
-                    for j, value in enumerate(row):
-                        # if j in (2, 7, 8):
-                        # value = locale.format_string("%.2f", value, grouping=True)
-                        if j == 4 and not value.isspace():
+                    for column_name, value in row.items():
+                        if column_name == 'ULT. ATUALIZ.' and not value.isspace():
                             data_obj = datetime.strptime(value, "%Y%m%d")
                             value = data_obj.strftime("%d/%m/%Y")
-                        elif j == 6:
+                        elif column_name == 'ARMAZÉM':
                             if value == '01':
                                 value = 'MATÉRIA-PRIMA'
                             elif value == '03':
@@ -735,19 +750,17 @@ class ComercialApp(QWidget):
 
                         item = QTableWidgetItem(str(value).strip())
 
-                        if 2 <= j < 7:
+                        if column_name in ['QUANT.', 'ULT. ATUALIZ.', 'ARMAZÉM']:
                             item.setTextAlignment(Qt.AlignCenter)
-                        elif j == 7 or j == 8:
+                        elif column_name in ['VALOR UNIT. (R$)', 'SUB-TOTAL (R$)']:
                             item.setTextAlignment(Qt.AlignRight)
 
-                        self.tree.setItem(i, j, item)
-
-                    # QCoreApplication.processEvents()
-
+                        self.tree.setItem(i, consolidated_dataframe.columns.get_loc(column_name), item)
                 self.tree.setSortingEnabled(True)
                 self.controle_campos_formulario(True)
                 self.label_product_name.setText(f"{self.codigo} - {self.descricao}")
                 self.label_product_name.show()
+                self.formatar_indicadores_custos(consolidated_dataframe)
             else:
                 self.controle_campos_formulario(True)
                 exibir_mensagem("EUREKA® Comercial", 'Produto não encontrado!', "info")
@@ -762,3 +775,58 @@ class ComercialApp(QWidget):
             # Fecha a conexão com o banco de dados se estiver aberta
             if 'engine' in locals():
                 engine.dispose()
+
+    def formatar_indicadores_custos(self, dataframe):
+        column_interval = 'ARMAZÉM'
+        column_subtotal = 'SUB-TOTAL (R$)'
+        armazens = {
+            'custo_comercial': '03',
+            'custo_mp': '01',
+            'custo_comer_importado': '11',
+            'custo_mp_importado': '12',
+            'custo_trat_superf': '97',
+        }
+
+        resultados = {key: dataframe[dataframe[column_interval] == valor][column_subtotal].sum() for key, valor in
+                      armazens.items()}
+
+        custos_formatados = {key: f"{value:.2f}" for key, value in resultados.items()}
+
+        message = f"""
+            <table border="1" cellspacing="2" cellpadding="4" style="border-collapse: collapse; text-align: left; width: 100%;">
+                <tr>
+                    <th style="text-align: middle; vertical-align: middle;">TOTAL POR ARMAZÉM</th>
+                    <th style="text-align: right; vertical-align: middle;">CUSTO (R$)</th>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle;">Comercial</td>
+                    <td style="text-align: right; vertical-align: middle;">{custos_formatados['custo_comercial']}</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle;">Matéria-prima</td>
+                    <td style="text-align: right; vertical-align: middle;">{custos_formatados['custo_mp']}</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle;">Produto comercial importado</td>
+                    <td style="text-align: right; vertical-align: middle;">{custos_formatados['custo_comer_importado']}</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle;">Matéria-prima importada</td>
+                    <td style="text-align: right; vertical-align: middle;">{custos_formatados['custo_mp_importado']}</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle;">Tratamento superficial</td>
+                    <td style="text-align: right; vertical-align: middle;">{custos_formatados['custo_trat_superf']}</td>
+                </tr>
+            </table>
+        """
+
+        self.label_costs.setText(message)
+        self.label_costs.show()
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = ComercialApp()
+    window.showMaximized()
+    sys.exit(app.exec_())
