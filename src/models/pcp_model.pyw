@@ -836,8 +836,8 @@ class PcpApp(QWidget):
         indicadores_table = f"""
                 <table border="1" cellspacing="2" cellpadding="4" style="border-collapse: collapse; text-align: left; width: 100%;">
                     <tr>
-                        <th style="text-align: middle; vertical-align: middle;">Status</th>
-                        <th style="text-align: right; vertical-align: middle;">Quantidade</th>
+                        <th style="text-align: middle; vertical-align: middle;">STATUS</th>
+                        <th style="text-align: right; vertical-align: middle;">QUANTIDADE</th>
                     </tr>
                     <tr>
                         <td style="vertical-align: middle;">OP ABERTA</td>
