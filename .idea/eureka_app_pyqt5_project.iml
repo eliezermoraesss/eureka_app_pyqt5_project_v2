@@ -4,9 +4,6 @@
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="jdk" jdkName="Python 3.12" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="eureka-windows" />
-    <orderEntry type="module" module-name="PYTHON" />
-    <orderEntry type="module" module-name="powerbi-mssql-indicators-dashboard-python-flask-api-rest" />
   </component>
   <component name="PyNamespacePackagesService">
     <option name="namespacePackageFolders">

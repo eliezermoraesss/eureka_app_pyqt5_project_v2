@@ -38,7 +38,8 @@ def executar_consulta_estrutura(self, table):
                         struct.G1_XUM AS "Unid.", 
                         struct.G1_REVFIM AS "Revisão", 
                         struct.G1_INI AS "Inserido em:",
-                        prod.B1_MSBLQL AS "Bloqueado?"
+                        prod.B1_MSBLQL AS "Bloqueado?",
+                        prod.B1_ZZLOCAL AS "Endereço"
                     FROM 
                         {database}.dbo.SG1010 struct
                     INNER JOIN 
