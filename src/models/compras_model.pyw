@@ -785,7 +785,7 @@ class ComprasApp(QWidget):
         data_inicio_formatada = self.campo_data_inicio.date().toString("yyyyMMdd")
         data_fim_formatada = self.campo_data_fim.date().toString("yyyyMMdd")
 
-        if data_fim_formatada != '' and data_fim_formatada != '':
+        if data_inicio_formatada != '' and data_fim_formatada != '':
             filtro_data = f"AND C1_EMISSAO >= '{data_inicio_formatada}' AND C1_EMISSAO <= '{data_fim_formatada}'"
         else:
             filtro_data = ''
