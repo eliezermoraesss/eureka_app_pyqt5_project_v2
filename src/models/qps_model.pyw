@@ -206,9 +206,15 @@ class QpClosedApp(QWidget):
         self.label_descricao_prod = QLabel("Descrição:", self)
         self.label_contem_descricao_prod = QLabel("Contém na descrição:", self)
         self.label_contem_descricao_prod.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
         self.label_qp = QLabel("QP:", self)
         self.label_line_number = QLabel("", self)
         self.label_line_number.setVisible(False)
+
+        self.label_indicators = QLabel("", self)
+        self.label_indicators.setObjectName("label-indicators")
+        self.label_indicators.setVisible(False)
+        self.label_indicators.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
 
         self.campo_descricao_prod = QLineEdit(self)
         self.campo_descricao_prod.setFont(QFont(fonte_campos, tamanho_fonte_campos))
@@ -322,6 +328,7 @@ class QpClosedApp(QWidget):
 
         self.layout_footer_label.addStretch(1)
         self.layout_footer_label.addWidget(self.label_line_number)
+        self.layout_footer_label.addWidget(self.label_indicators)
         self.layout_footer_label.addStretch(1)
 
         layout.addLayout(layout_title)
@@ -393,6 +400,7 @@ class QpClosedApp(QWidget):
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
         self.label_line_number.hide()
+        self.label_indicators.hide()
         self.btn_atualizar_qp.hide()
 
     def add_clear_button(self, line_edit):
@@ -517,7 +525,7 @@ class QpClosedApp(QWidget):
 
                 self.label_line_number.setText(f"{message}")
                 self.label_line_number.show()
-
+                self.label_indicators.show()
             else:
                 exibir_mensagem("EUREKA® PCP", 'Nenhuma QP encontrada!', "info")
                 self.controle_ativacao_de_objetos(True)
@@ -528,6 +536,7 @@ class QpClosedApp(QWidget):
             dataframe = dataframe.drop('DATA DE ENTREGA', axis=1) if status_qp == 'A' else dataframe
             dataframe[''] = ''
 
+            self.exibir_indicadores(dataframe)
             self.configurar_tabela(dataframe)
             self.configurar_tabela_tooltips(dataframe, status_qp)
             self.tree.setRowCount(0)
@@ -657,3 +666,25 @@ class QpClosedApp(QWidget):
                             self.tree.setItem(current_row, current_column, QTableWidgetItem(''))
                         except Exception as ex:
                             exibir_mensagem('Erro ao remover data da tabela', f'Erro: {str(ex)}', 'error')
+
+    def exibir_indicadores(self, dataframe):
+        aberto = dataframe['STATUS QP'].apply(lambda x: x.strip() == 'A' if isinstance(x, str) else True).sum()
+        fechado = dataframe['STATUS QP'].apply(lambda x: x.strip() == 'F' if isinstance(x, str) else True).sum()
+        indicadores_table = f"""
+                <table border="1" cellspacing="2" cellpadding="4" style="border-collapse: collapse; text-align: left; width: 100%;">
+                    <tr>
+                        <th style="text-align: middle; vertical-align: middle;">STATUS</th>
+                        <th style="text-align: right; vertical-align: middle;">QUANTIDADE</th>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: middle;">QP ABERTA</td>
+                        <td style="text-align: right; vertical-align: middle;">{aberto}</td>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: middle;">QP FECHADA</td>
+                        <td style="text-align: right; vertical-align: middle;">{fechado}</td>
+                    </tr>
+                </table>
+            """
+        self.label_indicators.setText(indicadores_table)
+        self.label_indicators.show()
