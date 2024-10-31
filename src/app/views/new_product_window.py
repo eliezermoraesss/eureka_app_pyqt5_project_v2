@@ -141,10 +141,6 @@ class NewProductWindow(QtWidgets.QDialog):
                                 f"\n\nContate o administrador do sistema.")
             return None
 
-<<<<<<< HEAD
-
-=======
->>>>>>> eureka/improvements
     def insert_product(self):
         codigo = tratar_campo_codigo(self.ui.codigo_field)
         try:
