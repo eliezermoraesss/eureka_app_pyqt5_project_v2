@@ -174,3 +174,11 @@ def numero_linhas_consulta(query_consulta):
             AS combined_results;
         """
     return query
+
+
+def tratar_campo_codigo(campo):
+    return campo.text().upper().strip().replace(" ", "").replace("\n", "")
+
+
+def formatar_campo(campo):
+    return campo.text().upper().strip()
