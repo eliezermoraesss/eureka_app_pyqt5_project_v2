@@ -153,7 +153,7 @@ class CopyProdutoItemWindow(QtWidgets.QDialog):
             return None
 
     def insert_product(self):
-        codigo = self.ui.codigo_field.text().upper()
+        codigo = self.ui.codigo_field.text().upper().strip()
         try:
             self.verify_blank_required_fields()
             if self.required_field_is_blank:

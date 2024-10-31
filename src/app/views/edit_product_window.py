@@ -120,16 +120,17 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
 
     def update_table(self):
         # Salvar os valores dos campos do formulário no atributo da classe 'selected_row_table' do tipo list []
-        self.selected_row[1] = self.ui.descricao_field.text().upper()
-        self.selected_row[2] = self.ui.desc_comp_field.text().upper()
-        self.selected_row[3] = self.ui.tipo_field.text().upper()
-        self.selected_row[4] = self.ui.um_field.text().upper()
-        self.selected_row[5] = self.ui.armazem_field.text().upper()
-        self.selected_row[6] = self.ui.grupo_field.text().upper()
-        self.selected_row[7] = self.ui.desc_grupo_field.text().upper()
-        self.selected_row[8] = self.ui.cc_field.text().upper()
+        self.selected_row[0] = self.ui.type_label.text().upper().strip()
+        self.selected_row[1] = self.ui.descricao_field.text().upper().strip()
+        self.selected_row[2] = self.ui.desc_comp_field.text().upper().strip()
+        self.selected_row[3] = self.ui.tipo_field.text().upper().strip()
+        self.selected_row[4] = self.ui.um_field.text().upper().strip()
+        self.selected_row[5] = self.ui.armazem_field.text().upper().strip()
+        self.selected_row[6] = self.ui.grupo_field.text().upper().strip()
+        self.selected_row[7] = self.ui.desc_grupo_field.text().upper().strip()
+        self.selected_row[8] = self.ui.cc_field.text().upper().strip()
         self.selected_row[9] = self.ui.bloquear_combobox.currentText()
-        self.selected_row[13] = self.ui.endereco_field.text().upper()
+        self.selected_row[13] = self.ui.endereco_field.text().upper().strip()
 
     def verify_blank_required_fields(self):
         self.required_field_is_blank = False
@@ -152,26 +153,42 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
                 UPDATE
                     PROTHEUS12_R27.dbo.SB1010 
                 SET 
-                    B1_DESC = N'{self.selected_row[1].ljust(100)}', -- 100
-                    B1_XDESC2 = N'{self.selected_row[2].ljust(60)}', -- 60
-                    B1_TIPO = N'{self.selected_row[3].ljust(2)}', -- 2
-                    B1_UM = N'{self.selected_row[4].ljust(2)}', -- 2
-                    B1_LOCPAD = N'{self.selected_row[5].ljust(2)}', -- 2
-                    B1_GRUPO = N'{self.selected_row[6].ljust(4)}', -- 4
-                    B1_ZZNOGRP = N'{self.selected_row[7].ljust(30)}', -- 30
-                    B1_CC = N'{self.selected_row[8].ljust(9)}', -- 9
-                    B1_MSBLQL = N'{'1' if self.selected_row[9] == 'Sim' else '2'}', -- 1
-                    B1_ZZLOCAL = N'{self.selected_row[13].ljust(6)}' -- 6
+                    B1_COD = ?,
+                    B1_DESC = ?,
+                    B1_XDESC2 = ?,
+                    B1_TIPO = ?,
+                    B1_UM = ?,
+                    B1_LOCPAD = ?,
+                    B1_GRUPO = ?,
+                    B1_ZZNOGRP = ?,
+                    B1_CC = ?,
+                    B1_MSBLQL = ?,
+                    B1_ZZLOCAL = ?
                 WHERE 
-                    B1_COD LIKE '{self.selected_row[0]}%'
+                    B1_COD LIKE ?
                 """
+                
+            data = [
+                self.selected_row[0].ljust(15),
+                self.selected_row[1].ljust(100),
+                self.selected_row[2].ljust(60),
+                self.selected_row[3].ljust(2),
+                self.selected_row[4].ljust(2),
+                self.selected_row[5].ljust(2),
+                self.selected_row[6].ljust(4),
+                self.selected_row[7].ljust(30),
+                self.selected_row[8].ljust(9),
+                '1' if self.selected_row[9] == 'Sim' else '2',
+                self.selected_row[13].ljust(6),
+                f"{self.selected_row[0]}%"
+            ]
 
             driver = '{SQL Server}'
             username, password, database, server = setup_mssql()
             with pyodbc.connect(
                     f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}') as conn:
                 cursor = conn.cursor()
-                cursor.execute(query)
+                cursor.execute(query, data)
                 conn.commit()
 
             # Fechar a janela após salvar
