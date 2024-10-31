@@ -9,6 +9,7 @@ from src.app.utils.open_search_dialog import open_search_dialog
 from src.app.utils.save_log_database import save_log_database
 from src.app.utils.search_queries import select_query
 from src.qt.ui.ui_copy_product_window import Ui_CopyProductWindow
+from src.app.utils.utils import tratar_campo_codigo
 
 
 def execute_validate_query(entity, field):
@@ -153,7 +154,7 @@ class CopyProdutoItemWindow(QtWidgets.QDialog):
             return None
 
     def insert_product(self):
-        codigo = self.ui.codigo_field.text().upper().strip()
+        codigo = tratar_campo_codigo(self.ui.codigo_field)
         try:
             self.verify_blank_required_fields()
             if self.required_field_is_blank:
