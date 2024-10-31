@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import pyodbc
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox
@@ -143,7 +141,10 @@ class NewProductWindow(QtWidgets.QDialog):
                                 f"\n\nContate o administrador do sistema.")
             return None
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> eureka/improvements
     def insert_product(self):
         codigo = tratar_campo_codigo(self.ui.codigo_field)
         try:
@@ -170,6 +171,7 @@ class NewProductWindow(QtWidgets.QDialog):
                                    f"Produto cadastrado com sucesso!")
 
         except Exception as ex:
+            print(ex)
             QMessageBox.warning(self, f"Eureka® - Falha ao conectar no banco de dados",
                                         f"Erro ao tentar cadastrar novo produto no TOTVS.\n\n{str(ex)}\n\nContate o "
                                         f"administrador do sistema.")
