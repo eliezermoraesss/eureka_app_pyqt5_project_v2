@@ -31,7 +31,9 @@ def executar_consulta_onde_usado(self, table):
             query_onde_usado = f"""
                     SELECT 
                         STRUT.G1_COD AS "Código", 
-                        PROD.B1_DESC "Descrição"
+                        PROD.B1_DESC "Descrição",
+                        STRUT.G1_QUANT AS "Quant. Usada",
+                        STRUT.G1_XUM AS "Unid."
                     FROM 
                         {database}.dbo.SG1010 STRUT 
                     INNER JOIN 
@@ -92,6 +94,9 @@ def executar_consulta_onde_usado(self, table):
 
                         item = QTableWidgetItem(valor_formatado)
                         tabela_onde_usado.setItem(i, j, item)
+                        
+                        if j != 0 and j != 1:
+                            item.setTextAlignment(Qt.AlignCenter)
 
                 tabela_onde_usado.setSortingEnabled(True)
 

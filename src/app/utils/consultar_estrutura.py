@@ -12,6 +12,16 @@ from src.app.utils.utils import ajustar_largura_coluna_descricao, exportar_excel
 
 
 def executar_consulta_estrutura(self, table):
+    """
+    Executes a query to retrieve and display the structure of a product in a PyQt5 application.
+
+    Parameters:
+    self (object): The instance of the class or object that the method belongs to.
+    table (QTableWidget): A PyQt5 QTableWidget object representing the table from which the selected item will be retrieved.
+
+    Returns:
+    None
+    """
     item_selecionado = table.currentItem()
     header = table.horizontalHeader()
     codigo_col, descricao_col = None, None
