@@ -1,4 +1,5 @@
 import ctypes
+import locale
 from datetime import datetime
 
 import pyodbc
@@ -108,7 +109,7 @@ def executar_consulta_estrutura(self, table):
                     tree_estrutura.insertRow(i)
                     for j, value in enumerate(row):
                         if j == 2:
-                            valor_formatado = "{:.2f}".format(float(value))
+                            valor_formatado = locale.format_string("%.2f", value, grouping=True)
                         elif j == 5:
                             data_obj = datetime.strptime(value, "%Y%m%d")
                             valor_formatado = data_obj.strftime("%d/%m/%Y")
