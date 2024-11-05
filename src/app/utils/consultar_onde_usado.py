@@ -1,3 +1,4 @@
+import locale
 from datetime import datetime
 
 import pyodbc
@@ -93,10 +94,8 @@ def executar_consulta_onde_usado(self, table):
                     tabela_onde_usado.insertRow(i)
                     for j, value in enumerate(row):
                         valor_formatado = str(value).strip()
-
                         if j == 2:
-                            valor_formatado = "{:.2f}".format(value)
-
+                            valor_formatado = locale.format_string("%.2f", value, grouping=True)
                         item = QTableWidgetItem(valor_formatado)
                         if j != 0 and j != 1:
                             item.setTextAlignment(Qt.AlignCenter)
