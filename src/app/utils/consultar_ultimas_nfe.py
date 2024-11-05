@@ -35,6 +35,7 @@ def consultar_ultimas_nfe(self, table):
         if codigo not in self.guias_abertas_ultimas_nfe and codigo is not None:
             query = f"""
                     SELECT
+                        D1_EMISSAO AS "Data da emissão",
                         D1_DTDIGIT AS "Data Entrada",
                         D1_DOC AS "Documento",
                         D1_SERIE AS "Série",
@@ -46,11 +47,8 @@ def consultar_ultimas_nfe(self, table):
                         D1_TIPO AS "Tipo NF",
                         D1_ITEM AS "Item NF",
                         D1_QUANT AS "Quant. NF",
-                        D1_VUNIT AS "Vlr. Unitário",
-                        D1_TOTAL AS "Vlr. Total",
-                        D1_ITEMPC AS "Item Pedido",
-                        D1_QTDPEDI AS "Quant. Pedido",
-                        D1_EMISSAO AS "Data da emissão",
+                        D1_VUNIT AS "Valor Unitário",
+                        D1_TOTAL AS "Valor Total",
                         livroFiscal.F3_CHVNFE AS "Chave de acesso"
                     FROM 
                         {database}.dbo.SD1010 NFE
@@ -84,6 +82,8 @@ def consultar_ultimas_nfe(self, table):
                 layout_cabecalho = QHBoxLayout()
 
                 tabela = QTableWidget(nova_guia)
+                tabela.setSelectionBehavior(QTableWidget.SelectRows)
+                tabela.setSelectionMode(QTableWidget.SingleSelection)
 
                 tabela.setContextMenuPolicy(Qt.CustomContextMenu)
                 tabela.customContextMenuRequested.connect(
@@ -115,14 +115,19 @@ def consultar_ultimas_nfe(self, table):
                         if column_name in ('Data Entrada', 'Data da emissão') and not value.isspace():
                             date_obj = datetime.strptime(value, "%Y%m%d")
                             value = date_obj.strftime('%d/%m/%Y')
-                        elif column_name in ('Quant. NF', 'Vlr. Unitário', 'Vlr. Total', 'Quant. Pedido'):
+                        elif column_name in ('Quant. NF', 'Valor Unitário', 'Valor Total'):
                             value = locale.format_string('%.2f', value, grouping=True)
                         elif column_name == 'Documento':
                             value = value.lstrip('0')
 
                         valor_formatado = str(value).strip()
                         item = QTableWidgetItem(valor_formatado)
-                        item.setTextAlignment(Qt.AlignCenter) if column_name != 'Fornecedor/Cliente' else item.setTextAlignment(Qt.AlignLeft)
+                        if column_name == 'Fornecedor/Cliente':
+                            item.setTextAlignment(Qt.AlignLeft)
+                        elif column_name in ('Valor Unitário', 'Valor Total'):
+                            item.setTextAlignment(Qt.AlignRight)
+                        else:
+                            item.setTextAlignment(Qt.AlignCenter)
                         tabela.setItem(i, column_index, item)
 
                 tabela.setSortingEnabled(True)
@@ -135,8 +140,9 @@ def consultar_ultimas_nfe(self, table):
                 btn_visualizar_nfe.clicked.connect(lambda: visualizar_nfe(self, tabela))
                 btn_visualizar_nfe.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
-                layout_cabecalho.addWidget(QLabel(f'Histórico de compras - Últimas Notas Fiscais\n\n{codigo} - {descricao}'),
-                                           alignment=Qt.AlignLeft)
+                select_product_label = QLabel(f'Histórico de compras - Últimas Notas Fiscais\n\n{codigo} - {descricao}')
+                select_product_label.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
+                layout_cabecalho.addWidget(select_product_label, alignment=Qt.AlignLeft)
                 layout_cabecalho.addSpacerItem(QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
                 layout_cabecalho.addWidget(btn_visualizar_nfe)
                 layout_cabecalho.addWidget(btn_exportar_excel_estrutura)
@@ -198,7 +204,7 @@ def consultar_ultimas_nfe(self, table):
                         }    
 
                         QTableWidget::item:selected {
-                            background-color: #0066ff;
+                            background-color: #000000;
                             color: #fff;
                             font-weight: bold;
                         }        

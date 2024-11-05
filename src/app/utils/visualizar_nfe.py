@@ -1,3 +1,6 @@
+import locale
+from datetime import datetime
+
 import pyodbc
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
@@ -28,30 +31,27 @@ def visualizar_nfe(self, table):
                 cod_fornecedor_col = col
 
         if documento_col is not None and nome_fornec_col is not None and cod_fornecedor_col is not None:
-            documento = table.item(item_selecionado.row(), documento_col).text()
+            documento = table.item(item_selecionado.row(), documento_col).text().zfill(9)
             nome_fornec = table.item(item_selecionado.row(), nome_fornec_col).text()
             cod_fornecedor = table.item(item_selecionado.row(), cod_fornecedor_col).text()
 
         if documento not in self.guias_abertas_visualizar_nfe and documento is not None:
             query = f"""
                     SELECT
-                        D1_ITEM AS "Item NF",
                         D1_COD AS "Código",
                         D1_XDESCRI AS "Descrição do produto/serviço",
+                        D1_ITEM AS "Item NF",
                         D1_XPOSIPI AS "NCM/SH",
-                        D1_UM AS "UN.",
-                        D1_SEGUM AS "Seg. Un.",
-                        D1_QUANT AS "Quant.",
-                        D1_VUNIT AS "Vlr. Unitário",
-                        D1_TOTAL AS "Vlr. Total",
+                        D1_UM AS "Unid.",
+                        D1_QUANT AS "Qtde",
+                        D1_VUNIT AS "Valor Unitário",
+                        D1_TOTAL AS "Valor Total",
                         D1_BASEICM AS "BC ICMS",
                         D1_VALICM AS "V. ICMS",
                         D1_VALIPI AS "V. IPI",
                         D1_PICM AS "ALIQ. ICMS",
                         D1_IPI AS "ALIQ. IPI",
-                        D1_PEDIDO AS "Pedido",
-                        D1_ITEMPC AS "Item PC",
-                        D1_QTDPEDI AS "Qtd. Pedido"
+                        D1_PEDIDO AS "Pedido"
                     FROM
                         {database}.dbo.SD1010 NFE
                     WHERE 
@@ -77,6 +77,8 @@ def visualizar_nfe(self, table):
                 layout_cabecalho = QHBoxLayout()
 
                 tabela = QTableWidget(nova_guia)
+                tabela.setSelectionBehavior(QTableWidget.SelectRows)
+                tabela.setSelectionMode(QTableWidget.SingleSelection)
 
                 tabela.setColumnCount(len(cursor.description))
                 tabela.setHorizontalHeaderLabels(
@@ -92,16 +94,29 @@ def visualizar_nfe(self, table):
                 tabela.setFont(fonte_tabela)
 
                 # Ajustar a altura das linhas
-                altura_linha = 20  # Substitua pelo valor desejado
+                altura_linha = 25  # Substitua pelo valor desejado
                 tabela.verticalHeader().setDefaultSectionSize(altura_linha)
+
+                column_names = [desc[0] for desc in cursor.description]
 
                 for i, row in enumerate(cursor.fetchall()):
                     tabela.insertRow(i)
-                    for j, value in enumerate(row):
+                    for column_index, column_name in enumerate(column_names):
+                        value = row[column_index]
+                        if (column_name in ('Valor Unitário', 'Valor Total',
+                                            'BC ICMS', 'V. ICMS', 'V. IPI', 'ALIQ. ICMS', 'ALIQ. IPI')):
+                            value = locale.format_string('%.2f', value, grouping=True)
+
                         valor_formatado = str(value).strip()
                         item = QTableWidgetItem(valor_formatado)
-                        item.setTextAlignment(Qt.AlignCenter)
-                        tabela.setItem(i, j, item)
+                        if column_name == 'Descrição do produto/serviço':
+                            item.setTextAlignment(Qt.AlignLeft)
+                        elif column_name in ('Valor Unitário', 'Valor Total',
+                                             'BC ICMS', 'V. ICMS', 'V. IPI', 'ALIQ. ICMS', 'ALIQ. IPI'):
+                            item.setTextAlignment(Qt.AlignRight)
+                        else:
+                            item.setTextAlignment(Qt.AlignCenter)
+                        tabela.setItem(i, column_index, item)
 
                 tabela.setSortingEnabled(True)
 
@@ -109,8 +124,10 @@ def visualizar_nfe(self, table):
                 btn_exportar_excel_estrutura.clicked.connect(lambda: exportar_excel(self, tabela))
                 btn_exportar_excel_estrutura.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
-                layout_cabecalho.addWidget(QLabel(f'Visualização de Nota Fiscal\n\nFornecedor: {cod_fornecedor} {nome_fornec} - Documento: {documento}'),
-                                           alignment=Qt.AlignLeft)
+                select_product_label = QLabel(f'Visualização de Nota Fiscal\n\n'
+                                              f'Fornecedor:\t{cod_fornecedor} {nome_fornec}\t\tDocumento:\t{documento.lstrip('0')}')
+                select_product_label.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
+                layout_cabecalho.addWidget(select_product_label, alignment=Qt.AlignLeft)
                 layout_cabecalho.addSpacerItem(QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
                 layout_cabecalho.addWidget(btn_exportar_excel_estrutura)
 
@@ -171,7 +188,7 @@ def visualizar_nfe(self, table):
                         }    
 
                         QTableWidget::item:selected {
-                            background-color: #0066ff;
+                            background-color: #000000;
                             color: #fff;
                             font-weight: bold;
                         }        
