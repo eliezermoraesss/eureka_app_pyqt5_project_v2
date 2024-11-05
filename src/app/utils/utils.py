@@ -182,3 +182,7 @@ def tratar_campo_codigo(campo):
 
 def formatar_campo(campo):
     return campo.text().upper().strip()
+
+
+def format_cnpj(cnpj):
+    return f"{cnpj[:2]}.{cnpj[2:5]}.{cnpj[5:8]}/{cnpj[8:12]}-{cnpj[12:]}"  # Saída: 12.345.678/9012-34
