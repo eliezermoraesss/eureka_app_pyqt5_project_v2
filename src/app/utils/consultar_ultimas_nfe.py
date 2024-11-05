@@ -1,3 +1,6 @@
+import locale
+from datetime import datetime
+
 import pyodbc
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
@@ -103,13 +106,24 @@ def consultar_ultimas_nfe(self, table):
                 altura_linha = 20  # Substitua pelo valor desejado
                 tabela.verticalHeader().setDefaultSectionSize(altura_linha)
 
+                column_names = [desc[0] for desc in cursor.description]
+
                 for i, row in enumerate(cursor.fetchall()):
                     tabela.insertRow(i)
-                    for j, value in enumerate(row):
+                    for column_index, column_name in enumerate(column_names):
+                        value = row[column_index]
+                        if column_name in ('Data Entrada', 'Data da emissão') and not value.isspace():
+                            date_obj = datetime.strptime(value, "%Y%m%d")
+                            value = date_obj.strftime('%d/%m/%Y')
+                        elif column_name in ('Quant. NF', 'Vlr. Unitário', 'Vlr. Total', 'Quant. Pedido'):
+                            value = locale.format_string('%.2f', value, grouping=True)
+                        elif column_name == 'Documento':
+                            value = value.lstrip('0')
+
                         valor_formatado = str(value).strip()
                         item = QTableWidgetItem(valor_formatado)
-                        item.setTextAlignment(Qt.AlignCenter)
-                        tabela.setItem(i, j, item)
+                        item.setTextAlignment(Qt.AlignCenter) if column_name != 'Fornecedor/Cliente' else item.setTextAlignment(Qt.AlignLeft)
+                        tabela.setItem(i, column_index, item)
 
                 tabela.setSortingEnabled(True)
 
