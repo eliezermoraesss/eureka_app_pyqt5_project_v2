@@ -1,3 +1,6 @@
+import locale
+from datetime import datetime
+
 import pyodbc
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
@@ -5,7 +8,7 @@ from PyQt5.QtWidgets import QLabel, QTableWidgetItem, QTableWidget, QHeaderView,
     QMessageBox
 
 from src.app.utils.db_mssql import setup_mssql
-from src.app.utils.utils import copiar_linha
+from src.app.utils.utils import copiar_linha, format_cnpj
 
 
 def executar_ultimos_fornecedores(self, table):
@@ -92,6 +95,14 @@ def executar_ultimos_fornecedores(self, table):
                 for i, row in enumerate(cursor.fetchall()):
                     tabela_ult_fornecedores.insertRow(i)
                     for j, value in enumerate(row):
+                        if j == 3:
+                            value = format_cnpj(value)
+                        elif j in (4, 5, 6, 7, 8, 9):
+                            value = locale.format_string("%.2f", value, grouping=True)
+                        elif j in (10, 11, 12) and not value.isspace():
+                            data_obj = datetime.strptime(value, "%Y%m%d")
+                            value = data_obj.strftime("%d/%m/%Y")
+
                         valor_formatado = str(value).strip()
                         item = QTableWidgetItem(valor_formatado)
                         item.setTextAlignment(Qt.AlignCenter)
