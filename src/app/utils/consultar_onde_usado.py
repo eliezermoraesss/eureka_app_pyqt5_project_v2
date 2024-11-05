@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pyodbc
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
@@ -92,11 +94,14 @@ def executar_consulta_onde_usado(self, table):
                     for j, value in enumerate(row):
                         valor_formatado = str(value).strip()
 
+                        if j == 2:
+                            valor_formatado = "{:.2f}".format(value)
+
                         item = QTableWidgetItem(valor_formatado)
-                        tabela_onde_usado.setItem(i, j, item)
-                        
                         if j != 0 and j != 1:
                             item.setTextAlignment(Qt.AlignCenter)
+
+                        tabela_onde_usado.setItem(i, j, item)
 
                 tabela_onde_usado.setSortingEnabled(True)
 
