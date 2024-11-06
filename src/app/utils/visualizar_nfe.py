@@ -103,9 +103,11 @@ def visualizar_nfe(self, table):
                     tabela.insertRow(i)
                     for column_index, column_name in enumerate(column_names):
                         value = row[column_index]
-                        if (column_name in ('Valor Unitário', 'Valor Total',
+                        if (column_name in ('Qtde', 'Valor Unitário', 'Valor Total',
                                             'BC ICMS', 'V. ICMS', 'V. IPI', 'ALIQ. ICMS', 'ALIQ. IPI')):
                             value = locale.format_string('%.2f', value, grouping=True)
+                        elif column_name == 'NCM/SH':
+                            value = f'{value[:4]}.{value[4:6]}.{value[6:]}'  # NCM FORMAT 1234.56.78
 
                         valor_formatado = str(value).strip()
                         item = QTableWidgetItem(valor_formatado)
@@ -124,9 +126,10 @@ def visualizar_nfe(self, table):
                 btn_exportar_excel_estrutura.clicked.connect(lambda: exportar_excel(self, tabela))
                 btn_exportar_excel_estrutura.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
-                select_product_label = QLabel(f'Visualização de Nota Fiscal\n\n'
-                                              f'Fornecedor:\t{cod_fornecedor} {nome_fornec}\t\tDocumento:\t{documento.lstrip('0')}')
+                select_product_label = QLabel(f'VISUALIZAÇÃO DA NOTA FISCAL\n\n'
+                                              f'Fornecedor:\t{cod_fornecedor}\t{nome_fornec}\t\tDocumento:\t{documento.lstrip('0')}')
                 select_product_label.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
+                # select_product_label.setFont(QFont())
                 layout_cabecalho.addWidget(select_product_label, alignment=Qt.AlignLeft)
                 layout_cabecalho.addSpacerItem(QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
                 layout_cabecalho.addWidget(btn_exportar_excel_estrutura)

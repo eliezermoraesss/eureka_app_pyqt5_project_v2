@@ -110,7 +110,7 @@ def executar_ultimos_fornecedores(self, table):
 
                 tabela_ult_fornecedores.setSortingEnabled(True)
 
-                layout_cabecalho.addWidget(QLabel(f'Últimos Fornecedores\n\n{codigo} - {descricao}'),
+                layout_cabecalho.addWidget(QLabel(f'ÚLTIMOS FORNECEDORES\n\n{codigo}\t{descricao}'),
                                            alignment=Qt.AlignLeft)
                 layout_nova_guia_ult_forn.addLayout(layout_cabecalho)
 

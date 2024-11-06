@@ -107,7 +107,7 @@ def executar_consulta_onde_usado(self, table):
                 # Ajustar automaticamente a largura da coluna "Descrição"
                 ajustar_largura_coluna_descricao(tabela_onde_usado)
 
-                layout_cabecalho.addWidget(QLabel(f'Onde é usado?\n\n{codigo} - {descricao}'),
+                layout_cabecalho.addWidget(QLabel(f'ONDE É USADO?\n\n{codigo}\t{descricao}'),
                                            alignment=Qt.AlignLeft)
                 layout_nova_guia_estrutura.addLayout(layout_cabecalho)
                 layout_nova_guia_estrutura.addWidget(tabela_onde_usado)

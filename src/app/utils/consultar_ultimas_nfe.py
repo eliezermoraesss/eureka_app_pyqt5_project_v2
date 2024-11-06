@@ -44,11 +44,10 @@ def consultar_ultimas_nfe(self, table):
                         FORN.A2_NOME AS "Fornecedor/Cliente",
                         D1_LOJA AS "Loja",
                         livroFiscal.F3_ESPECIE AS "Espécie",
-                        D1_ITEM AS "Item NF",
-                        D1_QUANT AS "Quant. NF",
+                        D1_QUANT AS "Qtde NF",
                         D1_VUNIT AS "Valor Unitário",
                         D1_TOTAL AS "Valor Total",
-                        livroFiscal.F3_CHVNFE AS "Chave de acesso"
+                        livroFiscal.F3_CHVNFE AS "CHAVE DE ACESSO"
                     FROM 
                         {database}.dbo.SD1010 NFE
                     LEFT JOIN
@@ -114,7 +113,7 @@ def consultar_ultimas_nfe(self, table):
                         if column_name in ('Data Entrada', 'Data da emissão') and not value.isspace():
                             date_obj = datetime.strptime(value, "%Y%m%d")
                             value = date_obj.strftime('%d/%m/%Y')
-                        elif column_name in ('Quant. NF', 'Valor Unitário', 'Valor Total'):
+                        elif column_name in ('Qtde NF', 'Valor Unitário', 'Valor Total'):
                             value = locale.format_string('%.2f', value, grouping=True)
                         elif column_name == 'Documento':
                             value = value.lstrip('0')
@@ -139,7 +138,7 @@ def consultar_ultimas_nfe(self, table):
                 btn_visualizar_nfe.clicked.connect(lambda: visualizar_nfe(self, tabela))
                 btn_visualizar_nfe.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
-                select_product_label = QLabel(f'Histórico de compras - Últimas Notas Fiscais\n\n{codigo} - {descricao}')
+                select_product_label = QLabel(f'ÚLTIMAS NOTAS FISCAIS\n\n{codigo}\t{descricao}')
                 select_product_label.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
                 layout_cabecalho.addWidget(select_product_label, alignment=Qt.AlignLeft)
                 layout_cabecalho.addSpacerItem(QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
