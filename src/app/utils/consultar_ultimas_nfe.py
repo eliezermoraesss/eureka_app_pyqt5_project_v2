@@ -44,7 +44,6 @@ def consultar_ultimas_nfe(self, table):
                         FORN.A2_NOME AS "Fornecedor/Cliente",
                         D1_LOJA AS "Loja",
                         livroFiscal.F3_ESPECIE AS "Espécie",
-                        D1_TIPO AS "Tipo NF",
                         D1_ITEM AS "Item NF",
                         D1_QUANT AS "Quant. NF",
                         D1_VUNIT AS "Valor Unitário",
