@@ -72,7 +72,7 @@ def consultar_ultimas_nfe(self, table):
                 cursor.execute(query)
 
                 if cursor.rowcount == 0:
-                    QMessageBox.information(None, "Eureka® ", "Nenhuma Nota Fiscal foi encontrada.")
+                    QMessageBox.information(None, "Atenção", "Nenhuma Nota Fiscal foi encontrada.\n\nEureka®")
                     return
 
                 nova_guia = QWidget()

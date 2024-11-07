@@ -754,7 +754,7 @@ class PcpApp(QWidget):
                 self.label_line_number.show()
 
             else:
-                exibir_mensagem("EUREKA® PCP", 'Nada encontrado!', "info")
+                exibir_mensagem("EUREKA® PCP", 'Nenhum registro foi encontrado.\n\nEureka®', "info")
                 self.controle_campos_formulario(True)
                 self.button_visible_control(False)
                 return

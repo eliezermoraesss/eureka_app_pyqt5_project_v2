@@ -73,7 +73,7 @@ def executar_consulta_estrutura(self, table):
                 cursor.execute(select_query_estrutura)
 
                 if cursor.rowcount == 0:
-                    QMessageBox.information(None, "Eureka® Consulta estrutura", "Estrutura não encontrada.")
+                    QMessageBox.information(None, "Atenção", "Estrutura não encontrada.\n\nEureka®")
                     return
 
                 nova_guia_estrutura = QWidget()
