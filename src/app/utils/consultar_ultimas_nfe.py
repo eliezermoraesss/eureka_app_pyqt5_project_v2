@@ -140,7 +140,7 @@ def consultar_ultimas_nfe(self, table):
 
                 select_product_label = QLabel(f'ÚLTIMAS NOTAS FISCAIS\n\n{codigo}\t{descricao}')
                 select_product_label.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
-                layout_cabecalho.addWidget(select_product_label, alignment=Qt.AlignLeft)
+                layout_cabecalho.addWidget(select_product_label, alignment=Qt.AlignCenter)
                 layout_cabecalho.addSpacerItem(QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
                 layout_cabecalho.addWidget(btn_visualizar_nfe)
                 layout_cabecalho.addWidget(btn_exportar_excel_estrutura)

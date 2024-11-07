@@ -106,8 +106,10 @@ def executar_saldo_em_estoque(self, table):
 
                 tabela_saldo_estoque.setSortingEnabled(True)
 
-                layout_cabecalho.addWidget(QLabel(f'Saldos em Estoque\n\n{codigo}\t{descricao}'),
-                                           alignment=Qt.AlignLeft)
+                select_product_label = QLabel(f'Saldos em Estoque\n\n{codigo}\t{descricao}')
+                select_product_label.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
+                layout_cabecalho.addWidget(select_product_label,
+                                           alignment=Qt.AlignCenter)
                 layout_nova_guia_saldo.addLayout(layout_cabecalho)
                 layout_nova_guia_saldo.addWidget(tabela_saldo_estoque)
                 nova_guia_saldo.setLayout(layout_nova_guia_saldo)
