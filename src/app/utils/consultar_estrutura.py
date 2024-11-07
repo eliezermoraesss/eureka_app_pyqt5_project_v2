@@ -73,40 +73,42 @@ def executar_consulta_estrutura(self, table):
                 cursor.execute(select_query_estrutura)
 
                 if cursor.rowcount == 0:
-                    QMessageBox.information(None, "Atenção", "Estrutura não encontrada.\n\nEureka®")
+                    QMessageBox.information(None, "Atenção", f"{codigo}\n\nEstrutura não encontrada.\n\nEureka®")
                     return
 
                 nova_guia_estrutura = QWidget()
                 layout_nova_guia_estrutura = QVBoxLayout()
                 layout_cabecalho = QHBoxLayout()
 
-                tree_estrutura = QTableWidget(nova_guia_estrutura)
+                tabela = QTableWidget(nova_guia_estrutura)
+                tabela.setSelectionBehavior(QTableWidget.SelectRows)
+                tabela.setSelectionMode(QTableWidget.SingleSelection)
 
-                tree_estrutura.setContextMenuPolicy(Qt.CustomContextMenu)
-                tree_estrutura.customContextMenuRequested.connect(
-                    lambda pos: self.show_context_menu(pos, tree_estrutura))
+                tabela.setContextMenuPolicy(Qt.CustomContextMenu)
+                tabela.customContextMenuRequested.connect(
+                    lambda pos: self.show_context_menu(pos, tabela))
 
-                tree_estrutura.setColumnCount(len(cursor.description))
-                tree_estrutura.setHorizontalHeaderLabels([desc[0] for desc in cursor.description])
+                tabela.setColumnCount(len(cursor.description))
+                tabela.setHorizontalHeaderLabels([desc[0] for desc in cursor.description])
 
                 # Tornar a tabela somente leitura
-                tree_estrutura.setEditTriggers(QTableWidget.NoEditTriggers)
+                tabela.setEditTriggers(QTableWidget.NoEditTriggers)
 
                 # Permitir edição apenas na coluna "Quantidade" (assumindo que "Quantidade" é a terceira coluna,
                 # índice 2)
-                tree_estrutura.setEditTriggers(QAbstractItemView.DoubleClicked)
-                tree_estrutura.setItemDelegateForColumn(2, QItemDelegate(tree_estrutura))
+                tabela.setEditTriggers(QAbstractItemView.DoubleClicked)
+                tabela.setItemDelegateForColumn(2, QItemDelegate(tabela))
 
                 # Configurar a fonte da tabela
                 fonte_tabela = QFont("Segoe UI", 8)  # Substitua por sua fonte desejada e tamanho
-                tree_estrutura.setFont(fonte_tabela)
+                tabela.setFont(fonte_tabela)
 
                 # Ajustar a altura das linhas
                 altura_linha = 22  # Substitua pelo valor desejado
-                tree_estrutura.verticalHeader().setDefaultSectionSize(altura_linha)
+                tabela.verticalHeader().setDefaultSectionSize(altura_linha)
 
                 for i, row in enumerate(cursor.fetchall()):
-                    tree_estrutura.insertRow(i)
+                    tabela.insertRow(i)
                     for j, value in enumerate(row):
                         if j == 2:
                             valor_formatado = locale.format_string("%.2f", value, grouping=True)
@@ -128,15 +130,15 @@ def executar_consulta_estrutura(self, table):
                         if j != 0 and j != 1:
                             item.setTextAlignment(Qt.AlignCenter)
 
-                        tree_estrutura.setItem(i, j, item)
+                        tabela.setItem(i, j, item)
 
-                tree_estrutura.setSortingEnabled(True)
+                tabela.setSortingEnabled(True)
 
                 # Ajustar automaticamente a largura da coluna "Descrição"
-                ajustar_largura_coluna_descricao(tree_estrutura)
+                ajustar_largura_coluna_descricao(tabela)
 
                 btn_exportar_excel_estrutura = QPushButton("Exportar Excel", self)
-                btn_exportar_excel_estrutura.clicked.connect(lambda: exportar_excel(self, tree_estrutura))
+                btn_exportar_excel_estrutura.clicked.connect(lambda: exportar_excel(self, tabela))
                 btn_exportar_excel_estrutura.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
                 select_product_label = QLabel(f"CONSULTA DE ESTRUTURA \n\n{codigo}\t{descricao}")
@@ -146,7 +148,7 @@ def executar_consulta_estrutura(self, table):
                 layout_cabecalho.addWidget(btn_exportar_excel_estrutura)
 
                 layout_nova_guia_estrutura.addLayout(layout_cabecalho)
-                layout_nova_guia_estrutura.addWidget(tree_estrutura)
+                layout_nova_guia_estrutura.addWidget(tabela)
                 nova_guia_estrutura.setLayout(layout_nova_guia_estrutura)
 
                 nova_guia_estrutura.setStyleSheet("""                                           
@@ -202,7 +204,7 @@ def executar_consulta_estrutura(self, table):
                         }
 
                         QTableWidget::item:selected {
-                            background-color: #0066ff;
+                            background-color: #000000;
                             color: #fff;
                             font-weight: bold;
                         }        
@@ -215,8 +217,8 @@ def executar_consulta_estrutura(self, table):
 
                 self.tabWidget.addTab(nova_guia_estrutura, f"ESTRUTURA - {codigo}")
                 self.tabWidget.setCurrentIndex(self.tabWidget.indexOf(nova_guia_estrutura))
-                tree_estrutura.itemChanged.connect(
-                    lambda item: handle_item_change(item, tree_estrutura, codigo))
+                tabela.itemChanged.connect(
+                    lambda item: handle_item_change(item, tabela, codigo))
                 self.guias_abertas.append(codigo)
 
             except pyodbc.Error as ex:
@@ -250,11 +252,11 @@ def alterar_quantidade_estrutura(codigo_pai, codigo_filho, quantidade):
                                          "Erro de execução", 16 | 0)
 
 
-def handle_item_change(item, tree_estrutura, codigo_pai):
+def handle_item_change(item, tabela, codigo_pai):
     if item.column() == 2:
-        linha_selecionada = tree_estrutura.currentItem()
+        linha_selecionada = tabela.currentItem()
 
-        codigo_filho = tree_estrutura.item(linha_selecionada.row(), 0).text()
+        codigo_filho = tabela.item(linha_selecionada.row(), 0).text()
         nova_quantidade = item.text()
         nova_quantidade = nova_quantidade.replace(',', '.')
 

@@ -61,34 +61,37 @@ def executar_saldo_em_estoque(self, table):
                 cursor_saldo_estoque.execute(query_saldo)
 
                 if cursor_saldo_estoque.rowcount == 0:
-                    QMessageBox.information(None, "Atenção", "Não há registros de estoque para este produto.\n\nEureka®")
+                    QMessageBox.information(None, "Atenção", f"{codigo}\n\nNão há registros de estoque para este "
+                                                             f"produto.\n\nEureka®")
                     return
 
                 nova_guia_saldo = QWidget()
                 layout_nova_guia_saldo = QVBoxLayout()
                 layout_cabecalho = QHBoxLayout()
 
-                tabela_saldo_estoque = QTableWidget(nova_guia_saldo)
+                tabela = QTableWidget(nova_guia_saldo)
+                tabela.setSelectionBehavior(QTableWidget.SelectRows)
+                tabela.setSelectionMode(QTableWidget.SingleSelection)
 
-                tabela_saldo_estoque.setColumnCount(len(cursor_saldo_estoque.description))
-                tabela_saldo_estoque.setHorizontalHeaderLabels(
+                tabela.setColumnCount(len(cursor_saldo_estoque.description))
+                tabela.setHorizontalHeaderLabels(
                     [desc[0] for desc in cursor_saldo_estoque.description])
 
-                tabela_saldo_estoque.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+                tabela.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
 
                 # Tornar a tabela somente leitura
-                tabela_saldo_estoque.setEditTriggers(QTableWidget.NoEditTriggers)
+                tabela.setEditTriggers(QTableWidget.NoEditTriggers)
 
                 # Configurar a fonte da tabela1
                 fonte_tabela = QFont("Segoe UI", 10)  # Substitua por sua fonte desejada e tamanho
-                tabela_saldo_estoque.setFont(fonte_tabela)
+                tabela.setFont(fonte_tabela)
 
                 # Ajustar a altura das linhas
                 altura_linha = 20  # Substitua pelo valor desejado
-                tabela_saldo_estoque.verticalHeader().setDefaultSectionSize(altura_linha)
+                tabela.verticalHeader().setDefaultSectionSize(altura_linha)
 
                 for i, row in enumerate(cursor_saldo_estoque.fetchall()):
-                    tabela_saldo_estoque.insertRow(i)
+                    tabela.insertRow(i)
                     for j, value in enumerate(row):
 
                         if j in (0, 1, 2, 3, 5, 6):
@@ -101,16 +104,16 @@ def executar_saldo_em_estoque(self, table):
                         valor_formatado = str(value).strip()
                         item = QTableWidgetItem(valor_formatado)
                         item.setTextAlignment(Qt.AlignCenter)
-                        tabela_saldo_estoque.setItem(i, j, item)
+                        tabela.setItem(i, j, item)
 
-                tabela_saldo_estoque.setSortingEnabled(True)
+                tabela.setSortingEnabled(True)
 
                 select_product_label = QLabel(f'SALDOS EM ESTOQUE\n\n{codigo}\t{descricao}')
                 select_product_label.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
                 layout_cabecalho.addWidget(select_product_label,
                                            alignment=Qt.AlignLeft)
                 layout_nova_guia_saldo.addLayout(layout_cabecalho)
-                layout_nova_guia_saldo.addWidget(tabela_saldo_estoque)
+                layout_nova_guia_saldo.addWidget(tabela)
                 nova_guia_saldo.setLayout(layout_nova_guia_saldo)
 
                 nova_guia_saldo.setStyleSheet("""                                           
@@ -144,7 +147,7 @@ def executar_saldo_em_estoque(self, table):
                         }   
 
                         QTableWidget::item:selected {
-                            background-color: #0066ff;
+                            background-color: #000000;
                             color: #fff;
                             font-weight: bold;
                         }        
@@ -156,7 +159,7 @@ def executar_saldo_em_estoque(self, table):
                     self.tabWidget.setVisible(True)
 
                 self.tabWidget.addTab(nova_guia_saldo, f"SALDO EM ESTOQUE - {codigo}")
-                tabela_saldo_estoque.itemDoubleClicked.connect(copiar_linha)
+                tabela.itemDoubleClicked.connect(copiar_linha)
                 self.tabWidget.setCurrentIndex(self.tabWidget.indexOf(nova_guia_saldo))
 
             except pyodbc.Error as ex:

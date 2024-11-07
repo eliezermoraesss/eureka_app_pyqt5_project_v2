@@ -68,7 +68,7 @@ def visualizar_nfe(self, table):
                 cursor.execute(query)
 
                 if cursor.rowcount == 0:
-                    QMessageBox.information(None, "Atenção", "Nota fiscal não encontrada.\n\nEureka®")
+                    QMessageBox.information(None, "Atenção", f"{documento}\n\nNota fiscal não encontrada.\n\nEureka®")
                     return
 
                 nova_guia = QWidget()

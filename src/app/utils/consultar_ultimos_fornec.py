@@ -66,34 +66,36 @@ def executar_ultimos_fornecedores(self, table):
                 cursor.execute(query)
 
                 if cursor.rowcount == 0:
-                    QMessageBox.information(None, "Atenção", "Nenhum fornecedor não encontrado.\n\nEureka®")
+                    QMessageBox.information(None, "Atenção", f"{codigo}\n\nNenhum fornecedor não encontrado.\n\nEureka®")
                     return
 
                 nova_guia_ult_forn = QWidget()
                 layout_nova_guia_ult_forn = QVBoxLayout()
                 layout_cabecalho = QHBoxLayout()
 
-                tabela_ult_fornecedores = QTableWidget(nova_guia_ult_forn)
+                tabela = QTableWidget(nova_guia_ult_forn)
+                tabela.setSelectionBehavior(QTableWidget.SelectRows)
+                tabela.setSelectionMode(QTableWidget.SingleSelection)
 
-                tabela_ult_fornecedores.setColumnCount(len(cursor.description))
-                tabela_ult_fornecedores.setHorizontalHeaderLabels(
+                tabela.setColumnCount(len(cursor.description))
+                tabela.setHorizontalHeaderLabels(
                     [desc[0] for desc in cursor.description])
 
-                tabela_ult_fornecedores.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+                tabela.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
 
                 # Tornar a tabela somente leitura
-                tabela_ult_fornecedores.setEditTriggers(QTableWidget.NoEditTriggers)
+                tabela.setEditTriggers(QTableWidget.NoEditTriggers)
 
                 # Configurar a fonte da tabela1
                 fonte_tabela = QFont("Segoe UI", 10)  # Substitua por sua fonte desejada e tamanho
-                tabela_ult_fornecedores.setFont(fonte_tabela)
+                tabela.setFont(fonte_tabela)
 
                 # Ajustar a altura das linhas
                 altura_linha = 20  # Substitua pelo valor desejado
-                tabela_ult_fornecedores.verticalHeader().setDefaultSectionSize(altura_linha)
+                tabela.verticalHeader().setDefaultSectionSize(altura_linha)
 
                 for i, row in enumerate(cursor.fetchall()):
-                    tabela_ult_fornecedores.insertRow(i)
+                    tabela.insertRow(i)
                     for j, value in enumerate(row):
                         if j == 3:
                             value = format_cnpj(value)
@@ -106,9 +108,9 @@ def executar_ultimos_fornecedores(self, table):
                         valor_formatado = str(value).strip()
                         item = QTableWidgetItem(valor_formatado)
                         item.setTextAlignment(Qt.AlignCenter)
-                        tabela_ult_fornecedores.setItem(i, j, item)
+                        tabela.setItem(i, j, item)
 
-                tabela_ult_fornecedores.setSortingEnabled(True)
+                tabela.setSortingEnabled(True)
 
                 select_product_label = QLabel(f'ÚLTIMOS FORNECEDORES\n\n{codigo}\t{descricao}')
                 select_product_label.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
@@ -116,7 +118,7 @@ def executar_ultimos_fornecedores(self, table):
                                            alignment=Qt.AlignLeft)
                 layout_nova_guia_ult_forn.addLayout(layout_cabecalho)
 
-                layout_nova_guia_ult_forn.addWidget(tabela_ult_fornecedores)
+                layout_nova_guia_ult_forn.addWidget(tabela)
                 nova_guia_ult_forn.setLayout(layout_nova_guia_ult_forn)
 
                 nova_guia_ult_forn.setStyleSheet("""                                           
@@ -150,7 +152,7 @@ def executar_ultimos_fornecedores(self, table):
                         }    
 
                         QTableWidget::item:selected {
-                            background-color: #0066ff;
+                            background-color: #000000;
                             color: #fff;
                             font-weight: bold;
                         }        
@@ -162,7 +164,7 @@ def executar_ultimos_fornecedores(self, table):
                     self.tabWidget.setVisible(True)
 
                 self.tabWidget.addTab(nova_guia_ult_forn, f"ÚLTIMOS FORNECEDORES - {codigo}")
-                tabela_ult_fornecedores.itemDoubleClicked.connect(copiar_linha)
+                tabela.itemDoubleClicked.connect(copiar_linha)
                 self.tabWidget.setCurrentIndex(self.tabWidget.indexOf(nova_guia_ult_forn))
 
             except pyodbc.Error as ex:

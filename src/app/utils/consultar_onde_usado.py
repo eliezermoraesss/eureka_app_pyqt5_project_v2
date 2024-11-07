@@ -62,7 +62,7 @@ def executar_consulta_onde_usado(self, table):
                 resultado = cursor.execute(query_onde_usado)
 
                 if resultado.rowcount == 0:
-                    QMessageBox.information(None, "Atenção", "Nenhum item pai encontrado.\nEste item não "
+                    QMessageBox.information(None, "Atenção", f"{codigo}\n\nNenhum item pai encontrado.\nEste item não "
                                                              "compõe nenhuma estrutura de produto.\n\nEureka®")
                     return
 
@@ -70,28 +70,30 @@ def executar_consulta_onde_usado(self, table):
                 layout_nova_guia_estrutura = QVBoxLayout()
                 layout_cabecalho = QHBoxLayout()
 
-                tabela_onde_usado = QTableWidget(nova_guia_estrutura)
+                tabela = QTableWidget(nova_guia_estrutura)
+                tabela.setSelectionBehavior(QTableWidget.SelectRows)
+                tabela.setSelectionMode(QTableWidget.SingleSelection)
 
-                tabela_onde_usado.setContextMenuPolicy(Qt.CustomContextMenu)
-                tabela_onde_usado.customContextMenuRequested.connect(
-                    lambda pos: self.show_context_menu(pos, tabela_onde_usado))
+                tabela.setContextMenuPolicy(Qt.CustomContextMenu)
+                tabela.customContextMenuRequested.connect(
+                    lambda pos: self.show_context_menu(pos, tabela))
 
-                tabela_onde_usado.setColumnCount(len(cursor.description))
-                tabela_onde_usado.setHorizontalHeaderLabels([desc[0] for desc in cursor.description])
+                tabela.setColumnCount(len(cursor.description))
+                tabela.setHorizontalHeaderLabels([desc[0] for desc in cursor.description])
 
                 # Tornar a tabela somente leitura
-                tabela_onde_usado.setEditTriggers(QTableWidget.NoEditTriggers)
+                tabela.setEditTriggers(QTableWidget.NoEditTriggers)
 
                 # Configurar a fonte da tabela
                 fonte_tabela = QFont("Segoe UI", 8)  # Substitua por sua fonte desejada e tamanho
-                tabela_onde_usado.setFont(fonte_tabela)
+                tabela.setFont(fonte_tabela)
 
                 # Ajustar a altura das linhas
                 altura_linha = 22  # Substitua pelo valor desejado
-                tabela_onde_usado.verticalHeader().setDefaultSectionSize(altura_linha)
+                tabela.verticalHeader().setDefaultSectionSize(altura_linha)
 
                 for i, row in enumerate(cursor.fetchall()):
-                    tabela_onde_usado.insertRow(i)
+                    tabela.insertRow(i)
                     for j, value in enumerate(row):
                         valor_formatado = str(value).strip()
                         if j == 2:
@@ -100,19 +102,19 @@ def executar_consulta_onde_usado(self, table):
                         if j != 0 and j != 1:
                             item.setTextAlignment(Qt.AlignCenter)
 
-                        tabela_onde_usado.setItem(i, j, item)
+                        tabela.setItem(i, j, item)
 
-                tabela_onde_usado.setSortingEnabled(True)
+                tabela.setSortingEnabled(True)
 
                 # Ajustar automaticamente a largura da coluna "Descrição"
-                ajustar_largura_coluna_descricao(tabela_onde_usado)
+                ajustar_largura_coluna_descricao(tabela)
 
                 select_product_label = QLabel(f'ONDE É USADO?\n\n{codigo}\t{descricao}')
                 select_product_label.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
 
                 layout_cabecalho.addWidget(select_product_label, alignment=Qt.AlignLeft)
                 layout_nova_guia_estrutura.addLayout(layout_cabecalho)
-                layout_nova_guia_estrutura.addWidget(tabela_onde_usado)
+                layout_nova_guia_estrutura.addWidget(tabela)
                 nova_guia_estrutura.setLayout(layout_nova_guia_estrutura)
 
                 nova_guia_estrutura.setStyleSheet("""                                           
@@ -146,7 +148,7 @@ def executar_consulta_onde_usado(self, table):
                         }   
 
                         QTableWidget::item:selected {
-                            background-color: #0066ff;
+                            background-color: #000000;
                             color: #fff;
                             font-weight: bold;
                         }        
@@ -158,7 +160,7 @@ def executar_consulta_onde_usado(self, table):
                     self.tabWidget.setVisible(True)
 
                 self.tabWidget.addTab(nova_guia_estrutura, f"ONDE É USADO? - {codigo}")
-                tabela_onde_usado.itemDoubleClicked.connect(copiar_linha)
+                tabela.itemDoubleClicked.connect(copiar_linha)
                 self.tabWidget.setCurrentIndex(self.tabWidget.indexOf(nova_guia_estrutura))
 
             except pyodbc.Error as ex:

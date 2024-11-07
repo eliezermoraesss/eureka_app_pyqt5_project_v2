@@ -72,7 +72,8 @@ def consultar_ultimas_nfe(self, table):
                 cursor.execute(query)
 
                 if cursor.rowcount == 0:
-                    QMessageBox.information(None, "Atenção", "Nenhuma Nota Fiscal foi encontrada.\n\nEureka®")
+                    QMessageBox.information(None, "Atenção", f"{codigo}\n\nNenhuma nota fiscal foi "
+                                                             f"encontrada.\n\nEureka®")
                     return
 
                 nova_guia = QWidget()
@@ -82,10 +83,6 @@ def consultar_ultimas_nfe(self, table):
                 tabela = QTableWidget(nova_guia)
                 tabela.setSelectionBehavior(QTableWidget.SelectRows)
                 tabela.setSelectionMode(QTableWidget.SingleSelection)
-
-                tabela.setContextMenuPolicy(Qt.CustomContextMenu)
-                tabela.customContextMenuRequested.connect(
-                    lambda pos: self.show_context_menu(pos, tabela))
 
                 tabela.setColumnCount(len(cursor.description))
                 tabela.setHorizontalHeaderLabels(
