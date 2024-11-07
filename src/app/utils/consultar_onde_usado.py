@@ -111,7 +111,7 @@ def executar_consulta_onde_usado(self, table):
                 select_product_label = QLabel(f'ONDE É USADO?\n\n{codigo}\t{descricao}')
                 select_product_label.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
 
-                layout_cabecalho.addWidget(select_product_label, alignment=Qt.AlignCenter)
+                layout_cabecalho.addWidget(select_product_label, alignment=Qt.AlignLeft)
                 layout_nova_guia_estrutura.addLayout(layout_cabecalho)
                 layout_nova_guia_estrutura.addWidget(tabela_onde_usado)
                 nova_guia_estrutura.setLayout(layout_nova_guia_estrutura)

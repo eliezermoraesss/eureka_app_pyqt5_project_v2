@@ -129,8 +129,7 @@ def visualizar_nfe(self, table):
                 select_product_label = QLabel(f'VISUALIZAÇÃO DA NOTA FISCAL\n\n'
                                               f'Fornecedor:\t{cod_fornecedor}\t{nome_fornec}\t\tDocumento:\t{documento.lstrip('0')}')
                 select_product_label.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
-                # select_product_label.setFont(QFont())
-                layout_cabecalho.addWidget(select_product_label, alignment=Qt.AlignCenter)
+                layout_cabecalho.addWidget(select_product_label, alignment=Qt.AlignLeft)
                 layout_cabecalho.addSpacerItem(QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
                 layout_cabecalho.addWidget(btn_exportar_excel_estrutura)
 

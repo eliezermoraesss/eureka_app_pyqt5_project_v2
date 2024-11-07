@@ -113,7 +113,7 @@ def executar_ultimos_fornecedores(self, table):
                 select_product_label = QLabel(f'ÚLTIMOS FORNECEDORES\n\n{codigo}\t{descricao}')
                 select_product_label.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
                 layout_cabecalho.addWidget(select_product_label,
-                                           alignment=Qt.AlignCenter)
+                                           alignment=Qt.AlignLeft)
                 layout_nova_guia_ult_forn.addLayout(layout_cabecalho)
 
                 layout_nova_guia_ult_forn.addWidget(tabela_ult_fornecedores)
