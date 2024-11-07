@@ -1,5 +1,4 @@
 import locale
-from datetime import datetime
 
 import pyodbc
 from PyQt5.QtCore import Qt

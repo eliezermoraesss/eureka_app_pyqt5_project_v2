@@ -552,6 +552,8 @@ class FiscalApp(QWidget):
             table.selectRow(index.row())
 
             menu = QMenu()
+            # A lib Qt garante que o objeto do menu será destruído após uso
+            menu.setAttribute(Qt.WA_DeleteOnClose)
 
             context_menu_ultimo_fornecedor = QAction('Últimos fornecedores', self)
             context_menu_ultimo_fornecedor.triggered.connect(lambda: executar_ultimos_fornecedores(self, table))

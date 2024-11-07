@@ -388,6 +388,8 @@ class QpClosedApp(QWidget):
             # Seleciona a linha inteira
             table.selectRow(index.row())
             menu = QMenu()
+            menu.setAttribute(Qt.WA_DeleteOnClose)
+
             context_menu_nova_janela = QAction('Nova janela', self)
             context_menu_nova_janela.triggered.connect(self.abrir_nova_janela)
             menu.addAction(context_menu_nova_janela)

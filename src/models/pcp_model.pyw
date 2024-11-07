@@ -509,6 +509,8 @@ class PcpApp(QWidget):
             table.selectRow(index.row())
 
             menu = QMenu()
+            # A lib Qt garante que o objeto do menu será destruído após uso
+            menu.setAttribute(Qt.WA_DeleteOnClose)
 
             context_menu_abrir_desenho = QAction('Abrir desenho', self)
             context_menu_abrir_desenho.triggered.connect(lambda: abrir_desenho(self, table))

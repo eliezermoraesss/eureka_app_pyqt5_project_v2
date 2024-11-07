@@ -598,6 +598,8 @@ class ComprasApp(QWidget):
             table.selectRow(index.row())
 
             menu = QMenu()
+            # A lib Qt garante que o objeto do menu será destruído após uso
+            menu.setAttribute(Qt.WA_DeleteOnClose)
 
             context_menu_visualizar_nf = QAction('Visualizar Nota Fiscal', self)
             context_menu_visualizar_nf.triggered.connect(lambda: visualizar_nfe(self, table))
@@ -663,6 +665,7 @@ class ComprasApp(QWidget):
             self.tree.horizontalHeader().sectionClicked.disconnect(self.abrir_filtro)
         except TypeError:
             pass
+
         # Conectar sinal de clique para abrir o filtro
         self.tree.horizontalHeader().sectionClicked.connect(self.abrir_filtro)
 

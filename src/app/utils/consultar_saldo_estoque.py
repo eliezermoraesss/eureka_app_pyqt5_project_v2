@@ -54,14 +54,14 @@ def executar_saldo_em_estoque(self, table):
                         B2_COD = '{codigo}';
                 """
             self.guias_abertas_saldo.append(codigo)
-            conn_saldo = pyodbc.connect(
+            conn = pyodbc.connect(
                 f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}')
             try:
-                cursor_saldo_estoque = conn_saldo.cursor()
+                cursor_saldo_estoque = conn.cursor()
                 cursor_saldo_estoque.execute(query_saldo)
 
                 if cursor_saldo_estoque.rowcount == 0:
-                    QMessageBox.information(None, "Atenção", "Não registros de estoque para este produto.\n\nEureka®")
+                    QMessageBox.information(None, "Atenção", "Não há registros de estoque para este produto.\n\nEureka®")
                     return
 
                 nova_guia_saldo = QWidget()
@@ -155,7 +155,7 @@ def executar_saldo_em_estoque(self, table):
                     self.layout().addWidget(self.tabWidget)
                     self.tabWidget.setVisible(True)
 
-                self.tabWidget.addTab(nova_guia_saldo, f"Saldos em Estoque - {codigo}")
+                self.tabWidget.addTab(nova_guia_saldo, f"SALDO EM ESTOQUE - {codigo}")
                 tabela_saldo_estoque.itemDoubleClicked.connect(copiar_linha)
                 self.tabWidget.setCurrentIndex(self.tabWidget.indexOf(nova_guia_saldo))
 
@@ -163,7 +163,7 @@ def executar_saldo_em_estoque(self, table):
                 print(f"Falha na consulta de estrutura. Erro: {str(ex)}")
 
             finally:
-                conn_saldo.close()
+                conn.close()
 
 
 driver = '{SQL Server}'

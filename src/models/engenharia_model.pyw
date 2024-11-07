@@ -170,7 +170,7 @@ class EngenhariaApp(QWidget):
         self.btn_saldo_estoque.clicked.connect(lambda: executar_saldo_em_estoque(self, self.tree))
         self.btn_saldo_estoque.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_saldo_estoque.hide()
-        
+
         self.btn_ultimos_fornecedores = QPushButton("Últimos Fornecedores", self)
         self.btn_ultimos_fornecedores.clicked.connect(lambda: executar_ultimos_fornecedores(self, self.tree))
         self.btn_ultimos_fornecedores.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -430,6 +430,7 @@ class EngenhariaApp(QWidget):
         self.tree.verticalHeader().setDefaultSectionSize(self.altura_linha)
         self.tree.horizontalHeader().sectionClicked.connect(self.ordenar_tabela)
         self.tree.horizontalHeader().setStretchLastSection(False)
+
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(lambda pos: self.show_context_menu(pos, self.tree))
 
@@ -455,6 +456,8 @@ class EngenhariaApp(QWidget):
             table.selectRow(index.row())
 
             menu = QMenu()
+            # A lib Qt garante que o objeto do menu será destruído após uso
+            menu.setAttribute(Qt.WA_DeleteOnClose)
 
             new_product = QAction('Cadastrar novo produto...', self)
             new_product.triggered.connect(self.abrir_janela_novo_produto)
