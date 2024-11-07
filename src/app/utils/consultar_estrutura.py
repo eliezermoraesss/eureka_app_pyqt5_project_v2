@@ -213,7 +213,7 @@ def executar_consulta_estrutura(self, table):
                     self.layout().addWidget(self.tabWidget)
                     self.tabWidget.setVisible(True)
 
-                self.tabWidget.addTab(nova_guia_estrutura, f"{codigo}")
+                self.tabWidget.addTab(nova_guia_estrutura, f"ESTRUTURA - {codigo}")
                 self.tabWidget.setCurrentIndex(self.tabWidget.indexOf(nova_guia_estrutura))
                 tree_estrutura.itemChanged.connect(
                     lambda item: handle_item_change(item, tree_estrutura, codigo))

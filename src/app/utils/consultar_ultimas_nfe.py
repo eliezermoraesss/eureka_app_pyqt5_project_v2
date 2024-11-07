@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QLabel, QTableWidgetItem, QTableWidget, QHeaderView,
 
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.utils import copiar_linha, exportar_excel
-from src.app.utils.visualizar_nfe import visualizar_nfe
+from src.app.utils.consultar_nfe import visualizar_nfe
 
 
 def consultar_ultimas_nfe(self, table):
@@ -213,7 +213,7 @@ def consultar_ultimas_nfe(self, table):
                     self.layout().addWidget(self.tabWidget)
                     self.tabWidget.setVisible(True)
 
-                self.tabWidget.addTab(nova_guia, f"Histórico de NFe - {codigo}")
+                self.tabWidget.addTab(nova_guia, f"ÚLTIMAS NOTAS FISCAIS - {codigo}")
                 tabela.itemDoubleClicked.connect(copiar_linha)
                 self.tabWidget.setCurrentIndex(self.tabWidget.indexOf(nova_guia))
 

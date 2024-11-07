@@ -157,7 +157,7 @@ def executar_consulta_onde_usado(self, table):
                     self.layout().addWidget(self.tabWidget)
                     self.tabWidget.setVisible(True)
 
-                self.tabWidget.addTab(nova_guia_estrutura, f"Onde é usado? - {codigo}")
+                self.tabWidget.addTab(nova_guia_estrutura, f"ONDE É USADO? - {codigo}")
                 tabela_onde_usado.itemDoubleClicked.connect(copiar_linha)
                 self.tabWidget.setCurrentIndex(self.tabWidget.indexOf(nova_guia_estrutura))
 

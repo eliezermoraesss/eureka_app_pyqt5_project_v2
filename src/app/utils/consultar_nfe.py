@@ -1,11 +1,10 @@
 import locale
-from datetime import datetime
 
 import pyodbc
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QLabel, QTableWidgetItem, QTableWidget, QHeaderView, QHBoxLayout, QVBoxLayout, QWidget, \
-    QMessageBox, QPushButton, QSizePolicy, QSpacerItem, QMenu, QAction
+    QMessageBox, QPushButton, QSizePolicy, QSpacerItem
 
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.utils import copiar_linha, exportar_excel
@@ -201,7 +200,7 @@ def visualizar_nfe(self, table):
                     self.layout().addWidget(self.tabWidget)
                     self.tabWidget.setVisible(True)
 
-                self.tabWidget.addTab(nova_guia, f"Nota Fiscal - {documento}")
+                self.tabWidget.addTab(nova_guia, f"NOTA FISCAL - {documento}")
                 tabela.itemDoubleClicked.connect(copiar_linha)
                 self.tabWidget.setCurrentIndex(self.tabWidget.indexOf(nova_guia))
 

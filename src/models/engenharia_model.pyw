@@ -431,6 +431,12 @@ class EngenhariaApp(QWidget):
         self.tree.horizontalHeader().sectionClicked.connect(self.ordenar_tabela)
         self.tree.horizontalHeader().setStretchLastSection(False)
 
+        # Evita múltiplas conexões para o menu de contexto
+        try:
+            self.tree.customContextMenuRequested.disconnect()
+        except TypeError:
+            pass  # Ignora erros caso não haja conexão existente
+
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(lambda pos: self.show_context_menu(pos, self.tree))
 

@@ -161,7 +161,7 @@ def executar_ultimos_fornecedores(self, table):
                     self.layout().addWidget(self.tabWidget)
                     self.tabWidget.setVisible(True)
 
-                self.tabWidget.addTab(nova_guia_ult_forn, f"Últimos Fornecedores - {codigo}")
+                self.tabWidget.addTab(nova_guia_ult_forn, f"ÚLTIMOS FORNECEDORES - {codigo}")
                 tabela_ult_fornecedores.itemDoubleClicked.connect(copiar_linha)
                 self.tabWidget.setCurrentIndex(self.tabWidget.indexOf(nova_guia_ult_forn))
 

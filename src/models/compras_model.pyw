@@ -25,7 +25,7 @@ from src.app.utils.utils import exibir_mensagem, copiar_linha, exportar_excel, n
 from src.app.views.FilterDialog import FilterDialog
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.dialog.loading_dialog import loading_dialog
-from src.app.utils.visualizar_nfe import visualizar_nfe
+from src.app.utils.consultar_nfe import visualizar_nfe
 
 
 class CustomLineEdit(QLineEdit):
@@ -662,6 +662,7 @@ class ComprasApp(QWidget):
         self.tree.verticalHeader().setDefaultSectionSize(self.altura_linha)
 
         try:
+            self.tree.customContextMenuRequested.disconnect()
             self.tree.horizontalHeader().sectionClicked.disconnect(self.abrir_filtro)
         except TypeError:
             pass

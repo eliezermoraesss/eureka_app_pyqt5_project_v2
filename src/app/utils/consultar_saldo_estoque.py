@@ -105,7 +105,7 @@ def executar_saldo_em_estoque(self, table):
 
                 tabela_saldo_estoque.setSortingEnabled(True)
 
-                select_product_label = QLabel(f'Saldos em Estoque\n\n{codigo}\t{descricao}')
+                select_product_label = QLabel(f'SALDOS EM ESTOQUE\n\n{codigo}\t{descricao}')
                 select_product_label.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
                 layout_cabecalho.addWidget(select_product_label,
                                            alignment=Qt.AlignLeft)

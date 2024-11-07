@@ -609,6 +609,12 @@ class FiscalApp(QWidget):
         # Permitir que a última coluna se estenda para preencher o espaço
         self.tree.horizontalHeader().setStretchLastSection(True)
 
+        # Evita múltiplas conexões para o menu de contexto
+        try:
+            self.tree.customContextMenuRequested.disconnect()
+        except TypeError:
+            pass  # Ignora erros caso não haja conexão existente
+
         # Menu de contexto personalizado
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(lambda pos: self.show_context_menu(pos, self.tree))
