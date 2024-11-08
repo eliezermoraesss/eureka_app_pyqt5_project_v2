@@ -806,8 +806,10 @@ class ComprasApp(QWidget):
                         WHEN ITEM_NF.D1_QUANT IS NULL THEN PC.C7_QUANT 
                         ELSE PC.C7_QUANT - ITEM_NF.D1_QUANT
                     END AS "QTD. PENDENTE",
-                    PC.C7_PRECO AS "CUSTO UNITÁRIO",
-                    PC.C7_TOTAL AS "CUSTO TOTAL",
+                    PC.C7_PRECO AS "VALOR UNIT. PC",
+                    PC.C7_TOTAL AS "VALOR TOTAL PC",
+                    ITEM_NF.D1_VUNIT AS "VALOR UNIT. NF",
+                    ITEM_NF.D1_TOTAL AS "VALOR TOTAL NF",
                     PC.C7_DATPRF AS "PREVISÃO ENTREGA",
                     ITEM_NF.D1_DTDIGIT AS "DATA DE ENTREGA",
                     PC.C7_ENCER AS "STATUS PEDIDO COMPRA",
@@ -904,8 +906,10 @@ class ComprasApp(QWidget):
                     NULL AS "QTD. PEDIDO COMPRA",
                     NULL AS "QTD. ENTREGUE",
                     NULL AS "QTD. PENDENTE",
-                    NULL AS "CUSTO UNITÁRIO",
-                    NULL AS "CUSTO TOTAL",
+                    NULL AS "VALOR UNIT. PC",
+                    NULL AS "VALOR TOTAL PC",
+                    NULL AS "VALOR UNIT. NF",
+                    NULL AS "VALOR TOTAL NF",
                     NULL AS "PREVISÃO ENTREGA",
                     NULL AS "DATA DE ENTREGA",
                     NULL AS "STATUS PEDIDO COMPRA",
@@ -1008,8 +1012,8 @@ class ComprasApp(QWidget):
                             dataframe.at[index, ' '] = 'SEM PEDIDO COMPRA'
                     else:
                         if column_name in ('QTD. SOLIC. COMPRAS', 'QTD. PEDIDO COMPRA', 'QTD. ENTREGUE',
-                                           'CUSTO UNITÁRIO', 'CUSTO TOTAL'):
-                            if column_name in ('CUSTO UNITÁRIO', 'CUSTO TOTAL'):
+                                           'VALOR UNIT. PC', 'VALOR TOTAL PC', 'VALOR UNIT. NF', 'VALOR TOTAL NF'):
+                            if column_name in ('VALOR UNIT. PC', 'VALOR TOTAL PC', 'VALOR UNIT. NF', 'VALOR TOTAL NF'):
                                 if not pd.isna(value):
                                     value = f"R$ {locale.format_string("%.2f", float(value), grouping=True)}"
                                 else:
@@ -1021,7 +1025,8 @@ class ComprasApp(QWidget):
                                 else:
                                     value = locale.format_string("%.2f", value, grouping=True)
 
-                        if (column_name in ('QTD. PEDIDO COMPRA', 'CUSTO UNITÁRIO', 'CUSTO TOTAL', 'QTD. ENTREGUE') and
+                        if (column_name in ('QTD. PEDIDO COMPRA', 'VALOR UNIT. PC', 'VALOR TOTAL PC', 'QTD. ENTREGUE',
+                                            'VALOR UNIT. NF', 'VALOR TOTAL NF') and
                                 value == 'nan'):
                             value = ''
 
@@ -1076,7 +1081,7 @@ class ComprasApp(QWidget):
                                                'OBSERVAÇÃO ITEM DO PEDIDO DE COMPRA', 'RAZÃO SOCIAL FORNECEDOR',
                                                'NOME FANTASIA FORNECEDOR'):
                             item.setTextAlignment(Qt.AlignCenter)
-                        if column_name in ('CUSTO UNITÁRIO', 'CUSTO TOTAL'):
+                        if column_name in ('VALOR UNIT. PC', 'VALOR TOTAL PC', 'VALOR UNIT. NF', 'VALOR TOTAL NF'):
                             item.setTextAlignment(Qt.AlignRight)
                 else:
                     item = QTableWidgetItem('')
@@ -1166,7 +1171,7 @@ class ComprasApp(QWidget):
             self.dataframe = pd.read_sql(query_consulta_filtro, self.engine)
             self.dataframe.insert(0, ' ', '')
             self.dataframe[''] = ''
-            self.dataframe.insert(15, 'CONTADOR DE DIAS', '')
+            self.dataframe.insert(16, 'CONTADOR DE DIAS', '')
 
             self.atualizar_tabela(self.dataframe)
             self.dataframe_original = self.dataframe.copy()
@@ -1199,8 +1204,8 @@ class ComprasApp(QWidget):
             # Get the selected filters from the dialog
             filtro_selecionado = self.filtro_dialog.get_filtros_selecionados()
             if filtro_selecionado:
-                colunas_formatar = ['QTD. PEDIDO COMPRA', 'QTD. ENTREGUE', 'QTD. PENDENTE', 'CUSTO UNITÁRIO',
-                                    'CUSTO TOTAL', 'QTD. SOLIC. COMPRAS']
+                colunas_formatar = ['QTD. PEDIDO COMPRA', 'QTD. ENTREGUE', 'QTD. PENDENTE', 'VALOR UNIT. PC',
+                                    'VALOR TOTAL PC', 'QTD. SOLIC. COMPRAS', 'VALOR UNIT. NF', 'VALOR TOTAL NF']
 
                 # Função para formatação dos valores
                 def formatar_valor(valor):
