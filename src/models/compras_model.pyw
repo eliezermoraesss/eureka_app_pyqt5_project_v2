@@ -134,8 +134,8 @@ class ComprasApp(QWidget):
         self.label_data_inicio = QLabel("A partir de:", self)
         self.label_data_fim = QLabel("Até:", self)
         self.label_armazem = QLabel("Armazém:", self)
-        self.label_fornecedor = QLabel("Razão social fornecedor:", self)
-        self.label_nm_fantasia_forn = QLabel("Nome Fantasia fornecedor:", self)
+        self.label_fornecedor = QLabel("Fornecedor (razão social):", self)
+        self.label_nm_fantasia_forn = QLabel("Fornecedor (nome fantasia):", self)
 
         self.campo_sc = QLineEdit(self)
         self.campo_sc.setFont(QFont(fonte_campos, tamanho_fonte_campos))
@@ -352,8 +352,6 @@ class ComprasApp(QWidget):
         container_nm_fantasia_forn.addWidget(self.label_nm_fantasia_forn)
         container_nm_fantasia_forn.addWidget(self.campo_nm_fantasia_fornecedor)
 
-        layout_campos_01.addStretch()
-        layout_campos_02.addStretch()
         layout_campos_01.addLayout(container_qp)
         layout_campos_01.addLayout(container_sc)
         layout_campos_01.addLayout(container_pedido)
@@ -371,9 +369,7 @@ class ComprasApp(QWidget):
         layout_campos_01.addStretch()
         layout_campos_02.addStretch()
 
-        layout_button_03.addStretch()
         layout_button_03.addWidget(self.btn_followup)
-        layout_button_04.addStretch()
         layout_button_04.addWidget(self.btn_visualizar_nf)
         layout_button_04.addWidget(self.btn_ultimas_nfe)
         layout_button_04.addWidget(self.btn_ultimos_fornecedores)

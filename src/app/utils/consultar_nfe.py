@@ -12,13 +12,14 @@ from src.app.utils.utils import copiar_linha, exportar_excel
 
 def visualizar_nfe(self, table):
     item_selecionado = table.currentItem()
-    documento, nome_fornec, cod_fornecedor = None, None, None
+    documento, nome_fornec, cod_fornecedor, pedido = None, None, None, None
 
     if item_selecionado:
         header = table.horizontalHeader()
         documento_col = None
         nome_fornec_col = None
         cod_fornecedor_col = None
+        pedido_col = None
 
         for col in range(header.count()):
             header_text = table.horizontalHeaderItem(col).text().lower()
@@ -28,11 +29,14 @@ def visualizar_nfe(self, table):
                 nome_fornec_col = col
             elif header_text == 'cód. fornecedor':
                 cod_fornecedor_col = col
+            elif header_text == 'pedido':
+                pedido_col = col
 
         if documento_col is not None and nome_fornec_col is not None and cod_fornecedor_col is not None:
             documento = table.item(item_selecionado.row(), documento_col).text().zfill(9)
             nome_fornec = table.item(item_selecionado.row(), nome_fornec_col).text()
             cod_fornecedor = table.item(item_selecionado.row(), cod_fornecedor_col).text()
+            pedido = table.item(item_selecionado.row(), pedido_col).text()
 
         if documento not in self.guias_abertas_visualizar_nfe and documento is not None:
             query = f"""
@@ -56,6 +60,7 @@ def visualizar_nfe(self, table):
                     WHERE 
                         D1_DOC = '{documento}'
                         AND D1_FORNECE = '{cod_fornecedor}'
+                        AND D1_PEDIDO = '{pedido}'
                         AND NFE.D_E_L_E_T_ <> '*'
                     ORDER BY 
                         D1_ITEM ASC;

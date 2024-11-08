@@ -1,28 +1,132 @@
--- enaplic_management.dbo.tb_status_qps definition
+SELECT * FROM sysobjects WHERE name='eureka_users' AND xtype='U'
+SELECT * FROM sysobjects WHERE name='eureka_password_reset' AND xtype='U'
 
--- Drop table
+SELECT
+    DB_NAME(database_id) AS DatabaseName,
+    type_desc AS FileType,
+    size / 128.0 AS TotalSizeMB,
+    size / 128.0 - CAST(FILEPROPERTY(name, 'SpaceUsed') AS INT) / 128.0 AS FreeSpaceMB
+FROM sys.master_files
+WHERE DB_NAME(database_id) = 'enaplic_management';  -- Substitua pelo nome do banco de dados
+
+EXEC sp_spaceused;
+EXEC sp_spaceused 'tb_baseline';
+EXEC xp_fixeddrives;
+
+SELECT * FROM enaplic_management.dbo.eureka_users;
+
+SELECT * FROM enaplic_management.dbo.eureka_password_reset;
+
+SELECT * FROM enaplic_management.dbo.tb_dashboard_indicators;
+
+SELECT * FROM enaplic_management.dbo.tb_qps;
+
+SELECT * FROM enaplic_management.dbo.tb_user_logs;
+
+SELECT * FROM enaplic_management.dbo.tb_user_logs
+WHERE full_name LIKE 'Rafael%';
+
+SELECT * FROM enaplic_management.dbo.tb_user_logs
+WHERE part_number LIKE 'M-034-015-148%';
+
+SELECT * FROM enaplic_management.dbo.tb_baseline;
+
+SELECT COUNT(*) FROM enaplic_management.dbo.tb_baseline WHERE cod_qp = '007491';
+
+SELECT * FROM enaplic_management.dbo.tb_baseline WHERE cod_qp = '007491';
+
+DELETE FROM enaplic_management.dbo.tb_baseline WHERE cod_qp = '009999';
+
+-- DROP TABLE enaplic_management.dbo.tb_baseline;
+
+-- DELETE FROM enaplic_management.dbo.tb_baseline;
+
+CREATE TABLE enaplic_management.dbo.tb_baseline (
+	id INT IDENTITY(1,1) PRIMARY KEY,
+    cod_qp VARCHAR(6) NOT NULL,
+    equipamento VARCHAR(200),
+    grupo VARCHAR(100),
+    nivel VARCHAR(2),
+    codigo VARCHAR(15),
+    codigo_pai VARCHAR(15),
+    descricao VARCHAR(200),
+    tipo VARCHAR(2),
+    qtde_bl DECIMAL(12, 5),
+   	unid_medida VARCHAR(2),
+    especificacoes VARCHAR(100),
+    qtde_proj DECIMAL(12, 5),
+    qtde_total DECIMAL(12, 5),
+    status VARCHAR(30),
+    status_op VARCHAR(30),
+    created_at DATETIME DEFAULT switchoffset(sysdatetimeoffset(), '-03:00') NOT NULL
+);
+
+-- DROP TABLE enaplic_management.dbo.eureka_users;
+
+CREATE TABLE enaplic_management.dbo.eureka_users (
+                id INT IDENTITY(1,1) PRIMARY KEY,
+                full_name NVARCHAR(100) NOT NULL,
+                username NVARCHAR(20) NOT NULL UNIQUE,
+                email NVARCHAR(50) NOT NULL UNIQUE,
+                hashed_password NVARCHAR(60) NOT NULL,
+                role NVARCHAR(50) NOT NULL,
+                created_at DATETIME DEFAULT switchoffset(sysdatetimeoffset(), '-03:00') NOT NULL
+                )
+                
+ALTER TABLE enaplic_management.dbo.eureka_users
+ALTER COLUMN hashed_password NVARCHAR(60) NOT NULL
+
+DELETE FROM enaplic_management.dbo.eureka_users
+
+-- DROP TABLE enaplic_management.dbo.eureka_password_reset;
+                
+CREATE TABLE enaplic_management.dbo.eureka_password_reset (
+                id INT IDENTITY(1,1) PRIMARY KEY,
+                user_id INT NOT NULL,
+                reset_code NVARCHAR(6) NOT NULL,
+                expiration_time DATETIME NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES dbo.eureka_users(id)
+                )
+                
+DELETE FROM enaplic_management.dbo.eureka_password_reset
+
+-- DROP TABLE enaplic_management.dbo.tb_user_logs;
+
+CREATE TABLE enaplic_management.dbo.tb_user_logs (
+    id INT IDENTITY(1,1) NOT NULL,                -- Identificador único
+    full_name NVARCHAR(100) NOT NULL,             -- Nome completo
+    email NVARCHAR(50) NOT NULL,                 -- Endereço de e-mail
+   	user_role NVARCHAR(20) NOT NULL,			-- Perfil de acesso
+   	part_number NVARCHAR(15) NOT NULL,			-- Código do produto
+    log_description NVARCHAR(500) NULL,                -- Campo de observação, pode ser nulo
+    created_at DATETIME DEFAULT switchoffset(sysdatetimeoffset(), '-03:00') NOT NULL, -- Data e hora de criação
+    PRIMARY KEY (id)                              -- Definir o campo id como chave primária
+);
+
+ALTER TABLE enaplic_management.dbo.tb_user_logs
+ALTER COLUMN log_description NVARCHAR()
+
+DELETE FROM enaplic_management.dbo.tb_user_logs
 
 -- DROP TABLE enaplic_management.dbo.tb_open_qps;
 
-CREATE TABLE enaplic_management.dbo.tb_open_qps (
+-- enaplic_management.dbo.tb_qps definição
+
+-- Drop table
+
+-- DROP TABLE enaplic_management.dbo.tb_qps;
+
+CREATE TABLE enaplic_management.dbo.tb_qps (
 	id int IDENTITY(1,1) NOT NULL,
 	cod_qp varchar(6) NOT NULL PRIMARY KEY,
 	des_qp varchar(200) NOT NULL,
-	dt_open_qp varchar(10) NULL,
-	dt_end_qp varchar(10) NULL,
-	S_T_A_M_P datetime DEFAULT switchoffset(sysdatetimeoffset(),'-03:00') NOT NULL,
-);
-
--- DROP TABLE enaplic_management.dbo.tb_end_qps;
-
-CREATE TABLE enaplic_management.dbo.tb_end_qps (
-	id int IDENTITY(1,1) NOT NULL,
-	cod_qp varchar(6) NOT NULL PRIMARY KEY,
-	des_qp varchar(200) NOT NULL,
+	status_qp char(1) NOT NULL,
 	dt_open_qp varchar(10) NULL,
 	dt_end_qp varchar(10) NULL,
 	dt_completed_qp varchar(10) NULL,
-	S_T_A_M_P datetime DEFAULT switchoffset(sysdatetimeoffset(),'-03:00') NOT NULL,
+	vl_delay int NULL,
+	status_delivery varchar(50) NULL,
+	S_T_A_M_P datetime DEFAULT switchoffset(sysdatetimeoffset(),'-03:00') NOT NULL
 );
 
 -- CREATE DATABASE enaplic_management;
@@ -38,6 +142,7 @@ CREATE TABLE enaplic_management.dbo.tb_dashboard_indicators (
 	id bigint IDENTITY(1,1) NOT NULL PRIMARY KEY,
 	cod_qp varchar(6) NOT NULL,
 	des_qp varchar(200) NOT NULL,
+	status_qp char(1) NOT NULL,
 	dt_open_qp varchar(10) NULL,
 	dt_end_qp varchar(10) NULL,
 	dt_start_proj varchar(10) NULL,
@@ -66,15 +171,16 @@ CREATE TABLE enaplic_management.dbo.tb_dashboard_indicators (
 	vl_com_pc_cost decimal(12,2) NOT NULL,
 	vl_mp_deliver_cost decimal(12,2) NOT NULL,
 	vl_com_deliver_cost decimal(12,2) NOT NULL,
-	S_T_A_M_P datetime DEFAULT switchoffset(sysdatetimeoffset(),'-03:00') NOT NULL,
+	S_T_A_M_P datetime DEFAULT switchoffset(sysdatetimeoffset(),'-03:00') NOT NULL
 );
 
--- DROP TABLE enaplic_management.dbo.tb_current_dashboard_indicators;
+-- DROP TABLE enaplic_management.dbo.tb_dashboard_indicators_test;
 
-CREATE TABLE enaplic_management.dbo.tb_current_dashboard_indicators (
+CREATE TABLE enaplic_management.dbo.tb_dashboard_indicators_test (
 	id bigint IDENTITY(1,1) NOT NULL PRIMARY KEY,
 	cod_qp varchar(6) NOT NULL,
 	des_qp varchar(200) NOT NULL,
+	status_qp char(1) NOT NULL,
 	dt_open_qp varchar(10) NULL,
 	dt_end_qp varchar(10) NULL,
 	dt_start_proj varchar(10) NULL,
@@ -103,10 +209,9 @@ CREATE TABLE enaplic_management.dbo.tb_current_dashboard_indicators (
 	vl_com_pc_cost decimal(12,2) NOT NULL,
 	vl_mp_deliver_cost decimal(12,2) NOT NULL,
 	vl_com_deliver_cost decimal(12,2) NOT NULL,
-	S_T_A_M_P datetime DEFAULT switchoffset(sysdatetimeoffset(),'-03:00') NOT NULL,
+	S_T_A_M_P datetime DEFAULT switchoffset(sysdatetimeoffset(),'-03:00') NOT NULL
 );
 
--- enaplic_management.dbo.tb_dashboard_indicators foreign keys
 
 INSERT INTO 
 	enaplic_management.dbo.tb_dashboard_indicators 
@@ -226,37 +331,31 @@ ORDER BY
 SELECT 
 	* 
 FROM 
-	enaplic_management.dbo.tb_open_qps
+	enaplic_management.dbo.tb_qps tq 
 ORDER BY 
 	id DESC;
 
 SELECT 
+	cod_qp AS "Código", 
+    des_qp AS "Descrição", 
+    status_qp AS "Status"
+FROM 
+	enaplic_management.dbo.tb_qps
+ORDER BY 
+	cod_qp DESC;
+
+SELECT 
 	* 
 FROM 
-	enaplic_management.dbo.tb_end_qps
+	enaplic_management.dbo.tb_qps
 ORDER BY 
 	id DESC;
-
-SELECT cod_qp FROM enaplic_management.dbo.tb_open_qps;
 
 SELECT TOP 1 vl_proj_pi
 FROM enaplic_management.dbo.tb_dashboard_indicators
 WHERE cod_qp = '005552'
 ORDER BY id DESC;
 
-UPDATE 
-    enaplic_management.dbo.tb_end_qps 
-SET 
-    dt_completed_qp = '07/08/2024' 
-WHERE 
-    cod_qp = '007573';
-   
-UPDATE 
-    enaplic_management.dbo.tb_end_qps 
-SET 
-    dt_completed_qp = '' 
-WHERE 
-    cod_qp = '007573';
 
 /*
  * CORRESPONDÊNCIA COLUNAS X INDICADORES
@@ -279,5 +378,3 @@ WHERE
 	vl_mat_received = MATERIAL RECEBIDO
 	vl_mat_received_perc = IND. RECEB. (vl_mat_received/vl_all_pc)
 */
-
-

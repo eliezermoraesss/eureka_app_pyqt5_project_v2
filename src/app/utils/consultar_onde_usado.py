@@ -3,10 +3,11 @@ import locale
 import pyodbc
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem, QLabel, QMessageBox
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem, QLabel, QMessageBox, \
+    QPushButton, QSizePolicy, QSpacerItem
 
 from src.app.utils.db_mssql import setup_mssql
-from src.app.utils.utils import ajustar_largura_coluna_descricao, copiar_linha
+from src.app.utils.utils import ajustar_largura_coluna_descricao, copiar_linha, exportar_excel
 
 
 def executar_consulta_onde_usado(self, table):
@@ -109,10 +110,17 @@ def executar_consulta_onde_usado(self, table):
                 # Ajustar automaticamente a largura da coluna "Descrição"
                 ajustar_largura_coluna_descricao(tabela)
 
+                btn_exportar_excel_estrutura = QPushButton("Exportar Excel", self)
+                btn_exportar_excel_estrutura.clicked.connect(lambda: exportar_excel(self, tabela))
+                btn_exportar_excel_estrutura.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+
                 select_product_label = QLabel(f'ONDE É USADO?\n\n{codigo}\t{descricao}')
                 select_product_label.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
 
                 layout_cabecalho.addWidget(select_product_label, alignment=Qt.AlignLeft)
+                layout_cabecalho.addSpacerItem(QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
+                layout_cabecalho.addWidget(btn_exportar_excel_estrutura)
+
                 layout_nova_guia_estrutura.addLayout(layout_cabecalho)
                 layout_nova_guia_estrutura.addWidget(tabela)
                 nova_guia_estrutura.setLayout(layout_nova_guia_estrutura)
@@ -126,6 +134,28 @@ def executar_consulta_onde_usado(self, table):
                             color: #EEEEEE;
                             font-size: 18px;
                             font-weight: bold;
+                        }
+                        
+                        QPushButton {
+                            background-color: #0a79f8;
+                            color: #fff;
+                            padding: 5px 15px;
+                            border: 2px;
+                            border-radius: 8px;
+                            font-size: 11px;
+                            height: 20px;
+                            font-weight: bold;
+                            margin: 10px 5px;
+                        }
+                        
+                        QPushButton:hover {
+                            background-color: #fff;
+                            color: #0a79f8
+                        }
+
+                        QPushButton:pressed {
+                            background-color: #6703c5;
+                            color: #fff;
                         }
 
                         QTableWidget {

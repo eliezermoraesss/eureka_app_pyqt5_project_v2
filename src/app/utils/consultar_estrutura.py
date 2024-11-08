@@ -143,6 +143,7 @@ def executar_consulta_estrutura(self, table):
 
                 select_product_label = QLabel(f"CONSULTA DE ESTRUTURA \n\n{codigo}\t{descricao}")
                 select_product_label.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
+
                 layout_cabecalho.addWidget(select_product_label, alignment=Qt.AlignLeft)
                 layout_cabecalho.addSpacerItem(QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
                 layout_cabecalho.addWidget(btn_exportar_excel_estrutura)

@@ -34,20 +34,30 @@ def consultar_ultimas_nfe(self, table):
 
         if codigo not in self.guias_abertas_ultimas_nfe and codigo is not None:
             query = f"""
+                    WITH livroFiscalFiltrado AS (
+                        SELECT 
+                            F3_NFISCAL, 
+                            F3_CLIEFOR, 
+                            F3_ESPECIE, 
+                            F3_CHVNFE,
+                            ROW_NUMBER() OVER (PARTITION BY F3_NFISCAL, F3_CLIEFOR ORDER BY F3_CHVNFE DESC) AS row_num
+                        FROM 
+                            {database}.dbo.SF3010
+                    )
                     SELECT
-                        D1_EMISSAO AS "Data da emissão",
-                        D1_DTDIGIT AS "Data Entrada",
-                        D1_DOC AS "Documento",
-                        D1_SERIE AS "Série",
-                        D1_PEDIDO AS "Pedido",
-                        D1_FORNECE AS "Cód. Fornecedor",
+                        NFE.D1_EMISSAO AS "Data da emissão",
+                        NFE.D1_DTDIGIT AS "Data Entrada",
+                        NFE.D1_DOC AS "Documento",
+                        NFE.D1_SERIE AS "Série",
+                        NFE.D1_PEDIDO AS "Pedido",
+                        NFE.D1_FORNECE AS "Cód. Fornecedor",
                         FORN.A2_NOME AS "Fornecedor/Cliente",
-                        D1_LOJA AS "Loja",
-                        livroFiscal.F3_ESPECIE AS "Espécie",
-                        D1_QUANT AS "Qtde NF",
-                        D1_VUNIT AS "Valor Unitário",
-                        D1_TOTAL AS "Valor Total",
-                        livroFiscal.F3_CHVNFE AS "CHAVE DE ACESSO"
+                        NFE.D1_LOJA AS "Loja",
+                        livroFiscalFiltrado.F3_ESPECIE AS "Espécie",
+                        NFE.D1_QUANT AS "Qtde NF",
+                        NFE.D1_VUNIT AS "Valor Unitário",
+                        NFE.D1_TOTAL AS "Valor Total",
+                        livroFiscalFiltrado.F3_CHVNFE AS "CHAVE DE ACESSO"
                     FROM 
                         {database}.dbo.SD1010 NFE
                     LEFT JOIN
@@ -55,12 +65,13 @@ def consultar_ultimas_nfe(self, table):
                     ON
                         FORN.A2_COD = NFE.D1_FORNECE
                     LEFT JOIN
-                        {database}.dbo.SF3010 livroFiscal
+                        livroFiscalFiltrado
                     ON
-                        F3_NFISCAL = D1_DOC AND F3_CLIEFOR = D1_FORNECE
+                        livroFiscalFiltrado.F3_NFISCAL = NFE.D1_DOC AND livroFiscalFiltrado.F3_CLIEFOR = NFE.D1_FORNECE
                     WHERE 
-                        D1_COD LIKE '{codigo}%'
+                        NFE.D1_COD LIKE '{codigo}%'
                         AND NFE.D_E_L_E_T_ <> '*'
+                        AND livroFiscalFiltrado.row_num = 1
                     ORDER BY 
                         NFE.R_E_C_N_O_ DESC;
                 """
