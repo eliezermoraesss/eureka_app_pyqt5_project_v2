@@ -66,6 +66,7 @@ def executar_consulta_estrutura(self, table):
                     ORDER BY 
                         B1_DESC ASC;
                 """
+            self.guias_abertas.append(codigo)
             conn = pyodbc.connect(
                 f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}')
             try:
@@ -220,7 +221,6 @@ def executar_consulta_estrutura(self, table):
                 self.tabWidget.setCurrentIndex(self.tabWidget.indexOf(nova_guia_estrutura))
                 tabela.itemChanged.connect(
                     lambda item: handle_item_change(item, tabela, codigo))
-                self.guias_abertas.append(codigo)
 
             except pyodbc.Error as ex:
                 print(f"Falha na consulta de estrutura. Erro: {str(ex)}")

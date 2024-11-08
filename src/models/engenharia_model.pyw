@@ -804,7 +804,7 @@ class EngenhariaApp(QWidget):
     def fechar_guia(self, index):
         if index >= 0:
             try:
-                codigo_guia_fechada = self.tabWidget.tabText(index)
+                codigo_guia_fechada = self.tabWidget.tabText(index).split(' - ')[1]
                 self.guias_abertas.remove(codigo_guia_fechada)
 
             # Por ter duas listas de controle de abas abertas, 'guias_abertas = []' e 'guias_abertas_onde_usado = []',
