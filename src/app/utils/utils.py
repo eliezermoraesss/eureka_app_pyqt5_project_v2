@@ -105,10 +105,6 @@ def exportar_excel(self, table=None):
         column_headers = [table.horizontalHeaderItem(i).text() for i in range(table.columnCount())]
         df = pd.DataFrame(data, columns=column_headers)
 
-        if 'Quantidade' in column_headers:
-            numeric_columns = ['Quantidade']
-            df[numeric_columns] = df[numeric_columns].apply(pd.to_numeric, errors='coerce')
-
         writer = pd.ExcelWriter(file_path, engine='xlsxwriter')
         df.to_excel(writer, sheet_name='Dados', index=False)
 
