@@ -3,6 +3,7 @@ import os
 import sys
 import time
 
+
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -27,6 +28,7 @@ from src.app.utils.load_session import load_session
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.app.utils.utils import *
 from src.app.views.copy_product_window import CopyProdutoItemWindow
+from src.app.utils.run_image_comparator import run_image_comparator
 
 
 class CustomLineEdit(QLineEdit):
@@ -510,6 +512,10 @@ class EngenhariaApp(QWidget):
             context_menu_nova_janela = QAction('Nova janela', self)
             context_menu_nova_janela.triggered.connect(self.abrir_nova_janela)
             menu.addAction(context_menu_nova_janela)
+
+            context_menu_image_comparator = QAction('Abrir Image Comparator®', self)
+            context_menu_image_comparator.triggered.connect(lambda: run_image_comparator())
+            menu.addAction(context_menu_image_comparator)
 
             context_menu_tabela_pesos = QAction('Abrir Tabela de Pesos', self)
             context_menu_tabela_pesos.triggered.connect(self.abrir_tabela_pesos)

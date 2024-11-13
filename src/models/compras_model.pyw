@@ -26,6 +26,7 @@ from src.app.views.FilterDialog import FilterDialog
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.dialog.loading_dialog import loading_dialog
 from src.app.utils.consultar_nfe import visualizar_nfe
+from src.app.utils.run_image_comparator import run_image_comparator
 
 
 class CustomLineEdit(QLineEdit):
@@ -597,6 +598,9 @@ class ComprasApp(QWidget):
             # A lib Qt garante que o objeto do menu será destruído após uso
             menu.setAttribute(Qt.WA_DeleteOnClose)
 
+            context_menu_image_comparator = QAction('Abrir Image Comparator®', self)
+            context_menu_image_comparator.triggered.connect(lambda: run_image_comparator())
+
             context_menu_visualizar_nf = QAction('Visualizar Nota Fiscal', self)
             context_menu_visualizar_nf.triggered.connect(lambda: visualizar_nfe(self, table))
 
@@ -615,6 +619,7 @@ class ComprasApp(QWidget):
             context_menu_nova_janela = QAction('Nova janela', self)
             context_menu_nova_janela.triggered.connect(self.abrir_nova_janela)
 
+            menu.addAction(context_menu_image_comparator)
             menu.addAction(context_menu_visualizar_nf)
             menu.addAction(context_menu_ultimo_fornecedor)
             menu.addAction(context_menu_ultimas_nfe)

@@ -2,6 +2,8 @@ import locale
 import os
 import sys
 
+from src.app.utils.run_image_comparator import run_image_comparator
+
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -515,6 +517,9 @@ class PcpApp(QWidget):
             context_menu_abrir_desenho = QAction('Abrir desenho', self)
             context_menu_abrir_desenho.triggered.connect(lambda: abrir_desenho(self, table))
 
+            context_menu_image_comparator = QAction('Abrir Image Comparator®', self)
+            context_menu_image_comparator.triggered.connect(lambda: run_image_comparator())
+
             context_menu_consultar_estrutura = QAction('Consultar estrutura', self)
             context_menu_consultar_estrutura.triggered.connect(lambda: executar_consulta_estrutura(self, table))
 
@@ -528,6 +533,7 @@ class PcpApp(QWidget):
             context_menu_nova_janela.triggered.connect(self.abrir_nova_janela)
 
             menu.addAction(context_menu_abrir_desenho)
+            menu.addAction(context_menu_image_comparator)
             menu.addAction(context_menu_consultar_estrutura)
             menu.addAction(context_menu_consultar_onde_usado)
             menu.addAction(context_menu_saldo_estoque)
