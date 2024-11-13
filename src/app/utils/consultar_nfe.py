@@ -29,7 +29,7 @@ def visualizar_nfe(self, table):
                 nome_fornec_col = col
             elif header_text == 'cód. fornecedor':
                 cod_fornecedor_col = col
-            elif header_text == 'pedido':
+            elif header_text in ('pedido', 'pedido compra'):
                 pedido_col = col
 
         if documento_col is not None and nome_fornec_col is not None and cod_fornecedor_col is not None:
@@ -73,7 +73,8 @@ def visualizar_nfe(self, table):
                 cursor.execute(query)
 
                 if cursor.rowcount == 0:
-                    QMessageBox.information(None, "Atenção", f"{documento}\n\nNota fiscal não encontrada.\n\nEureka®")
+                    QMessageBox.information(None, "Atenção", f"{documento if documento != '000000000' else ''}"
+                                                             f"\n\nNota fiscal não encontrada.\n\nEureka®")
                     return
 
                 nova_guia = QWidget()

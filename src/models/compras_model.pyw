@@ -240,7 +240,7 @@ class ComprasApp(QWidget):
         self.btn_saldo_estoque.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_saldo_estoque.hide()
 
-        self.btn_ultimos_fornecedores = QPushButton("Últimos fornecedores", self)
+        self.btn_ultimos_fornecedores = QPushButton("Últimos Fornecedores", self)
         self.btn_ultimos_fornecedores.clicked.connect(lambda: executar_ultimos_fornecedores(self, self.tree))
         self.btn_ultimos_fornecedores.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_ultimos_fornecedores.hide()
@@ -598,13 +598,13 @@ class ComprasApp(QWidget):
             # A lib Qt garante que o objeto do menu será destruído após uso
             menu.setAttribute(Qt.WA_DeleteOnClose)
 
-            context_menu_image_comparator = QAction('Abrir Image Comparator®', self)
+            context_menu_image_comparator = QAction('Abrir ImageComparator®', self)
             context_menu_image_comparator.triggered.connect(lambda: run_image_comparator())
 
             context_menu_visualizar_nf = QAction('Visualizar Nota Fiscal', self)
             context_menu_visualizar_nf.triggered.connect(lambda: visualizar_nfe(self, table))
 
-            context_menu_ultimo_fornecedor = QAction('Últimos fornecedores', self)
+            context_menu_ultimo_fornecedor = QAction('Últimos Fornecedores', self)
             context_menu_ultimo_fornecedor.triggered.connect(lambda: executar_ultimos_fornecedores(self, table))
 
             context_menu_ultimas_nfe = QAction('Últimas Notas Fiscais', self)
@@ -621,11 +621,13 @@ class ComprasApp(QWidget):
 
             menu.addAction(context_menu_nova_janela)
             menu.addAction(context_menu_image_comparator)
-            menu.addAction(context_menu_visualizar_nf)
-            menu.addAction(context_menu_ultimo_fornecedor)
-            menu.addAction(context_menu_ultimas_nfe)
+            menu.addSeparator()
             menu.addAction(context_menu_consultar_onde_usado)
             menu.addAction(context_menu_saldo_estoque)
+            menu.addSeparator()
+            menu.addAction(context_menu_ultimo_fornecedor)
+            menu.addAction(context_menu_ultimas_nfe)
+            menu.addAction(context_menu_visualizar_nf)
 
             menu.exec_(table.viewport().mapToGlobal(position))
 

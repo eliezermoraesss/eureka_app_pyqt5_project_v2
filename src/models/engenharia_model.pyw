@@ -202,7 +202,7 @@ class EngenhariaApp(QWidget):
         self.btn_exportar_excel.hide()
 
         self.btn_calculo_peso = QPushButton("Tabela de pesos", self)
-        self.btn_calculo_peso.clicked.connect(self.abrir_tabela_pesos)
+        self.btn_calculo_peso.clicked.connect(lambda: abrir_tabela_pesos())
         self.btn_calculo_peso.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_fechar = QPushButton("Fechar", self)
@@ -395,9 +395,6 @@ class EngenhariaApp(QWidget):
         eng_window.showMaximized()
         self.main_window.sub_windows.append(eng_window)
 
-    def abrir_tabela_pesos(self):
-        os.startfile(r'\\192.175.175.4\desenvolvimento\REPOSITORIOS\resources\assets\excel\TABELA_PESO.xlsx')
-
     def numero_linhas_consulta(self, query_consulta):
         order_by_a_remover = "ORDER BY B1_COD ASC"
         query_sem_order_by = query_consulta.replace(order_by_a_remover, "")
@@ -469,59 +466,56 @@ class EngenhariaApp(QWidget):
 
             context_menu_nova_janela = QAction('Nova janela', self)
             context_menu_nova_janela.triggered.connect(self.abrir_nova_janela)
-            menu.addAction(context_menu_nova_janela)
-
-            menu.addSeparator()
 
             new_product = QAction('Cadastrar novo produto...', self)
             new_product.triggered.connect(self.abrir_janela_novo_produto)
-            menu.addAction(new_product)
 
             cadastro_copia_produto = QAction('Cadastro semelhante...', self)
             cadastro_copia_produto.triggered.connect(self.copiar_item_selecionado)
-            menu.addAction(cadastro_copia_produto)
 
             editar_action = QAction('Editar cadastro...', self)
             editar_action.triggered.connect(self.editar_item_selecionado)
-            menu.addAction(editar_action)
-
-            menu.addSeparator()
 
             context_menu_abrir_desenho = QAction('Abrir desenho', self)
             context_menu_abrir_desenho.triggered.connect(lambda: abrir_desenho(self, table))
-            menu.addAction(context_menu_abrir_desenho)
 
             context_menu_consultar_estrutura = QAction('Consultar estrutura', self)
             context_menu_consultar_estrutura.triggered.connect(lambda: executar_consulta_estrutura(self, table))
-            menu.addAction(context_menu_consultar_estrutura)
 
             context_menu_consultar_onde_usado = QAction('Onde é usado?', self)
             context_menu_consultar_onde_usado.triggered.connect(lambda: executar_consulta_onde_usado(self, table))
-            menu.addAction(context_menu_consultar_onde_usado)
-
-            menu.addSeparator()
 
             context_menu_saldo_estoque = QAction('Saldo em estoque', self)
             context_menu_saldo_estoque.triggered.connect(lambda: executar_saldo_em_estoque(self, table))
-            menu.addAction(context_menu_saldo_estoque)
 
             context_menu_ultimo_fornecedor = QAction('Últimos Fornecedores', self)
             context_menu_ultimo_fornecedor.triggered.connect(lambda: executar_ultimos_fornecedores(self, table))
-            menu.addAction(context_menu_ultimo_fornecedor)
 
             context_menu_ultimas_nfe = QAction('Últimas Notas Fiscais', self)
             context_menu_ultimas_nfe.triggered.connect(lambda: consultar_ultimas_nfe(self, table))
-            menu.addAction(context_menu_ultimas_nfe)
 
-            menu.addSeparator()
-
-            context_menu_image_comparator = QAction('Abrir Image Comparator®', self)
+            context_menu_image_comparator = QAction('Abrir ImageComparator®', self)
             context_menu_image_comparator.triggered.connect(lambda: run_image_comparator())
-            menu.addAction(context_menu_image_comparator)
 
             context_menu_tabela_pesos = QAction('Abrir Tabela de Pesos', self)
-            context_menu_tabela_pesos.triggered.connect(self.abrir_tabela_pesos)
+            context_menu_tabela_pesos.triggered.connect(lambda: abrir_tabela_pesos())
+
+            menu.addAction(context_menu_nova_janela)
+            menu.addSeparator()
+            menu.addAction(new_product)
+            menu.addAction(cadastro_copia_produto)
+            menu.addAction(editar_action)
+            menu.addSeparator()
+            menu.addAction(context_menu_abrir_desenho)
+            menu.addAction(context_menu_image_comparator)
             menu.addAction(context_menu_tabela_pesos)
+            menu.addSeparator()
+            menu.addAction(context_menu_consultar_estrutura)
+            menu.addAction(context_menu_consultar_onde_usado)
+            menu.addAction(context_menu_saldo_estoque)
+            menu.addAction(context_menu_ultimo_fornecedor)
+            menu.addAction(context_menu_ultimas_nfe)
+
 
             menu.exec_(table.viewport().mapToGlobal(position))
 

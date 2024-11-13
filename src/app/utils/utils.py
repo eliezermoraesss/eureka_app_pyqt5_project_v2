@@ -182,3 +182,7 @@ def formatar_campo(campo):
 
 def format_cnpj(cnpj):
     return f"{cnpj[:2]}.{cnpj[2:5]}.{cnpj[5:8]}/{cnpj[8:12]}-{cnpj[12:]}"  # Saída: 12.345.678/9012-34
+
+
+def abrir_tabela_pesos():
+    os.startfile(r'\\192.175.175.4\desenvolvimento\REPOSITORIOS\resources\assets\excel\TABELA_PESO.xlsx')

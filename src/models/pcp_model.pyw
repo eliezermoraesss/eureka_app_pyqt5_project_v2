@@ -22,7 +22,7 @@ from src.app.utils.consultar_onde_usado import executar_consulta_onde_usado
 from src.app.utils.consultar_saldo_estoque import executar_saldo_em_estoque
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.load_session import load_session
-from src.app.utils.utils import exibir_mensagem, abrir_desenho, exportar_excel, copiar_linha
+from src.app.utils.utils import exibir_mensagem, abrir_desenho, exportar_excel, copiar_linha, abrir_tabela_pesos
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.dialog.loading_dialog import loading_dialog
 
@@ -517,7 +517,7 @@ class PcpApp(QWidget):
             context_menu_abrir_desenho = QAction('Abrir desenho', self)
             context_menu_abrir_desenho.triggered.connect(lambda: abrir_desenho(self, table))
 
-            context_menu_image_comparator = QAction('Abrir Image Comparator®', self)
+            context_menu_image_comparator = QAction('Abrir ImageComparator®', self)
             context_menu_image_comparator.triggered.connect(lambda: run_image_comparator())
 
             context_menu_consultar_estrutura = QAction('Consultar estrutura', self)
@@ -532,9 +532,15 @@ class PcpApp(QWidget):
             context_menu_nova_janela = QAction('Nova janela', self)
             context_menu_nova_janela.triggered.connect(self.abrir_nova_janela)
 
+            context_menu_tabela_pesos = QAction('Abrir Tabela de Pesos', self)
+            context_menu_tabela_pesos.triggered.connect(lambda: abrir_tabela_pesos())
+
             menu.addAction(context_menu_nova_janela)
+            menu.addSeparator()
             menu.addAction(context_menu_abrir_desenho)
             menu.addAction(context_menu_image_comparator)
+            menu.addAction(context_menu_tabela_pesos)
+            menu.addSeparator()
             menu.addAction(context_menu_consultar_estrutura)
             menu.addAction(context_menu_consultar_onde_usado)
             menu.addAction(context_menu_saldo_estoque)
