@@ -619,13 +619,13 @@ class ComprasApp(QWidget):
             context_menu_nova_janela = QAction('Nova janela', self)
             context_menu_nova_janela.triggered.connect(self.abrir_nova_janela)
 
+            menu.addAction(context_menu_nova_janela)
             menu.addAction(context_menu_image_comparator)
             menu.addAction(context_menu_visualizar_nf)
             menu.addAction(context_menu_ultimo_fornecedor)
             menu.addAction(context_menu_ultimas_nfe)
             menu.addAction(context_menu_consultar_onde_usado)
             menu.addAction(context_menu_saldo_estoque)
-            menu.addAction(context_menu_nova_janela)
 
             menu.exec_(table.viewport().mapToGlobal(position))
 

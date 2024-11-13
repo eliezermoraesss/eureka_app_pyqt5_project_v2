@@ -467,6 +467,12 @@ class EngenhariaApp(QWidget):
             # A lib Qt garante que o objeto do menu será destruído após uso
             menu.setAttribute(Qt.WA_DeleteOnClose)
 
+            context_menu_nova_janela = QAction('Nova janela', self)
+            context_menu_nova_janela.triggered.connect(self.abrir_nova_janela)
+            menu.addAction(context_menu_nova_janela)
+
+            menu.addSeparator()
+
             new_product = QAction('Cadastrar novo produto...', self)
             new_product.triggered.connect(self.abrir_janela_novo_produto)
             menu.addAction(new_product)
@@ -508,10 +514,6 @@ class EngenhariaApp(QWidget):
             menu.addAction(context_menu_ultimas_nfe)
 
             menu.addSeparator()
-
-            context_menu_nova_janela = QAction('Nova janela', self)
-            context_menu_nova_janela.triggered.connect(self.abrir_nova_janela)
-            menu.addAction(context_menu_nova_janela)
 
             context_menu_image_comparator = QAction('Abrir Image Comparator®', self)
             context_menu_image_comparator.triggered.connect(lambda: run_image_comparator())
