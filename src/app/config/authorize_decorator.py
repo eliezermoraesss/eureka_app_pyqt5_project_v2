@@ -7,7 +7,6 @@ from functools import wraps
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from PyQt5 import QtWidgets
-
 from app.utils.load_session import load_session
 
 
@@ -20,9 +19,10 @@ def authorize(allowed_roles, self):
                 logging.debug(f"User data loaded: {user_data}")
 
                 user_role = user_data.get('role')  # Assumes 'role' is in the session data
-                logging.debug(f"User role: {user_role}")
+                user_email = user_data.get('email')
+                logging.debug(f"User role: {user_role}\nUser email: {user_email}")
 
-                if user_role in allowed_roles:
+                if user_role in allowed_roles or user_email in allowed_roles:
                     logging.debug(f"Access granted for role: {user_role}")
                     return func(*args, **kwargs)  # User has the required role, proceed
                 else:

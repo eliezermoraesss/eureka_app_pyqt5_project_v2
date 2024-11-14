@@ -1,8 +1,6 @@
 import os
 import sys
 
-from PyQt5.QtCore import QProcess
-
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -16,6 +14,7 @@ from models.comercial_model import ComercialApp
 from models.qps_model import QpClosedApp
 from app.utils.load_session import load_session
 from qt.ui.ui_home_window import Ui_HomeWindow
+from app.utils.open_dashboard_webbrowser import open_dashboard_firefox
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -38,12 +37,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setup_connections()
 
     def setup_connections(self):
-        @authorize(['admin', 'manager', 'Diretoria', 'Comercial'], self)
+        @authorize(['admin', 'francesco@enaplic.com.br', 'assennato@enaplic.com.br', 'antonio@enaplic.com.br',
+                    'maynara@enaplic.com.br', 'lucio@enaplic.com.br', 'julio@enaplic.com.br'], self)
         def execute_dashboard_model(checked=False):
-            process = QProcess()
-            script_path = os.path.abspath(os.path.join(self.base_dir, '..', '..', 'models', 'dashboard_model.pyw'))
-            process.startDetached("python", [script_path])  # Usa startDetached para execução
-            self.processes.append(process)
+            # Abre a URL no navegador padrão do sistema
+            url = ('https://app.powerbi.com/groups/me/reports/18fe3397-3456-4c98-b9c8-e42a80fa5bf5'
+                   '/d752779fc700976478f5?experience=power-bi')
+            open_dashboard_firefox(url)
 
         def execute_engenharia_model():
             eng_window = EngenhariaApp(self)

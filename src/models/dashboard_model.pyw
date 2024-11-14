@@ -27,7 +27,7 @@ class DashboardWindow(QMainWindow):
         self.browser = QWebEngineView()
 
         # Converte a string da URL para um objeto QUrl
-        power_bi_url = QUrl("https://app.powerbi.com/groups/me/reports/b0632c9a-3773-4099-85b4-ce57f55e74b7"
+        power_bi_url = QUrl("https://app.powerbi.com/groups/me/reports/18fe3397-3456-4c98-b9c8-e42a80fa5bf5"
                             "/d752779fc700976478f5?experience=power-bi")
 
         # Carrega a URL do relatório do Power BI

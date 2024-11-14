@@ -799,7 +799,7 @@ class ComprasApp(QWidget):
 
         common_select = f"""
                 SELECT
-                    SC.C1_ZZNUMQP AS "QP",
+                    SC.C1_ZZNUMQP AS [QP/QR],
                     SC.C1_NUM AS "SOLIC. COMPRA",
                     SC.C1_PEDIDO AS "PEDIDO COMPRA",
                     ITEM_NF.D1_DOC AS "DOC. NF ENTRADA",
@@ -836,7 +836,8 @@ class ComprasApp(QWidget):
                     PC.C7_OBSM AS "OBSERVAÇÃO ITEM DO PEDIDO DE COMPRA",
                     US.USR_NOME AS "SOLICITANTE",
                     PC.S_T_A_M_P_ AS "PEDIDO DE COMPRA ABERTO EM:",
-                    SC.C1_OP AS "OP"
+                    SC.C1_OP AS "OP",
+                    itemPedidoVenda.C6_XTPOPER AS "QR?"
                 FROM 
                     {self.database}.dbo.SC7010 PC
                 LEFT JOIN
@@ -863,6 +864,10 @@ class ComprasApp(QWidget):
                     {self.database}.dbo.SB1010 PROD
                 ON 
                     PROD.B1_COD = SC.C1_PRODUTO
+                LEFT JOIN
+                    {self.database}.dbo.SC6010 itemPedidoVenda
+                ON
+                    SC.C1_ZZNUMQP = itemPedidoVenda.C6_NUM AND SC.C1_PRODUTO = itemPedidoVenda.C6_PRODUTO
                 """
         solic_com_pedido_where = f"""
                 WHERE
@@ -902,7 +907,7 @@ class ComprasApp(QWidget):
                 UNION ALL
                 
                 SELECT
-                    SC.C1_ZZNUMQP AS "QP",
+                    SC.C1_ZZNUMQP AS [QP/QR],
                     SC.C1_NUM AS "SOLIC. COMPRA",
                     NULL AS "PEDIDO COMPRA",
                     NULL AS "DOC. NF ENTRADA",
@@ -936,7 +941,8 @@ class ComprasApp(QWidget):
                     NULL AS "OBSERVAÇÃO ITEM DO PEDIDO DE COMPRA",
                     US.USR_NOME AS "SOLICITANTE",
                     NULL AS "PEDIDO DE COMPRA ABERTO EM:",
-                    SC.C1_OP AS "OP"
+                    SC.C1_OP AS "OP",
+                    NULL AS "QR?"
                 FROM 
                     {self.database}.dbo.SC1010 SC
                 LEFT JOIN
@@ -1018,6 +1024,10 @@ class ComprasApp(QWidget):
                             item.setText('SEM PEDIDO COMPRA')
                             dataframe.at[index, ' '] = 'SEM PEDIDO COMPRA'
                     else:
+                        if column_name in ('QP/QR', 'SOLIC. COMPRA'):
+                            value = value.lstrip('0')
+                        if column_name == 'QR?':
+                            value = 'Sim' if value == '2' else 'Não'
                         if column_name in ('QTD. SOLIC. COMPRAS', 'QTD. PEDIDO COMPRA', 'QTD. ENTREGUE',
                                            'VALOR UNIT. PC', 'VALOR TOTAL PC', 'VALOR UNIT. NF', 'VALOR TOTAL NF'):
                             if column_name in ('VALOR UNIT. PC', 'VALOR TOTAL PC', 'VALOR UNIT. NF', 'VALOR TOTAL NF'):
@@ -1103,10 +1113,14 @@ class ComprasApp(QWidget):
 
     def exibir_indicadores(self, dataframe):
         coluna_status = ' '
-        sem_pc = dataframe[coluna_status].apply(lambda x: x.strip() == 'SEM PEDIDO COMPRA' if isinstance(x, str) else True).sum()
-        pc_encerrado = dataframe[coluna_status].apply(lambda x: x.strip() == 'PEDIDO ENCERRADO' if isinstance(x, str) else True).sum()
-        entrega_parcial = dataframe[coluna_status].apply(lambda x: x.strip() == 'ENTREGA PARCIAL' if isinstance(x, str) else True).sum()
-        aguardando_entrega = dataframe[coluna_status].apply(lambda x: x.strip() == 'AGUARDANDO ENTREGA' if isinstance(x, str) else True).sum()
+        sem_pc = dataframe[coluna_status].apply(
+            lambda x: x.strip() == 'SEM PEDIDO COMPRA' if isinstance(x, str) else True).sum()
+        pc_encerrado = dataframe[coluna_status].apply(
+            lambda x: x.strip() == 'PEDIDO ENCERRADO' if isinstance(x, str) else True).sum()
+        entrega_parcial = dataframe[coluna_status].apply(
+            lambda x: x.strip() == 'ENTREGA PARCIAL' if isinstance(x, str) else True).sum()
+        aguardando_entrega = dataframe[coluna_status].apply(
+            lambda x: x.strip() == 'AGUARDANDO ENTREGA' if isinstance(x, str) else True).sum()
 
         indicadores_table = f"""
                 <table border="1" cellspacing="2" cellpadding="4" style="border-collapse: collapse; text-align: left; width: 100%;">
@@ -1173,7 +1187,7 @@ class ComprasApp(QWidget):
                 return
 
             dialog = loading_dialog(self, "Carregando...", "🤖 Processando dados do TOTVS..."
-                                                            "\n\n🤖 Por favor, aguarde.\n\nEureka®")
+                                                           "\n\n🤖 Por favor, aguarde.\n\nEureka®")
 
             self.dataframe = pd.read_sql(query_consulta_filtro, self.engine)
             self.dataframe.insert(0, ' ', '')

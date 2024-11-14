@@ -37,12 +37,12 @@ class FilterDialog(QDialog):
         # Pegar valores únicos da coluna
         if self.nome_coluna == ' ':
             self.itens_originais = ['SEM PEDIDO COMPRA', 'AGUARDANDO ENTREGA', 'ENTREGA PARCIAL', 'PEDIDO ENCERRADO']
-            self.list_widget.addItems(self.itens_originais)
         else:
             self.itens_originais = list(map(str, self.dataframe[self.nome_coluna].dropna().unique()))
             if self.dataframe[self.nome_coluna].isnull().any():
                 self.itens_originais.append(self.vazio_label)
-            self.list_widget.addItems(self.itens_originais)
+
+        self.list_widget.addItems(self.itens_originais)
 
         # Botão de aplicar filtro
         btn_aplicar = QPushButton("Aplicar Filtro")

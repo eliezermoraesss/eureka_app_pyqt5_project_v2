@@ -34,6 +34,29 @@ def exibir_mensagem(title, message, icon_type):
     root.destroy()
 
 
+def exibir_janela_mensagem_opcao(titulo, mensagem):
+    root = tk.Tk()
+    root.withdraw()  # Esconde a janela principal
+    root.attributes('-topmost', True)  # Garante que a janela estará sempre no topo
+    root.lift()  # Traz a janela para frente
+    root.focus_force()  # Força o foco na janela
+
+    # Mostrar a mensagem
+    user_choice = messagebox.askquestion(
+        titulo,
+        mensagem,
+        parent=root  # Define a janela principal como pai da mensagem
+    )
+
+    # Fechar a janela principal após a escolha do usuário
+    root.destroy()
+
+    if user_choice == "yes":
+        return True
+    else:
+        return False
+
+
 def copiar_linha(item):
     # Verificar se um item foi clicado
     if item is not None:
