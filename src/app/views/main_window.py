@@ -41,8 +41,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     'maynara@enaplic.com.br', 'lucio@enaplic.com.br', 'julio@enaplic.com.br'], self)
         def execute_dashboard_model(checked=False):
             # Abre a URL no navegador padrão do sistema
-            url = ('https://app.powerbi.com/groups/me/reports/18fe3397-3456-4c98-b9c8-e42a80fa5bf5'
-                   '/d752779fc700976478f5?experience=power-bi')
+            url = ('https://app.powerbi.com/groups/me/reports/f4562fea-7618-4f05-8df7-0750108248f8/d752779fc700976478f5?experience=power-bi')
             open_dashboard_firefox(url)
 
         def execute_engenharia_model():
