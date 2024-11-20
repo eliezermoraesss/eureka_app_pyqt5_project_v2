@@ -2,7 +2,7 @@ import locale
 import os
 import sys
 
-from src.app.utils.run_image_comparator import run_image_comparator
+from src.app.utils.run_image_comparator import run_image_comparator_exe
 
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -518,7 +518,7 @@ class PcpApp(QWidget):
             context_menu_abrir_desenho.triggered.connect(lambda: abrir_desenho(self, table))
 
             context_menu_image_comparator = QAction('Abrir ImageComparator®', self)
-            context_menu_image_comparator.triggered.connect(lambda: run_image_comparator())
+            context_menu_image_comparator.triggered.connect(lambda: run_image_comparator_exe())
 
             context_menu_consultar_estrutura = QAction('Consultar estrutura', self)
             context_menu_consultar_estrutura.triggered.connect(lambda: executar_consulta_estrutura(self, table))

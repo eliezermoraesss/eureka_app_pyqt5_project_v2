@@ -3,7 +3,6 @@ import os
 import sys
 import time
 
-
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -28,7 +27,7 @@ from src.app.utils.load_session import load_session
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.app.utils.utils import *
 from src.app.views.copy_product_window import CopyProdutoItemWindow
-from src.app.utils.run_image_comparator import run_image_comparator
+from src.app.utils.run_image_comparator import *
 
 
 class CustomLineEdit(QLineEdit):
@@ -59,6 +58,7 @@ class EngenhariaApp(QWidget):
         self.setWindowTitle(f"Eureka® Engenharia . {username} ({role})")
         self.username, self.password, self.database, self.server = setup_mssql()
         self.driver = '{SQL Server}'
+        self.base_dir = os.path.dirname(os.path.abspath(__file__))
 
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
@@ -205,6 +205,10 @@ class EngenhariaApp(QWidget):
         self.btn_calculo_peso.clicked.connect(lambda: abrir_tabela_pesos())
         self.btn_calculo_peso.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
+        self.btn_image_comparator = QPushButton("Image Comparator", self)
+        self.btn_image_comparator.clicked.connect(lambda: run_image_comparator_model(self))
+        self.btn_image_comparator.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
         self.btn_fechar = QPushButton("Fechar", self)
         self.btn_fechar.clicked.connect(self.fechar_janela)
         self.btn_fechar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -251,6 +255,7 @@ class EngenhariaApp(QWidget):
         layout_button_04.addWidget(self.btn_exportar_excel)
         layout_button_04.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         layout_button_03.addWidget(self.btn_calculo_peso)
+        layout_button_03.addWidget(self.btn_image_comparator)
         layout_button_03.addWidget(self.btn_fechar)
         layout_button_03.addWidget(self.btn_home)
         layout_button_03.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
@@ -495,7 +500,7 @@ class EngenhariaApp(QWidget):
             context_menu_ultimas_nfe.triggered.connect(lambda: consultar_ultimas_nfe(self, table))
 
             context_menu_image_comparator = QAction('Abrir ImageComparator®', self)
-            context_menu_image_comparator.triggered.connect(lambda: run_image_comparator())
+            context_menu_image_comparator.triggered.connect(lambda: run_image_comparator_model(self))
 
             context_menu_tabela_pesos = QAction('Abrir Tabela de Pesos', self)
             context_menu_tabela_pesos.triggered.connect(lambda: abrir_tabela_pesos())
@@ -515,7 +520,6 @@ class EngenhariaApp(QWidget):
             menu.addAction(context_menu_saldo_estoque)
             menu.addAction(context_menu_ultimo_fornecedor)
             menu.addAction(context_menu_ultimas_nfe)
-
 
             menu.exec_(table.viewport().mapToGlobal(position))
 
