@@ -12,7 +12,7 @@ from PyQt5.QtCore import Qt, QDate, pyqtSignal, QSize
 from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtWidgets import QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QDateEdit, QLabel, \
-    QSizePolicy, QTabWidget, QMenu, QCheckBox, QDialog
+    QSizePolicy, QTabWidget, QMenu, QCheckBox, QDialog, QComboBox
 from sqlalchemy import create_engine
 
 from src.app.utils.consultar_onde_usado import executar_consulta_onde_usado
@@ -366,6 +366,7 @@ class ComprasApp(QWidget):
         layout_campos_02.addLayout(container_campo_armazem)
         layout_campos_02.addLayout(container_fornecedor)
         layout_campos_02.addLayout(container_nm_fantasia_forn)
+        # layout_campos_02.addLayout(container_combobox_qr)
         layout_campos_02.addWidget(self.checkbox_exibir_somente_sc_com_pedido)
         layout_campos_01.addStretch()
         layout_campos_02.addStretch()
@@ -800,6 +801,10 @@ class ComprasApp(QWidget):
         common_select = f"""
                 SELECT
                     SC.C1_ZZNUMQP AS [QP/QR],
+                    CASE
+                        WHEN itemPedidoVenda.C6_XTPOPER = 2 THEN 'Sim'
+                        ELSE 'Não'
+                    END AS "QR?",
                     SC.C1_NUM AS "SOLIC. COMPRA",
                     SC.C1_PEDIDO AS "PEDIDO COMPRA",
                     ITEM_NF.D1_DOC AS "DOC. NF ENTRADA",
@@ -836,8 +841,7 @@ class ComprasApp(QWidget):
                     PC.C7_OBSM AS "OBSERVAÇÃO ITEM DO PEDIDO DE COMPRA",
                     US.USR_NOME AS "SOLICITANTE",
                     PC.S_T_A_M_P_ AS "PEDIDO DE COMPRA ABERTO EM:",
-                    SC.C1_OP AS "OP",
-                    itemPedidoVenda.C6_XTPOPER AS "QR?"
+                    SC.C1_OP AS "OP"
                 FROM 
                     {self.database}.dbo.SC7010 PC
                 LEFT JOIN
@@ -908,6 +912,7 @@ class ComprasApp(QWidget):
                 
                 SELECT
                     SC.C1_ZZNUMQP AS [QP/QR],
+                    NULL AS "QR?",
                     SC.C1_NUM AS "SOLIC. COMPRA",
                     NULL AS "PEDIDO COMPRA",
                     NULL AS "DOC. NF ENTRADA",
@@ -941,8 +946,7 @@ class ComprasApp(QWidget):
                     NULL AS "OBSERVAÇÃO ITEM DO PEDIDO DE COMPRA",
                     US.USR_NOME AS "SOLICITANTE",
                     NULL AS "PEDIDO DE COMPRA ABERTO EM:",
-                    SC.C1_OP AS "OP",
-                    NULL AS "QR?"
+                    SC.C1_OP AS "OP"
                 FROM 
                     {self.database}.dbo.SC1010 SC
                 LEFT JOIN
@@ -1026,8 +1030,8 @@ class ComprasApp(QWidget):
                     else:
                         if column_name in ('QP/QR', 'SOLIC. COMPRA'):
                             value = value.lstrip('0')
-                        if column_name == 'QR?':
-                            value = 'Sim' if value == '2' else 'Não'
+                        # if column_name == 'QR?':
+                            # value = 'Sim' if value == '2' else 'Não'
                         if column_name in ('QTD. SOLIC. COMPRAS', 'QTD. PEDIDO COMPRA', 'QTD. ENTREGUE',
                                            'VALOR UNIT. PC', 'VALOR TOTAL PC', 'VALOR UNIT. NF', 'VALOR TOTAL NF'):
                             if column_name in ('VALOR UNIT. PC', 'VALOR TOTAL PC', 'VALOR UNIT. NF', 'VALOR TOTAL NF'):
