@@ -698,7 +698,7 @@ class PcpApp(QWidget):
                 B1_DESC AS "Descrição", 
                 C2_QUANT AS "Quant.", 
                 C2_UM AS "UM", 
-                C2_EMISSAO AS "Emissão", 
+                C2_EMISSAO AS "Data Abertura", 
                 C2_DATPRF AS "Prev. Entrega",
                 C2_DATRF AS "Fechamento", 
                 C2_OBS AS "Observação",

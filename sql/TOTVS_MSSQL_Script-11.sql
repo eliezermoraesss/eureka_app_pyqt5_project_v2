@@ -113,18 +113,23 @@ FROM PROTHEUS12_R27.dbo.SC6010
 ORDER BY R_E_C_N_O_ DESC; -- TABELA ITENS PEDIDO DE VENDA -> C6_XTPOPER = 1 (QP) / 2 (QR) / 3 (ND - OUTROS)
 
 
--- QUERY PARA PROJETAR INFORMAÇÕES REFENTE AOS PEDIDOS DE VENDA E NOTAS FISCAIS DE SAÍDA
+--==================================== v1 ====================================
+-- QUERY PARA PROJETAR INFORMAÇÕES REFERENTE AOS PEDIDOS DE VENDA E NOTAS FISCAIS DE SAÍDA
+-- PARAMETRO 1 PARA CONSULTA DE NOTA FISCAL 'LIKE %' 
+-- PARAMETRO2 PARA 'NOTA FISCAL' IS NULL (PV ABERTO/FECHADO)
+-- PARAMETRO 3 PARA 'NOTA FISCAL' IS NULL (PV ABERTO) 
+DECLARE @prioridade INT = 3;
 SELECT
 	CASE
 		WHEN D2_DOC IS NULL THEN 'ABERTO'
 		ELSE 'FECHADO'
 	END AS 'STATUS',
-	C6_NUM AS 'PED. DE VENDA',
+	C6_NUM AS 'PV',
 	CASE
 		WHEN C6_XTPOPER = 1 THEN 'QP'
 		WHEN C6_XTPOPER = 2 THEN 'QR'
 		ELSE 'Outros'
-	END AS 'TIPO PED. VENDA',
+	END AS 'TIPO PV',
 	C6_PRODUTO AS 'CÓDIGO',
 	C6_DESCRI AS 'DESCRIÇÃO',
 	C6_UM AS 'UN.', 
@@ -132,11 +137,28 @@ SELECT
 	C6_PRCVEN AS 'PREÇO VENDA', 
 	C6_VALOR AS 'TOTAL ITEM',
 	C5_PBRUTO AS 'PESO BRUTO',
-	C5_EMISSAO 'DATA EMISSÃO',
+	C5_EMISSAO 'PV ABERTO EM:',
 	C6_DATFAT AS 'DATA FATURAMENTO',
 	C6_ENTREG AS 'DATA ENTREGA',
 	C5_CONDPAG AS 'CONDIÇÃO PAGAMENTO',
-	C6_ITEM AS 'ITEM PED. VENDA', 
+	C6_ITEM AS 'ITEM PV',
+	CASE
+		WHEN C1_NUM IS NULL THEN 'Sem solic. de compra' 
+		ELSE C1_NUM
+	END AS 'SOLIC. COMPRA',
+	CASE 
+		WHEN C1_EMISSAO IS NULL THEN 'Sem data'
+		ELSE C1_EMISSAO
+	END AS 'SC ABERTA EM:',
+	CASE 
+		WHEN C2_NUM IS NULL THEN 'Sem OP'
+		ELSE C2_NUM
+	END AS 'OP',
+	CASE 
+		WHEN C2_EMISSAO IS NULL THEN 'Sem data'
+		ELSE C2_EMISSAO 
+	END AS 'OP ABERTA EM:',
+	C6_XITEMSC AS 'ITEM SC',
 	CASE 
 		WHEN D2_DOC IS NULL THEN 'Sem nota fiscal'
 		ELSE D2_DOC
@@ -148,7 +170,7 @@ SELECT
 	C6_LOCAL AS 'ARMAZÉM',
 	C6_CC AS 'CENTRO CUSTO',
 	C6_CLI AS 'CÓD. CLIENTE',
-	C5_ZZNOME AS 'DESC. CLIENTE',
+	C5_ZZNOME AS 'CLIENTE',
 	C5_TIPOCLI AS 'TIPO CLIENTE',
 	C5_TRANSP AS 'TRANSPORTADORA',
 	C5_TPFRETE AS 'TIPO FRETE',
@@ -157,10 +179,7 @@ SELECT
 	C6_NFORI AS 'NF. ORIGINAL',
 	C6_CLASFIS AS 'SIT. TRIBUTÁRIA',
 	C6_ZZNCM AS 'NCM',
-	C6_CONTA AS 'CONTA CONTÁBIL',
-	C6_XNUMSC AS 'SOLIC. COMPRA',
-	C6_XITEMSC AS 'ITEM SC',
-	itemPedidoVenda.S_T_A_M_P_ AS 'PV ABERTO EM:'
+	C6_CONTA AS 'CONTA CONTÁBIL'
 FROM 
 	PROTHEUS12_R27.dbo.SC6010 itemPedidoVenda
 LEFT JOIN
@@ -173,13 +192,29 @@ INNER JOIN
 	PROTHEUS12_R27.dbo.SC5010 cabecalhoPedidoVenda
 ON
 	itemPedidoVenda.C6_NUM = cabecalhoPedidoVenda.C5_NUM
+LEFT JOIN
+	SC1010 tabelaSolicCompras
+ON
+	itemPedidoVenda.C6_NUM = tabelaSolicCompras.C1_ZZNUMQP
+	AND itemPedidoVenda.C6_PRODUTO = tabelaSolicCompras.C1_PRODUTO
+	AND	itemPedidoVenda.D_E_L_E_T_ = tabelaSolicCompras.D_E_L_E_T_
+LEFT JOIN 
+	PROTHEUS12_R27.dbo.SC2010 tabelaOrdemDeProducao
+ON
+	itemPedidoVenda.C6_NUM = tabelaOrdemDeProducao.C2_ZZNUMQP
+	AND itemPedidoVenda.C6_PRODUTO = tabelaOrdemDeProducao.C2_PRODUTO
+	AND itemPedidoVenda.D_E_L_E_T_ = tabelaOrdemDeProducao.D_E_L_E_T_ 
 WHERE 
-	C6_XTPOPER LIKE '%' -- C6_XTPOPER = 1 (QP) / 2 (QR) / 3 (ND - OUTROS)
+	C6_XTPOPER LIKE '2%' -- C6_XTPOPER = 1 (QP) / 2 (QR) / 3 (ND - OUTROS)
 	AND	C6_NUM LIKE '%'
 	AND	C6_PRODUTO LIKE '%'
 	AND	C6_DESCRI LIKE '%%'
 	AND	C6_NUMORC LIKE '%'
-	AND	D2_DOC LIKE '%'
+	AND (
+    (@prioridade = 1 AND D2_DOC LIKE '%')
+    OR (@prioridade = 2 AND (D2_DOC IS NULL OR D2_DOC IS NOT NULL))
+    OR (@prioridade = 3 AND D2_DOC IS NULL)
+	)
 	AND C6_CLI LIKE '%'
 	AND C5_ZZNOME LIKE '%%'
 	AND C6_XNUMSC LIKE '%'
@@ -189,7 +224,149 @@ WHERE
 ORDER BY 
 	itemPedidoVenda.R_E_C_N_O_ DESC;
 
+--==================================== v2 - EUREKA COMERCIAL ====================================
+-- QUERY PARA PROJETAR INFORMAÇÕES REFERENTE AOS PEDIDOS DE VENDA E NOTAS FISCAIS DE SAÍDA
+-- @prioridade = 1 PARA CONSULTA DE NOTA FISCAL 'LIKE %' 
+-- @prioridade = 2 PARA 'NOTA FISCAL' IS NULL (PV ABERTO/FECHADO)
+-- @prioridade = 3 PARA 'NOTA FISCAL' IS NULL (PV ABERTO) 
+DECLARE @prioridade INT = 2;
+SELECT
+	CASE
+		WHEN D2_DOC IS NULL THEN 'ABERTO'
+		ELSE 'FECHADO'
+	END AS 'STATUS',
+	CASE
+		WHEN C6_XTPOPER = 1 THEN 'QP'
+		WHEN C6_XTPOPER = 2 THEN 'QR'
+		ELSE 'Outros'
+	END AS 'TIPO PV',
+	C6_CLI AS 'CÓD. CLIENTE',
+	C5_ZZNOME AS 'CLIENTE',
+	C6_NUMORC AS 'ORÇAMENTO',
+	C6_NUM AS 'PV',
+	C5_EMISSAO 'PV ABERTO EM:',
+	CASE
+		WHEN C1_NUM IS NULL THEN '' 
+		ELSE C1_NUM
+	END AS 'SOLIC. COMPRA',
+	CASE 
+		WHEN C1_EMISSAO IS NULL THEN ''
+		ELSE C1_EMISSAO
+	END AS 'SC ABERTA EM:',
+	CASE 
+		WHEN C2_NUM IS NULL THEN ''
+		ELSE C2_NUM
+	END AS 'OP',
+	CASE 
+		WHEN C2_EMISSAO IS NULL THEN ''
+		ELSE C2_EMISSAO 
+	END AS 'OP ABERTA EM:',
+	C6_ENTREG AS 'DATA ENTREGA',
+	C6_PRODUTO AS 'CÓDIGO',
+	C6_DESCRI AS 'DESCRIÇÃO',
+	C6_UM AS 'UN.', 
+	C6_QTDVEN AS 'QTD. VENDA', 
+	C6_PRCVEN AS 'PREÇO VENDA', 
+	C6_VALOR AS 'TOTAL ITEM',
+	C6_DATFAT AS 'DATA FATURAMENTO',
+	CASE 
+		WHEN D2_DOC IS NULL THEN ''
+		ELSE D2_DOC
+	END AS 'DOC. NF SAÍDA',
+	C5_MENNOTA AS 'MENSAGEM NOTA'
+FROM 
+	PROTHEUS12_R27.dbo.SC6010 itemPedidoVenda
+LEFT JOIN
+	PROTHEUS12_R27.dbo.SD2010 itemNotaFiscalSaida
+ON
+	itemPedidoVenda.C6_NUM = itemNotaFiscalSaida.D2_PEDIDO 
+	AND itemPedidoVenda.C6_PRODUTO = itemNotaFiscalSaida.D2_COD
+	AND	itemPedidoVenda.D_E_L_E_T_ = itemNotaFiscalSaida.D_E_L_E_T_
+INNER JOIN
+	PROTHEUS12_R27.dbo.SC5010 cabecalhoPedidoVenda
+ON
+	itemPedidoVenda.C6_NUM = cabecalhoPedidoVenda.C5_NUM
+LEFT JOIN
+	SC1010 tabelaSolicCompras
+ON
+	itemPedidoVenda.C6_NUM = tabelaSolicCompras.C1_ZZNUMQP
+	AND itemPedidoVenda.C6_PRODUTO = tabelaSolicCompras.C1_PRODUTO
+	AND	itemPedidoVenda.D_E_L_E_T_ = tabelaSolicCompras.D_E_L_E_T_
+LEFT JOIN 
+	PROTHEUS12_R27.dbo.SC2010 tabelaOrdemDeProducao
+ON
+	itemPedidoVenda.C6_NUM = tabelaOrdemDeProducao.C2_ZZNUMQP
+	AND itemPedidoVenda.C6_PRODUTO = tabelaOrdemDeProducao.C2_PRODUTO
+	AND itemPedidoVenda.D_E_L_E_T_ = tabelaOrdemDeProducao.D_E_L_E_T_ 
+WHERE 
+	C6_XTPOPER LIKE '%' -- C6_XTPOPER = 1 (QP) / 2 (QR) / 3 (ND - OUTROS)
+	AND	C6_NUM LIKE '%'
+	AND	C6_PRODUTO LIKE '%'
+	AND	C6_DESCRI LIKE '%%'
+	AND	C6_NUMORC LIKE '%'
+	AND (
+	    (@prioridade = 1 AND D2_DOC LIKE '%') -- PV (ABERTO/FECHADO)
+	    OR (@prioridade = 2 AND (D2_DOC IS NULL OR D2_DOC IS NOT NULL)) -- PV (ABERTO/FECHADO)
+	    OR (@prioridade = 3 AND D2_DOC IS NULL) -- PV (ABERTO)
+	)
+	AND C6_CLI LIKE '%'
+	AND C5_ZZNOME LIKE '%%'
+	AND C5_MENNOTA LIKE '%%'
+	AND	itemPedidoVenda.D_E_L_E_T_ <> '*'
+ORDER BY 
+	itemPedidoVenda.R_E_C_N_O_ DESC;
 
+--==================================== v3 - EMAIL COMERCIAL QR(PV) EM ABERTO ====================================
+-- QUERY PARA PROJETAR INFORMAÇÕES REFERENTE AOS PEDIDOS DE VENDA E NOTAS FISCAIS DE SAÍDA
+SELECT
+	C6_NUM AS 'QR',
+	C5_ZZNOME AS 'CLIENTE',
+	C6_PRODUTO AS 'CÓDIGO',
+	C6_DESCRI AS 'DESCRIÇÃO',
+	C6_UM AS 'UN.', 
+	C6_QTDVEN AS 'QTD. VENDA',
+	C5_EMISSAO 'PV ABERTO EM:',
+	C6_ENTREG AS 'DATA ENTREGA',
+	CASE
+		WHEN C1_NUM IS NULL THEN '' 
+		ELSE C1_NUM
+	END AS 'SOLIC. COMPRA',
+	CASE 
+		WHEN C2_NUM IS NULL THEN ''
+		ELSE C2_NUM
+	END AS 'OP'
+FROM 
+	PROTHEUS12_R27.dbo.SC6010 itemPedidoVenda
+LEFT JOIN
+	PROTHEUS12_R27.dbo.SD2010 itemNotaFiscalSaida
+ON
+	itemPedidoVenda.C6_NUM = itemNotaFiscalSaida.D2_PEDIDO 
+	AND itemPedidoVenda.C6_PRODUTO = itemNotaFiscalSaida.D2_COD
+	AND	itemPedidoVenda.D_E_L_E_T_ = itemNotaFiscalSaida.D_E_L_E_T_
+INNER JOIN
+	PROTHEUS12_R27.dbo.SC5010 cabecalhoPedidoVenda
+ON
+	itemPedidoVenda.C6_NUM = cabecalhoPedidoVenda.C5_NUM
+LEFT JOIN
+	SC1010 tabelaSolicCompras
+ON
+	itemPedidoVenda.C6_NUM = tabelaSolicCompras.C1_ZZNUMQP
+	AND itemPedidoVenda.C6_PRODUTO = tabelaSolicCompras.C1_PRODUTO
+	AND	itemPedidoVenda.D_E_L_E_T_ = tabelaSolicCompras.D_E_L_E_T_
+LEFT JOIN 
+	PROTHEUS12_R27.dbo.SC2010 tabelaOrdemDeProducao
+ON
+	itemPedidoVenda.C6_NUM = tabelaOrdemDeProducao.C2_ZZNUMQP
+	AND itemPedidoVenda.C6_PRODUTO = tabelaOrdemDeProducao.C2_PRODUTO
+	AND itemPedidoVenda.D_E_L_E_T_ = tabelaOrdemDeProducao.D_E_L_E_T_ 
+WHERE 
+	C6_XTPOPER LIKE '2%' -- C6_XTPOPER = 1 (QP) / 2 (QR) / 3 (ND - OUTROS)
+	AND D2_DOC IS NULL -- PV (ABERTO)
+	AND	itemPedidoVenda.D_E_L_E_T_ <> '*'
+ORDER BY 
+	itemPedidoVenda.R_E_C_N_O_ DESC;
+
+--======================================================================================
 
 SELECT * FROM PROTHEUS12_R27.dbo.SC7010 ORDER BY R_E_C_N_O_ DESC; -- TABELA PEDIDO DE COMPRA
 

@@ -122,30 +122,17 @@ class QpClosedApp(QWidget):
                 background-color: #c1121f;
             }
             
-            QPushButton#btn_qps_finalizadas {
-                background-color: #C5EBAA;
-                color: #294B29;
-            }
-            
-            QPushButton#btn_qps_abertas {
-                background-color: #FFC94A;
-                color: #3E3232;
-            }
-            
-            QPushButton#btn_qps {
-                background-color: #6EACDA;
-                color: #021526;
-            }
-            
             QPushButton#btn_atualizar_qp {
                 background-color: #3F72AF;
             }
 
-            QPushButton:hover, QPushButton:hover#btn_qps_finalizadas, QPushButton:hover#btn_qps_abertas, 
-            QPushButton:hover#btn_qps, QPushButton:hover#btn_atualizar_qp, QPushButton:hover#btn_home { background-color: #E84545; color: #fff }
+            QPushButton:hover, QPushButton:hover#btn_atualizar_qp, QPushButton:hover#btn_home { 
+                background-color: #E84545; color: #fff 
+            }
     
-            QPushButton:pressed, QPushButton:pressed#btn_qps_finalizadas, QPushButton:pressed#btn_qps_abertas, 
-            QPushButton:pressed#btn_qps, QPushButton:pressed#btn_atualizar_qp, QPushButton:pressed#btn_home { background-color: #6703c5; color: #fff; }
+            QPushButton:pressed, QPushButton:pressed#btn_atualizar_qp, QPushButton:pressed#btn_home {
+                background-color: #6703c5; color: #fff; 
+            }
 
             QTableWidget {
                 border: 1px solid #000000;
