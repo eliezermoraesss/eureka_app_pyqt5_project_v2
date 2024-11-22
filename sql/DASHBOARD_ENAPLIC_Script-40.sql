@@ -31,11 +31,11 @@ WHERE part_number LIKE 'M-034-015-148%';
 
 SELECT * FROM enaplic_management.dbo.tb_baseline;
 
-SELECT COUNT(*) FROM enaplic_management.dbo.tb_baseline WHERE cod_qp = '007491';
+SELECT COUNT(*) FROM enaplic_management.dbo.tb_baseline WHERE cod_qp = '007933';
 
-SELECT * FROM enaplic_management.dbo.tb_baseline WHERE cod_qp = '007491';
+SELECT * FROM enaplic_management.dbo.tb_baseline WHERE cod_qp = '007933';
 
-DELETE FROM enaplic_management.dbo.tb_baseline WHERE cod_qp = '009999';
+DELETE FROM enaplic_management.dbo.tb_baseline WHERE cod_qp = '007933';
 
 -- DROP TABLE enaplic_management.dbo.tb_baseline;
 
@@ -378,3 +378,5 @@ ORDER BY id DESC;
 	vl_mat_received = MATERIAL RECEBIDO
 	vl_mat_received_perc = IND. RECEB. (vl_mat_received/vl_all_pc)
 */
+
+
