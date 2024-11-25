@@ -2,8 +2,6 @@ import locale
 import os
 import sys
 
-from src.app.utils.run_image_comparator import run_image_comparator_exe
-
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -25,6 +23,7 @@ from src.app.utils.load_session import load_session
 from src.app.utils.utils import exibir_mensagem, abrir_desenho, exportar_excel, copiar_linha, abrir_tabela_pesos
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.dialog.loading_dialog import loading_dialog
+from src.app.utils.run_image_comparator import run_image_comparator_exe, run_image_comparator_model
 
 
 class CustomLineEdit(QLineEdit):
@@ -63,6 +62,7 @@ class PcpApp(QWidget):
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
         self.nova_janela = None
+        self.base_dir = os.path.dirname(os.path.abspath(__file__))
 
         self.tabWidget = QTabWidget(self)  # Adicione um QTabWidget ao layout principal
         self.tabWidget.setTabsClosable(True)  # Adicione essa linha para permitir o fechamento de guias
@@ -339,6 +339,11 @@ class PcpApp(QWidget):
         self.btn_fechar.clicked.connect(self.close)
         self.btn_fechar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
+        self.btn_image_comparator = QPushButton("Image Comparator", self)
+        self.btn_image_comparator.clicked.connect(lambda: run_image_comparator_model(self))
+        self.btn_image_comparator.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.btn_image_comparator.hide()
+
         self.campo_codigo.returnPressed.connect(self.executar_consulta)
         self.campo_qp.returnPressed.connect(self.executar_consulta)
         self.campo_OP.returnPressed.connect(self.executar_consulta)
@@ -409,6 +414,7 @@ class PcpApp(QWidget):
         self.layout_buttons.addWidget(self.btn_limpar)
         self.layout_buttons.addWidget(self.btn_abrir_desenho)
         self.layout_buttons.addWidget(self.btn_exportar_excel)
+        self.layout_buttons.addWidget(self.btn_image_comparator)
         self.layout_buttons.addWidget(self.btn_fechar)
         self.layout_buttons.addWidget(self.btn_home)
         self.layout_buttons.addStretch()
@@ -564,6 +570,7 @@ class PcpApp(QWidget):
         self.btn_exportar_excel.hide()
         self.btn_onde_e_usado.hide()
         self.btn_saldo_estoque.hide()
+        self.btn_image_comparator.hide()
 
         self.guias_abertas.clear()
         self.guias_abertas_onde_usado.clear()
@@ -579,12 +586,14 @@ class PcpApp(QWidget):
             self.btn_abrir_desenho.hide()
             self.btn_consultar_estrutura.hide()
             self.btn_exportar_excel.hide()
+            self.btn_image_comparator.hide()
             self.btn_onde_e_usado.hide()
             self.btn_saldo_estoque.hide()
         else:
             self.btn_abrir_desenho.show()
             self.btn_consultar_estrutura.show()
             self.btn_exportar_excel.show()
+            self.btn_image_comparator.show()
             self.btn_onde_e_usado.show()
             self.btn_saldo_estoque.show()
 
@@ -660,6 +669,7 @@ class PcpApp(QWidget):
         self.campo_data_fim.setEnabled(status)
         self.btn_consultar.setEnabled(status)
         self.btn_exportar_excel.setEnabled(status)
+        self.btn_image_comparator.setEnabled(status)
         self.btn_abrir_desenho.setEnabled(status)
         self.btn_onde_e_usado.setEnabled(status)
         self.btn_saldo_estoque.setEnabled(status)

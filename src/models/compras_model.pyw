@@ -12,7 +12,7 @@ from PyQt5.QtCore import Qt, QDate, pyqtSignal, QSize
 from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtWidgets import QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QDateEdit, QLabel, \
-    QSizePolicy, QTabWidget, QMenu, QCheckBox, QDialog, QComboBox
+    QSizePolicy, QTabWidget, QMenu, QCheckBox, QDialog
 from sqlalchemy import create_engine
 
 from src.app.utils.consultar_onde_usado import executar_consulta_onde_usado
@@ -26,7 +26,7 @@ from src.app.views.FilterDialog import FilterDialog
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.dialog.loading_dialog import loading_dialog
 from src.app.utils.consultar_nfe import visualizar_nfe
-from src.app.utils.run_image_comparator import run_image_comparator_exe
+from src.app.utils.run_image_comparator import run_image_comparator_exe, run_image_comparator_model
 
 
 class CustomLineEdit(QLineEdit):
@@ -51,9 +51,12 @@ class ComprasApp(QWidget):
         self.main_window = main_window
         self.filtro_dialog = None
         self.dataframe_original = None
+        self.base_dir = os.path.dirname(os.path.abspath(__file__))
+
         user_data = load_session()
         username = user_data["username"]
         role = user_data["role"]
+
         self.username, self.password, self.database, self.server = setup_mssql()
         self.driver = '{SQL Server}'
 
@@ -282,6 +285,11 @@ class ComprasApp(QWidget):
         self.btn_home.clicked.connect(self.return_to_main)
         self.btn_home.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
+        self.btn_image_comparator = QPushButton("Image Comparator", self)
+        self.btn_image_comparator.clicked.connect(lambda: run_image_comparator_model(self))
+        self.btn_image_comparator.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.btn_image_comparator.hide()
+
         self.campo_sc.returnPressed.connect(self.executar_consulta_followup)
         self.campo_pedido.returnPressed.connect(self.executar_consulta_followup)
         self.campo_doc_nf.returnPressed.connect(self.executar_consulta_followup)
@@ -381,6 +389,7 @@ class ComprasApp(QWidget):
         layout_button_04.addWidget(self.btn_limpar_filtro)
         layout_button_03.addWidget(self.btn_limpar)
         layout_button_04.addWidget(self.btn_exportar_excel)
+        layout_button_04.addWidget(self.btn_image_comparator)
         layout_button_04.addStretch()
         layout_button_03.addWidget(self.btn_fechar)
         layout_button_03.addWidget(self.btn_home)
@@ -715,6 +724,7 @@ class ComprasApp(QWidget):
         self.label_indicators.hide()
 
         self.btn_exportar_excel.hide()
+        self.btn_image_comparator.hide()
         self.btn_onde_e_usado.hide()
         self.btn_saldo_estoque.hide()
         self.btn_ultimos_fornecedores.hide()
@@ -742,6 +752,7 @@ class ComprasApp(QWidget):
             self.btn_ultimos_fornecedores.hide()
             self.btn_ultimas_nfe.hide()
             self.btn_visualizar_nf.hide()
+            self.btn_image_comparator.hide()
         else:
             self.btn_exportar_excel.show()
             self.btn_onde_e_usado.show()
@@ -749,6 +760,7 @@ class ComprasApp(QWidget):
             self.btn_ultimos_fornecedores.show()
             self.btn_ultimas_nfe.show()
             self.btn_visualizar_nf.show()
+            self.btn_image_comparator.show()
 
     def controle_campos_formulario(self, status):
         self.campo_sc.setEnabled(status)
@@ -766,6 +778,7 @@ class ComprasApp(QWidget):
         self.btn_saldo_estoque.setEnabled(status)
         self.btn_onde_e_usado.setEnabled(status)
         self.btn_ultimos_fornecedores.setEnabled(status)
+        self.btn_image_comparator.setEnabled(status)
 
     def query_followup(self):
         numero_sc = self.campo_sc.text().upper().strip()
