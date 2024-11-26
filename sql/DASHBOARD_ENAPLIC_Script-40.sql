@@ -29,37 +29,116 @@ WHERE full_name LIKE 'Rafael%';
 SELECT * FROM enaplic_management.dbo.tb_user_logs
 WHERE part_number LIKE 'M-034-015-148%';
 
-SELECT * FROM enaplic_management.dbo.tb_baseline;
+SELECT * FROM enaplic_management.dbo.tb_baseline ORDER BY id DESC;
 
-SELECT COUNT(*) FROM enaplic_management.dbo.tb_baseline WHERE cod_qp = '007933';
+SELECT COUNT(*) FROM enaplic_management.dbo.tb_baseline WHERE cod_qp = '008047';
 
-SELECT * FROM enaplic_management.dbo.tb_baseline WHERE cod_qp = '007933';
+SELECT * FROM enaplic_management.dbo.tb_baseline WHERE cod_qp = '008047';
 
-DELETE FROM enaplic_management.dbo.tb_baseline WHERE cod_qp = '007933';
+DELETE FROM enaplic_management.dbo.tb_baseline WHERE cod_qp = '008038';
 
 -- DROP TABLE enaplic_management.dbo.tb_baseline;
 
 -- DELETE FROM enaplic_management.dbo.tb_baseline;
 
+EXEC sp_depends 'tb_baseline';
+
+-- Encerrar conexões
+DECLARE @kill_command NVARCHAR(MAX) = N'';
+
+SELECT @kill_command += 'KILL ' + CONVERT(VARCHAR(10), session_id) + '; '
+FROM sys.dm_exec_sessions
+WHERE database_id = DB_ID('enaplic_management');
+
+EXEC sp_executesql @kill_command;
+
+EXEC sp_helpindex 'enaplic_management.dbo.tb_baseline';
+
 CREATE TABLE enaplic_management.dbo.tb_baseline (
-	id INT IDENTITY(1,1) PRIMARY KEY,
+	id BIGINT IDENTITY(1,1) PRIMARY KEY,
     cod_qp VARCHAR(6) NOT NULL,
-    equipamento VARCHAR(200),
-    grupo VARCHAR(100),
-    nivel VARCHAR(2),
-    codigo VARCHAR(15),
-    codigo_pai VARCHAR(15),
-    descricao VARCHAR(200),
-    tipo VARCHAR(2),
-    qtde_bl DECIMAL(12, 5),
-   	unid_medida VARCHAR(2),
-    especificacoes VARCHAR(100),
-    qtde_proj DECIMAL(12, 5),
-    qtde_total DECIMAL(12, 5),
-    status VARCHAR(30),
-    status_op VARCHAR(30),
-    created_at DATETIME DEFAULT switchoffset(sysdatetimeoffset(), '-03:00') NOT NULL
+    equipamento VARCHAR(200) NULL,
+    grupo VARCHAR(100) NULL,
+    nivel VARCHAR(2) NULL,
+    codigo VARCHAR(15) NULL,
+    codigo_pai VARCHAR(15) NULL,
+    descricao VARCHAR(200) NULL,
+    tipo VARCHAR(2) NULL,
+    qtde_bl DECIMAL(12, 5) DEFAULT 0,
+   	unid_medida VARCHAR(2) NULL,
+    especificacoes VARCHAR(100) NULL,
+    qtde_proj DECIMAL(12, 5) DEFAULT 0,
+    qtde_total DECIMAL(12, 5) DEFAULT 0,
+    status VARCHAR(30) NULL,
+    status_op VARCHAR(30) NULL,
+    created_at DATETIME DEFAULT switchoffset(sysdatetimeoffset(), '-03:00') NOT NULL,
+    
+    INDEX IX_tb_baseline_cod_qp (cod_qp),
+    INDEX IX_tb_baseline_codigo (codigo),
+    INDEX IX_tb_baseline_codigo_pai (codigo_pai),
+    INDEX IX_tb_baseline_nivel (nivel),
+    INDEX IX_tb_baseline_status (status)
 );
+
+ALTER TABLE enaplic_management.dbo.tb_baseline
+ALTER COLUMN id BIGINT
+
+SELECT * FROM sys.dm_exec_requests;
+
+SELECT 
+    r.session_id,
+    r.status,
+    r.start_time,
+    r.command,
+    r.cpu_time,
+    r.total_elapsed_time,
+    r.logical_reads,
+    r.writes,
+    r.wait_type,
+    r.blocking_session_id,
+    t.text AS query_text,
+    s.host_name,
+    s.program_name
+FROM sys.dm_exec_requests AS r
+JOIN sys.dm_exec_sessions AS s ON r.session_id = s.session_id
+CROSS APPLY sys.dm_exec_sql_text(r.sql_handle) AS t
+WHERE r.session_id != @@SPID
+ORDER BY r.total_elapsed_time DESC;
+
+SELECT 
+    r.session_id,
+    r.cpu_time,
+    t.text AS query_text
+FROM sys.dm_exec_requests AS r
+CROSS APPLY sys.dm_exec_sql_text(r.sql_handle) AS t
+ORDER BY r.cpu_time DESC;
+
+KILL 103;
+
+SELECT
+    r.blocking_session_id,
+    r.session_id,
+    t.text AS blocking_query,
+    s.host_name,
+    s.program_name
+FROM sys.dm_exec_requests AS r
+JOIN sys.dm_exec_sessions AS s ON r.blocking_session_id = s.session_id
+CROSS APPLY sys.dm_exec_sql_text(r.sql_handle) AS t
+WHERE r.blocking_session_id > 0;
+
+
+
+KILL 103;
+
+SELECT
+    t1.resource_type,
+    t1.request_mode,
+    t1.request_status,
+    t2.text AS blocking_query
+FROM sys.dm_tran_locks AS t1
+JOIN sys.dm_exec_requests AS t2 ON t1.request_session_id = t2.session_id;
+
+
 
 -- DROP TABLE enaplic_management.dbo.eureka_users;
 
