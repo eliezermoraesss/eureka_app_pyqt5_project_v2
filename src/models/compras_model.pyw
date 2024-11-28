@@ -129,7 +129,7 @@ class ComprasApp(QWidget):
         self.label_contem_descricao_prod = QLabel("Contém na descrição:", self)
         self.label_contem_descricao_prod.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        self.label_qp = QLabel("Número da QP:", self)
+        self.label_qp = QLabel("Número da QP/QR:", self)
         self.label_qp.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.label_nf = QLabel("NF entrada:", self)
         self.label_nf.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)

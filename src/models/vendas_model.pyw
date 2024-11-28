@@ -117,14 +117,14 @@ class VendasApp(QWidget):
         self.label_pedido = QLabel("Pedido de Venda:", self)
         self.label_pedido.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        self.label_sc = QLabel("Solicitação de Compra:", self)
-        self.label_sc.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.label_msg_nota = QLabel("Mensagem nota:", self)
+        self.label_msg_nota.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        self.label_OP = QLabel("Número da OP:", self)
-        self.label_OP.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.label_orcamento = QLabel("Orçamento:", self)
+        self.label_orcamento.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        self.label_nf = QLabel("NF entrada:", self)
-        self.label_nf.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.label_nf_saida = QLabel("NF Saída:", self)
+        self.label_nf_saida.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.label_codigo = QLabel("Código:", self)
         self.label_codigo.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -139,11 +139,11 @@ class VendasApp(QWidget):
         self.label_data_fim = QLabel("Até:", self)
         self.label_cliente = QLabel("Cliente:", self)
 
-        self.campo_sc = QLineEdit(self)
-        self.campo_sc.setFont(QFont(fonte_campos, tamanho_fonte_campos))
-        self.campo_sc.setMaxLength(6)
-        self.campo_sc.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.add_clear_button(self.campo_sc)
+        self.campo_msg_nota = QLineEdit(self)
+        self.campo_msg_nota.setFont(QFont(fonte_campos, tamanho_fonte_campos))
+        self.campo_msg_nota.setMaxLength(6)
+        self.campo_msg_nota.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.add_clear_button(self.campo_msg_nota)
 
         self.campo_pedido = QLineEdit(self)
         self.campo_pedido.setFont(QFont(fonte_campos, tamanho_fonte_campos))
@@ -169,24 +169,24 @@ class VendasApp(QWidget):
         self.campo_contem_descricao_prod.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.add_clear_button(self.campo_contem_descricao_prod)
 
-        self.campo_doc_nf = QLineEdit(self)
-        self.campo_doc_nf.setFont(QFont(fonte_campos, tamanho_fonte_campos))
-        self.campo_doc_nf.setMaxLength(9)
-        self.campo_doc_nf.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.add_clear_button(self.campo_doc_nf)
+        self.campo_doc_nf_entrada = QLineEdit(self)
+        self.campo_doc_nf_entrada.setFont(QFont(fonte_campos, tamanho_fonte_campos))
+        self.campo_doc_nf_entrada.setMaxLength(9)
+        self.campo_doc_nf_entrada.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.add_clear_button(self.campo_doc_nf_entrada)
 
-        self.campo_OP = QLineEdit(self)
-        self.campo_OP.setFont(QFont(fonte_campos, tamanho_fonte_campos))
-        self.campo_OP.setMaxLength(6)
-        self.campo_OP.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.add_clear_button(self.campo_OP)
+        self.campo_orcamento = QLineEdit(self)
+        self.campo_orcamento.setFont(QFont(fonte_campos, tamanho_fonte_campos))
+        self.campo_orcamento.setMaxLength(8)
+        self.campo_orcamento.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.add_clear_button(self.campo_orcamento)
 
-        self.campo_cliente = CustomLineEdit('Cliente', 'cliente', 'Cliente', self)
-        self.campo_cliente.setObjectName("cliente")
-        self.campo_cliente.setFont(QFont(fonte_campos, tamanho_fonte_campos))
-        self.campo_cliente.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.campo_cliente.setMaxLength(40)
-        # self.add_clear_button(self.campo_cliente)
+        self.campo_cod_cliente = CustomLineEdit('Cliente', 'cliente', 'Cliente', self)
+        self.campo_cod_cliente.setObjectName("cliente")
+        self.campo_cod_cliente.setFont(QFont(fonte_campos, tamanho_fonte_campos))
+        self.campo_cod_cliente.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.campo_cod_cliente.setMaxLength(40)
+        # self.add_clear_button(self.campo_cod_cliente)
 
         self.campo_data_inicio = QDateEdit(self)
         self.campo_data_inicio.setFont(QFont(fonte_campos, 10))
@@ -208,9 +208,9 @@ class VendasApp(QWidget):
         self.campo_data_fim.setDate(QDate().currentDate())
         self.add_today_button(self.campo_data_fim)
 
-        self.btn_followup = QPushButton("Pesquisar", self)
-        self.btn_followup.clicked.connect(self.executar_consulta_followup)
-        self.btn_followup.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.btn_pesquisar = QPushButton("Pesquisar", self)
+        self.btn_pesquisar.clicked.connect(self.executar_consulta)
+        self.btn_pesquisar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_onde_e_usado = QPushButton("Onde é usado?", self)
         self.btn_onde_e_usado.clicked.connect(lambda: executar_consulta_onde_usado(self, self.tree))
@@ -269,14 +269,14 @@ class VendasApp(QWidget):
         self.btn_image_comparator.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_image_comparator.hide()
 
-        self.campo_pedido.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_sc.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_OP.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_doc_nf.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_codigo.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_descricao_prod.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_contem_descricao_prod.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_cliente.returnPressed.connect(self.executar_consulta_followup)
+        self.campo_pedido.returnPressed.connect(self.executar_consulta)
+        self.campo_msg_nota.returnPressed.connect(self.executar_consulta)
+        self.campo_orcamento.returnPressed.connect(self.executar_consulta)
+        self.campo_doc_nf_entrada.returnPressed.connect(self.executar_consulta)
+        self.campo_codigo.returnPressed.connect(self.executar_consulta)
+        self.campo_descricao_prod.returnPressed.connect(self.executar_consulta)
+        self.campo_contem_descricao_prod.returnPressed.connect(self.executar_consulta)
+        self.campo_cod_cliente.returnPressed.connect(self.executar_consulta)
 
         layout = QVBoxLayout()
         layout_campos_01 = QHBoxLayout()
@@ -287,8 +287,8 @@ class VendasApp(QWidget):
         self.layout_footer_label = QHBoxLayout()
 
         container_sc = QVBoxLayout()
-        container_sc.addWidget(self.label_sc)
-        container_sc.addWidget(self.campo_sc)
+        container_sc.addWidget(self.label_msg_nota)
+        container_sc.addWidget(self.campo_msg_nota)
 
         container_pedido = QVBoxLayout()
         container_pedido.addWidget(self.label_pedido)
@@ -307,12 +307,12 @@ class VendasApp(QWidget):
         container_contem_descricao_prod.addWidget(self.campo_contem_descricao_prod)
 
         container_op = QVBoxLayout()
-        container_op.addWidget(self.label_OP)
-        container_op.addWidget(self.campo_OP)
+        container_op.addWidget(self.label_orcamento)
+        container_op.addWidget(self.campo_orcamento)
 
         container_doc_nf = QVBoxLayout()
-        container_doc_nf.addWidget(self.label_nf)
-        container_doc_nf.addWidget(self.campo_doc_nf)
+        container_doc_nf.addWidget(self.label_nf_saida)
+        container_doc_nf.addWidget(self.campo_doc_nf_entrada)
 
         container_data_ini = QVBoxLayout()
         container_data_ini.addWidget(self.label_data_inicio)
@@ -324,7 +324,7 @@ class VendasApp(QWidget):
 
         container_cliente = QVBoxLayout()
         container_cliente.addWidget(self.label_cliente)
-        container_cliente.addWidget(self.campo_cliente)
+        container_cliente.addWidget(self.campo_cod_cliente)
 
         layout_campos_01.addLayout(container_sc)
         layout_campos_01.addLayout(container_pedido)
@@ -339,7 +339,7 @@ class VendasApp(QWidget):
         layout_campos_01.addStretch()
         layout_campos_02.addStretch()
 
-        layout_button_03.addWidget(self.btn_followup)
+        layout_button_03.addWidget(self.btn_pesquisar)
         layout_button_04.addWidget(self.btn_visualizar_nf_entrada)
         layout_button_04.addWidget(self.btn_ultimas_nfe_entrada)
         layout_button_04.addWidget(self.btn_ultimos_fornecedores)
@@ -667,13 +667,13 @@ class VendasApp(QWidget):
     def clean_screen(self):
         self.table_area.show()
         self.tree.hide()
-        self.campo_sc.clear()
+        self.campo_msg_nota.clear()
         self.campo_pedido.clear()
         self.campo_codigo.clear()
         self.campo_descricao_prod.clear()
         self.campo_contem_descricao_prod.clear()
-        self.campo_cliente.clear()
-        self.campo_OP.clear()
+        self.campo_cod_cliente.clear()
+        self.campo_orcamento.clear()
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
         self.label_line_number.hide()
@@ -719,52 +719,52 @@ class VendasApp(QWidget):
             self.btn_image_comparator.show()
 
     def controle_campos_formulario(self, status):
-        self.campo_sc.setEnabled(status)
+        self.campo_msg_nota.setEnabled(status)
         self.campo_codigo.setEnabled(status)
         self.campo_descricao_prod.setEnabled(status)
         self.campo_contem_descricao_prod.setEnabled(status)
-        self.campo_cliente.setEnabled(status)
-        self.campo_OP.setEnabled(status)
+        self.campo_cod_cliente.setEnabled(status)
+        self.campo_orcamento.setEnabled(status)
         self.campo_data_inicio.setEnabled(status)
         self.campo_data_fim.setEnabled(status)
-        self.btn_followup.setEnabled(status)
+        self.btn_pesquisar.setEnabled(status)
         self.btn_exportar_excel.setEnabled(status)
         self.btn_saldo_estoque.setEnabled(status)
         self.btn_onde_e_usado.setEnabled(status)
         self.btn_ultimos_fornecedores.setEnabled(status)
         self.btn_image_comparator.setEnabled(status)
 
-    def query_followup(self):
-        numero_sc = self.campo_sc.text().upper().strip()
-        numero_pedido = self.campo_pedido.text().upper().strip()
-        numero_nf = self.campo_doc_nf.text().upper().strip()
-        numero_op = self.campo_OP.text().upper().strip()
+    def query_consulta(self):
+        pedido_venda = self.campo_pedido.text().upper().strip()
+        orcamento = self.campo_orcamento.text().upper().strip()
+        doc_nf_saida = self.campo_doc_nf_entrada.text().upper().strip()
         codigo_produto = self.campo_codigo.text().upper().strip()
-        razao_social_fornecedor = self.campo_cliente.text().upper().strip()
+        cod_cliente = self.campo_cod_cliente.text().upper().strip()
         descricao_produto = self.campo_descricao_prod.text().upper().strip()
         contem_descricao = self.campo_contem_descricao_prod.text().upper().strip()
+        mensagem_nota = self.campo_msg_nota.text().upper().strip()
 
         palavras_contem_descricao = contem_descricao.split('*')
         clausulas_contem_descricao = " AND ".join(
-            [f"SC.C1_DESCRI LIKE '%{palavra}%'" for palavra in palavras_contem_descricao])
+            [f"SC.C6_DESCRI LIKE '%{palavra}%'" for palavra in palavras_contem_descricao])
 
         data_inicio_formatada = self.campo_data_inicio.date().toString("yyyyMMdd")
         data_fim_formatada = self.campo_data_fim.date().toString("yyyyMMdd")
 
         if data_inicio_formatada != '' and data_fim_formatada != '':
-            filtro_data = f"AND C1_EMISSAO >= '{data_inicio_formatada}' AND C1_EMISSAO <= '{data_fim_formatada}'"
+            filtro_data = f"AND C5_EMISSAO >= '{data_inicio_formatada}' AND C5_EMISSAO <= '{data_fim_formatada}'"
         else:
             filtro_data = ''
 
         query = f"""
                 -- QUERY PARA PROJETAR INFORMAÇÕES REFERENTE AOS PEDIDOS DE VENDA E NOTAS FISCAIS DE SAÍDA
-                -- @prioridade = 1 PARA CONSULTA DE NOTA FISCAL 'LIKE %' 
-                -- @prioridade = 2 PARA 'NOTA FISCAL' IS NULL (PV ABERTO/FECHADO)
-                -- @prioridade = 3 PARA 'NOTA FISCAL' IS NULL (PV ABERTO) 
-                DECLARE @prioridade INT = 2;
+                -- @statusPedido = 1 (PV ABERTO/FECHADO)
+                -- @statusPedido = 2 (PV FECHADO)
+                -- @statusPedido = 3 (PV ABERTO) 
+                DECLARE @statusPedido INT = {status_pedido};
                 SELECT
                     CASE
-                        WHEN D2_DOC IS NULL THEN 'ABERTO'
+                        WHEN C5_NOTA = '         ' THEN 'ABERTO'
                         ELSE 'FECHADO'
                     END AS 'STATUS',
                     CASE
@@ -801,21 +801,12 @@ class VendasApp(QWidget):
                     C6_PRCVEN AS 'PREÇO VENDA', 
                     C6_VALOR AS 'TOTAL ITEM',
                     C6_DATFAT AS 'DATA DE FATURAMENTO',
-                    CASE 
-                        WHEN D2_DOC IS NULL THEN ''
-                        ELSE D2_DOC
-                    END AS 'DOC. NF SAÍDA',
+                    C5_NOTA AS 'DOC. NF SAÍDA',
                     C5_MENNOTA AS 'MENSAGEM NOTA'
                 FROM 
-                    PROTHEUS12_R27.dbo.SC6010 itemPedidoVenda
-                LEFT JOIN
-                    PROTHEUS12_R27.dbo.SD2010 itemNotaFiscalSaida
-                ON
-                    itemPedidoVenda.C6_NUM = itemNotaFiscalSaida.D2_PEDIDO 
-                    AND itemPedidoVenda.C6_PRODUTO = itemNotaFiscalSaida.D2_COD
-                    AND	itemPedidoVenda.D_E_L_E_T_ = itemNotaFiscalSaida.D_E_L_E_T_
+                    {self.database}.dbo.SC6010 itemPedidoVenda
                 INNER JOIN
-                    PROTHEUS12_R27.dbo.SC5010 cabecalhoPedidoVenda
+                    {self.database}.dbo.SC5010 cabecalhoPedidoVenda
                 ON
                     itemPedidoVenda.C6_NUM = cabecalhoPedidoVenda.C5_NUM
                 LEFT JOIN
@@ -825,26 +816,27 @@ class VendasApp(QWidget):
                     AND itemPedidoVenda.C6_PRODUTO = tabelaSolicCompras.C1_PRODUTO
                     AND	itemPedidoVenda.D_E_L_E_T_ = tabelaSolicCompras.D_E_L_E_T_
                 LEFT JOIN 
-                    PROTHEUS12_R27.dbo.SC2010 tabelaOrdemDeProducao
+                    {self.database}.dbo.SC2010 tabelaOrdemDeProducao
                 ON
                     itemPedidoVenda.C6_NUM = tabelaOrdemDeProducao.C2_ZZNUMQP
                     AND itemPedidoVenda.C6_PRODUTO = tabelaOrdemDeProducao.C2_PRODUTO
                     AND itemPedidoVenda.D_E_L_E_T_ = tabelaOrdemDeProducao.D_E_L_E_T_ 
                 WHERE 
-                    C6_XTPOPER LIKE '%' -- C6_XTPOPER = 1 (QP) / 2 (QR) / 3 (ND - OUTROS)
-                    AND	C6_NUM LIKE '%'
-                    AND	C6_PRODUTO LIKE '%'
-                    AND	C6_DESCRI LIKE '%%'
-                    AND	C6_NUMORC LIKE '%'
-                    AND (
-                        (@prioridade = 1 AND D2_DOC LIKE '%') -- PV (ABERTO/FECHADO)
-                        OR (@prioridade = 2 AND (D2_DOC IS NULL OR D2_DOC IS NOT NULL)) -- PV (ABERTO/FECHADO)
-                        OR (@prioridade = 3 AND D2_DOC IS NULL) -- PV (ABERTO)
-                    )
-                    AND C6_CLI LIKE '%'
-                    AND C5_ZZNOME LIKE '%%'
-                    AND C5_MENNOTA LIKE '%%'
+                    C6_XTPOPER = '{tipo_pedido}' -- C6_XTPOPER = 1 (QP) / 2 (QR) / 3 (ND - OUTROS)
+                    AND	C6_NUM LIKE '%{pedido_venda}'
+                    AND	C6_PRODUTO LIKE '{codigo_produto}%'
+                    AND	C6_DESCRI LIKE '%{descricao_produto}%'
+                    AND	C6_NUMORC LIKE '{orcamento}%'
+                    AND C5_NOTA LIKE '{doc_nf_saida}%'
+                    AND C6_CLI LIKE '{cod_cliente}%'
+                    AND C5_MENNOTA LIKE '%{mensagem_nota}%'
+                    AND ((@statusPedido = 1 AND C5_NOTA LIKE '%{doc_nf_saida}') -- open/closed
+                        OR (@statusPedido = 2 AND C5_NOTA LIKE '%{doc_nf_saida}' AND C5_NOTA <> '         ') -- closed
+                        OR (@statusPedido = 3 AND C5_NOTA LIKE '%{doc_nf_saida}' AND C5_NOTA = '         ')) -- open
                     AND	itemPedidoVenda.D_E_L_E_T_ <> '*'
+                    AND cabecalhoPedidoVenda.D_E_L_E_T_ <> '*'
+                    {clausulas_contem_descricao}
+                    {filtro_data}
                 ORDER BY 
                     itemPedidoVenda.R_E_C_N_O_ DESC;
                 """
@@ -1027,8 +1019,8 @@ class VendasApp(QWidget):
             self.button_visible_control(False)
             return True
 
-    def executar_consulta_followup(self):
-        query_consulta_filtro = self.query_followup()
+    def executar_consulta(self):
+        query_consulta_filtro = self.query_consulta()
         query_contagem_linhas = numero_linhas_consulta(query_consulta_filtro)
 
         self.label_line_number.hide()
@@ -1046,7 +1038,7 @@ class VendasApp(QWidget):
 
             if self.table_line_number(line_number):
                 self.clean_screen()
-                exibir_mensagem("EUREKA® Compras", 'Nenhum resultado encontrado nesta pesquisa.', "info")
+                exibir_mensagem("EUREKA® Vendas", 'Nenhum resultado encontrado nesta pesquisa.', "info")
                 return
 
             dialog = loading_dialog(self, "Carregando...", "🤖 Processando dados do TOTVS..."

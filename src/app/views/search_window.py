@@ -100,7 +100,8 @@ class SearchWindow(QDialog):
             self.selected_value = codigo
             self.accept()
         else:
-            header_items = [self.ui.search_table.horizontalHeaderItem(i).text() for i in range(self.ui.search_table.columnCount())]
+            header_items = [self.ui.search_table.horizontalHeaderItem(i).text() for i in
+                            range(self.ui.search_table.columnCount())]
             try:
                 indice_coluna = header_items.index(self.nome_coluna)
                 valor_campo = selected_items[indice_coluna].text()
