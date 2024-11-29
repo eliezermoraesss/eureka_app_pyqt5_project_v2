@@ -598,7 +598,7 @@ class EngenhariaApp(QWidget):
         self.campo_armazem.clear()
         self.campo_grupo.clear()
         self.campo_cc.clear()
-        self.combobox_bloqueio.clear()
+        self.combobox_bloqueio.setCurrentText('-')
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
         self.label_line_number.hide()
