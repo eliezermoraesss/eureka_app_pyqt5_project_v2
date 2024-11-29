@@ -5,14 +5,12 @@ import sys
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from datetime import datetime
-
 import pandas as pd
-from PyQt5.QtCore import Qt, QDate, pyqtSignal, QSize
+from PyQt5.QtCore import Qt, QDate, pyqtSignal
 from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtWidgets import QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QDateEdit, QLabel, \
-    QSizePolicy, QTabWidget, QMenu, QCheckBox, QDialog
+    QSizePolicy, QTabWidget, QMenu, QDialog, QComboBox, QApplication
 from sqlalchemy import create_engine
 
 from src.app.utils.consultar_onde_usado import executar_consulta_onde_usado
@@ -46,9 +44,9 @@ class CustomLineEdit(QLineEdit):
 class VendasApp(QWidget):
     guia_fechada = pyqtSignal()
 
-    def __init__(self, main_window):
+    def __init__(self):
         super().__init__()
-        self.main_window = main_window
+        self.main_window = 'main_window'
         self.filtro_dialog = None
         self.dataframe = pd.DataFrame()
         self.dataframe_original = None
@@ -138,6 +136,8 @@ class VendasApp(QWidget):
         self.label_data_inicio = QLabel("A partir de:", self)
         self.label_data_fim = QLabel("Até:", self)
         self.label_cliente = QLabel("Cliente:", self)
+        self.label_status_pedido = QLabel("Status Pedido", self)
+        self.label_tipo_pedido = QLabel("Tipo Pedido", self)
 
         self.campo_msg_nota = QLineEdit(self)
         self.campo_msg_nota.setFont(QFont(fonte_campos, tamanho_fonte_campos))
@@ -269,6 +269,21 @@ class VendasApp(QWidget):
         self.btn_image_comparator.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_image_comparator.hide()
 
+        self.combobox_status_pedido = QComboBox(self)
+        self.combobox_status_pedido.setEditable(False)
+        self.combobox_status_pedido.setObjectName('combobox-status-pv')
+        self.combobox_status_pedido.addItem('-', '1')
+        self.combobox_status_pedido.addItem('Fechado', '2')
+        self.combobox_status_pedido.addItem('Aberto', '3')
+
+        self.combobox_tipo_pedido = QComboBox(self)
+        self.combobox_tipo_pedido.setEditable(False)
+        self.combobox_tipo_pedido.setObjectName('combobox-tipo-pv')
+        self.combobox_tipo_pedido.addItem('-', '')
+        self.combobox_tipo_pedido.addItem('QP', '1')
+        self.combobox_tipo_pedido.addItem('QR', '2')
+        self.combobox_tipo_pedido.addItem('Outros', '3')
+
         self.campo_pedido.returnPressed.connect(self.executar_consulta)
         self.campo_msg_nota.returnPressed.connect(self.executar_consulta)
         self.campo_orcamento.returnPressed.connect(self.executar_consulta)
@@ -326,16 +341,26 @@ class VendasApp(QWidget):
         container_cliente.addWidget(self.label_cliente)
         container_cliente.addWidget(self.campo_cod_cliente)
 
-        layout_campos_01.addLayout(container_sc)
+        container_combobox_status_pv = QVBoxLayout()
+        container_combobox_status_pv.addWidget(self.label_status_pedido)
+        container_combobox_status_pv.addWidget(self.combobox_status_pedido)
+
+        container_combobox_tipo_pv = QVBoxLayout()
+        container_combobox_tipo_pv.addWidget(self.label_tipo_pedido)
+        container_combobox_tipo_pv.addWidget(self.combobox_tipo_pedido)
+
         layout_campos_01.addLayout(container_pedido)
         layout_campos_01.addLayout(container_doc_nf)
+        layout_campos_01.addLayout(container_sc)
+        layout_campos_01.addLayout(container_op)
         layout_campos_01.addLayout(container_codigo)
         layout_campos_01.addLayout(container_descricao_prod)
         layout_campos_01.addLayout(container_contem_descricao_prod)
-        layout_campos_01.addLayout(container_op)
         layout_campos_02.addLayout(container_data_ini)
         layout_campos_02.addLayout(container_data_fim)
         layout_campos_02.addLayout(container_cliente)
+        layout_campos_02.addLayout(container_combobox_status_pv)
+        layout_campos_02.addLayout(container_combobox_tipo_pv)
         layout_campos_01.addStretch()
         layout_campos_02.addStretch()
 
@@ -636,12 +661,12 @@ class VendasApp(QWidget):
 
         try:
             self.tree.customContextMenuRequested.disconnect()
-            self.tree.horizontalHeader().sectionClicked.disconnect(self.abrir_filtro)
+            # self.tree.horizontalHeader().sectionClicked.disconnect(self.abrir_filtro)
         except TypeError:
             pass
 
         # Conectar sinal de clique para abrir o filtro
-        self.tree.horizontalHeader().sectionClicked.connect(self.abrir_filtro)
+        # self.tree.horizontalHeader().sectionClicked.connect(self.abrir_filtro)
 
         # Menu de contexto personalizado
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -674,6 +699,7 @@ class VendasApp(QWidget):
         self.campo_contem_descricao_prod.clear()
         self.campo_cod_cliente.clear()
         self.campo_orcamento.clear()
+        self.combobox_status_pedido.clear()
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
         self.label_line_number.hide()
@@ -727,6 +753,7 @@ class VendasApp(QWidget):
         self.campo_orcamento.setEnabled(status)
         self.campo_data_inicio.setEnabled(status)
         self.campo_data_fim.setEnabled(status)
+        self.combobox_status_pedido.setEnabled(status)
         self.btn_pesquisar.setEnabled(status)
         self.btn_exportar_excel.setEnabled(status)
         self.btn_saldo_estoque.setEnabled(status)
@@ -743,10 +770,12 @@ class VendasApp(QWidget):
         descricao_produto = self.campo_descricao_prod.text().upper().strip()
         contem_descricao = self.campo_contem_descricao_prod.text().upper().strip()
         mensagem_nota = self.campo_msg_nota.text().upper().strip()
+        status_pedido = self.combobox_status_pedido.currentData()
+        tipo_pedido = self.combobox_tipo_pedido.currentData()
 
         palavras_contem_descricao = contem_descricao.split('*')
         clausulas_contem_descricao = " AND ".join(
-            [f"SC.C6_DESCRI LIKE '%{palavra}%'" for palavra in palavras_contem_descricao])
+            [f"itemPedidoVenda.C6_DESCRI LIKE '%{palavra}%'" for palavra in palavras_contem_descricao])
 
         data_inicio_formatada = self.campo_data_inicio.date().toString("yyyyMMdd")
         data_fim_formatada = self.campo_data_fim.date().toString("yyyyMMdd")
@@ -822,7 +851,7 @@ class VendasApp(QWidget):
                     AND itemPedidoVenda.C6_PRODUTO = tabelaOrdemDeProducao.C2_PRODUTO
                     AND itemPedidoVenda.D_E_L_E_T_ = tabelaOrdemDeProducao.D_E_L_E_T_ 
                 WHERE 
-                    C6_XTPOPER = '{tipo_pedido}' -- C6_XTPOPER = 1 (QP) / 2 (QR) / 3 (ND - OUTROS)
+                    C6_XTPOPER LIKE '{tipo_pedido}%' -- C6_XTPOPER = 1 (QP) / 2 (QR) / 3 (ND - OUTROS)
                     AND	C6_NUM LIKE '%{pedido_venda}'
                     AND	C6_PRODUTO LIKE '{codigo_produto}%'
                     AND	C6_DESCRI LIKE '%{descricao_produto}%'
@@ -835,7 +864,7 @@ class VendasApp(QWidget):
                         OR (@statusPedido = 3 AND C5_NOTA LIKE '%{doc_nf_saida}' AND C5_NOTA = '         ')) -- open
                     AND	itemPedidoVenda.D_E_L_E_T_ <> '*'
                     AND cabecalhoPedidoVenda.D_E_L_E_T_ <> '*'
-                    {clausulas_contem_descricao}
+                    AND {clausulas_contem_descricao}
                     {filtro_data}
                 ORDER BY 
                     itemPedidoVenda.R_E_C_N_O_ DESC;
@@ -849,19 +878,15 @@ class VendasApp(QWidget):
         self.tree.setRowCount(0)
         self.tree.setColumnCount(0)
         self.configurar_tabela(dataframe)
-        self.configurar_tabela_tooltips(dataframe)
+        # self.configurar_tabela_tooltips(dataframe)
         # self.tree.setSortingEnabled(False)
 
         # Construir caminhos relativos
         script_dir = os.path.dirname(os.path.abspath(__file__))
         no_pc = os.path.join(script_dir, '..', 'resources', 'images', 'red.png')
-        no_order_path = os.path.join(script_dir, '..', 'resources', 'images', 'gray.png')
-        wait_order_path = os.path.join(script_dir, '..', 'resources', 'images', 'wait.png')
         end_order_path = os.path.join(script_dir, '..', 'resources', 'images', 'green.png')
 
         no_pc = QIcon(no_pc)
-        no_order = QIcon(no_order_path)
-        wait_delivery = QIcon(wait_order_path)
         end_order = QIcon(end_order_path)
 
         for i, (index, row) in enumerate(dataframe.iterrows()):
@@ -870,91 +895,16 @@ class VendasApp(QWidget):
                 if value is not None:
                     if column_name == ' ':
                         item = QTableWidgetItem()
-                        if row['STATUS PEDIDO COMPRA'] is not None:
-                            if row['STATUS PEDIDO COMPRA'].strip() == '' and row['DOC. NF ENTRADA'] is None:
-                                item.setIcon(no_order)
-                                item.setText('AGUARDANDO ENTREGA')
-                                dataframe.at[index, ' '] = 'AGUARDANDO ENTREGA'
-                            elif row['STATUS PEDIDO COMPRA'].strip() == '' and row['DOC. NF ENTRADA'] is not None:
-                                item.setIcon(wait_delivery)
-                                item.setText('ENTREGA PARCIAL')
-                                dataframe.at[index, ' '] = 'ENTREGA PARCIAL'
-                            elif row['STATUS PEDIDO COMPRA'] == 'E':
-                                item.setIcon(end_order)
-                                item.setText('PEDIDO ENCERRADO')
-                                dataframe.at[index, ' '] = 'PEDIDO ENCERRADO'
-                            item.setSizeHint(QSize(64, 64))
-                        elif row['PEDIDO COMPRA'] is None:
+                        if row['DOC. NF SAÍDA'] != '         ':
+                            item.setIcon(end_order)
+                            item.setText('FECHADO')
+                            dataframe.at[index, ' '] = 'FECHADO'
+                        else:
                             item.setIcon(no_pc)
-                            item.setText('SEM PEDIDO COMPRA')
-                            dataframe.at[index, ' '] = 'SEM PEDIDO COMPRA'
+                            item.setText('ABERTO')
+                            dataframe.at[index, ' '] = 'ABERTO'
                     else:
-                        if column_name in ('QP/QR', 'SOLIC. COMPRA'):
-                            value = value.lstrip('0')
-                        # if column_name == 'QR?':
-                        # value = 'Sim' if value == '2' else 'Não'
-                        if column_name in ('QTD. SOLIC. COMPRAS', 'QTD. PEDIDO COMPRA', 'QTD. ENTREGUE',
-                                           'VALOR UNIT. PC', 'VALOR TOTAL PC', 'VALOR UNIT. NF', 'VALOR TOTAL NF'):
-                            if column_name in ('VALOR UNIT. PC', 'VALOR TOTAL PC', 'VALOR UNIT. NF', 'VALOR TOTAL NF'):
-                                if not pd.isna(value):
-                                    value = f"R$ {locale.format_string("%.2f", float(value), grouping=True)}"
-                                else:
-                                    value = ''
-                            else:
-                                value = float(value)
-                                if value.is_integer():
-                                    value = int(value)
-                                else:
-                                    value = locale.format_string("%.2f", value, grouping=True)
-
-                        if (column_name in ('QTD. PEDIDO COMPRA', 'VALOR UNIT. PC', 'VALOR TOTAL PC', 'QTD. ENTREGUE',
-                                            'VALOR UNIT. NF', 'VALOR TOTAL NF') and
-                                value == 'nan'):
-                            value = ''
-
-                        if column_name == 'PEDIDO DE COMPRA ABERTO EM:' and pd.isna(value):
-                            value = ''
-                        if column_name == 'PEDIDO DE COMPRA ABERTO EM:' and not pd.isna(value) and value != '':
-                            try:
-                                # Converter para objeto datetime
-                                datetime_value = pd.to_datetime(value, utc=True)
-                                # Converter para o fuso horário UTC-3
-                                datetime_value = datetime_value.tz_convert('America/Sao_Paulo')
-                                # Remover os últimos 7 caracteres equivale a remover segundos e microsegundos
-                                datetime_value = datetime_value.replace(microsecond=0)
-                                # Converter de volta para string no formato desejado
-                                value = datetime_value.strftime('%d/%m/%Y %H:%M:%S')
-                            except ValueError:
-                                # Lidar com valores que não podem ser convertidos para datetime
-                                print(f"Erro ao converter {value} para datetime.")
-
-                        if column_name == 'QTD. PENDENTE' and pd.isna(value):
-                            value = ''
-                        elif column_name == 'QTD. PENDENTE' and value:
-                            value = float(value)
-                            if value.is_integer():
-                                value = int(value)
-                            else:
-                                value = locale.format_string("%.2f", float(value), grouping=True)
-
-                        if column_name == 'STATUS PEDIDO COMPRA' and value == 'E':
-                            value = 'Encerrado'
-                        elif column_name == 'STATUS PEDIDO COMPRA' and value.strip() == '':
-                            value = ''
-
-                        if column_name in ('PREVISÃO ENTREGA', 'DATA DE ENTREGA', 'SC ABERTA EM:', 'PC ABERTO EM:',
-                                           'DATA EMISSÃO NF') and not value.isspace():
-                            data_obj = datetime.strptime(value, "%Y%m%d")
-                            value = data_obj.strftime("%d/%m/%Y")
-
                         item = QTableWidgetItem(str(value).strip())
-
-                        if column_name not in ('DESCRIÇÃO', 'OBSERVAÇÃO SOLIC. COMPRA', 'OBSERVAÇÃO PEDIDO DE COMPRA',
-                                               'OBSERVAÇÃO ITEM DO PEDIDO DE COMPRA', 'RAZÃO SOCIAL FORNECEDOR',
-                                               'NOME FANTASIA FORNECEDOR'):
-                            item.setTextAlignment(Qt.AlignCenter)
-                        if column_name in ('VALOR UNIT. PC', 'VALOR TOTAL PC', 'VALOR UNIT. NF', 'VALOR TOTAL NF'):
-                            item.setTextAlignment(Qt.AlignRight)
                 else:
                     item = QTableWidgetItem('')
                 self.tree.setItem(i, list(row.index).index(column_name), item)
@@ -968,13 +918,9 @@ class VendasApp(QWidget):
 
     def exibir_indicadores(self, dataframe):
         coluna_status = ' '
-        sem_pc = dataframe[coluna_status].apply(
-            lambda x: x.strip() == 'SEM PEDIDO COMPRA' if isinstance(x, str) else True).sum()
-        pc_encerrado = dataframe[coluna_status].apply(
-            lambda x: x.strip() == 'PEDIDO ENCERRADO' if isinstance(x, str) else True).sum()
-        entrega_parcial = dataframe[coluna_status].apply(
-            lambda x: x.strip() == 'ENTREGA PARCIAL' if isinstance(x, str) else True).sum()
-        aguardando_entrega = dataframe[coluna_status].apply(
+        pv_aberto = dataframe[coluna_status].apply(
+            lambda x: x.strip() == 'ABERTO' if isinstance(x, str) else True).sum()
+        pv_fechado = dataframe[coluna_status].apply(
             lambda x: x.strip() == 'AGUARDANDO ENTREGA' if isinstance(x, str) else True).sum()
 
         indicadores_table = f"""
@@ -984,20 +930,12 @@ class VendasApp(QWidget):
                         <th style="text-align: right; vertical-align: middle;">QUANTIDADE</th>
                     </tr>
                     <tr>
-                        <td style="vertical-align: middle;">SEM PEDIDO DE COMPRA</td>
-                        <td style="text-align: right; vertical-align: middle;">{sem_pc}</td>
+                        <td style="vertical-align: middle;">ABERTO</td>
+                        <td style="text-align: right; vertical-align: middle;">{pv_aberto}</td>
                     </tr>
                     <tr>
-                        <td style="vertical-align: middle;">AGUARDANDO ENTREGA</td>
-                        <td style="text-align: right; vertical-align: middle;">{aguardando_entrega}</td>
-                    </tr>
-                    <tr>
-                        <td style="vertical-align: middle;">ENTREGA PARCIAL</td>
-                        <td style="text-align: right; vertical-align: middle;">{entrega_parcial}</td>
-                    </tr>
-                    <tr>
-                        <td style="vertical-align: middle;">PEDIDO ENCERRADO</td>
-                        <td style="text-align: right; vertical-align: middle;">{pc_encerrado}</td>
+                        <td style="vertical-align: middle;">FECHADO</td>
+                        <td style="text-align: right; vertical-align: middle;">{pv_fechado}</td>
                     </tr>
                 </table>
             """
@@ -1021,7 +959,6 @@ class VendasApp(QWidget):
 
     def executar_consulta(self):
         query_consulta_filtro = self.query_consulta()
-        query_contagem_linhas = numero_linhas_consulta(query_consulta_filtro)
 
         self.label_line_number.hide()
         self.label_indicators.hide()
@@ -1033,8 +970,11 @@ class VendasApp(QWidget):
         self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
 
         try:
-            dataframe_line_number = pd.read_sql(query_contagem_linhas, self.engine)
-            line_number = dataframe_line_number.iloc[0, 0]
+            self.dataframe = pd.read_sql(query_consulta_filtro, self.engine)
+            self.dataframe.insert(0, ' ', '')
+            self.dataframe[''] = ''
+
+            line_number = self.dataframe.shape[0]
 
             if self.table_line_number(line_number):
                 self.clean_screen()
@@ -1043,10 +983,6 @@ class VendasApp(QWidget):
 
             dialog = loading_dialog(self, "Carregando...", "🤖 Processando dados do TOTVS..."
                                                            "\n\n🤖 Por favor, aguarde.\n\nEureka®")
-
-            self.dataframe = pd.read_sql(query_consulta_filtro, self.engine)
-            self.dataframe.insert(0, ' ', '')
-            self.dataframe[''] = ''
 
             self.atualizar_tabela(self.dataframe)
             self.dataframe_original = self.dataframe.copy()
@@ -1105,3 +1041,10 @@ class VendasApp(QWidget):
         self.btn_limpar_filtro.hide()
         self.dataframe = self.dataframe_original.copy()
         dialog.close()
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = VendasApp()
+    window.showMaximized()
+    sys.exit(app.exec_())
