@@ -131,8 +131,8 @@ def visualizar_nfe(self, table):
                 btn_exportar_excel_estrutura.clicked.connect(lambda: exportar_excel(self, tabela))
                 btn_exportar_excel_estrutura.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
-                select_product_label = QLabel(f'VISUALIZAÇÃO DA NOTA FISCAL\n\n'
-                                              f'Fornecedor:\t{cod_fornecedor}\t{nome_fornec}\t\tDocumento:\t{documento.lstrip('0')}')
+                select_product_label = QLabel(f'Documento:\t{documento.lstrip('0')}\n\n'
+                                              f'Fornecedor:\t{cod_fornecedor}\t{nome_fornec}')
                 select_product_label.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
                 layout_cabecalho.addWidget(select_product_label, alignment=Qt.AlignLeft)
                 layout_cabecalho.addSpacerItem(QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
@@ -206,7 +206,7 @@ def visualizar_nfe(self, table):
                     self.layout().addWidget(self.tabWidget)
                     self.tabWidget.setVisible(True)
 
-                self.tabWidget.addTab(nova_guia, f"NOTA FISCAL - {documento}")
+                self.tabWidget.addTab(nova_guia, f"NOTA FISCAL DE ENTRADA - {documento}")
                 tabela.itemDoubleClicked.connect(copiar_linha)
                 self.tabWidget.setCurrentIndex(self.tabWidget.indexOf(nova_guia))
 

@@ -19,11 +19,10 @@ from src.app.utils.consultar_ultimos_fornec import executar_ultimos_fornecedores
 from src.app.utils.consultar_ultimas_nfe import consultar_ultimas_nfe
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.load_session import load_session
-from src.app.utils.utils import exibir_mensagem, copiar_linha, exportar_excel, numero_linhas_consulta
+from src.app.utils.utils import exibir_mensagem, copiar_linha, exportar_excel
 from src.app.views.FilterDialog import FilterDialog
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.dialog.loading_dialog import loading_dialog
-from src.app.utils.consultar_nfe import visualizar_nfe
 from src.app.utils.run_image_comparator import run_image_comparator_exe, run_image_comparator_model
 
 
@@ -195,7 +194,7 @@ class VendasApp(QWidget):
         self.campo_data_inicio.setDisplayFormat("dd/MM/yyyy")
 
         data_atual = QDate.currentDate()
-        intervalo_meses = 12
+        intervalo_meses = 60
         data_inicio = data_atual.addMonths(-intervalo_meses)
         self.campo_data_inicio.setDate(data_inicio)
         self.add_today_button(self.campo_data_inicio)
@@ -222,20 +221,15 @@ class VendasApp(QWidget):
         self.btn_saldo_estoque.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_saldo_estoque.hide()
 
-        self.btn_ultimos_fornecedores = QPushButton("Últimos Fornecedores", self)
+        self.btn_ultimos_fornecedores = QPushButton("Histórico de Fornecedores", self)
         self.btn_ultimos_fornecedores.clicked.connect(lambda: executar_ultimos_fornecedores(self, self.tree))
         self.btn_ultimos_fornecedores.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_ultimos_fornecedores.hide()
 
-        self.btn_ultimas_nfe_entrada = QPushButton("Últimas Notas Fiscais Entrada", self)
+        self.btn_ultimas_nfe_entrada = QPushButton("Histórico de Nota Fiscal de Entrada", self)
         self.btn_ultimas_nfe_entrada.clicked.connect(lambda: consultar_ultimas_nfe(self, self.tree))
         self.btn_ultimas_nfe_entrada.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_ultimas_nfe_entrada.hide()
-
-        self.btn_visualizar_nf_entrada = QPushButton("Visualizar Nota Fiscal Entrada", self)
-        self.btn_visualizar_nf_entrada.clicked.connect(lambda: visualizar_nfe(self, self.tree))
-        self.btn_visualizar_nf_entrada.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.btn_visualizar_nf_entrada.hide()
 
         self.btn_limpar_filtro = QPushButton("Limpar filtros", self)
         self.btn_limpar_filtro.clicked.connect(self.limpar_filtros)
@@ -365,7 +359,6 @@ class VendasApp(QWidget):
         layout_campos_02.addStretch()
 
         layout_button_03.addWidget(self.btn_pesquisar)
-        layout_button_04.addWidget(self.btn_visualizar_nf_entrada)
         layout_button_04.addWidget(self.btn_ultimas_nfe_entrada)
         layout_button_04.addWidget(self.btn_ultimos_fornecedores)
         layout_button_04.addWidget(self.btn_saldo_estoque)
@@ -464,10 +457,9 @@ class VendasApp(QWidget):
             }
     
             QPushButton {
-                background-color: #AF125A;
+                background-color: #023e8a;
                 color: #eeeeee;
                 padding: 5px 10px;
-                border: 2px solid #AF125A;
                 border-radius: 8px;
                 font-style: "Segoe UI";
                 font-size: 11px;
@@ -490,12 +482,16 @@ class VendasApp(QWidget):
                 color: #fff;
             }
             
+            QTableWidget {
+                border: 1px solid #000000;
+            }
+            
             QTableWidget#result_table {
                 background-color: #EEEEEE;
             }
             
             QTableWidget#table_area {
-                background-color: #302c2c;
+                background-color: #363636;
             }
             
             QTableWidget QHeaderView::section {
@@ -596,9 +592,6 @@ class VendasApp(QWidget):
             context_menu_image_comparator = QAction('Abrir ImageComparator®', self)
             context_menu_image_comparator.triggered.connect(lambda: run_image_comparator_exe())
 
-            context_menu_visualizar_nf = QAction('Visualizar Nota Fiscal', self)
-            context_menu_visualizar_nf.triggered.connect(lambda: visualizar_nfe(self, table))
-
             context_menu_ultimo_fornecedor = QAction('Últimos Fornecedores', self)
             context_menu_ultimo_fornecedor.triggered.connect(lambda: executar_ultimos_fornecedores(self, table))
 
@@ -622,7 +615,6 @@ class VendasApp(QWidget):
             menu.addSeparator()
             menu.addAction(context_menu_ultimo_fornecedor)
             menu.addAction(context_menu_ultimas_nfe)
-            menu.addAction(context_menu_visualizar_nf)
 
             menu.exec_(table.viewport().mapToGlobal(position))
 
@@ -699,7 +691,8 @@ class VendasApp(QWidget):
         self.campo_contem_descricao_prod.clear()
         self.campo_cod_cliente.clear()
         self.campo_orcamento.clear()
-        self.combobox_status_pedido.clear()
+        self.combobox_status_pedido.setCurrentText('-')
+        self.combobox_tipo_pedido.setCurrentText('-')
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
         self.label_line_number.hide()
@@ -741,7 +734,6 @@ class VendasApp(QWidget):
             self.btn_saldo_estoque.show()
             self.btn_ultimos_fornecedores.show()
             self.btn_ultimas_nfe_entrada.show()
-            self.btn_visualizar_nf_entrada.show()
             self.btn_image_comparator.show()
 
     def controle_campos_formulario(self, status):
@@ -854,10 +846,10 @@ class VendasApp(QWidget):
                     C6_XTPOPER LIKE '{tipo_pedido}%' -- C6_XTPOPER = 1 (QP) / 2 (QR) / 3 (ND - OUTROS)
                     AND	C6_NUM LIKE '%{pedido_venda}'
                     AND	C6_PRODUTO LIKE '{codigo_produto}%'
-                    AND	C6_DESCRI LIKE '%{descricao_produto}%'
-                    AND	C6_NUMORC LIKE '{orcamento}%'
-                    AND C5_NOTA LIKE '{doc_nf_saida}%'
-                    AND C6_CLI LIKE '{cod_cliente}%'
+                    AND	C6_DESCRI LIKE '{descricao_produto}%'
+                    AND	C6_NUMORC LIKE '%{orcamento}%'
+                    AND C5_NOTA LIKE '%{doc_nf_saida}'
+                    AND C6_CLI LIKE '%{cod_cliente}'
                     AND C5_MENNOTA LIKE '%{mensagem_nota}%'
                     AND ((@statusPedido = 1 AND C5_NOTA LIKE '%{doc_nf_saida}') -- open/closed
                         OR (@statusPedido = 2 AND C5_NOTA LIKE '%{doc_nf_saida}' AND C5_NOTA <> '         ') -- closed

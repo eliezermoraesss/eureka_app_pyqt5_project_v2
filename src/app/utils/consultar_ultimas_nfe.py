@@ -146,7 +146,7 @@ def consultar_ultimas_nfe(self, table):
                 btn_visualizar_nfe.clicked.connect(lambda: visualizar_nfe(self, tabela))
                 btn_visualizar_nfe.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
-                select_product_label = QLabel(f'ÚLTIMAS NOTAS FISCAIS\n\n{codigo}\t{descricao}')
+                select_product_label = QLabel(f'Notas fiscais de entrada\n\n{codigo}\t{descricao}')
                 select_product_label.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
                 layout_cabecalho.addWidget(select_product_label, alignment=Qt.AlignLeft)
                 layout_cabecalho.addSpacerItem(QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
@@ -221,7 +221,7 @@ def consultar_ultimas_nfe(self, table):
                     self.layout().addWidget(self.tabWidget)
                     self.tabWidget.setVisible(True)
 
-                self.tabWidget.addTab(nova_guia, f"ÚLTIMAS NOTAS FISCAIS - {codigo}")
+                self.tabWidget.addTab(nova_guia, f"HISTÓRICO DE NOTA FISCAL - {codigo}")
                 tabela.itemDoubleClicked.connect(copiar_linha)
                 self.tabWidget.setCurrentIndex(self.tabWidget.indexOf(nova_guia))
 
