@@ -40,6 +40,17 @@ class CustomLineEdit(QLineEdit):
         super(CustomLineEdit, self).mousePressEvent(event)
 
 
+def format_number(value):
+    if pd.notnull(value):
+        value = float(value)
+        if value.is_integer():
+            return int(value)
+        else:
+            return locale.format_string("%.2f", value, grouping=True)
+    else:
+        return ''
+
+
 class VendasApp(QWidget):
     guia_fechada = pyqtSignal()
 
@@ -458,7 +469,7 @@ class VendasApp(QWidget):
             }
     
             QPushButton {
-                background-color: #7014f2;
+                background-color: #3f37c9;
                 color: #eeeeee;
                 padding: 5px 10px;
                 border-radius: 8px;
@@ -496,7 +507,7 @@ class VendasApp(QWidget):
             }
             
             QTableWidget QHeaderView::section {
-                background-color: #302c2c;
+                background-color: #393E46;
                 color: #EEEEEE;
                 font-weight: bold;
                 height: 25px;
@@ -797,8 +808,8 @@ class VendasApp(QWidget):
                     C6_DESCRI AS 'DESCRIÇÃO',
                     C6_UM AS 'UN.', 
                     C6_QTDVEN AS 'QTD. VENDA', 
-                    C6_PRCVEN AS 'PREÇO VENDA', 
-                    C6_VALOR AS 'TOTAL ITEM',
+                    C6_PRCVEN AS 'PREÇO VENDA R$', 
+                    C6_VALOR AS 'TOTAL ITEM R$',
                     C6_DATFAT AS 'DATA DE FATURAMENTO',
                     CASE
                         WHEN C5_NOTA = 'XXXXXXXXX' THEN 'Resíduo'
@@ -879,7 +890,7 @@ class VendasApp(QWidget):
                         item = QTableWidgetItem(str(value).strip())
                         if column_name in ['CLIENTE', 'DESCRIÇÃO', 'MENSAGEM NOTA']:
                             item.setTextAlignment(Qt.AlignLeft)
-                        elif column_name in ['PREÇO VENDA', 'TOTAL ITEM']:
+                        elif column_name in ['PREÇO VENDA R$', 'TOTAL ITEM R$']:
                             item.setTextAlignment(Qt.AlignRight)
                         else:
                             item.setTextAlignment(Qt.AlignCenter)
@@ -902,9 +913,10 @@ class VendasApp(QWidget):
             lambda x: x.strip() == 'FECHADO' if isinstance(x, str) else True).sum()
 
         indicadores_table = f"""
-                <table border="1" cellspacing="2" cellpadding="4" style="border-collapse: collapse; text-align: left; width: 100%;">
+                <table border="1" cellspacing="2" cellpadding="4" style="border-collapse: collapse; text-align: left; 
+                width: 100%;">
                     <tr>
-                        <th style="text-align: middle; vertical-align: middle;">STATUS</th>
+                        <th style="text-align: middle; vertical-align: middle;">STATUS PV</th>
                         <th style="text-align: right; vertical-align: middle;">QUANTIDADE</th>
                     </tr>
                     <tr>
@@ -958,6 +970,10 @@ class VendasApp(QWidget):
             date_columns = ['PV ABERTO EM:', 'SC ABERTA EM:', 'OP ABERTA EM:', 'DATA DE ENTREGA', 'DATA DE FATURAMENTO']
             self.df[date_columns] = self.df[date_columns].apply(lambda col: pd.to_datetime(
                 col, format='%Y%m%d', errors='coerce').dt.strftime('%d/%m/%Y').fillna(''))
+
+            format_number_columns = ['QTD. VENDA', 'PREÇO VENDA R$', 'TOTAL ITEM R$']
+            self.df[format_number_columns] = self.df[format_number_columns].apply(
+                lambda col: pd.to_numeric(col, errors='coerce').apply(format_number))
 
             line_number = self.df.shape[0]
 
