@@ -10,7 +10,7 @@ from PyQt5.QtCore import Qt, QDate, pyqtSignal
 from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtWidgets import QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QDateEdit, QLabel, \
-    QSizePolicy, QTabWidget, QMenu, QDialog, QComboBox, QApplication
+    QSizePolicy, QTabWidget, QMenu, QDialog, QComboBox, QApplication, QFrame
 from sqlalchemy import create_engine
 
 from src.app.utils.consultar_onde_usado import executar_consulta_onde_usado
@@ -74,14 +74,6 @@ class VendasApp(QWidget):
         self.setWindowTitle(f"Eureka® Vendas . {username} ({role})")
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        logo_enaplic_path = os.path.join(script_dir, '..', 'resources', 'images', 'LOGO.jpeg')
-        self.logo_label = QLabel(self)
-        self.logo_label.setObjectName('logo-enaplic')
-        pixmap_logo = QPixmap(logo_enaplic_path).scaledToWidth(60)
-        self.logo_label.setPixmap(pixmap_logo)
-        self.logo_label.setAlignment(Qt.AlignRight)
-
         self.altura_linha = 30
         self.tamanho_fonte_tabela = 10
         self.fonte_tabela = 'Segoe UI'
@@ -113,6 +105,22 @@ class VendasApp(QWidget):
         self.guias_abertas_ultimos_fornecedores = []
         self.guias_abertas_ultimas_nfe = []
         self.guias_abertas_visualizar_nfe = []
+
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        logo_enaplic_path = os.path.join(script_dir, '..', 'resources', 'images', 'LOGO.jpeg')
+        self.logo_label = QLabel(self)
+        self.logo_label.setObjectName('logo-enaplic')
+        pixmap_logo = QPixmap(logo_enaplic_path).scaledToWidth(30)
+        self.logo_label.setPixmap(pixmap_logo)
+        self.logo_label.setAlignment(Qt.AlignRight)
+
+        self.label_title = QLabel("VENDAS", self)
+        self.label_title.setObjectName('label-title')
+
+        self.line = QFrame(self)
+        self.line.setObjectName('line')
+        self.line.setFrameShape(QFrame.HLine)
+        self.line.setFrameShadow(QFrame.Sunken)
 
         self.label_line_number = QLabel("", self)
         self.label_line_number.setObjectName("label-line-number")
@@ -305,12 +313,18 @@ class VendasApp(QWidget):
         self.campo_nome_cliente.returnPressed.connect(self.executar_consulta)
 
         layout = QVBoxLayout()
+        layout_title = QHBoxLayout()
         layout_campos_01 = QHBoxLayout()
         layout_campos_02 = QHBoxLayout()
         layout_button_03 = QHBoxLayout()
         layout_button_04 = QHBoxLayout()
         self.layout_buttons = QHBoxLayout()
         self.layout_footer_label = QHBoxLayout()
+
+        layout_title.addStretch(1)
+        layout_title.addWidget(self.logo_label)
+        layout_title.addWidget(self.label_title)
+        layout_title.addStretch(1)
 
         container_sc = QVBoxLayout()
         container_sc.addWidget(self.label_msg_nota)
@@ -395,8 +409,9 @@ class VendasApp(QWidget):
         self.layout_footer_label.addWidget(self.label_line_number)
         self.layout_footer_label.addWidget(self.label_indicators)
         self.layout_footer_label.addStretch(1)
-        self.layout_footer_label.addWidget(self.logo_label)
 
+        layout.addLayout(layout_title)
+        layout.addWidget(self.line)
         layout.addLayout(layout_campos_01)
         layout.addLayout(layout_campos_02)
         layout.addLayout(layout_button_03)
@@ -419,6 +434,16 @@ class VendasApp(QWidget):
                 font-weight: regular;
                 padding-left: 10px; 
                 font-style: "Segoe UI";
+            }
+            
+            QLabel#label-title {
+                margin: 5px;
+                font-size: 22px;
+                font-weight: bold;
+            }
+            
+            QLabel#logo-enaplic {
+                margin: 5px;
             }
             
             QCheckBox#checkbox-sc {
@@ -481,7 +506,7 @@ class VendasApp(QWidget):
                 border-radius: 8px;
                 font-style: "Segoe UI";
                 font-size: 11px;
-                height: 26px;
+                height: 24px;
                 font-weight: bold;
                 margin: 5px;
             }
@@ -535,6 +560,13 @@ class VendasApp(QWidget):
             QTableWidget::item:selected {
                 color: #EEEEEE;
                 font-weight: bold;
+            }
+            
+            QFrame#line {
+                color: white;
+                background-color: white;
+                border: 1px solid white;
+                margin-bottom: 3px;
             }
         """)
 
