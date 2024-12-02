@@ -877,6 +877,12 @@ class VendasApp(QWidget):
                             dataframe.at[index, 'STATUS'] = 'ABERTO'
                     else:
                         item = QTableWidgetItem(str(value).strip())
+                        if column_name in ['CLIENTE', 'DESCRIÇÃO', 'MENSAGEM NOTA']:
+                            item.setTextAlignment(Qt.AlignLeft)
+                        elif column_name in ['PREÇO VENDA', 'TOTAL ITEM']:
+                            item.setTextAlignment(Qt.AlignRight)
+                        else:
+                            item.setTextAlignment(Qt.AlignCenter)
                 else:
                     item = QTableWidgetItem('')
                 self.tree.setItem(i, list(row.index).index(column_name), item)
