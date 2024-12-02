@@ -50,6 +50,7 @@ class VendasApp(QWidget):
         self.dataframe = pd.DataFrame()
         self.dataframe_original = None
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.lista_status_tabela = ['ABERTO', 'FECHADO']
 
         user_data = load_session()
         username = user_data["username"]
@@ -653,12 +654,12 @@ class VendasApp(QWidget):
 
         try:
             self.tree.customContextMenuRequested.disconnect()
-            # self.tree.horizontalHeader().sectionClicked.disconnect(self.abrir_filtro)
+            self.tree.horizontalHeader().sectionClicked.disconnect(self.abrir_filtro)
         except TypeError:
             pass
 
         # Conectar sinal de clique para abrir o filtro
-        # self.tree.horizontalHeader().sectionClicked.connect(self.abrir_filtro)
+        self.tree.horizontalHeader().sectionClicked.connect(self.abrir_filtro)
 
         # Menu de contexto personalizado
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -705,7 +706,6 @@ class VendasApp(QWidget):
         self.btn_ultimos_fornecedores.hide()
         self.btn_ultimas_nfe_entrada.hide()
         self.btn_limpar_filtro.hide()
-        self.btn_visualizar_nf_entrada.hide()
 
         self.guias_abertas.clear()
         self.guias_abertas_onde_usado.clear()
@@ -726,7 +726,6 @@ class VendasApp(QWidget):
             self.btn_saldo_estoque.hide()
             self.btn_ultimos_fornecedores.hide()
             self.btn_ultimas_nfe_entrada.hide()
-            self.btn_visualizar_nf_entrada.hide()
             self.btn_image_comparator.hide()
         else:
             self.btn_exportar_excel.show()
@@ -1000,25 +999,13 @@ class VendasApp(QWidget):
             self.filtro_dialog.close()
 
         # Create and show a new instance of FilterDialog
-        self.filtro_dialog = FilterDialog(self, nome_coluna, self.dataframe)
+        self.filtro_dialog = FilterDialog(self, nome_coluna, self.dataframe, self.lista_status_tabela)
 
         # Execute the dialog and wait for the user to close it
         if self.filtro_dialog.exec_() == QDialog.Accepted:
             # Get the selected filters from the dialog
             filtro_selecionado = self.filtro_dialog.get_filtros_selecionados()
             if filtro_selecionado:
-                colunas_formatar = ['QTD. PEDIDO COMPRA', 'QTD. ENTREGUE', 'QTD. PENDENTE', 'VALOR UNIT. PC',
-                                    'VALOR TOTAL PC', 'QTD. SOLIC. COMPRAS', 'VALOR UNIT. NF', 'VALOR TOTAL NF']
-
-                # Função para formatação dos valores
-                def formatar_valor(valor):
-                    if isinstance(valor, float):
-                        return '{:.1f}'.format(valor) if valor.is_integer() else '{:.2f}'.format(valor)
-                    return valor
-
-                # Aplicar formatação nas colunas especificas
-                self.dataframe[colunas_formatar] = self.dataframe[colunas_formatar].map(formatar_valor)
-
                 # Apply the filter to the dataframe
                 self.dataframe = self.dataframe[self.dataframe[nome_coluna].isin(filtro_selecionado)]
 

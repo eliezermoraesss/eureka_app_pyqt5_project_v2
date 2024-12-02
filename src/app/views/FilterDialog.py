@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QDialog, QVBoxLayout, QListWidget, QPushButton, QLab
 
 
 class FilterDialog(QDialog):
-    def __init__(self, parent, nome_coluna, dataframe):
+    def __init__(self, parent, nome_coluna, dataframe, lista_status_tabela):
         super().__init__(parent)
 
         self.nome_coluna = nome_coluna
@@ -36,7 +36,7 @@ class FilterDialog(QDialog):
 
         # Pegar valores únicos da coluna
         if self.nome_coluna == ' ':
-            self.itens_originais = ['SEM PEDIDO COMPRA', 'AGUARDANDO ENTREGA', 'ENTREGA PARCIAL', 'PEDIDO ENCERRADO']
+            self.itens_originais = lista_status_tabela
         else:
             self.itens_originais = list(map(str, self.dataframe[self.nome_coluna].dropna().unique()))
             if self.dataframe[self.nome_coluna].isnull().any():

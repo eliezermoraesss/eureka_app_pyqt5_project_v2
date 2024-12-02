@@ -52,6 +52,7 @@ class ComprasApp(QWidget):
         self.filtro_dialog = None
         self.dataframe_original = None
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.lista_status_tabela = ['SEM PEDIDO COMPRA', 'AGUARDANDO ENTREGA', 'ENTREGA PARCIAL', 'PEDIDO ENCERRADO']
 
         user_data = load_session()
         username = user_data["username"]
@@ -1235,7 +1236,7 @@ class ComprasApp(QWidget):
             self.filtro_dialog.close()
 
         # Create and show a new instance of FilterDialog
-        self.filtro_dialog = FilterDialog(self, nome_coluna, self.dataframe)
+        self.filtro_dialog = FilterDialog(self, nome_coluna, self.dataframe, self.lista_status_tabela)
 
         # Execute the dialog and wait for the user to close it
         if self.filtro_dialog.exec_() == QDialog.Accepted:
