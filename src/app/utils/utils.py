@@ -73,8 +73,8 @@ def abrir_desenho(self, table=None, codigo_param=None):
         codigo = None
 
         for col in range(header.count()):
-            header_text = table.horizontalHeaderItem(col).text()
-            if header_text == 'Código':
+            header_text = table.horizontalHeaderItem(col).text().lower()
+            if header_text == 'código':
                 codigo_col = col
 
             if codigo_col is not None:

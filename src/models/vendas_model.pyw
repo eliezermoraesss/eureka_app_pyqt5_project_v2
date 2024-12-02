@@ -19,7 +19,7 @@ from src.app.utils.consultar_ultimos_fornec import executar_ultimos_fornecedores
 from src.app.utils.consultar_ultimas_nfe import consultar_ultimas_nfe
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.load_session import load_session
-from src.app.utils.utils import exibir_mensagem, copiar_linha, exportar_excel
+from src.app.utils.utils import exibir_mensagem, copiar_linha, exportar_excel, abrir_desenho
 from src.app.views.FilterDialog import FilterDialog
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.dialog.loading_dialog import loading_dialog
@@ -256,6 +256,11 @@ class VendasApp(QWidget):
         self.btn_nova_janela.clicked.connect(self.abrir_nova_janela)
         self.btn_nova_janela.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
+        self.btn_abrir_desenho = QPushButton("Abrir Desenho", self)
+        self.btn_abrir_desenho.clicked.connect(lambda: abrir_desenho(self, self.tree))
+        self.btn_abrir_desenho.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.btn_abrir_desenho.hide()
+
         self.btn_exportar_excel = QPushButton("Exportar Excel", self)
         self.btn_exportar_excel.clicked.connect(lambda: exportar_excel(self, self.tree))
         self.btn_exportar_excel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -378,6 +383,7 @@ class VendasApp(QWidget):
         layout_button_03.addWidget(self.btn_nova_janela)
         layout_button_04.addWidget(self.btn_limpar_filtro)
         layout_button_03.addWidget(self.btn_limpar)
+        layout_button_04.addWidget(self.btn_abrir_desenho)
         layout_button_04.addWidget(self.btn_exportar_excel)
         layout_button_04.addWidget(self.btn_image_comparator)
         layout_button_04.addStretch()
@@ -601,6 +607,9 @@ class VendasApp(QWidget):
             # A lib Qt garante que o objeto do menu será destruído após uso
             menu.setAttribute(Qt.WA_DeleteOnClose)
 
+            context_menu_abrir_desenho = QAction('Abrir desenho', self)
+            context_menu_abrir_desenho.triggered.connect(lambda: abrir_desenho(self, table))
+
             context_menu_image_comparator = QAction('Abrir ImageComparator®', self)
             context_menu_image_comparator.triggered.connect(lambda: run_image_comparator_exe())
 
@@ -620,6 +629,8 @@ class VendasApp(QWidget):
             context_menu_nova_janela.triggered.connect(self.abrir_nova_janela)
 
             menu.addAction(context_menu_nova_janela)
+            menu.addSeparator()
+            menu.addAction(context_menu_abrir_desenho)
             menu.addAction(context_menu_image_comparator)
             menu.addSeparator()
             menu.addAction(context_menu_consultar_onde_usado)
@@ -693,6 +704,7 @@ class VendasApp(QWidget):
         self.label_line_number.hide()
         self.label_indicators.hide()
 
+        self.btn_abrir_desenho.hide()
         self.btn_exportar_excel.hide()
         self.btn_image_comparator.hide()
         self.btn_onde_e_usado.hide()
@@ -715,6 +727,7 @@ class VendasApp(QWidget):
 
     def button_visible_control(self, visible):
         if visible == "False":
+            self.btn_abrir_desenho.hide()
             self.btn_exportar_excel.hide()
             self.btn_onde_e_usado.hide()
             self.btn_saldo_estoque.hide()
@@ -722,6 +735,7 @@ class VendasApp(QWidget):
             self.btn_ultimas_nfe_entrada.hide()
             self.btn_image_comparator.hide()
         else:
+            self.btn_abrir_desenho.show()
             self.btn_exportar_excel.show()
             self.btn_onde_e_usado.show()
             self.btn_saldo_estoque.show()
