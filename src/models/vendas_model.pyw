@@ -458,13 +458,13 @@ class VendasApp(QWidget):
             }
     
             QPushButton {
-                background-color: #023e8a;
+                background-color: #7014f2;
                 color: #eeeeee;
                 padding: 5px 10px;
                 border-radius: 8px;
                 font-style: "Segoe UI";
                 font-size: 11px;
-                height: 20px;
+                height: 26px;
                 font-weight: bold;
                 margin: 5px;
             }
@@ -593,10 +593,10 @@ class VendasApp(QWidget):
             context_menu_image_comparator = QAction('Abrir ImageComparator®', self)
             context_menu_image_comparator.triggered.connect(lambda: run_image_comparator_exe())
 
-            context_menu_ultimo_fornecedor = QAction('Últimos Fornecedores', self)
+            context_menu_ultimo_fornecedor = QAction('Histórico de Fornecedores', self)
             context_menu_ultimo_fornecedor.triggered.connect(lambda: executar_ultimos_fornecedores(self, table))
 
-            context_menu_ultimas_nfe = QAction('Últimas Notas Fiscais', self)
+            context_menu_ultimas_nfe = QAction('Histórico de Notas Fiscais de Entrada', self)
             context_menu_ultimas_nfe.triggered.connect(lambda: consultar_ultimas_nfe(self, table))
 
             context_menu_consultar_onde_usado = QAction('Onde é usado?', self)
@@ -640,7 +640,7 @@ class VendasApp(QWidget):
         self.tree.setHorizontalHeaderLabels(dataframe.columns)
 
         # Definir largura de colunas específicas
-        self.tree.setColumnWidth(0, 190)  # Coluna 'ICONES DE STATUS'
+        self.tree.setColumnWidth(0, 100)  # Coluna 'STATUS'
         for col in range(1, len(dataframe.columns)):
             self.tree.horizontalHeader().setSectionResizeMode(col, QHeaderView.ResizeToContents)
 
@@ -664,23 +664,6 @@ class VendasApp(QWidget):
         # Menu de contexto personalizado
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(lambda pos: self.show_context_menu(pos, self.tree))
-
-    def configurar_tabela_tooltips(self, dataframe):
-        # Mapa de tooltips correspondentes às colunas da consulta SQL
-        tooltip_map = {
-            " ": "VERMELHO:\nSC sem Pedido de Compra\n\nCINZA:\nAguardando entrega\n\nAZUL:\nEntrega "
-                 "parcial\n\nVERDE:\nPedido de compra encerrado"
-        }
-
-        # Obtenha os cabeçalhos das colunas do dataframe
-        headers = dataframe.columns
-
-        # Adicione os cabeçalhos e os tooltips
-        for i, header in enumerate(headers):
-            item = QTableWidgetItem(header)
-            tooltip = tooltip_map.get(header)
-            item.setToolTip(tooltip)
-            self.tree.setHorizontalHeaderItem(i, item)
 
     def clean_screen(self):
         self.table_area.show()
@@ -784,10 +767,6 @@ class VendasApp(QWidget):
                 DECLARE @statusPedido INT = {status_pedido};
                 SELECT
                     CASE
-                        WHEN C5_NOTA = '         ' THEN 'ABERTO'
-                        ELSE 'FECHADO'
-                    END AS 'STATUS',
-                    CASE
                         WHEN C6_XTPOPER = 1 THEN 'QP'
                         WHEN C6_XTPOPER = 2 THEN 'QR'
                         ELSE 'Outros'
@@ -821,7 +800,10 @@ class VendasApp(QWidget):
                     C6_PRCVEN AS 'PREÇO VENDA', 
                     C6_VALOR AS 'TOTAL ITEM',
                     C6_DATFAT AS 'DATA DE FATURAMENTO',
-                    C5_NOTA AS 'DOC. NF SAÍDA',
+                    CASE
+                        WHEN C5_NOTA = 'XXXXXXXXX' THEN 'Resíduo'
+                        ELSE C5_NOTA
+                    END AS 'DOC. NF SAÍDA',
                     C5_MENNOTA AS 'MENSAGEM NOTA'
                 FROM 
                     {self.database}.dbo.SC6010 itemPedidoVenda
@@ -848,7 +830,7 @@ class VendasApp(QWidget):
                     AND	C6_DESCRI LIKE '{descricao_produto}%'
                     AND	C6_NUMORC LIKE '%{orcamento}%'
                     AND C5_NOTA LIKE '%{doc_nf_saida}'
-                    AND C5_ZZNOME LIKE '%{nome_cliente}'
+                    AND C5_ZZNOME LIKE '{nome_cliente}%'
                     AND C5_MENNOTA LIKE '%{mensagem_nota}%'
                     AND ((@statusPedido = 1 AND C5_NOTA LIKE '%{doc_nf_saida}') -- open/closed
                         OR (@statusPedido = 2 AND C5_NOTA LIKE '%{doc_nf_saida}' AND C5_NOTA <> '         ') -- closed
@@ -869,7 +851,6 @@ class VendasApp(QWidget):
         self.tree.setRowCount(0)
         self.tree.setColumnCount(0)
         self.configurar_tabela(dataframe)
-        # self.configurar_tabela_tooltips(dataframe)
         # self.tree.setSortingEnabled(False)
 
         # Construir caminhos relativos
@@ -884,16 +865,16 @@ class VendasApp(QWidget):
             self.tree.insertRow(i)
             for column_name, value in row.items():
                 if value is not None:
-                    if column_name == ' ':
+                    if column_name == 'STATUS':
                         item = QTableWidgetItem()
                         if row['DOC. NF SAÍDA'] != '         ':
                             item.setIcon(end_order)
                             item.setText('FECHADO')
-                            dataframe.at[index, ' '] = 'FECHADO'
+                            dataframe.at[index, 'STATUS'] = 'FECHADO'
                         else:
                             item.setIcon(no_pc)
                             item.setText('ABERTO')
-                            dataframe.at[index, ' '] = 'ABERTO'
+                            dataframe.at[index, 'STATUS'] = 'ABERTO'
                     else:
                         item = QTableWidgetItem(str(value).strip())
                 else:
@@ -908,11 +889,11 @@ class VendasApp(QWidget):
         self.button_visible_control(True)
 
     def exibir_indicadores(self, dataframe):
-        coluna_status = ' '
+        coluna_status = 'STATUS'
         pv_aberto = dataframe[coluna_status].apply(
             lambda x: x.strip() == 'ABERTO' if isinstance(x, str) else True).sum()
         pv_fechado = dataframe[coluna_status].apply(
-            lambda x: x.strip() == 'AGUARDANDO ENTREGA' if isinstance(x, str) else True).sum()
+            lambda x: x.strip() == 'FECHADO' if isinstance(x, str) else True).sum()
 
         indicadores_table = f"""
                 <table border="1" cellspacing="2" cellpadding="4" style="border-collapse: collapse; text-align: left; width: 100%;">
@@ -962,8 +943,7 @@ class VendasApp(QWidget):
 
         try:
             self.dataframe = pd.read_sql(query_consulta_filtro, self.engine)
-            self.dataframe.insert(0, ' ', '')
-            self.dataframe[''] = ''
+            self.dataframe.insert(0, 'STATUS', '')
 
             line_number = self.dataframe.shape[0]
 
