@@ -260,6 +260,45 @@ def select_query(entity):
                                 PROTHEUS12_R27.dbo.SBM010
                             WHERE BM_DESC LIKE '%:search_field%'
                             AND D_E_L_E_T_ <> '*'"""
-                  ]
+                  ],
+        "cliente": ["""
+            SELECT 
+                A1_COD AS 'Código',
+                A1_NOME AS 'Cliente',
+                A1_NREDUZ AS 'Nome fantasia'
+            FROM 
+                PROTHEUS12_R27.dbo.SA1010 tabelaCliente
+            WHERE 
+            tabelaCliente.D_E_L_E_T_ <> '*'
+        ORDER BY 
+            tabelaCliente.A1_NOME ASC;
+        """, """
+            SELECT 
+                A1_COD AS 'Código',
+                A1_NOME AS 'Cliente',
+                A1_NREDUZ AS 'Nome fantasia'
+            FROM 
+                PROTHEUS12_R27.dbo.SA1010 tabelaCliente
+            WHERE 
+                tabelaCliente.D_E_L_E_T_ <> '*'
+            AND
+                A1_COD LIKE ':search_field%'
+            ORDER BY
+                tabelaCliente.A1_NOME ASC;
+        """, """
+            SELECT 
+                A1_COD AS 'Código',
+                A1_NOME AS 'Cliente',
+                A1_NREDUZ AS 'Nome fantasia'
+            FROM 
+                PROTHEUS12_R27.dbo.SA1010 tabelaCliente
+            WHERE
+                tabelaCliente.D_E_L_E_T_ <> '*'
+            AND
+                A1_NOME LIKE '%:search_field%'
+            ORDER BY
+                tabelaCliente.A1_NOME ASC;
+        """
+                    ]
     }
     return query_dict[entity]

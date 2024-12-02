@@ -181,12 +181,12 @@ class VendasApp(QWidget):
         self.campo_orcamento.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.add_clear_button(self.campo_orcamento)
 
-        self.campo_cod_cliente = CustomLineEdit('Cliente', 'cliente', 'Cliente', self)
-        self.campo_cod_cliente.setObjectName("cliente")
-        self.campo_cod_cliente.setFont(QFont(fonte_campos, tamanho_fonte_campos))
-        self.campo_cod_cliente.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.campo_cod_cliente.setMaxLength(40)
-        # self.add_clear_button(self.campo_cod_cliente)
+        self.campo_nome_cliente = CustomLineEdit('Cliente', 'cliente', 'Cliente', self)
+        self.campo_nome_cliente.setObjectName("cliente")
+        self.campo_nome_cliente.setFont(QFont(fonte_campos, tamanho_fonte_campos))
+        self.campo_nome_cliente.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.campo_nome_cliente.setMaxLength(40)
+        # self.add_clear_button(self.campo_nome_cliente)
 
         self.campo_data_inicio = QDateEdit(self)
         self.campo_data_inicio.setFont(QFont(fonte_campos, 10))
@@ -286,7 +286,7 @@ class VendasApp(QWidget):
         self.campo_codigo.returnPressed.connect(self.executar_consulta)
         self.campo_descricao_prod.returnPressed.connect(self.executar_consulta)
         self.campo_contem_descricao_prod.returnPressed.connect(self.executar_consulta)
-        self.campo_cod_cliente.returnPressed.connect(self.executar_consulta)
+        self.campo_nome_cliente.returnPressed.connect(self.executar_consulta)
 
         layout = QVBoxLayout()
         layout_campos_01 = QHBoxLayout()
@@ -334,7 +334,7 @@ class VendasApp(QWidget):
 
         container_cliente = QVBoxLayout()
         container_cliente.addWidget(self.label_cliente)
-        container_cliente.addWidget(self.campo_cod_cliente)
+        container_cliente.addWidget(self.campo_nome_cliente)
 
         container_combobox_status_pv = QVBoxLayout()
         container_combobox_status_pv.addWidget(self.label_status_pedido)
@@ -690,7 +690,7 @@ class VendasApp(QWidget):
         self.campo_codigo.clear()
         self.campo_descricao_prod.clear()
         self.campo_contem_descricao_prod.clear()
-        self.campo_cod_cliente.clear()
+        self.campo_nome_cliente.clear()
         self.campo_orcamento.clear()
         self.combobox_status_pedido.setCurrentText('-')
         self.combobox_tipo_pedido.setCurrentText('-')
@@ -740,7 +740,7 @@ class VendasApp(QWidget):
         self.campo_codigo.setEnabled(status)
         self.campo_descricao_prod.setEnabled(status)
         self.campo_contem_descricao_prod.setEnabled(status)
-        self.campo_cod_cliente.setEnabled(status)
+        self.campo_nome_cliente.setEnabled(status)
         self.campo_orcamento.setEnabled(status)
         self.campo_data_inicio.setEnabled(status)
         self.campo_data_fim.setEnabled(status)
@@ -757,7 +757,7 @@ class VendasApp(QWidget):
         orcamento = self.campo_orcamento.text().upper().strip()
         doc_nf_saida = self.campo_doc_nf_entrada.text().upper().strip()
         codigo_produto = self.campo_codigo.text().upper().strip()
-        cod_cliente = self.campo_cod_cliente.text().upper().strip()
+        nome_cliente = self.campo_nome_cliente.text().upper().strip()
         descricao_produto = self.campo_descricao_prod.text().upper().strip()
         contem_descricao = self.campo_contem_descricao_prod.text().upper().strip()
         mensagem_nota = self.campo_msg_nota.text().upper().strip()
@@ -848,7 +848,7 @@ class VendasApp(QWidget):
                     AND	C6_DESCRI LIKE '{descricao_produto}%'
                     AND	C6_NUMORC LIKE '%{orcamento}%'
                     AND C5_NOTA LIKE '%{doc_nf_saida}'
-                    AND C6_CLI LIKE '%{cod_cliente}'
+                    AND C5_ZZNOME LIKE '%{nome_cliente}'
                     AND C5_MENNOTA LIKE '%{mensagem_nota}%'
                     AND ((@statusPedido = 1 AND C5_NOTA LIKE '%{doc_nf_saida}') -- open/closed
                         OR (@statusPedido = 2 AND C5_NOTA LIKE '%{doc_nf_saida}' AND C5_NOTA <> '         ') -- closed
