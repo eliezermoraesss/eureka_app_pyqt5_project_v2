@@ -47,8 +47,8 @@ class VendasApp(QWidget):
         super().__init__()
         self.main_window = 'main_window'
         self.filtro_dialog = None
-        self.dataframe = pd.DataFrame()
-        self.dataframe_original = None
+        self.df = pd.DataFrame()
+        self.df_original = None
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
         self.lista_status_tabela = ['ABERTO', 'FECHADO']
 
@@ -948,10 +948,18 @@ class VendasApp(QWidget):
         self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
 
         try:
-            self.dataframe = pd.read_sql(query_consulta_filtro, self.engine)
-            self.dataframe.insert(0, 'STATUS', '')
+            self.df = pd.read_sql(query_consulta_filtro, self.engine)
+            self.df.insert(0, 'STATUS', '')
 
-            line_number = self.dataframe.shape[0]
+            remove_zero_columns = ['ORÇAMENTO', 'PV', 'SOLIC. COMPRA', 'DOC. NF SAÍDA']
+            self.df[remove_zero_columns] = self.df[remove_zero_columns].apply(
+                lambda x: x.str.lstrip('0'))
+            
+            date_columns = ['PV ABERTO EM:', 'SC ABERTA EM:', 'OP ABERTA EM:', 'DATA DE ENTREGA', 'DATA DE FATURAMENTO']
+            self.df[date_columns] = self.df[date_columns].apply(lambda col: pd.to_datetime(
+                col, format='%Y%m%d', errors='coerce').dt.strftime('%d/%m/%Y').fillna(''))
+
+            line_number = self.df.shape[0]
 
             if self.table_line_number(line_number):
                 self.clean_screen()
@@ -961,8 +969,8 @@ class VendasApp(QWidget):
             dialog = loading_dialog(self, "Carregando...", "🤖 Processando dados do TOTVS..."
                                                            "\n\n🤖 Por favor, aguarde.\n\nEureka®")
 
-            self.atualizar_tabela(self.dataframe)
-            self.dataframe_original = self.dataframe.copy()
+            self.atualizar_tabela(self.df)
+            self.df_original = self.df.copy()
             dialog.close()
 
         except Exception as ex:
@@ -985,7 +993,7 @@ class VendasApp(QWidget):
             self.filtro_dialog.close()
 
         # Create and show a new instance of FilterDialog
-        self.filtro_dialog = FilterDialog(self, nome_coluna, self.dataframe, self.lista_status_tabela)
+        self.filtro_dialog = FilterDialog(self, nome_coluna, self.df, self.lista_status_tabela)
 
         # Execute the dialog and wait for the user to close it
         if self.filtro_dialog.exec_() == QDialog.Accepted:
@@ -993,18 +1001,18 @@ class VendasApp(QWidget):
             filtro_selecionado = self.filtro_dialog.get_filtros_selecionados()
             if filtro_selecionado:
                 # Apply the filter to the dataframe
-                self.dataframe = self.dataframe[self.dataframe[nome_coluna].isin(filtro_selecionado)]
+                self.df = self.df[self.df[nome_coluna].isin(filtro_selecionado)]
 
-                self.atualizar_tabela(self.dataframe)
+                self.atualizar_tabela(self.df)
                 self.btn_limpar_filtro.show()
         # Reativa os sinais do cabeçalho
         self.tree.horizontalHeader().blockSignals(False)
 
     def limpar_filtros(self):
         dialog = loading_dialog(self, "Eureka®", "🤖 Removendo filtros...\n\nRestaurando a consulta inicial")
-        self.atualizar_tabela(self.dataframe_original)
+        self.atualizar_tabela(self.df_original)
         self.btn_limpar_filtro.hide()
-        self.dataframe = self.dataframe_original.copy()
+        self.df = self.df_original.copy()
         dialog.close()
 
 
