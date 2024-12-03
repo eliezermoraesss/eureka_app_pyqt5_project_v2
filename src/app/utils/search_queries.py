@@ -282,7 +282,7 @@ def select_query(entity):
             WHERE 
                 tabelaCliente.D_E_L_E_T_ <> '*'
             AND
-                A1_COD LIKE ':search_field%'
+                A1_COD LIKE '%:search_field'
             ORDER BY
                 tabelaCliente.A1_NOME ASC;
         """, """
