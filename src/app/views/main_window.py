@@ -1,8 +1,6 @@
 import os
 import sys
 
-from src.models.vendas_model import VendasApp
-
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -17,6 +15,7 @@ from models.qps_model import QpClosedApp
 from app.utils.load_session import load_session
 from qt.ui.ui_home_window import Ui_HomeWindow
 from app.utils.open_dashboard_webbrowser import open_dashboard_firefox
+from src.models.vendas_model import VendasApp
 
 
 class MainWindow(QtWidgets.QMainWindow):
