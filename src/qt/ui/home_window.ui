@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1319</width>
-    <height>797</height>
+    <height>800</height>
    </rect>
   </property>
   <property name="font">
@@ -37,7 +37,7 @@
     </property>
     <property name="font">
      <font>
-      <family>Segoe UI Light</family>
+      <family>Segoe UI</family>
      </font>
     </property>
     <property name="styleSheet">
@@ -72,9 +72,9 @@ QPushButton:pressed {
      <property name="geometry">
       <rect>
        <x>150</x>
-       <y>270</y>
+       <y>230</y>
        <width>221</width>
-       <height>121</height>
+       <height>131</height>
       </rect>
      </property>
      <property name="minimumSize">
@@ -85,7 +85,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -112,8 +111,8 @@ QPushButton:pressed {
     <widget class="QPushButton" name="btn_engenharia">
      <property name="geometry">
       <rect>
-       <x>440</x>
-       <y>270</y>
+       <x>390</x>
+       <y>230</y>
        <width>221</width>
        <height>131</height>
       </rect>
@@ -126,7 +125,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -150,8 +148,8 @@ QPushButton:pressed {
     <widget class="QPushButton" name="btn_pcp">
      <property name="geometry">
       <rect>
-       <x>730</x>
-       <y>270</y>
+       <x>630</x>
+       <y>230</y>
        <width>221</width>
        <height>131</height>
       </rect>
@@ -164,7 +162,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -189,7 +186,7 @@ QPushButton:pressed {
      <property name="geometry">
       <rect>
        <x>150</x>
-       <y>460</y>
+       <y>380</y>
        <width>221</width>
        <height>131</height>
       </rect>
@@ -202,7 +199,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -226,8 +222,8 @@ QPushButton:pressed {
     <widget class="QPushButton" name="btn_comercial">
      <property name="geometry">
       <rect>
-       <x>440</x>
-       <y>460</y>
+       <x>390</x>
+       <y>380</y>
        <width>221</width>
        <height>131</height>
       </rect>
@@ -240,7 +236,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -264,8 +259,8 @@ QPushButton:pressed {
     <widget class="QPushButton" name="btn_qps">
      <property name="geometry">
       <rect>
-       <x>730</x>
-       <y>460</y>
+       <x>630</x>
+       <y>380</y>
        <width>221</width>
        <height>131</height>
       </rect>
@@ -278,7 +273,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -313,7 +307,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
        <weight>75</weight>
        <bold>true</bold>
@@ -364,7 +357,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
        <weight>75</weight>
        <bold>true</bold>
@@ -387,7 +379,7 @@ QPushButton:pressed {
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>650</y>
+       <y>690</y>
        <width>1050</width>
        <height>2</height>
       </rect>
@@ -407,8 +399,8 @@ QPushButton:pressed {
     <widget class="QPushButton" name="btn_logout">
      <property name="geometry">
       <rect>
-       <x>850</x>
-       <y>700</y>
+       <x>750</x>
+       <y>720</y>
        <width>101</width>
        <height>51</height>
       </rect>
@@ -421,7 +413,6 @@ QPushButton:pressed {
      </property>
      <property name="font">
       <font>
-       <family>Segoe UI</family>
        <pointsize>-1</pointsize>
       </font>
      </property>
@@ -455,6 +446,43 @@ QPushButton:hover {
       </size>
      </property>
     </widget>
+    <widget class="QPushButton" name="btn_vendas">
+     <property name="geometry">
+      <rect>
+       <x>390</x>
+       <y>530</y>
+       <width>221</width>
+       <height>131</height>
+      </rect>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>221</width>
+       <height>41</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>-1</pointsize>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string> Vendas</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../static/resource.qrc">
+       <normaloff>:/icon/icon/crescimento.png</normaloff>:/icon/icon/crescimento.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>64</width>
+       <height>64</height>
+      </size>
+     </property>
+    </widget>
     <zorder>btn_qps</zorder>
     <zorder>btn_comercial</zorder>
     <zorder>btn_compras</zorder>
@@ -466,6 +494,7 @@ QPushButton:hover {
     <zorder>user_label</zorder>
     <zorder>frame_2</zorder>
     <zorder>btn_logout</zorder>
+    <zorder>btn_vendas</zorder>
    </widget>
    <widget class="QWidget" name="sidebar_enaplic" native="true">
     <property name="geometry">

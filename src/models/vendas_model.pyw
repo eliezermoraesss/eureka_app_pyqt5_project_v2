@@ -54,9 +54,9 @@ def format_number(value):
 class VendasApp(QWidget):
     guia_fechada = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, main_window):
         super().__init__()
-        self.main_window = 'main_window'
+        self.main_window = main_window
         self.filtro_dialog = None
         self.df = pd.DataFrame()
         self.df_original = None

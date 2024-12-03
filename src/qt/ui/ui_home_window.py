@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\home_window.ui'
+# Form implementation generated from reading ui file 'home_window.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.10
 #
@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_HomeWindow(object):
     def setupUi(self, HomeWindow):
         HomeWindow.setObjectName("HomeWindow")
-        HomeWindow.resize(1319, 797)
+        HomeWindow.resize(1319, 800)
         font = QtGui.QFont()
         font.setFamily("Segoe UI")
         HomeWindow.setFont(font)
@@ -27,7 +27,7 @@ class Ui_HomeWindow(object):
         self.widget = QtWidgets.QWidget(self.centralwidget)
         self.widget.setGeometry(QtCore.QRect(230, 0, 1200, 800))
         font = QtGui.QFont()
-        font.setFamily("Segoe UI Light")
+        font.setFamily("Segoe UI")
         self.widget.setFont(font)
         self.widget.setStyleSheet("* {\n"
 "    background-color: #F2F5F7;\n"
@@ -57,7 +57,7 @@ class Ui_HomeWindow(object):
 "")
         self.widget.setObjectName("widget")
         self.btn_dashboard = QtWidgets.QPushButton(self.widget)
-        self.btn_dashboard.setGeometry(QtCore.QRect(150, 270, 221, 121))
+        self.btn_dashboard.setGeometry(QtCore.QRect(150, 230, 221, 131))
         self.btn_dashboard.setMinimumSize(QtCore.QSize(0, 41))
         font = QtGui.QFont()
         font.setFamily("Segoe UI")
@@ -71,7 +71,7 @@ class Ui_HomeWindow(object):
         self.btn_dashboard.setIconSize(QtCore.QSize(64, 64))
         self.btn_dashboard.setObjectName("btn_dashboard")
         self.btn_engenharia = QtWidgets.QPushButton(self.widget)
-        self.btn_engenharia.setGeometry(QtCore.QRect(440, 270, 221, 131))
+        self.btn_engenharia.setGeometry(QtCore.QRect(390, 230, 221, 131))
         self.btn_engenharia.setMinimumSize(QtCore.QSize(221, 41))
         font = QtGui.QFont()
         font.setFamily("Segoe UI")
@@ -84,7 +84,7 @@ class Ui_HomeWindow(object):
         self.btn_engenharia.setIconSize(QtCore.QSize(64, 64))
         self.btn_engenharia.setObjectName("btn_engenharia")
         self.btn_pcp = QtWidgets.QPushButton(self.widget)
-        self.btn_pcp.setGeometry(QtCore.QRect(730, 270, 221, 131))
+        self.btn_pcp.setGeometry(QtCore.QRect(630, 230, 221, 131))
         self.btn_pcp.setMinimumSize(QtCore.QSize(221, 41))
         font = QtGui.QFont()
         font.setFamily("Segoe UI")
@@ -97,7 +97,7 @@ class Ui_HomeWindow(object):
         self.btn_pcp.setIconSize(QtCore.QSize(64, 64))
         self.btn_pcp.setObjectName("btn_pcp")
         self.btn_compras = QtWidgets.QPushButton(self.widget)
-        self.btn_compras.setGeometry(QtCore.QRect(150, 460, 221, 131))
+        self.btn_compras.setGeometry(QtCore.QRect(150, 380, 221, 131))
         self.btn_compras.setMinimumSize(QtCore.QSize(221, 41))
         font = QtGui.QFont()
         font.setFamily("Segoe UI")
@@ -110,7 +110,7 @@ class Ui_HomeWindow(object):
         self.btn_compras.setIconSize(QtCore.QSize(64, 64))
         self.btn_compras.setObjectName("btn_compras")
         self.btn_comercial = QtWidgets.QPushButton(self.widget)
-        self.btn_comercial.setGeometry(QtCore.QRect(440, 460, 221, 131))
+        self.btn_comercial.setGeometry(QtCore.QRect(390, 380, 221, 131))
         self.btn_comercial.setMinimumSize(QtCore.QSize(221, 41))
         font = QtGui.QFont()
         font.setFamily("Segoe UI")
@@ -123,7 +123,7 @@ class Ui_HomeWindow(object):
         self.btn_comercial.setIconSize(QtCore.QSize(64, 64))
         self.btn_comercial.setObjectName("btn_comercial")
         self.btn_qps = QtWidgets.QPushButton(self.widget)
-        self.btn_qps.setGeometry(QtCore.QRect(730, 460, 221, 131))
+        self.btn_qps.setGeometry(QtCore.QRect(630, 380, 221, 131))
         self.btn_qps.setMinimumSize(QtCore.QSize(221, 41))
         font = QtGui.QFont()
         font.setFamily("Segoe UI")
@@ -177,7 +177,7 @@ class Ui_HomeWindow(object):
 "}")
         self.user_label.setObjectName("user_label")
         self.frame_2 = QtWidgets.QFrame(self.widget)
-        self.frame_2.setGeometry(QtCore.QRect(20, 650, 1050, 2))
+        self.frame_2.setGeometry(QtCore.QRect(20, 690, 1050, 2))
         self.frame_2.setStyleSheet("QFrame {\n"
 "    background-color: #a4161a;\n"
 "}")
@@ -185,7 +185,7 @@ class Ui_HomeWindow(object):
         self.frame_2.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_2.setObjectName("frame_2")
         self.btn_logout = QtWidgets.QPushButton(self.widget)
-        self.btn_logout.setGeometry(QtCore.QRect(850, 700, 101, 51))
+        self.btn_logout.setGeometry(QtCore.QRect(750, 720, 101, 51))
         self.btn_logout.setMinimumSize(QtCore.QSize(0, 41))
         font = QtGui.QFont()
         font.setFamily("Segoe UI")
@@ -210,6 +210,19 @@ class Ui_HomeWindow(object):
         self.btn_logout.setIcon(icon7)
         self.btn_logout.setIconSize(QtCore.QSize(32, 32))
         self.btn_logout.setObjectName("btn_logout")
+        self.btn_vendas = QtWidgets.QPushButton(self.widget)
+        self.btn_vendas.setGeometry(QtCore.QRect(390, 530, 221, 131))
+        self.btn_vendas.setMinimumSize(QtCore.QSize(221, 41))
+        font = QtGui.QFont()
+        font.setFamily("Segoe UI")
+        font.setPointSize(1)
+        self.btn_vendas.setFont(font)
+        self.btn_vendas.setStyleSheet("")
+        icon8 = QtGui.QIcon()
+        icon8.addPixmap(QtGui.QPixmap(":/icon/icon/crescimento.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_vendas.setIcon(icon8)
+        self.btn_vendas.setIconSize(QtCore.QSize(64, 64))
+        self.btn_vendas.setObjectName("btn_vendas")
         self.btn_qps.raise_()
         self.btn_comercial.raise_()
         self.btn_compras.raise_()
@@ -221,6 +234,7 @@ class Ui_HomeWindow(object):
         self.user_label.raise_()
         self.frame_2.raise_()
         self.btn_logout.raise_()
+        self.btn_vendas.raise_()
         self.sidebar_enaplic = QtWidgets.QWidget(self.centralwidget)
         self.sidebar_enaplic.setGeometry(QtCore.QRect(-10, 0, 241, 801))
         self.sidebar_enaplic.setStyleSheet("* {\n"
@@ -261,4 +275,5 @@ class Ui_HomeWindow(object):
         self.welcome_label.setText(_translate("HomeWindow", "Bem-vindo(a) ao Eureka®!"))
         self.user_label.setText(_translate("HomeWindow", "Olá {user}"))
         self.btn_logout.setText(_translate("HomeWindow", "Sair"))
+        self.btn_vendas.setText(_translate("HomeWindow", " Vendas"))
 from qt.ui import resource_rc

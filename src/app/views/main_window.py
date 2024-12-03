@@ -1,6 +1,8 @@
 import os
 import sys
 
+from src.models.vendas_model import VendasApp
+
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -41,7 +43,8 @@ class MainWindow(QtWidgets.QMainWindow):
                     'maynara@enaplic.com.br', 'lucio@enaplic.com.br', 'julio@enaplic.com.br'], self)
         def execute_dashboard_model(checked=False):
             # Abre a URL no navegador padrão do sistema
-            url = ('https://app.powerbi.com/groups/me/reports/f4562fea-7618-4f05-8df7-0750108248f8/d752779fc700976478f5?experience=power-bi')
+            url = ('https://app.powerbi.com/groups/me/reports/f4562fea-7618-4f05-8df7-0750108248f8/d752779fc7009764'
+                   '78f5?experience=power-bi')
             open_dashboard_firefox(url)
 
         def execute_engenharia_model():
@@ -69,12 +72,18 @@ class MainWindow(QtWidgets.QMainWindow):
             qps_window.showMaximized()
             self.sub_windows.append(qps_window)
 
+        def execute_vendas_model():
+            vendas_window = VendasApp(self)
+            vendas_window.showMaximized()
+            self.sub_windows.append(vendas_window)
+
         self.home_window.btn_dashboard.clicked.connect(execute_dashboard_model)
         self.home_window.btn_engenharia.clicked.connect(execute_engenharia_model)
         self.home_window.btn_pcp.clicked.connect(execute_pcp_model)
         self.home_window.btn_compras.clicked.connect(execute_compras_model)
         self.home_window.btn_comercial.clicked.connect(execute_comercial_model)
         self.home_window.btn_qps.clicked.connect(execute_qps_model)
+        self.home_window.btn_vendas.clicked.connect(execute_vendas_model)
         self.home_window.btn_logout.clicked.connect(self.close)
 
     def reopen(self):
