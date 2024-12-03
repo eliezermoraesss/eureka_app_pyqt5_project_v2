@@ -314,6 +314,14 @@ class EngenhariaApp(QWidget):
                 height: 20px;
                 font-size: 16px;
             }
+            
+            QComboBox QAbstractItemView {
+                background-color: #EEEEEE;
+                color: #000000; /* Cor do texto para garantir legibilidade */
+                selection-background-color: #0a79f8; /* Cor de seleção quando passa o mouse */
+                selection-color: #FFFFFF; /* Cor do texto quando selecionado */
+                border: 1px solid #393E46;
+            }
     
             QDateEdit::drop-down, QComboBox::drop-down {
                 subcontrol-origin: padding;
