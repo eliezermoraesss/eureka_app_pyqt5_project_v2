@@ -64,14 +64,14 @@ class VendasApp(QWidget):
         self.lista_status_tabela = ['ABERTO', 'FECHADO']
 
         user_data = load_session()
-        username = user_data["username"]
-        role = user_data["role"]
+        self.username = user_data["username"]
+        self.role = user_data["role"]
 
         self.engine = None
         self.username, self.password, self.database, self.server = setup_mssql()
         self.driver = '{SQL Server}'
 
-        self.setWindowTitle(f"Eureka® Vendas . {username} ({role})")
+        self.setWindowTitle(f"Eureka® Vendas . {self.username} ({self.role})")
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
         self.altura_linha = 30
@@ -426,9 +426,10 @@ class VendasApp(QWidget):
         self.setStyleSheet("""
             * {
                 background-color: #363636;
+                font-style: 'Segoe UI';
             }
     
-            QLabel, QCheckBox {
+            QLabel {
                 color: #DFE0E2;
                 font-size: 13px;
                 font-weight: regular;
@@ -446,12 +447,6 @@ class VendasApp(QWidget):
                 margin: 5px;
             }
             
-            QCheckBox#checkbox-sc {
-                margin-left: 10px;
-                font-size: 13px;
-                font-weight: normal;
-            }
-            
             QLabel#label-line-number {
                 font-size: 16px;
                 font-weight: normal;
@@ -465,6 +460,14 @@ class VendasApp(QWidget):
                 border-radius: 10px;
                 height: 24px;
                 font-size: 16px;
+            }
+            
+            QComboBox QAbstractItemView {
+                background-color: #EEEEEE;
+                color: #000000; /* Cor do texto para garantir legibilidade */
+                selection-background-color: #3f37c9; /* Cor de seleção quando passa o mouse */
+                selection-color: #FFFFFF; /* Cor do texto quando selecionado */
+                border: 1px solid #393E46;
             }
     
             QDateEdit::drop-down, QComboBox::drop-down {
@@ -486,7 +489,7 @@ class VendasApp(QWidget):
     
             QLineEdit {
                 background-color: #EEEEEE;
-                border: 1px solid #393E46;
+                border: 1px solid #000000;
                 padding: 5px 10px;
                 border-radius: 12px;
                 font-size: 16px;
@@ -501,6 +504,7 @@ class VendasApp(QWidget):
     
             QPushButton {
                 background-color: #3f37c9;
+                border: 1px solid #3a0ca3;
                 color: #eeeeee;
                 padding: 5px 10px;
                 border-radius: 8px;
@@ -935,11 +939,11 @@ class VendasApp(QWidget):
                     else:
                         item = QTableWidgetItem(str(value).strip())
                         if column_name in ['CLIENTE', 'DESCRIÇÃO', 'MENSAGEM NOTA']:
-                            item.setTextAlignment(Qt.AlignLeft)
+                            item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
                         elif column_name in ['PREÇO VENDA R$', 'TOTAL ITEM R$']:
-                            item.setTextAlignment(Qt.AlignRight)
+                            item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
                         else:
-                            item.setTextAlignment(Qt.AlignCenter)
+                            item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
                 else:
                     item = QTableWidgetItem('')
                 self.tree.setItem(i, list(row.index).index(column_name), item)
@@ -993,6 +997,25 @@ class VendasApp(QWidget):
             self.button_visible_control(False)
             return True
 
+    def dataframe_format(self):
+        self.df.insert(0, 'STATUS', '')
+
+        remove_zero_columns = ['ORÇAMENTO', 'PV', 'SOLIC. COMPRA', 'DOC. NF SAÍDA']
+        self.df[remove_zero_columns] = self.df[remove_zero_columns].apply(
+            lambda x: x.str.lstrip('0'))
+
+        date_columns = ['PV ABERTO EM:', 'SC ABERTA EM:', 'OP ABERTA EM:', 'DATA DE ENTREGA', 'DATA DE FATURAMENTO']
+        self.df[date_columns] = self.df[date_columns].apply(lambda col: pd.to_datetime(
+            col, format='%Y%m%d', errors='coerce').dt.strftime('%d/%m/%Y').fillna(''))
+
+        format_number_columns = ['QTD. VENDA', 'PREÇO VENDA R$', 'TOTAL ITEM R$']
+        self.df[format_number_columns] = self.df[format_number_columns].apply(
+            lambda col: pd.to_numeric(col, errors='coerce').apply(format_number))
+
+        if self.role in ['Almoxarifado', 'Expedição']:
+            columns_to_remove = ['PREÇO VENDA R$', 'TOTAL ITEM R$']
+            self.df.drop(columns_to_remove, axis=1, inplace=True)
+
     def executar_consulta(self):
         query_consulta_filtro = self.query_consulta()
 
@@ -1007,19 +1030,7 @@ class VendasApp(QWidget):
 
         try:
             self.df = pd.read_sql(query_consulta_filtro, self.engine)
-            self.df.insert(0, 'STATUS', '')
-
-            remove_zero_columns = ['ORÇAMENTO', 'PV', 'SOLIC. COMPRA', 'DOC. NF SAÍDA']
-            self.df[remove_zero_columns] = self.df[remove_zero_columns].apply(
-                lambda x: x.str.lstrip('0'))
-            
-            date_columns = ['PV ABERTO EM:', 'SC ABERTA EM:', 'OP ABERTA EM:', 'DATA DE ENTREGA', 'DATA DE FATURAMENTO']
-            self.df[date_columns] = self.df[date_columns].apply(lambda col: pd.to_datetime(
-                col, format='%Y%m%d', errors='coerce').dt.strftime('%d/%m/%Y').fillna(''))
-
-            format_number_columns = ['QTD. VENDA', 'PREÇO VENDA R$', 'TOTAL ITEM R$']
-            self.df[format_number_columns] = self.df[format_number_columns].apply(
-                lambda col: pd.to_numeric(col, errors='coerce').apply(format_number))
+            self.dataframe_format()
 
             line_number = self.df.shape[0]
 
@@ -1076,10 +1087,3 @@ class VendasApp(QWidget):
         self.btn_limpar_filtro.hide()
         self.df = self.df_original.copy()
         dialog.close()
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = VendasApp()
-    window.showMaximized()
-    sys.exit(app.exec_())
