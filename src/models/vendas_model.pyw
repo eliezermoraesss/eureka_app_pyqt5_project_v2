@@ -64,14 +64,14 @@ class VendasApp(QWidget):
         self.lista_status_tabela = ['ABERTO', 'FECHADO']
 
         user_data = load_session()
-        self.username = user_data["username"]
+        username = user_data["username"]
         self.role = user_data["role"]
 
         self.engine = None
         self.username, self.password, self.database, self.server = setup_mssql()
         self.driver = '{SQL Server}'
 
-        self.setWindowTitle(f"Eureka® Vendas . {self.username} ({self.role})")
+        self.setWindowTitle(f"Eureka® Vendas . {username} ({self.role})")
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
         self.altura_linha = 30

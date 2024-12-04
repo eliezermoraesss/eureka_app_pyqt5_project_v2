@@ -1044,8 +1044,6 @@ class ComprasApp(QWidget):
                     else:
                         if column_name in ('QP/QR', 'SOLIC. COMPRA'):
                             value = value.lstrip('0')
-                        # if column_name == 'QR?':
-                            # value = 'Sim' if value == '2' else 'Não'
                         if column_name in ('QTD. SOLIC. COMPRAS', 'QTD. PEDIDO COMPRA', 'QTD. ENTREGUE',
                                            'VALOR UNIT. PC', 'VALOR TOTAL PC', 'VALOR UNIT. NF', 'VALOR TOTAL NF'):
                             if column_name in ('VALOR UNIT. PC', 'VALOR TOTAL PC', 'VALOR UNIT. NF', 'VALOR TOTAL NF'):
