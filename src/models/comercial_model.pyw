@@ -428,6 +428,8 @@ class ComercialApp(QWidget):
 
             # Definindo um formato contábil
             accounting_format = workbook.add_format({'num_format': '[$R$-pt-BR] #,##0.00'})
+            dolar_format = workbook.add_format({'num_format': '[$$-en-US] #,##0.00'})
+            number_format = workbook.add_format({'num_format': '#,##0.00'})
 
             # Adicionar fórmulas na planilha 'Dados' na última linha + 1
             worksheet_dados.write(f'A{last_row}', 'COMERCIAL')
@@ -460,6 +462,18 @@ class ComercialApp(QWidget):
             worksheet_dados.write(f'A{last_row + 6}', 'TOTAL GERAL')
             worksheet_dados.write_formula(f'B{last_row + 6}', f'=SUBTOTAL(9, B{last_row}:B{last_row + 4})',
                                           accounting_format)
+
+            worksheet_dados.write(f'A{last_row + 8}', 'FATOR ENAPLIC')
+            worksheet_dados.write_formula(f'B{last_row + 8}', f'3.75', number_format)
+
+            worksheet_dados.write(f'A{last_row + 9}', 'SUGESTÃO DE VENDA')
+            worksheet_dados.write_formula(f'B{last_row + 9}', f'=B{last_row + 6}*B{last_row + 8}', accounting_format)
+
+            worksheet_dados.write(f'A{last_row + 10}', 'PREÇO DO DÓLAR')
+            worksheet_dados.write_formula(f'B{last_row + 10}', f'5.2', dolar_format)
+
+            worksheet_dados.write(f'A{last_row + 11}', 'VENDA EM DÓLAR')
+            worksheet_dados.write_formula(f'B{last_row + 11}', f'=B{last_row + 9}/B{last_row + 10}', dolar_format)
 
             writer.close()
 
