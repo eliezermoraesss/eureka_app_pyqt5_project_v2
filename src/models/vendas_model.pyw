@@ -1012,7 +1012,7 @@ class VendasApp(QWidget):
         self.df[format_number_columns] = self.df[format_number_columns].apply(
             lambda col: pd.to_numeric(col, errors='coerce').apply(format_number))
 
-        if self.role in ['Almoxarifado', 'Expedição']:
+        if self.role not in ['admin', 'DIRETORIA', 'COMERCIAL']:
             columns_to_remove = ['PREÇO VENDA R$', 'TOTAL ITEM R$']
             self.df.drop(columns_to_remove, axis=1, inplace=True)
 
