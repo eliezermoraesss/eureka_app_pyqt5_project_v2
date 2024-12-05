@@ -466,13 +466,13 @@ class ComercialApp(QWidget):
             worksheet_dados.write(f'A{last_row + 8}', 'FATOR ENAPLIC')
             worksheet_dados.write_formula(f'B{last_row + 8}', f'3.75', number_format)
 
-            worksheet_dados.write(f'A{last_row + 9}', 'SUGESTÃO DE VENDA')
+            worksheet_dados.write(f'A{last_row + 9}', 'VENDA EM REAL (R$)')
             worksheet_dados.write_formula(f'B{last_row + 9}', f'=B{last_row + 6}*B{last_row + 8}', accounting_format)
 
-            worksheet_dados.write(f'A{last_row + 10}', 'PREÇO DO DÓLAR')
+            worksheet_dados.write(f'A{last_row + 10}', 'COTAÇÃO DO DÓLAR (US$)')
             worksheet_dados.write_formula(f'B{last_row + 10}', f'5.2', dolar_format)
 
-            worksheet_dados.write(f'A{last_row + 11}', 'VENDA EM DÓLAR')
+            worksheet_dados.write(f'A{last_row + 11}', 'VENDA EM DÓLAR (US$)')
             worksheet_dados.write_formula(f'B{last_row + 11}', f'=B{last_row + 9}/B{last_row + 10}', dolar_format)
 
             writer.close()
