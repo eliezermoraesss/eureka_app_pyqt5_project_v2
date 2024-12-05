@@ -803,9 +803,13 @@ class ComercialApp(QWidget):
                 self.label_product_name.setText(f"{self.codigo} - {self.descricao}")
                 self.label_product_name.show()
                 self.formatar_indicadores_custos(consolidated_dataframe)
+                self.btn_exportar_excel.show()
+                self.btn_exportar_pdf.show()
+                self.btn_abrir_desenho.show()
                 dialog.close()
             else:
                 self.controle_campos_formulario(True)
+                dialog.close()
                 exibir_mensagem("EUREKA® Comercial", 'Produto não encontrado!', "info")
                 return
 
@@ -813,9 +817,6 @@ class ComercialApp(QWidget):
             exibir_mensagem('Erro ao consultar tabela', f'Erro: {str(ex)}', 'error')
 
         finally:
-            self.btn_exportar_excel.show()
-            self.btn_exportar_pdf.show()
-            self.btn_abrir_desenho.show()
             # Fecha a conexão com o banco de dados se estiver aberta
             if 'engine' in locals():
                 engine.dispose()
