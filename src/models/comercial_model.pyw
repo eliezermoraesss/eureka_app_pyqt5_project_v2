@@ -793,9 +793,9 @@ class ComercialApp(QWidget):
                         item = QTableWidgetItem(str(value).strip())
 
                         if column_name in ['QUANT.', 'ULT. ATUALIZ.', 'ARMAZÉM']:
-                            item.setTextAlignment(Qt.AlignCenter)
+                            item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
                         elif column_name in ['VALOR UNIT. (R$)', 'SUB-TOTAL (R$)']:
-                            item.setTextAlignment(Qt.AlignRight)
+                            item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
                         self.tree.setItem(i, consolidated_dataframe.columns.get_loc(column_name), item)
                 self.tree.setSortingEnabled(True)
