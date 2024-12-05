@@ -398,8 +398,8 @@ class ComercialApp(QWidget):
 
         if tipo_exportacao == 'excel':
             self.file_path, _ = QFileDialog.getSaveFileName(self, 'Salvar como', os.path.join(
-                                                        desktop_path, default_filename),
-                                                        'Arquivos Excel (*.xlsx);;Todos os arquivos (*)')
+                desktop_path, default_filename),
+                                                            'Arquivos Excel (*.xlsx);;Todos os arquivos (*)')
         elif tipo_exportacao == 'pdf':
             self.file_path = os.path.join(desktop_path, default_filename)
 
@@ -485,25 +485,47 @@ class ComercialApp(QWidget):
     def exportar_pdf(self):
         self.exportar_excel('pdf')
 
+        # Caminho para salvar o PDF
+        pdf_path, _ = QFileDialog.getSaveFileName(self, 'Salvar como', self.file_path.replace('.xlsx', '.pdf'),
+                                                  'Arquivos PDF (*.pdf);;Todos os arquivos (*)')
+        if not pdf_path:
+            return
+
         # Ler dados do Excel
         dataframe_tabela = pd.read_excel(self.file_path, sheet_name='Dados')
 
         if os.path.exists(self.file_path):
             os.remove(self.file_path)
 
-        # Caminho para salvar o PDF
-        pdf_path, _ = QFileDialog.getSaveFileName(self, 'Salvar como', self.file_path.replace('.xlsx', '.pdf'),
-                                                  'Arquivos PDF (*.pdf);;Todos os arquivos (*)')
-
-        if not pdf_path:
-            return
-
         nan_row_index = dataframe_tabela.isna().all(axis=1).idxmax()
-
         df_dados = dataframe_tabela.iloc[:nan_row_index].dropna(how='all')
-        df_valores = dataframe_tabela.iloc[nan_row_index + 1:].dropna(how='all')
 
-        df_valores = df_valores.dropna(axis=1, how='all').fillna('')
+        idx_total_geral = dataframe_tabela[dataframe_tabela['CÓDIGO'] == 'TOTAL GERAL'].index[0]
+        idx_fator_enaplic = dataframe_tabela[dataframe_tabela['CÓDIGO'] == 'FATOR ENAPLIC'].index[0]
+
+        df_total_armazem = dataframe_tabela.iloc[nan_row_index + 1: idx_total_geral + 1].dropna(how='all')
+        df_total_armazem = df_total_armazem.dropna(axis=1, how='all').fillna('')
+
+        df_sugestao_vendas = dataframe_tabela.iloc[idx_fator_enaplic:].dropna(axis=1, how='all').fillna('')
+
+        table_valores_header = ['TOTAL POR ARMAZÉM', 'CUSTO\n(R$)', 'QUANTIDADE\n(kg)']
+        table_valores = [table_valores_header] + df_total_armazem.values.tolist()
+
+        table_sugestao_header = ['SUGESTÃO DE VENDA', '']
+        table_sugestao_vendas = [table_sugestao_header] + df_sugestao_vendas.values.tolist()
+
+        # Index das colunas que você deseja formatar
+        idx_custo = table_valores_header.index('CUSTO\n(R$)')
+        idx_quantidade = table_valores_header.index('QUANTIDADE\n(kg)')
+        idx_custo_venda = table_sugestao_header.index('')
+
+        for row in table_valores[1:]:  # Começa do segundo item para pular o cabeçalho
+            row[idx_custo] = format_decimal(row[idx_custo])
+            if row[idx_quantidade] != '':
+                row[idx_quantidade] = format_decimal(row[idx_quantidade])
+
+        for row in table_sugestao_vendas[1:]:
+            row[idx_custo_venda] = format_decimal(row[idx_custo_venda])
 
         if 'QUANT.' in df_dados.columns:
             df_dados['QUANT.'] = df_dados['QUANT.'].apply(format_decimal)
@@ -528,19 +550,7 @@ class ComercialApp(QWidget):
             df_dados = df_dados.rename(columns={'VALOR UNIT. (R$)': 'VALOR\nUNIT. (R$)'})
 
         if 'SUB-TOTAL (R$)' in df_dados.columns:
-            df_dados = df_dados.rename(columns={'SUB-TOTAL (R$)': 'TOTAL (R$)'})
-
-        table_valores_header = ['TOTAL POR ARMAZÉM', 'CUSTO\n(R$)', 'QUANTIDADE\n(kg)']
-        table_valores = [table_valores_header] + df_valores.values.tolist()
-
-        # Index das colunas que você deseja formatar
-        idx_custo = table_valores_header.index('CUSTO\n(R$)')
-        idx_quantidade = table_valores_header.index('QUANTIDADE\n(kg)')
-
-        for row in table_valores[1:]:  # Começa do segundo item para pular o cabeçalho
-            row[idx_custo] = format_decimal(row[idx_custo])
-            if row[idx_quantidade] != '':
-                row[idx_quantidade] = format_decimal(row[idx_quantidade])
+            df_dados.rename(columns={'SUB-TOTAL (R$)': 'TOTAL (R$)'})
 
         def build_elements():
             elements_pdf = []
@@ -554,7 +564,6 @@ class ComercialApp(QWidget):
                 elements_pdf.append(logo)
 
             # Adicionar título e data/hora
-            styles = getSampleStyleSheet()
             title_style = ParagraphStyle(name='TitleStyle', fontSize=16, fontName='Helvetica-Bold', leading=24,
                                          alignment=TA_CENTER)
             normal_style = ParagraphStyle(name='NormalStyle', fontSize=10, leading=12, alignment=TA_CENTER)
@@ -625,10 +634,15 @@ class ComercialApp(QWidget):
             ])
 
             summary_table = Table(table_valores)
+            vendas_table = Table(table_sugestao_vendas)
+
             summary_table.setStyle(style_valores)
+            vendas_table.setStyle(style_valores)
 
             elements_pdf.append(Spacer(1, 36))  # Espaço entre tabela e sumário
             elements_pdf.append(summary_table)
+            elements_pdf.append(Spacer(1, 36))
+            elements_pdf.append(vendas_table)
 
             return elements_pdf
 
