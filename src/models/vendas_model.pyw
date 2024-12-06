@@ -131,7 +131,7 @@ class VendasApp(QWidget):
         self.label_indicators.setVisible(False)
         self.label_indicators.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
 
-        self.label_pedido = QLabel("Pedido de Venda:", self)
+        self.label_pedido = QLabel("Pedido de Venda (QP/QR/Outros):", self)
         self.label_pedido.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.label_msg_nota = QLabel("Mensagem nota:", self)
@@ -861,7 +861,10 @@ class VendasApp(QWidget):
                     C6_PRCVEN AS 'PREÇO VENDA R$', 
                     C6_VALOR AS 'TOTAL ITEM R$',
                     C6_DATFAT AS 'DATA DE FATURAMENTO',
-                    C6_NOTA AS 'DOC. NF SAÍDA',
+                    CASE
+                        WHEN C5_NOTA = 'XXXXXXXXX' THEN 'RESÍDUO'
+                        ELSE C6_NOTA
+                    END AS 'DOC. NF SAÍDA',
                     C5_MENNOTA AS 'MENSAGEM NOTA'
                 FROM 
                     {self.database}.dbo.SC6010 itemPedidoVenda
@@ -898,7 +901,7 @@ class VendasApp(QWidget):
                     AND {clausulas_contem_descricao}
                     {filtro_data}
                 ORDER BY 
-                    itemPedidoVenda.R_E_C_N_O_ DESC;
+                    itemPedidoVenda.C6_NUM DESC;
                 """
 
         return query
@@ -925,7 +928,7 @@ class VendasApp(QWidget):
                 if value is not None:
                     if column_name == 'STATUS':
                         item = QTableWidgetItem()
-                        if row['DOC. NF SAÍDA'] != '         ':
+                        if row['DOC. NF SAÍDA'] != '         ' or row['DOC. NF SAÍDA'] == 'RESÍDUO':
                             item.setIcon(red_icon)
                             item.setText('FECHADO')
                             dataframe.at[index, 'STATUS'] = 'FECHADO'
