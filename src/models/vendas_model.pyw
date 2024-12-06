@@ -861,10 +861,7 @@ class VendasApp(QWidget):
                     C6_PRCVEN AS 'PREÇO VENDA R$', 
                     C6_VALOR AS 'TOTAL ITEM R$',
                     C6_DATFAT AS 'DATA DE FATURAMENTO',
-                    CASE
-                        WHEN C5_NOTA = 'XXXXXXXXX' THEN 'Resíduo'
-                        ELSE C5_NOTA
-                    END AS 'DOC. NF SAÍDA',
+                    C6_NOTA AS 'DOC. NF SAÍDA',
                     C5_MENNOTA AS 'MENSAGEM NOTA'
                 FROM 
                     {self.database}.dbo.SC6010 itemPedidoVenda
@@ -872,6 +869,7 @@ class VendasApp(QWidget):
                     {self.database}.dbo.SC5010 cabecalhoPedidoVenda
                 ON
                     itemPedidoVenda.C6_NUM = cabecalhoPedidoVenda.C5_NUM
+                    AND itemPedidoVenda.D_E_L_E_T_ = cabecalhoPedidoVenda.D_E_L_E_T_
                 LEFT JOIN
                     SC1010 tabelaSolicCompras
                 ON
@@ -893,11 +891,10 @@ class VendasApp(QWidget):
                     AND C5_NOTA LIKE '%{doc_nf_saida}'
                     AND C5_ZZNOME LIKE '{nome_cliente}%'
                     AND C5_MENNOTA LIKE '%{mensagem_nota}%'
-                    AND ((@statusPedido = 1 AND C5_NOTA LIKE '%{doc_nf_saida}') -- open/closed
-                        OR (@statusPedido = 2 AND C5_NOTA LIKE '%{doc_nf_saida}' AND C5_NOTA <> '         ') -- closed
-                        OR (@statusPedido = 3 AND C5_NOTA LIKE '%{doc_nf_saida}' AND C5_NOTA = '         ')) -- open
+                    AND ((@statusPedido = 1 AND C6_NOTA LIKE '%{doc_nf_saida}') -- open/closed
+                        OR (@statusPedido = 2 AND C6_NOTA LIKE '%{doc_nf_saida}' AND C6_NOTA <> '         ') -- closed
+                        OR (@statusPedido = 3 AND C6_NOTA LIKE '%{doc_nf_saida}' AND C6_NOTA = '         ')) -- open
                     AND	itemPedidoVenda.D_E_L_E_T_ <> '*'
-                    AND cabecalhoPedidoVenda.D_E_L_E_T_ <> '*'
                     AND {clausulas_contem_descricao}
                     {filtro_data}
                 ORDER BY 
@@ -916,11 +913,11 @@ class VendasApp(QWidget):
 
         # Construir caminhos relativos
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        no_pc = os.path.join(script_dir, '..', 'resources', 'images', 'red.png')
-        end_order_path = os.path.join(script_dir, '..', 'resources', 'images', 'green.png')
+        red_icon_path = os.path.join(script_dir, '..', 'resources', 'images', 'red.png')
+        green_icon_path = os.path.join(script_dir, '..', 'resources', 'images', 'green.png')
 
-        no_pc = QIcon(no_pc)
-        end_order = QIcon(end_order_path)
+        red_icon = QIcon(red_icon_path)
+        green_icon = QIcon(green_icon_path)
 
         for i, (index, row) in enumerate(dataframe.iterrows()):
             self.tree.insertRow(i)
@@ -929,11 +926,11 @@ class VendasApp(QWidget):
                     if column_name == 'STATUS':
                         item = QTableWidgetItem()
                         if row['DOC. NF SAÍDA'] != '         ':
-                            item.setIcon(end_order)
+                            item.setIcon(red_icon)
                             item.setText('FECHADO')
                             dataframe.at[index, 'STATUS'] = 'FECHADO'
                         else:
-                            item.setIcon(no_pc)
+                            item.setIcon(green_icon)
                             item.setText('ABERTO')
                             dataframe.at[index, 'STATUS'] = 'ABERTO'
                     else:
