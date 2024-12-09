@@ -465,15 +465,19 @@ class ComercialApp(QWidget):
 
             worksheet_dados.write(f'A{last_row + 8}', 'FATOR ENAPLIC')
             worksheet_dados.write_formula(f'B{last_row + 8}', f'3.75', number_format)
+            worksheet_dados.write_formula(f'C{last_row + 8}', f'5.25', number_format)
 
             worksheet_dados.write(f'A{last_row + 9}', 'VENDA EM REAL (R$)')
             worksheet_dados.write_formula(f'B{last_row + 9}', f'=B{last_row + 6}*B{last_row + 8}', accounting_format)
+            worksheet_dados.write_formula(f'C{last_row + 9}', f'=B{last_row + 6}*C{last_row + 8}', accounting_format)
 
             worksheet_dados.write(f'A{last_row + 10}', 'COTAÇÃO DO DÓLAR (US$)')
             worksheet_dados.write_formula(f'B{last_row + 10}', f'5.2', dolar_format)
+            worksheet_dados.write_formula(f'C{last_row + 10}', f'5.2', dolar_format)
 
             worksheet_dados.write(f'A{last_row + 11}', 'VENDA EM DÓLAR (US$)')
             worksheet_dados.write_formula(f'B{last_row + 11}', f'=B{last_row + 9}/B{last_row + 10}', dolar_format)
+            worksheet_dados.write_formula(f'C{last_row + 11}', f'=C{last_row + 9}/C{last_row + 10}', dolar_format)
 
             writer.close()
 
@@ -511,13 +515,14 @@ class ComercialApp(QWidget):
         table_valores_header = ['TOTAL POR ARMAZÉM', 'CUSTO\n(R$)', 'QUANTIDADE\n(kg)']
         table_valores = [table_valores_header] + df_total_armazem.values.tolist()
 
-        table_sugestao_header = ['SUGESTÃO DE VENDA', '']
+        table_sugestao_header = ['SUGESTÃO DE VENDA', 'QP', 'QR']
         table_sugestao_vendas = [table_sugestao_header] + df_sugestao_vendas.values.tolist()
 
         # Index das colunas que você deseja formatar
         idx_custo = table_valores_header.index('CUSTO\n(R$)')
         idx_quantidade = table_valores_header.index('QUANTIDADE\n(kg)')
-        idx_custo_venda = table_sugestao_header.index('')
+        idx_custo_venda_qp = table_sugestao_header.index('QP')
+        idx_custo_venda_qr = table_sugestao_header.index('QR')
 
         for row in table_valores[1:]:  # Começa do segundo item para pular o cabeçalho
             row[idx_custo] = format_decimal(row[idx_custo])
@@ -525,7 +530,8 @@ class ComercialApp(QWidget):
                 row[idx_quantidade] = format_decimal(row[idx_quantidade])
 
         for row in table_sugestao_vendas[1:]:
-            row[idx_custo_venda] = format_decimal(row[idx_custo_venda])
+            row[idx_custo_venda_qp] = format_decimal(row[idx_custo_venda_qp])
+            row[idx_custo_venda_qr] = format_decimal(row[idx_custo_venda_qr])
 
         if 'QUANT.' in df_dados.columns:
             df_dados['QUANT.'] = df_dados['QUANT.'].apply(format_decimal)
