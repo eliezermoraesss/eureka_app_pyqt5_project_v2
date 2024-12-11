@@ -896,7 +896,8 @@ class VendasApp(QWidget):
                     AND C5_MENNOTA LIKE '%{mensagem_nota}%'
                     AND ((@statusPedido = 1 AND C6_NOTA LIKE '%{doc_nf_saida}') -- open/closed
                         OR (@statusPedido = 2 AND C6_NOTA LIKE '%{doc_nf_saida}' AND C6_NOTA <> '         ') -- closed
-                        OR (@statusPedido = 3 AND C6_NOTA LIKE '%{doc_nf_saida}' AND C6_NOTA = '         ')) -- open
+                        OR (@statusPedido = 3 AND C6_NOTA LIKE '%{doc_nf_saida}' AND C6_NOTA = '         ' 
+                            AND C5_NOTA <> 'XXXXXXXXX')) -- open
                     AND	itemPedidoVenda.D_E_L_E_T_ <> '*'
                     AND {clausulas_contem_descricao}
                     {filtro_data}
