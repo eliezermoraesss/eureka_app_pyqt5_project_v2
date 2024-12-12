@@ -537,34 +537,22 @@ class ComercialApp(QWidget):
             row[idx_custo_venda_qp] = format_decimal(row[idx_custo_venda_qp])
             row[idx_custo_venda_qr] = format_decimal(row[idx_custo_venda_qr])
 
-        if 'QUANT.' in df_dados.columns:
-            df_dados['QUANT.'] = df_dados['QUANT.'].apply(format_decimal)
-        if 'VALOR UNIT. (R$)' in df_dados.columns:
-            df_dados['VALOR UNIT. (R$)'] = df_dados['VALOR UNIT. (R$)'].apply(format_decimal)
-        if 'SUB-TOTAL (R$)' in df_dados.columns:
-            df_dados['SUB-TOTAL (R$)'] = df_dados['SUB-TOTAL (R$)'].apply(format_decimal)
-
-        if 'TIPO' in df_dados.columns:
-            df_dados = df_dados.drop(columns='TIPO')
-
-        if 'UNID. MED.' in df_dados.columns:
-            df_dados = df_dados.rename(columns={'UNID. MED.': 'UNID.\nMED.'})
-
-        if 'ARMAZÉM' in df_dados.columns:
-            df_dados['ARMAZÉM'] = df_dados['ARMAZÉM'].replace({
-                'COMERCIAL': 'COM.',
-                'MATÉRIA-PRIMA': 'MP',
-                'TRAT. SUPERFICIAL': 'TRAT.'
-            })
-
-        if 'ULT. ATUALIZ.' in df_dados.columns:
-            df_dados = df_dados.rename(columns={'ULT. ATUALIZ.': 'ÚLT.\nATUALIZ.'})
-
-        if 'VALOR UNIT. (R$)' in df_dados.columns:
-            df_dados = df_dados.rename(columns={'VALOR UNIT. (R$)': 'VALOR\nUNIT. (R$)'})
-
-        if 'SUB-TOTAL (R$)' in df_dados.columns:
-            df_dados.rename(columns={'SUB-TOTAL (R$)': 'TOTAL (R$)'})
+        df_dados['DESCRIÇÃO'] = df_dados['DESCRIÇÃO'].apply(lambda value: value[:60])
+        df_dados['QUANT.'] = df_dados['QUANT.'].apply(format_decimal)
+        df_dados['VALOR UNIT. (R$)'] = df_dados['VALOR UNIT. (R$)'].apply(format_decimal)
+        df_dados['SUB-TOTAL (R$)'] = df_dados['SUB-TOTAL (R$)'].apply(format_decimal)
+        df_dados = df_dados.drop(columns='TIPO')
+        df_dados = df_dados.rename(columns={'UNID. MED.': 'UNID.\nMED.'})
+        df_dados['ARMAZÉM'] = df_dados['ARMAZÉM'].replace({
+            'COMERCIAL': 'COM.',
+            'MATÉRIA-PRIMA': 'MP',
+            'TRAT. SUPERFICIAL': 'TRAT.',
+            'PROD. COMER. IMPORT. DIRETO': 'COM. IMP.',
+            'MAT. PRIMA IMPORT. DIRETO': 'MP IMP.'
+        })
+        df_dados = df_dados.rename(columns={'ULT. ATUALIZ.': 'ÚLT.\nATUALIZ.'})
+        df_dados = df_dados.rename(columns={'VALOR UNIT. (R$)': 'VALOR\nUNIT. (R$)'})
+        df_dados.rename(columns={'SUB-TOTAL (R$)': 'TOTAL (R$)'})
 
         def build_elements():
             elements_pdf = []
@@ -606,7 +594,7 @@ class ComercialApp(QWidget):
                     max_length = max(dataframe[col].astype(str).apply(len).max(), len(col))
                     col_width = max_length * col_width_multiplier
                     if col == 'DESCRIÇÃO':
-                        col_width *= 2  # Aumentar a largura da coluna "descrição"
+                        col_width *= 3  # Aumentar a largura da coluna "descrição"
                     col_width = max(col_width, min_width)
                     col_widths.append(col_width)
                 return col_widths
