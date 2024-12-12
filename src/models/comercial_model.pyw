@@ -407,6 +407,7 @@ class ComercialApp(QWidget):
             data = obter_dados_tabela(self.tree)
             column_headers = [self.tree.horizontalHeaderItem(i).text() for i in range(self.tree.columnCount())]
             df = pd.DataFrame(data, columns=column_headers)
+            df = df.fillna('')
 
             # Converter as colunas 'QUANT.', 'VALOR UNIT. (R$)' e 'SUB-TOTAL (R$)' para números
             numeric_columns = ['QUANT.', 'VALOR UNIT. (R$)', 'SUB-TOTAL (R$)']
@@ -457,7 +458,9 @@ class ComercialApp(QWidget):
                                           f'=SUMIF(G2:G{last_row - 2}, "TRAT. SUPERFICIAL", I2:I{last_row - 2})',
                                           accounting_format)
 
-            worksheet_dados.write_formula(f'C{last_row + 1}', f'=SUMIF(D2:D{last_row - 2}, "KG", C2:C{last_row - 2})')
+            worksheet_dados.write_formula(f'C{last_row + 1}', f'=SUMIF(D2:D{last_row - 2}, "KG", C2:C{last_row - 2})'
+                                                              f'-SUMIF(G2:G{last_row - 2},"TRAT. SUPERFICIAL",'
+                                                              f'C2:C{last_row - 2})')
 
             worksheet_dados.write(f'A{last_row + 6}', 'TOTAL GERAL')
             worksheet_dados.write_formula(f'B{last_row + 6}', f'=SUBTOTAL(9, B{last_row}:B{last_row + 4})',
@@ -496,21 +499,22 @@ class ComercialApp(QWidget):
             return
 
         # Ler dados do Excel
-        dataframe_tabela = pd.read_excel(self.file_path, sheet_name='Dados')
+        df_tabela = pd.read_excel(self.file_path, sheet_name='Dados')
 
         if os.path.exists(self.file_path):
             os.remove(self.file_path)
 
-        nan_row_index = dataframe_tabela.isna().all(axis=1).idxmax()
-        df_dados = dataframe_tabela.iloc[:nan_row_index].dropna(how='all')
+        nan_row_index = df_tabela.isna().all(axis=1).idxmax()
+        df_dados = df_tabela.iloc[:nan_row_index].dropna(how='all')
+        df_dados = df_dados.fillna('')
 
-        idx_total_geral = dataframe_tabela[dataframe_tabela['CÓDIGO'] == 'TOTAL GERAL'].index[0]
-        idx_fator_enaplic = dataframe_tabela[dataframe_tabela['CÓDIGO'] == 'FATOR ENAPLIC'].index[0]
+        idx_total_geral = df_tabela[df_tabela['CÓDIGO'] == 'TOTAL GERAL'].index[0]
+        idx_fator_enaplic = df_tabela[df_tabela['CÓDIGO'] == 'FATOR ENAPLIC'].index[0]
 
-        df_total_armazem = dataframe_tabela.iloc[nan_row_index + 1: idx_total_geral + 1].dropna(how='all')
+        df_total_armazem = df_tabela.iloc[nan_row_index + 1: idx_total_geral + 1].dropna(how='all')
         df_total_armazem = df_total_armazem.dropna(axis=1, how='all').fillna('')
 
-        df_sugestao_vendas = dataframe_tabela.iloc[idx_fator_enaplic:].dropna(axis=1, how='all').fillna('')
+        df_sugestao_vendas = df_tabela.iloc[idx_fator_enaplic:].dropna(axis=1, how='all').fillna('')
 
         table_valores_header = ['TOTAL POR ARMAZÉM', 'CUSTO\n(R$)', 'QUANTIDADE\n(kg)']
         table_valores = [table_valores_header] + df_total_armazem.values.tolist()
@@ -547,7 +551,11 @@ class ComercialApp(QWidget):
             df_dados = df_dados.rename(columns={'UNID. MED.': 'UNID.\nMED.'})
 
         if 'ARMAZÉM' in df_dados.columns:
-            df_dados['ARMAZÉM'] = df_dados['ARMAZÉM'].replace({'COMERCIAL': 'COM.', 'MATÉRIA-PRIMA': 'MP'})
+            df_dados['ARMAZÉM'] = df_dados['ARMAZÉM'].replace({
+                'COMERCIAL': 'COM.',
+                'MATÉRIA-PRIMA': 'MP',
+                'TRAT. SUPERFICIAL': 'TRAT.'
+            })
 
         if 'ULT. ATUALIZ.' in df_dados.columns:
             df_dados = df_dados.rename(columns={'ULT. ATUALIZ.': 'ÚLT.\nATUALIZ.'})
@@ -598,7 +606,7 @@ class ComercialApp(QWidget):
                     max_length = max(dataframe[col].astype(str).apply(len).max(), len(col))
                     col_width = max_length * col_width_multiplier
                     if col == 'DESCRIÇÃO':
-                        col_width *= 3  # Aumentar a largura da coluna "descrição"
+                        col_width *= 2  # Aumentar a largura da coluna "descrição"
                     col_width = max(col_width, min_width)
                     col_widths.append(col_width)
                 return col_widths
