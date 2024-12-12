@@ -458,9 +458,8 @@ class ComercialApp(QWidget):
                                           f'=SUMIF(G2:G{last_row - 2}, "TRAT. SUPERFICIAL", I2:I{last_row - 2})',
                                           accounting_format)
 
-            worksheet_dados.write_formula(f'C{last_row + 1}', f'=SUMIF(D2:D{last_row - 2}, "KG", C2:C{last_row - 2})'
-                                                              f'-SUMIF(G2:G{last_row - 2},"TRAT. SUPERFICIAL",'
-                                                              f'C2:C{last_row - 2})')
+            worksheet_dados.write_formula(f'C{last_row + 1}', f'=SUMIFS(C2:C{last_row - 2},D2:D{last_row - 2},'
+                                                              f'"KG",G2:G{last_row - 2},"<>TRAT. SUPERFICIAL")')
 
             worksheet_dados.write(f'A{last_row + 6}', 'TOTAL GERAL')
             worksheet_dados.write_formula(f'B{last_row + 6}', f'=SUBTOTAL(9, B{last_row}:B{last_row + 4})',
@@ -836,11 +835,16 @@ class ComercialApp(QWidget):
             'custo_trat_superf': '97',
         }
 
-        resultados = {key: dataframe[dataframe[column_interval] == value][column_subtotal].sum() for key, value in
-                      armazens.items()}
+        resultados = {key: dataframe[dataframe[column_interval] == value][column_subtotal].sum()
+                      for key, value in armazens.items()}
+
         custos_formatados = {key: format_decimal(value) for key, value in resultados.items()}
 
-        resultado_quantidade_kg = dataframe[dataframe[column_interval_kg] == 'KG'][column_quantity_kg].sum()
+        resultado_quantidade_kg = dataframe[
+            (dataframe[column_interval_kg] == 'KG') &
+            (dataframe[column_interval] != '97')
+        ][column_quantity_kg].sum()
+
         total_geral = dataframe[column_subtotal].sum()
 
         costs_table = f"""
