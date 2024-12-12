@@ -407,6 +407,7 @@ class ComercialApp(QWidget):
             data = obter_dados_tabela(self.tree)
             column_headers = [self.tree.horizontalHeaderItem(i).text() for i in range(self.tree.columnCount())]
             df = pd.DataFrame(data, columns=column_headers)
+            df = df.fillna('')
 
             # Converter as colunas 'QUANT.', 'VALOR UNIT. (R$)' e 'SUB-TOTAL (R$)' para números
             numeric_columns = ['QUANT.', 'VALOR UNIT. (R$)', 'SUB-TOTAL (R$)']
@@ -457,7 +458,8 @@ class ComercialApp(QWidget):
                                           f'=SUMIF(G2:G{last_row - 2}, "TRAT. SUPERFICIAL", I2:I{last_row - 2})',
                                           accounting_format)
 
-            worksheet_dados.write_formula(f'C{last_row + 1}', f'=SUMIF(D2:D{last_row - 2}, "KG", C2:C{last_row - 2})')
+            worksheet_dados.write_formula(f'C{last_row + 1}', f'=SUMIFS(C2:C{last_row - 2},D2:D{last_row - 2},'
+                                                              f'"KG",G2:G{last_row - 2},"<>TRAT. SUPERFICIAL")')
 
             worksheet_dados.write(f'A{last_row + 6}', 'TOTAL GERAL')
             worksheet_dados.write_formula(f'B{last_row + 6}', f'=SUBTOTAL(9, B{last_row}:B{last_row + 4})',
@@ -496,21 +498,22 @@ class ComercialApp(QWidget):
             return
 
         # Ler dados do Excel
-        dataframe_tabela = pd.read_excel(self.file_path, sheet_name='Dados')
+        df_tabela = pd.read_excel(self.file_path, sheet_name='Dados')
 
         if os.path.exists(self.file_path):
             os.remove(self.file_path)
 
-        nan_row_index = dataframe_tabela.isna().all(axis=1).idxmax()
-        df_dados = dataframe_tabela.iloc[:nan_row_index].dropna(how='all')
+        nan_row_index = df_tabela.isna().all(axis=1).idxmax()
+        df_dados = df_tabela.iloc[:nan_row_index].dropna(how='all')
+        df_dados = df_dados.fillna('')
 
-        idx_total_geral = dataframe_tabela[dataframe_tabela['CÓDIGO'] == 'TOTAL GERAL'].index[0]
-        idx_fator_enaplic = dataframe_tabela[dataframe_tabela['CÓDIGO'] == 'FATOR ENAPLIC'].index[0]
+        idx_total_geral = df_tabela[df_tabela['CÓDIGO'] == 'TOTAL GERAL'].index[0]
+        idx_fator_enaplic = df_tabela[df_tabela['CÓDIGO'] == 'FATOR ENAPLIC'].index[0]
 
-        df_total_armazem = dataframe_tabela.iloc[nan_row_index + 1: idx_total_geral + 1].dropna(how='all')
+        df_total_armazem = df_tabela.iloc[nan_row_index + 1: idx_total_geral + 1].dropna(how='all')
         df_total_armazem = df_total_armazem.dropna(axis=1, how='all').fillna('')
 
-        df_sugestao_vendas = dataframe_tabela.iloc[idx_fator_enaplic:].dropna(axis=1, how='all').fillna('')
+        df_sugestao_vendas = df_tabela.iloc[idx_fator_enaplic:].dropna(axis=1, how='all').fillna('')
 
         table_valores_header = ['TOTAL POR ARMAZÉM', 'CUSTO\n(R$)', 'QUANTIDADE\n(kg)']
         table_valores = [table_valores_header] + df_total_armazem.values.tolist()
@@ -533,30 +536,22 @@ class ComercialApp(QWidget):
             row[idx_custo_venda_qp] = format_decimal(row[idx_custo_venda_qp])
             row[idx_custo_venda_qr] = format_decimal(row[idx_custo_venda_qr])
 
-        if 'QUANT.' in df_dados.columns:
-            df_dados['QUANT.'] = df_dados['QUANT.'].apply(format_decimal)
-        if 'VALOR UNIT. (R$)' in df_dados.columns:
-            df_dados['VALOR UNIT. (R$)'] = df_dados['VALOR UNIT. (R$)'].apply(format_decimal)
-        if 'SUB-TOTAL (R$)' in df_dados.columns:
-            df_dados['SUB-TOTAL (R$)'] = df_dados['SUB-TOTAL (R$)'].apply(format_decimal)
-
-        if 'TIPO' in df_dados.columns:
-            df_dados = df_dados.drop(columns='TIPO')
-
-        if 'UNID. MED.' in df_dados.columns:
-            df_dados = df_dados.rename(columns={'UNID. MED.': 'UNID.\nMED.'})
-
-        if 'ARMAZÉM' in df_dados.columns:
-            df_dados['ARMAZÉM'] = df_dados['ARMAZÉM'].replace({'COMERCIAL': 'COM.', 'MATÉRIA-PRIMA': 'MP'})
-
-        if 'ULT. ATUALIZ.' in df_dados.columns:
-            df_dados = df_dados.rename(columns={'ULT. ATUALIZ.': 'ÚLT.\nATUALIZ.'})
-
-        if 'VALOR UNIT. (R$)' in df_dados.columns:
-            df_dados = df_dados.rename(columns={'VALOR UNIT. (R$)': 'VALOR\nUNIT. (R$)'})
-
-        if 'SUB-TOTAL (R$)' in df_dados.columns:
-            df_dados.rename(columns={'SUB-TOTAL (R$)': 'TOTAL (R$)'})
+        df_dados['DESCRIÇÃO'] = df_dados['DESCRIÇÃO'].apply(lambda value: value[:60])
+        df_dados['QUANT.'] = df_dados['QUANT.'].apply(format_decimal)
+        df_dados['VALOR UNIT. (R$)'] = df_dados['VALOR UNIT. (R$)'].apply(format_decimal)
+        df_dados['SUB-TOTAL (R$)'] = df_dados['SUB-TOTAL (R$)'].apply(format_decimal)
+        df_dados = df_dados.drop(columns='TIPO')
+        df_dados = df_dados.rename(columns={'UNID. MED.': 'UNID.\nMED.'})
+        df_dados['ARMAZÉM'] = df_dados['ARMAZÉM'].replace({
+            'COMERCIAL': 'COM.',
+            'MATÉRIA-PRIMA': 'MP',
+            'TRAT. SUPERFICIAL': 'TRAT.',
+            'PROD. COMER. IMPORT. DIRETO': 'COM. IMP.',
+            'MAT. PRIMA IMPORT. DIRETO': 'MP IMP.'
+        })
+        df_dados = df_dados.rename(columns={'ULT. ATUALIZ.': 'ÚLT.\nATUALIZ.'})
+        df_dados = df_dados.rename(columns={'VALOR UNIT. (R$)': 'VALOR\nUNIT. (R$)'})
+        df_dados.rename(columns={'SUB-TOTAL (R$)': 'TOTAL (R$)'})
 
         def build_elements():
             elements_pdf = []
@@ -840,11 +835,16 @@ class ComercialApp(QWidget):
             'custo_trat_superf': '97',
         }
 
-        resultados = {key: dataframe[dataframe[column_interval] == value][column_subtotal].sum() for key, value in
-                      armazens.items()}
+        resultados = {key: dataframe[dataframe[column_interval] == value][column_subtotal].sum()
+                      for key, value in armazens.items()}
+
         custos_formatados = {key: format_decimal(value) for key, value in resultados.items()}
 
-        resultado_quantidade_kg = dataframe[dataframe[column_interval_kg] == 'KG'][column_quantity_kg].sum()
+        resultado_quantidade_kg = dataframe[
+            (dataframe[column_interval_kg] == 'KG') &
+            (dataframe[column_interval] != '97')
+        ][column_quantity_kg].sum()
+
         total_geral = dataframe[column_subtotal].sum()
 
         costs_table = f"""
