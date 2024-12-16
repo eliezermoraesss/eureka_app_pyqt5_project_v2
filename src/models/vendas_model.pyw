@@ -930,11 +930,11 @@ class VendasApp(QWidget):
                     if column_name == 'STATUS':
                         item = QTableWidgetItem()
                         if row['DOC. NF SAÍDA'] != '         ' or row['DOC. NF SAÍDA'] == 'RESÍDUO':
-                            item.setIcon(red_icon)
+                            item.setIcon(green_icon)
                             item.setText('FECHADO')
                             dataframe.at[index, 'STATUS'] = 'FECHADO'
                         else:
-                            item.setIcon(green_icon)
+                            item.setIcon(red_icon)
                             item.setText('ABERTO')
                             dataframe.at[index, 'STATUS'] = 'ABERTO'
                     else:
