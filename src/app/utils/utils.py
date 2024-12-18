@@ -70,7 +70,6 @@ def abrir_desenho(self, table=None, codigo_param=None):
         item_selecionado = table.currentItem()
         header = table.horizontalHeader()
         codigo_col = None
-        codigo = None
 
         for col in range(header.count()):
             header_text = table.horizontalHeaderItem(col).text().lower()
