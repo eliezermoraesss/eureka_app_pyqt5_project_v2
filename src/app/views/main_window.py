@@ -27,17 +27,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.sub_windows = []
         self.processes = []
         self.user_role = None
-        self.authorized_users = ['admin',
-                                 'eliezer@enaplic.com.br',
-                                 'fernanda@enaplic.com.br',
-                                 'francesco@enaplic.com.br',
-                                 'assennato@enaplic.com.br',
-                                 'antonio@enaplic.com.br',
-                                 'flavio@enaplic.com.br',
-                                 'amanda@enaplic.com.br',
-                                 'leticia@enaplic.com.br',
-                                 'lucio@enaplic.com.br',
-                                 'julio@enaplic.com.br']
+        self.authorized_high_users = ['admin',
+                                      'Comercial',
+                                      'Diretoria',
+                                      'Compras',
+                                      'PCP'
+                                      ]
+        self.authorized_level_one_users = ['Engenharia',
+                                           'Elétrica',
+                                           'Fiscal'
+                                           ]
         self.init_ui()
 
     def init_ui(self):
@@ -51,15 +50,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setup_connections()
 
     def setup_connections(self):
-        @authorize(self.authorized_users, self)
+        @authorize(self.authorized_high_users, self)
         def execute_dashboard_model(checked=False):
             # Abre a URL no navegador padrão do sistema
             url = ('https://app.powerbi.com/groups/me/reports/f4562fea-7618-4f05-8df7-0750108248f8/d752779fc7009764'
                    '78f5?experience=power-bi')
             open_dashboard_firefox(url)
 
-        @authorize('Engenharia', 'Elétrica', self)
-        def execute_dashboard_model_engenharia(checked=False):
+        @authorize(self.authorized_level_one_users, self)
+        def execute_dashboard_model_level_one(checked=False):
             # Abre a URL no navegador padrão do sistema
             url = ('https://app.powerbi.com/links/vd-7YEt8uK?ctid=1a30606f-47bf-4606-aa81-7245533ad2d9&pbi_source='
                    'linkShare&bookmarkGuid=994bd70e-7716-4df7-aed5-88c7cbb0dbe1')
@@ -95,8 +94,8 @@ class MainWindow(QtWidgets.QMainWindow):
             vendas_window.showMaximized()
             self.sub_windows.append(vendas_window)
 
-        if self.user_role in ['Engenharia', 'Elétrica']:
-            self.home_window.btn_dashboard.clicked.connect(execute_dashboard_model_engenharia)
+        if self.user_role in self.authorized_level_one_users:
+            self.home_window.btn_dashboard.clicked.connect(execute_dashboard_model_level_one)
         else:
             self.home_window.btn_dashboard.clicked.connect(execute_dashboard_model)
         self.home_window.btn_engenharia.clicked.connect(execute_engenharia_model)
