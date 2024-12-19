@@ -28,6 +28,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.processes = []
         self.user_role = None
         self.authorized_users = ['admin',
+                                 'eliezer@enaplic.com.br',
+                                 'fernanda@enaplic.com.br',
                                  'francesco@enaplic.com.br',
                                  'assennato@enaplic.com.br',
                                  'antonio@enaplic.com.br',
@@ -93,7 +95,7 @@ class MainWindow(QtWidgets.QMainWindow):
             vendas_window.showMaximized()
             self.sub_windows.append(vendas_window)
 
-        if self.user_role == 'Engenharia':
+        if self.user_role in ['Engenharia', 'Elétrica']:
             self.home_window.btn_dashboard.clicked.connect(execute_dashboard_model_engenharia)
         else:
             self.home_window.btn_dashboard.clicked.connect(execute_dashboard_model)
