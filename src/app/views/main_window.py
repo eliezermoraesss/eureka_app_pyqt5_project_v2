@@ -58,7 +58,7 @@ class MainWindow(QtWidgets.QMainWindow):
                    '78f5?experience=power-bi')
             open_dashboard_firefox(url)
 
-        @authorize('Engenharia', self)
+        @authorize('Engenharia', 'Elétrica', self)
         def execute_dashboard_model_engenharia(checked=False):
             # Abre a URL no navegador padrão do sistema
             url = ('https://app.powerbi.com/links/vd-7YEt8uK?ctid=1a30606f-47bf-4606-aa81-7245533ad2d9&pbi_source='
