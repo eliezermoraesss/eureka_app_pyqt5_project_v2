@@ -1135,9 +1135,9 @@ class ComprasApp(QWidget):
                         if column_name not in ('DESCRIÇÃO', 'OBSERVAÇÃO SOLIC. COMPRA', 'OBSERVAÇÃO PEDIDO DE COMPRA',
                                                'OBSERVAÇÃO ITEM DO PEDIDO DE COMPRA', 'RAZÃO SOCIAL FORNECEDOR',
                                                'NOME FANTASIA FORNECEDOR'):
-                            item.setTextAlignment(Qt.AlignCenter)
+                            item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
                         if column_name in ('VALOR UNIT. PC', 'VALOR TOTAL PC', 'VALOR UNIT. NF', 'VALOR TOTAL NF'):
-                            item.setTextAlignment(Qt.AlignRight)
+                            item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
                 else:
                     item = QTableWidgetItem('')
                 self.tree.setItem(i, list(row.index).index(column_name), item)
@@ -1153,44 +1153,49 @@ class ComprasApp(QWidget):
         self.controle_campos_formulario(True)
         self.button_visible_control(True)
 
-    def exibir_indicadores(self, dataframe):
+    def exibir_indicadores(self, df):
         coluna_status = ' '
-        sem_pc = dataframe[coluna_status].apply(
-            lambda x: x.strip() == 'SEM PEDIDO COMPRA' if isinstance(x, str) else True).sum()
-        pc_encerrado = dataframe[coluna_status].apply(
-            lambda x: x.strip() == 'PEDIDO ENCERRADO' if isinstance(x, str) else True).sum()
-        entrega_parcial = dataframe[coluna_status].apply(
-            lambda x: x.strip() == 'ENTREGA PARCIAL' if isinstance(x, str) else True).sum()
-        aguardando_entrega = dataframe[coluna_status].apply(
-            lambda x: x.strip() == 'AGUARDANDO ENTREGA' if isinstance(x, str) else True).sum()
-        em_aprovacao = dataframe[coluna_status].apply(
-            lambda x: x.strip() == 'EM APROVAÇÃO' if isinstance(x, str) else True).sum()
+
+        contagem_itens = {}
+        contagem_pedidos = {}
+        for status in self.lista_status_tabela:
+            quantidade_itens = len(df[df[coluna_status] == status])
+            contagem_itens[status] = quantidade_itens
+            quantidade_pedidos_diferentes = df[df[coluna_status] == status]['QP/QR'].nunique()
+            contagem_pedidos[status] = quantidade_pedidos_diferentes
 
         indicadores_table = f"""
-                <table border="1" cellspacing="2" cellpadding="4" style="border-collapse: collapse; text-align: left; width: 100%;">
+                <table border="1" cellspacing="2" cellpadding="4" style="border-collapse: collapse; text-align: left; 
+                width: 100%;">
                     <tr>
-                        <th style="text-align: middle; vertical-align: middle;">STATUS</th>
-                        <th style="text-align: right; vertical-align: middle;">QUANTIDADE</th>
+                        <th style="text-align: middle; vertical-align: middle;">Status</th>
+                        <th style="text-align: right; vertical-align: middle;">Itens</th>
+                        <th style="text-align: right; vertical-align: middle;">Pedidos</th>
                     </tr>
                     <tr>
                         <td style="vertical-align: middle;">SEM PEDIDO DE COMPRA</td>
-                        <td style="text-align: right; vertical-align: middle;">{sem_pc}</td>
+                        <td style="text-align: right; vertical-align: middle;">{contagem_itens['SEM PEDIDO COMPRA']}</td>
+                        <td style="text-align: right; vertical-align: middle;">{contagem_pedidos['SEM PEDIDO COMPRA']}</td>
                     </tr>
                     <tr>
                         <td style="vertical-align: middle;">EM APROVAÇÃO</td>
-                        <td style="text-align: right; vertical-align: middle;">{em_aprovacao}</td>
+                        <td style="text-align: right; vertical-align: middle;">{contagem_itens['EM APROVAÇÃO']}</td>
+                        <td style="text-align: right; vertical-align: middle;">{contagem_pedidos['EM APROVAÇÃO']}</td>
                     </tr>
                     <tr>
                         <td style="vertical-align: middle;">AGUARDANDO ENTREGA</td>
-                        <td style="text-align: right; vertical-align: middle;">{aguardando_entrega}</td>
+                        <td style="text-align: right; vertical-align: middle;">{contagem_itens['AGUARDANDO ENTREGA']}</td>
+                        <td style="text-align: right; vertical-align: middle;">{contagem_pedidos['AGUARDANDO ENTREGA']}</td>
                     </tr>
                     <tr>
                         <td style="vertical-align: middle;">ENTREGA PARCIAL</td>
-                        <td style="text-align: right; vertical-align: middle;">{entrega_parcial}</td>
+                        <td style="text-align: right; vertical-align: middle;">{contagem_itens['ENTREGA PARCIAL']}</td>
+                        <td style="text-align: right; vertical-align: middle;">{contagem_pedidos['ENTREGA PARCIAL']}</td>
                     </tr>
                     <tr>
                         <td style="vertical-align: middle;">PEDIDO ENCERRADO</td>
-                        <td style="text-align: right; vertical-align: middle;">{pc_encerrado}</td>
+                        <td style="text-align: right; vertical-align: middle;">{contagem_itens['PEDIDO ENCERRADO']}</td>
+                        <td style="text-align: right; vertical-align: middle;">{contagem_pedidos['PEDIDO ENCERRADO']}</td>
                     </tr>
                 </table>
             """
