@@ -52,7 +52,8 @@ class ComprasApp(QWidget):
         self.filtro_dialog = None
         self.dataframe_original = None
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
-        self.lista_status_tabela = ['SEM PEDIDO COMPRA', 'AGUARDANDO ENTREGA', 'ENTREGA PARCIAL', 'PEDIDO ENCERRADO']
+        self.lista_status_tabela = ['SEM PEDIDO COMPRA', 'EM APROVAÇÃO', 'AGUARDANDO ENTREGA', 'ENTREGA PARCIAL',
+                                    'PEDIDO ENCERRADO']
 
         user_data = load_session()
         username = user_data["username"]
@@ -819,6 +820,7 @@ class ComprasApp(QWidget):
                         WHEN itemPedidoVenda.C6_XTPOPER = 2 THEN 'Sim'
                         ELSE 'Não'
                     END AS "QR?",
+                    PC.C7_CONAPRO AS "APROVAÇÃO",
                     SC.C1_NUM AS "SOLIC. COMPRA",
                     SC.C1_PEDIDO AS "PEDIDO COMPRA",
                     ITEM_NF.D1_DOC AS "DOC. NF ENTRADA",
@@ -927,6 +929,7 @@ class ComprasApp(QWidget):
                 SELECT
                     SC.C1_ZZNUMQP AS [QP/QR],
                     NULL AS "QR?",
+                    NULL AS "APROVAÇÃO",
                     SC.C1_NUM AS "SOLIC. COMPRA",
                     NULL AS "PEDIDO COMPRA",
                     NULL AS "DOC. NF ENTRADA",
@@ -1007,15 +1010,17 @@ class ComprasApp(QWidget):
 
         # Construir caminhos relativos
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        no_pc = os.path.join(script_dir, '..', 'resources', 'images', 'red.png')
-        no_order_path = os.path.join(script_dir, '..', 'resources', 'images', 'gray.png')
-        wait_order_path = os.path.join(script_dir, '..', 'resources', 'images', 'wait.png')
-        end_order_path = os.path.join(script_dir, '..', 'resources', 'images', 'green.png')
+        red_icon = os.path.join(script_dir, '..', 'resources', 'images', 'red.png')
+        gray_icon = os.path.join(script_dir, '..', 'resources', 'images', 'gray.png')
+        blue_icon = os.path.join(script_dir, '..', 'resources', 'images', 'wait.png')
+        green_icon = os.path.join(script_dir, '..', 'resources', 'images', 'green.png')
+        orange_icon = os.path.join(script_dir, '..', 'resources', 'images', 'orange.png')
 
-        no_pc = QIcon(no_pc)
-        no_order = QIcon(no_order_path)
-        wait_delivery = QIcon(wait_order_path)
-        end_order = QIcon(end_order_path)
+        red_icon = QIcon(red_icon)
+        gray_icon = QIcon(gray_icon)
+        blue_icon = QIcon(blue_icon)
+        green_icon = QIcon(green_icon)
+        orange_icon = QIcon(orange_icon)
 
         for i, (index, row) in enumerate(dataframe.iterrows()):
             self.tree.insertRow(i)
@@ -1024,21 +1029,27 @@ class ComprasApp(QWidget):
                     if column_name == ' ':
                         item = QTableWidgetItem()
                         if row['STATUS PEDIDO COMPRA'] is not None:
-                            if row['STATUS PEDIDO COMPRA'].strip() == '' and row['DOC. NF ENTRADA'] is None:
-                                item.setIcon(no_order)
+                            if (row['STATUS PEDIDO COMPRA'].strip() == '' and row['DOC. NF ENTRADA'] is None
+                                    and row['APROVAÇÃO'] == 'L'):
+                                item.setIcon(gray_icon)
                                 item.setText('AGUARDANDO ENTREGA')
                                 dataframe.at[index, ' '] = 'AGUARDANDO ENTREGA'
+                            elif (row['STATUS PEDIDO COMPRA'].strip() == '' and row['DOC. NF ENTRADA'] is None
+                                  and row['APROVAÇÃO'] == 'B'):
+                                item.setIcon(blue_icon)
+                                item.setText('EM APROVAÇÃO')
+                                dataframe.at[index, ' '] = 'EM APROVAÇÃO'
                             elif row['STATUS PEDIDO COMPRA'].strip() == '' and row['DOC. NF ENTRADA'] is not None:
-                                item.setIcon(wait_delivery)
+                                item.setIcon(orange_icon)
                                 item.setText('ENTREGA PARCIAL')
                                 dataframe.at[index, ' '] = 'ENTREGA PARCIAL'
                             elif row['STATUS PEDIDO COMPRA'] == 'E':
-                                item.setIcon(end_order)
+                                item.setIcon(green_icon)
                                 item.setText('PEDIDO ENCERRADO')
                                 dataframe.at[index, ' '] = 'PEDIDO ENCERRADO'
                             item.setSizeHint(QSize(64, 64))
                         elif row['PEDIDO COMPRA'] is None:
-                            item.setIcon(no_pc)
+                            item.setIcon(red_icon)
                             item.setText('SEM PEDIDO COMPRA')
                             dataframe.at[index, ' '] = 'SEM PEDIDO COMPRA'
                     else:
@@ -1120,6 +1131,10 @@ class ComprasApp(QWidget):
                     item = QTableWidgetItem('')
                 self.tree.setItem(i, list(row.index).index(column_name), item)
 
+        for i in range(self.tree.columnCount()):
+            if self.tree.horizontalHeaderItem(i).text() == 'APROVAÇÃO':
+                self.tree.setColumnHidden(i, True)
+                break
         self.table_line_number(dataframe.shape[0])
         self.exibir_indicadores(dataframe)
         self.tree.viewport().update()
@@ -1137,6 +1152,8 @@ class ComprasApp(QWidget):
             lambda x: x.strip() == 'ENTREGA PARCIAL' if isinstance(x, str) else True).sum()
         aguardando_entrega = dataframe[coluna_status].apply(
             lambda x: x.strip() == 'AGUARDANDO ENTREGA' if isinstance(x, str) else True).sum()
+        em_aprovacao = dataframe[coluna_status].apply(
+            lambda x: x.strip() == 'EM APROVAÇÃO' if isinstance(x, str) else True).sum()
 
         indicadores_table = f"""
                 <table border="1" cellspacing="2" cellpadding="4" style="border-collapse: collapse; text-align: left; width: 100%;">
@@ -1147,6 +1164,10 @@ class ComprasApp(QWidget):
                     <tr>
                         <td style="vertical-align: middle;">SEM PEDIDO DE COMPRA</td>
                         <td style="text-align: right; vertical-align: middle;">{sem_pc}</td>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: middle;">EM APROVAÇÃO</td>
+                        <td style="text-align: right; vertical-align: middle;">{em_aprovacao}</td>
                     </tr>
                     <tr>
                         <td style="vertical-align: middle;">AGUARDANDO ENTREGA</td>
