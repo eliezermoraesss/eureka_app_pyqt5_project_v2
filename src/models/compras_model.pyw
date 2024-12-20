@@ -692,8 +692,11 @@ class ComprasApp(QWidget):
     def configurar_tabela_tooltips(self, dataframe):
         # Mapa de tooltips correspondentes às colunas da consulta SQL
         tooltip_map = {
-            " ": "VERMELHO:\nSC sem Pedido de Compra\n\nCINZA:\nAguardando entrega\n\nAZUL:\nEntrega "
-                 "parcial\n\nVERDE:\nPedido de compra encerrado"
+            " ": "VERMELHO:\nSolicitação sem pedido de compra\n\n"
+                 "AZUL:\nEm aprovação\n\n"
+                 "CINZA:\nAguardando entrega\n\n"
+                 "LARANJA:\nEntrega parcial\n\n"
+                 "VERDE:\nPedido de compra encerrado"
         }
 
         # Obtenha os cabeçalhos das colunas do dataframe
