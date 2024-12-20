@@ -821,6 +821,7 @@ class ComprasApp(QWidget):
                         ELSE 'Não'
                     END AS "QR?",
                     PC.C7_CONAPRO AS "APROVAÇÃO",
+                    tabelaAprovacao.CR_DATALIB AS "DATA APROVAÇÃO", 
                     SC.C1_NUM AS "SOLIC. COMPRA",
                     SC.C1_PEDIDO AS "PEDIDO COMPRA",
                     ITEM_NF.D1_DOC AS "DOC. NF ENTRADA",
@@ -888,6 +889,15 @@ class ComprasApp(QWidget):
                     {self.database}.dbo.SC6010 itemPedidoVenda
                 ON
                     SC.C1_ZZNUMQP = itemPedidoVenda.C6_NUM AND SC.C1_PRODUTO = itemPedidoVenda.C6_PRODUTO
+                LEFT JOIN (
+                    SELECT
+                        CR_NUM,
+                        MAX(CR_DATALIB) as CR_DATALIB
+                        FROM {self.database}.dbo.SCR010
+                        GROUP BY CR_NUM
+                ) tabelaAprovacao
+                ON
+                    SC.C1_PEDIDO = tabelaAprovacao.CR_NUM
                 """
         solic_com_pedido_where = f"""
                 WHERE
@@ -930,6 +940,7 @@ class ComprasApp(QWidget):
                     SC.C1_ZZNUMQP AS [QP/QR],
                     NULL AS "QR?",
                     NULL AS "APROVAÇÃO",
+                    NULL AS "DATA APROVAÇÃO",
                     SC.C1_NUM AS "SOLIC. COMPRA",
                     NULL AS "PEDIDO COMPRA",
                     NULL AS "DOC. NF ENTRADA",
@@ -1114,8 +1125,8 @@ class ComprasApp(QWidget):
                         elif column_name == 'STATUS PEDIDO COMPRA' and value.strip() == '':
                             value = ''
 
-                        if column_name in ('PREVISÃO ENTREGA', 'DATA DE ENTREGA', 'SC ABERTA EM:', 'PC ABERTO EM:',
-                                           'DATA EMISSÃO NF') and not value.isspace():
+                        if column_name in ('DATA APROVAÇÃO', 'PREVISÃO ENTREGA', 'DATA DE ENTREGA', 'SC ABERTA EM:',
+                                           'PC ABERTO EM:', 'DATA EMISSÃO NF') and not value.isspace():
                             data_obj = datetime.strptime(value, "%Y%m%d")
                             value = data_obj.strftime("%d/%m/%Y")
 
