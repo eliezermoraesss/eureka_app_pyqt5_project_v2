@@ -15,11 +15,17 @@ EXEC xp_fixeddrives;
 
 SELECT * FROM enaplic_management.dbo.eureka_users;
 
+UPDATE enaplic_management.dbo.eureka_users
+SET role = 'admin'
+WHERE username = 'Eliezer';
+
 SELECT * FROM enaplic_management.dbo.eureka_password_reset;
 
 SELECT * FROM enaplic_management.dbo.tb_dashboard_indicators;
 
 SELECT * FROM enaplic_management.dbo.tb_qps;
+
+SELECT * FROM enaplic_management.dbo.tb_qps WHERE cod_qp = '005552';
 
 SELECT * FROM enaplic_management.dbo.tb_user_logs;
 
@@ -27,13 +33,13 @@ SELECT * FROM enaplic_management.dbo.tb_user_logs
 WHERE full_name LIKE 'Rafael%';
 
 SELECT * FROM enaplic_management.dbo.tb_user_logs
-WHERE part_number LIKE 'M-034-015-148%';
+WHERE part_number LIKE 'M-059-201-128%';
 
 SELECT * FROM enaplic_management.dbo.tb_baseline ORDER BY id DESC;
 
-SELECT COUNT(*) FROM enaplic_management.dbo.tb_baseline WHERE cod_qp = '008047';
+SELECT COUNT(*) FROM enaplic_management.dbo.tb_baseline WHERE cod_qp = '005552';
 
-SELECT * FROM enaplic_management.dbo.tb_baseline WHERE cod_qp = '008047';
+SELECT * FROM enaplic_management.dbo.tb_baseline WHERE cod_qp = '005552';
 
 DELETE FROM enaplic_management.dbo.tb_baseline WHERE cod_qp = '008038';
 

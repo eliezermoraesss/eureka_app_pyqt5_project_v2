@@ -1044,7 +1044,7 @@ class ComprasApp(QWidget):
                         item = QTableWidgetItem()
                         if row['STATUS PEDIDO COMPRA'] is not None:
                             if (row['STATUS PEDIDO COMPRA'].strip() == '' and row['DOC. NF ENTRADA'] is None
-                                    and row['APROVAÇÃO'] == 'L'):
+                                    and row['APROVAÇÃO'] in ['L', ' ']):
                                 item.setIcon(gray_icon)
                                 item.setText('AGUARDANDO ENTREGA')
                                 dataframe.at[index, ' '] = 'AGUARDANDO ENTREGA'
