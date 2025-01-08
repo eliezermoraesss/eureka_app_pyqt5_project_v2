@@ -3,18 +3,16 @@ import os
 import sys
 import time
 
-from src.app.utils.search_history_manager import SearchHistoryManager
-
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 import pyodbc
-from PyQt5.QtCore import Qt, pyqtSignal, QStringListModel
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, \
     QTableWidgetItem, QSizePolicy, QSpacerItem, QTabWidget, \
-    QMenu, QAction, QComboBox, QStyle, QCompleter
+    QMenu, QAction, QComboBox, QStyle
 from sqlalchemy import create_engine
 
 from src.app.views.new_product_window import NewProductWindow
@@ -30,6 +28,8 @@ from src.app.utils.open_search_dialog import open_search_dialog
 from src.app.utils.utils import *
 from src.app.views.copy_product_window import CopyProdutoItemWindow
 from src.app.utils.run_image_comparator import *
+from src.app.utils.autocomplete_feature import AutoCompleteManager
+from src.app.utils.search_history_manager import SearchHistoryManager
 
 
 class CustomLineEdit(QLineEdit):
@@ -44,6 +44,28 @@ class CustomLineEdit(QLineEdit):
         open_search_dialog(self.entity_name, self, self.entity, self.nome_coluna, self.parentWidget())
         # Continue com o comportamento padrão
         super(CustomLineEdit, self).mousePressEvent(event)
+
+
+def numero_linhas_consulta(query_consulta):
+    order_by_a_remover = "ORDER BY B1_COD ASC"
+    query_sem_order_by = query_consulta.replace(order_by_a_remover, "")
+
+    query = f"""
+                SELECT 
+                    COUNT(*) AS total_records
+                FROM ({query_sem_order_by}) AS combined_results;
+            """
+    return query
+
+
+def abrir_janela_novo_produto():
+    new_product_window = NewProductWindow()
+    new_product_window.exec_()
+
+
+def abrir_janela_copiar_produto(selected_row_table):
+    copy_window = CopyProdutoItemWindow(selected_row_table)
+    copy_window.exec_()
 
 
 class EngenhariaApp(QWidget):
@@ -61,16 +83,7 @@ class EngenhariaApp(QWidget):
         self.username, self.password, self.database, self.server = setup_mssql()
         self.driver = '{SQL Server}'
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
-
-        self.history_manager = SearchHistoryManager()
-        self.fields = {}
-
-        completer = QCompleter()
-        completer.setCaseSensitivity(Qt.CaseInsensitive)
-        completer.setModel(QStringListModel())
-
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
-
         self.nova_janela = None  # Adicione esta linha
         self.guias_abertas = []
         self.guias_abertas_onde_usado = []
@@ -79,7 +92,7 @@ class EngenhariaApp(QWidget):
         self.guias_abertas_ultimas_nfe = []
         self.guias_abertas_visualizar_nfe = []
         fonte = "Segoe UI"
-        tamanho_fonte = 10
+        tamanho_fonte = 12
 
         self.altura_linha = 30
         self.tamanho_fonte_tabela = 10
@@ -155,11 +168,11 @@ class EngenhariaApp(QWidget):
         self.combobox_bloqueio.addItem("Não", '2')
 
         self.btn_consultar = QPushButton("Pesquisar", self)
-        self.btn_consultar.clicked.connect(self.handle_button_click_pesquisar)
+        self.btn_consultar.clicked.connect(self.btn_consultar_actions)
         self.btn_consultar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_new_product = QPushButton("Cadastrar novo produto", self)
-        self.btn_new_product.clicked.connect(self.abrir_janela_novo_produto)
+        self.btn_new_product.clicked.connect(abrir_janela_novo_produto)
         self.btn_new_product.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_home = QPushButton("HOME", self)
@@ -222,6 +235,28 @@ class EngenhariaApp(QWidget):
         self.btn_fechar.clicked.connect(self.fechar_janela)
         self.btn_fechar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
+        self.field_name_list = [
+            "codigo",
+            "descricao",
+            "contem_descricao",
+            "tipo",
+            "unid_medida",
+            "armazem",
+            "grupo",
+            "centro_custo"
+        ]
+
+        object_fields = {
+            "codigo": self.campo_codigo,
+            "descricao": self.campo_descricao,
+            "contem_descricao": self.campo_contem_descricao,
+            "tipo": self.campo_tipo,
+            "unid_medida": self.campo_um,
+            "armazem": self.campo_armazem,
+            "grupo": self.campo_grupo,
+            "centro_custo": self.campo_cc
+        }
+
         layout = QVBoxLayout()
         layout_campos_01 = QHBoxLayout()
         layout_campos_02 = QHBoxLayout()
@@ -282,46 +317,18 @@ class EngenhariaApp(QWidget):
         layout.addLayout(self.layout_footer_label)
         self.setLayout(layout)
 
-        object_fields = {
-            "codigo": self.campo_codigo,
-            "descricao": self.campo_descricao,
-            "contem_descricao": self.campo_contem_descricao,
-            "tipo": self.campo_tipo,
-            "unid_medida": self.campo_um,
-            "armazem": self.campo_armazem,
-            "grupo": self.campo_grupo,
-            "centro_custo": self.campo_cc
-        }
+        self.campo_codigo.returnPressed.connect(self.executar_consulta)
+        self.campo_descricao.returnPressed.connect(self.executar_consulta)
+        self.campo_contem_descricao.returnPressed.connect(self.executar_consulta)
+        self.campo_tipo.returnPressed.connect(self.executar_consulta)
+        self.campo_um.returnPressed.connect(self.executar_consulta)
+        self.campo_armazem.returnPressed.connect(self.executar_consulta)
+        self.campo_grupo.returnPressed.connect(self.executar_consulta)
+        self.campo_cc.returnPressed.connect(self.executar_consulta)
 
-        for label, field_name in [
-            ("Código", "codigo"),
-            ("Descrição", "descricao"),
-            ("Contém Descrição", "contem_descricao"),
-            ("Tipo", "tipo"),
-            ("Unidade de Medida", "unid_medida"),
-            ("Armazém", "armazem"),
-            ("Grupo", "grupo"),
-            ("Centro de Custo", "centro_custo")
-        ]:
-            object_fields[field_name].setCompleter(completer)
-
-            # Atualizar completer com dados históricos
-            self.update_completer(field_name, completer)
-
-            # Guarda referências
-            self.fields[field_name] = {
-                'line_edit': object_fields[field_name],
-                'completer': completer
-            }
-
-            # Conecta o sinal
-            object_fields[field_name].returnPressed.connect(
-                lambda fn=field_name: self.save_search_history(fn)
-            )
-
-            object_fields[field_name].returnPressed.connect(
-                lambda: self.executar_consulta
-            )
+        history_manager = SearchHistoryManager()
+        self.autocomplete_settings = AutoCompleteManager(history_manager)
+        self.autocomplete_settings.setup_autocomplete(self.field_name_list, object_fields)
 
         self.setStyleSheet("""
             * {
@@ -440,81 +447,11 @@ class EngenhariaApp(QWidget):
                 color: #EEEEEE;
                 font-weight: bold;
             }
-            
-            /* Estilo para o QCompleter popup */
-            QListView {
-                background-color: #DFE0E2;
-                border: 1px solid #262626;
-                border-radius: 8px;
-                padding: 5px;
-            }
-            
-            QListView::item {
-                background-color: #DFE0E2;
-                color: #000000;
-                padding: 5px;
-                border-radius: 4px;
-            }
-            
-            QListView::item:selected {
-                background-color: #0a79f8;
-                color: #FFFFFF;
-            }
-            
-            QListView::item:hover {
-                background-color: #c4c4c4;
-                color: #000000;
-            }
-            
-            /* Estilo para a scrollbar do QCompleter */
-            QScrollBar:vertical {
-                background-color: #DFE0E2;
-                width: 10px;
-                margin: 0px;
-            }
-            
-            QScrollBar::handle:vertical {
-                background-color: #0a79f8;
-                border-radius: 5px;
-                min-height: 20px;
-            }
-            
-            QScrollBar::handle:vertical:hover {
-                background-color: #0861c7;
-            }
-            
-            QScrollBar::add-line:vertical,
-            QScrollBar::sub-line:vertical {
-                height: 0px;
-            }
-            
-            QScrollBar::up-arrow:vertical,
-            QScrollBar::down-arrow:vertical {
-                height: 0px;
-            }
-            
-            QScrollBar::add-page:vertical,
-            QScrollBar::sub-page:vertical {
-                background-color: #DFE0E2;
-            } 
                 """)
 
-    def update_completer(self, field_name, completer):
-        """Atualiza a lista de sugestões do completer"""
-        history = self.history_manager.get_history(field_name)
-        completer.model().setStringList(history)
-
-    def save_search_history(self, field_name):
-        value = self.fields[field_name]['line_edit'].text()
-
-        if value.strip():  # Verifica se não está vazio
-            self.history_manager.save_history(field_name, value)
-
-            # Atualiza completer do campo
-            completer = self.fields[field_name]['completer']
-            self.update_completer(field_name, completer)
-
-    def handle_button_click_pesquisar(self):
+    def btn_consultar_actions(self):
+        for field_name in self.field_name_list:
+            self.autocomplete_settings.save_search_history(field_name)
         self.executar_consulta()
 
     def return_to_main(self):
@@ -525,17 +462,6 @@ class EngenhariaApp(QWidget):
         eng_window = EngenhariaApp(self.main_window)
         eng_window.showMaximized()
         self.main_window.sub_windows.append(eng_window)
-
-    def numero_linhas_consulta(self, query_consulta):
-        order_by_a_remover = "ORDER BY B1_COD ASC"
-        query_sem_order_by = query_consulta.replace(order_by_a_remover, "")
-
-        query = f"""
-                    SELECT 
-                        COUNT(*) AS total_records
-                    FROM ({query_sem_order_by}) AS combined_results;
-                """
-        return query
 
     def add_clear_button(self, line_edit):
         clear_icon = self.style().standardIcon(QStyle.SP_LineEditClearButton)
@@ -599,7 +525,7 @@ class EngenhariaApp(QWidget):
             context_menu_nova_janela.triggered.connect(self.abrir_nova_janela)
 
             new_product = QAction('Cadastrar novo produto...', self)
-            new_product.triggered.connect(self.abrir_janela_novo_produto)
+            new_product.triggered.connect(abrir_janela_novo_produto)
 
             cadastro_copia_produto = QAction('Cadastro semelhante...', self)
             cadastro_copia_produto.triggered.connect(self.copiar_item_selecionado)
@@ -649,10 +575,6 @@ class EngenhariaApp(QWidget):
 
             menu.exec_(table.viewport().mapToGlobal(position))
 
-    def abrir_janela_novo_produto(self):
-        new_product_window = NewProductWindow()
-        new_product_window.exec_()
-
     def copiar_item_selecionado(self):
         selected_row = self.tree.currentRow()
         if selected_row != -1:
@@ -661,11 +583,7 @@ class EngenhariaApp(QWidget):
                 item = self.tree.item(selected_row, column)
                 selected_row_table.append(item.text() if item else "")
 
-            self.abrir_janela_copiar_produto(selected_row_table)
-
-    def abrir_janela_copiar_produto(self, selected_row_table):
-        copy_window = CopyProdutoItemWindow(selected_row_table)
-        copy_window.exec_()
+            abrir_janela_copiar_produto(selected_row_table)
 
     def editar_item_selecionado(self):
         selected_row = self.tree.currentRow()
@@ -848,13 +766,14 @@ class EngenhariaApp(QWidget):
             self.btn_consultar.setEnabled(True)
             return
 
-        query_contagem_linhas = self.numero_linhas_consulta(query_consulta)
+        query_contagem_linhas = numero_linhas_consulta(query_consulta)
 
         self.label_line_number.hide()
         self.controle_campos_formulario(False)
         self.button_visible_control(False)
 
-        conn_str = f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};PWD={self.password}'
+        conn_str = (f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};'
+                    f'PWD={self.password}')
         self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
 
         try:
