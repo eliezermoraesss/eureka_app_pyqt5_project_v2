@@ -3,16 +3,18 @@ import os
 import sys
 import time
 
+from src.app.utils.search_history_manager import SearchHistoryManager
+
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 import pyodbc
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal, QStringListModel
 from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, \
     QTableWidgetItem, QSizePolicy, QSpacerItem, QTabWidget, \
-    QMenu, QAction, QComboBox, QStyle
+    QMenu, QAction, QComboBox, QStyle, QCompleter
 from sqlalchemy import create_engine
 
 from src.app.views.new_product_window import NewProductWindow
@@ -59,6 +61,13 @@ class EngenhariaApp(QWidget):
         self.username, self.password, self.database, self.server = setup_mssql()
         self.driver = '{SQL Server}'
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
+
+        self.history_manager = SearchHistoryManager()
+        self.fields = {}
+
+        completer = QCompleter()
+        completer.setCaseSensitivity(Qt.CaseInsensitive)
+        completer.setModel(QStringListModel())
 
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
@@ -278,7 +287,9 @@ class EngenhariaApp(QWidget):
         self.campo_contem_descricao.returnPressed.connect(self.executar_consulta)
         self.campo_tipo.returnPressed.connect(self.executar_consulta)
         self.campo_um.returnPressed.connect(self.executar_consulta)
+        self.campo_armazem.connect(self.executar_consulta)
         self.campo_grupo.returnPressed.connect(self.executar_consulta)
+        self.campo_cc.returnPressed.connect(self.executar_consulta)
 
         self.setStyleSheet("""
             * {
@@ -398,6 +409,48 @@ class EngenhariaApp(QWidget):
                 font-weight: bold;
             }
                 """)
+
+        object_fields = {
+            "codigo": self.campo_codigo,
+            "descricao": self.campo_descricao,
+            "tipo": self.campo_tipo
+        }
+
+        for label, field_name in [
+            ("Código", "codigo"),
+            ("Descrição", "descricao"),
+            ("Tipo", "tipo")
+        ]:
+            object_fields[field_name].setCompleter(completer)
+
+            # Atualizar completer com dados históricos
+            self.update_completer(field_name, completer)
+
+            # Guarda referências
+            self.fields[field_name] = {
+                'line_edit': object_fields[field_name],
+                'completer': completer
+            }
+
+            # Conecta o sinal
+            object_fields[field_name].returnPressed.connect(
+                lambda fn=field_name: self.save_search_history(fn)
+            )
+
+    def update_completer(self, field_name, completer):
+        """Atualiza a lista de sugestões do completer"""
+        history = self.history_manager.get_history(field_name)
+        completer.model().setStringList(history)
+
+    def save_search_history(self, field_name):
+        value = self.fields[field_name]['line_edit'].text()
+
+        if value.strip():  # Verifica se não está vazio
+            self.history_manager.save_history(field_name, value)
+
+            # Atualiza completer do campo
+            completer = self.fields[field_name]['completer']
+            self.update_completer(field_name, completer)
 
     def return_to_main(self):
         self.close()  # Fecha a janela atual
