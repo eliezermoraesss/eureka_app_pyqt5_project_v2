@@ -155,7 +155,7 @@ class EngenhariaApp(QWidget):
         self.combobox_bloqueio.addItem("Não", '2')
 
         self.btn_consultar = QPushButton("Pesquisar", self)
-        self.btn_consultar.clicked.connect(self.executar_consulta)
+        self.btn_consultar.clicked.connect(self.handle_button_click_pesquisar)
         self.btn_consultar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_new_product = QPushButton("Cadastrar novo produto", self)
@@ -282,14 +282,46 @@ class EngenhariaApp(QWidget):
         layout.addLayout(self.layout_footer_label)
         self.setLayout(layout)
 
-        self.campo_codigo.returnPressed.connect(self.executar_consulta)
-        self.campo_descricao.returnPressed.connect(self.executar_consulta)
-        self.campo_contem_descricao.returnPressed.connect(self.executar_consulta)
-        self.campo_tipo.returnPressed.connect(self.executar_consulta)
-        self.campo_um.returnPressed.connect(self.executar_consulta)
-        self.campo_armazem.connect(self.executar_consulta)
-        self.campo_grupo.returnPressed.connect(self.executar_consulta)
-        self.campo_cc.returnPressed.connect(self.executar_consulta)
+        object_fields = {
+            "codigo": self.campo_codigo,
+            "descricao": self.campo_descricao,
+            "contem_descricao": self.campo_contem_descricao,
+            "tipo": self.campo_tipo,
+            "unid_medida": self.campo_um,
+            "armazem": self.campo_armazem,
+            "grupo": self.campo_grupo,
+            "centro_custo": self.campo_cc
+        }
+
+        for label, field_name in [
+            ("Código", "codigo"),
+            ("Descrição", "descricao"),
+            ("Contém Descrição", "contem_descricao"),
+            ("Tipo", "tipo"),
+            ("Unidade de Medida", "unid_medida"),
+            ("Armazém", "armazem"),
+            ("Grupo", "grupo"),
+            ("Centro de Custo", "centro_custo")
+        ]:
+            object_fields[field_name].setCompleter(completer)
+
+            # Atualizar completer com dados históricos
+            self.update_completer(field_name, completer)
+
+            # Guarda referências
+            self.fields[field_name] = {
+                'line_edit': object_fields[field_name],
+                'completer': completer
+            }
+
+            # Conecta o sinal
+            object_fields[field_name].returnPressed.connect(
+                lambda fn=field_name: self.save_search_history(fn)
+            )
+
+            object_fields[field_name].returnPressed.connect(
+                lambda: self.executar_consulta
+            )
 
         self.setStyleSheet("""
             * {
@@ -408,44 +440,64 @@ class EngenhariaApp(QWidget):
                 color: #EEEEEE;
                 font-weight: bold;
             }
-                """)
-
-        object_fields = {
-            "codigo": self.campo_codigo,
-            "descricao": self.campo_descricao,
-            "contem_descricao": self.campo_contem_descricao,
-            "tipo": self.campo_tipo,
-            "unid_medida": self.campo_um,
-            "armazem": self.campo_armazem,
-            "grupo": self.campo_grupo,
-            "centro_custo": self.campo_cc
-        }
-
-        for label, field_name in [
-            ("Código", "codigo"),
-            ("Descrição", "descricao"),
-            ("Contém Descrição", "contem_descricao"),
-            ("Tipo", "tipo"),
-            ("Unidade de Medida", "unid_medida"),
-            ("Armazém", "armazem"),
-            ("Grupo", "grupo"),
-            ("Centro de Custo", "centro_custo")
-        ]:
-            object_fields[field_name].setCompleter(completer)
-
-            # Atualizar completer com dados históricos
-            self.update_completer(field_name, completer)
-
-            # Guarda referências
-            self.fields[field_name] = {
-                'line_edit': object_fields[field_name],
-                'completer': completer
+            
+            /* Estilo para o QCompleter popup */
+            QListView {
+                background-color: #DFE0E2;
+                border: 1px solid #262626;
+                border-radius: 8px;
+                padding: 5px;
             }
-
-            # Conecta o sinal
-            object_fields[field_name].returnPressed.connect(
-                lambda fn=field_name: self.save_search_history(fn)
-            )
+            
+            QListView::item {
+                background-color: #DFE0E2;
+                color: #000000;
+                padding: 5px;
+                border-radius: 4px;
+            }
+            
+            QListView::item:selected {
+                background-color: #0a79f8;
+                color: #FFFFFF;
+            }
+            
+            QListView::item:hover {
+                background-color: #c4c4c4;
+                color: #000000;
+            }
+            
+            /* Estilo para a scrollbar do QCompleter */
+            QScrollBar:vertical {
+                background-color: #DFE0E2;
+                width: 10px;
+                margin: 0px;
+            }
+            
+            QScrollBar::handle:vertical {
+                background-color: #0a79f8;
+                border-radius: 5px;
+                min-height: 20px;
+            }
+            
+            QScrollBar::handle:vertical:hover {
+                background-color: #0861c7;
+            }
+            
+            QScrollBar::add-line:vertical,
+            QScrollBar::sub-line:vertical {
+                height: 0px;
+            }
+            
+            QScrollBar::up-arrow:vertical,
+            QScrollBar::down-arrow:vertical {
+                height: 0px;
+            }
+            
+            QScrollBar::add-page:vertical,
+            QScrollBar::sub-page:vertical {
+                background-color: #DFE0E2;
+            } 
+                """)
 
     def update_completer(self, field_name, completer):
         """Atualiza a lista de sugestões do completer"""
@@ -461,6 +513,9 @@ class EngenhariaApp(QWidget):
             # Atualiza completer do campo
             completer = self.fields[field_name]['completer']
             self.update_completer(field_name, completer)
+
+    def handle_button_click_pesquisar(self):
+        self.executar_consulta()
 
     def return_to_main(self):
         self.close()  # Fecha a janela atual
