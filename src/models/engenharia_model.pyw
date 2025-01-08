@@ -413,13 +413,23 @@ class EngenhariaApp(QWidget):
         object_fields = {
             "codigo": self.campo_codigo,
             "descricao": self.campo_descricao,
-            "tipo": self.campo_tipo
+            "contem_descricao": self.campo_contem_descricao,
+            "tipo": self.campo_tipo,
+            "unid_medida": self.campo_um,
+            "armazem": self.campo_armazem,
+            "grupo": self.campo_grupo,
+            "centro_custo": self.campo_cc
         }
 
         for label, field_name in [
             ("Código", "codigo"),
             ("Descrição", "descricao"),
-            ("Tipo", "tipo")
+            ("Contém Descrição", "contem_descricao"),
+            ("Tipo", "tipo"),
+            ("Unidade de Medida", "unid_medida"),
+            ("Armazém", "armazem"),
+            ("Grupo", "grupo"),
+            ("Centro de Custo", "centro_custo")
         ]:
             object_fields[field_name].setCompleter(completer)
 
