@@ -5,6 +5,10 @@ import sqlite3
 class SearchHistoryManager:
     def __init__(self, db_path='search_history.db'):
         app_data = os.getenv('LOCALAPPDATA') or os.path.expanduser('~\\AppData\\Roaming')
+<<<<<<< HEAD
+=======
+
+>>>>>>> eureka/engenharia
         # Determina o caminho do banco de dados
         self.db_path = os.path.join(app_data, 'Eureka', db_path)
 
@@ -40,14 +44,22 @@ class SearchHistoryManager:
         except sqlite3.Error as e:
             print(f"Erro ao salvar histórico: {e}")
 
+<<<<<<< HEAD
     def get_history(self, field_name, limit=20):
+=======
+    def get_history(self, field_name):
+>>>>>>> eureka/engenharia
         """Recupera histórico de um campo"""
         self.cursor.execute('''
             SELECT value FROM search_history
             WHERE field_name = ?
             ORDER BY timestamp DESC
+<<<<<<< HEAD
             LIMIT ?
         ''', (field_name, limit))
+=======
+        ''', (field_name,))
+>>>>>>> eureka/engenharia
         return [row[0] for row in self.cursor.fetchall()]
 
     def clear_history(self, field_name=None):

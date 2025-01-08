@@ -66,30 +66,32 @@ def copiar_linha(item):
 
 def abrir_desenho(self, table=None, codigo_param=None):
     codigo_desenho = ''
-    if table is not None:
-        item_selecionado = table.currentItem()
-        header = table.horizontalHeader()
-        codigo_col = None
+    item_selecionado = table.currentItem()
 
-        for col in range(header.count()):
-            header_text = table.horizontalHeaderItem(col).text().lower()
-            if header_text == 'código':
-                codigo_col = col
+    if item_selecionado:
+        if table is not None:
+            header = table.horizontalHeader()
+            codigo_col = None
 
-            if codigo_col is not None:
-                codigo = table.item(item_selecionado.row(), codigo_col).text()
-                codigo_desenho = codigo
-    else:
-        codigo_desenho = codigo_param
-    pdf_path = os.path.join(r"\\192.175.175.4\dados\EMPRESA\PROJETOS\PDF-OFICIAL", f"{codigo_desenho}.PDF")
-    pdf_path = os.path.normpath(pdf_path)
+            for col in range(header.count()):
+                header_text = table.horizontalHeaderItem(col).text().lower()
+                if header_text == 'código':
+                    codigo_col = col
 
-    if os.path.exists(pdf_path):
-        QCoreApplication.processEvents()
-        QDesktopServices.openUrl(QUrl.fromLocalFile(pdf_path))
-    else:
-        mensagem = f"Desenho não encontrado!\n\n:-("
-        QMessageBox.information(self, f"{codigo_desenho}", mensagem)
+                if codigo_col is not None:
+                    codigo = table.item(item_selecionado.row(), codigo_col).text()
+                    codigo_desenho = codigo
+        else:
+            codigo_desenho = codigo_param
+        pdf_path = os.path.join(r"\\192.175.175.4\dados\EMPRESA\PROJETOS\PDF-OFICIAL", f"{codigo_desenho}.PDF")
+        pdf_path = os.path.normpath(pdf_path)
+
+        if os.path.exists(pdf_path):
+            QCoreApplication.processEvents()
+            QDesktopServices.openUrl(QUrl.fromLocalFile(pdf_path))
+        else:
+            mensagem = f"Desenho não encontrado!\n\n:-("
+            QMessageBox.information(self, f"{codigo_desenho}", mensagem)
 
 
 def ajustar_largura_coluna_descricao(tree_widget):
