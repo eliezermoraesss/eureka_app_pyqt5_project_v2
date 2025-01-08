@@ -3,8 +3,6 @@ import os
 import sys
 import time
 
-from src.app.utils.search_history_manager import SearchHistoryManager
-
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
