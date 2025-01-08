@@ -320,6 +320,10 @@ class EngenhariaApp(QWidget):
         layout.addLayout(self.layout_footer_label)
         self.setLayout(layout)
 
+        history_manager = SearchHistoryManager()
+        self.autocomplete_settings = AutoCompleteManager(history_manager)
+        self.autocomplete_settings.setup_autocomplete(self.field_name_list, object_fields)
+
         self.campo_codigo.returnPressed.connect(self.executar_consulta)
         self.campo_descricao.returnPressed.connect(self.executar_consulta)
         self.campo_contem_descricao.returnPressed.connect(self.executar_consulta)
@@ -328,10 +332,6 @@ class EngenhariaApp(QWidget):
         self.campo_armazem.returnPressed.connect(self.executar_consulta)
         self.campo_grupo.returnPressed.connect(self.executar_consulta)
         self.campo_cc.returnPressed.connect(self.executar_consulta)
-
-        history_manager = SearchHistoryManager()
-        self.autocomplete_settings = AutoCompleteManager(history_manager)
-        self.autocomplete_settings.setup_autocomplete(self.field_name_list, object_fields)
 
         self.setStyleSheet("""
             * {
