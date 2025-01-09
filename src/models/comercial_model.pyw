@@ -15,11 +15,11 @@ from PyPDF2 import PdfReader
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QPixmap, QIcon
 from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
-    QTableWidget, QTableWidgetItem, QHeaderView, QFileDialog, QStyle, QAction, QApplication, QSizePolicy
+    QTableWidget, QTableWidgetItem, QHeaderView, QFileDialog, QStyle, QAction, QSizePolicy
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import inch, mm
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Image, Spacer
 from sqlalchemy import create_engine
@@ -28,6 +28,8 @@ from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.utils import exibir_mensagem, copiar_linha, obter_dados_tabela, abrir_desenho
 from src.app.utils.load_session import load_session
 from src.dialog.loading_dialog import loading_dialog
+from src.app.utils.autocomplete_feature import AutoCompleteManager
+from src.app.utils.search_history_manager import SearchHistoryManager
 
 
 def query_consulta(codigo):
@@ -177,7 +179,7 @@ class ComercialApp(QWidget):
         self.add_clear_button(self.campo_codigo)
 
         self.btn_consultar = QPushButton("Pesquisar", self)
-        self.btn_consultar.clicked.connect(self.executar_consulta)
+        self.btn_consultar.clicked.connect(self.btn_consultar_actions)
         self.btn_consultar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_limpar = QPushButton("Limpar", self)
@@ -211,6 +213,18 @@ class ComercialApp(QWidget):
         self.btn_abrir_desenho = QPushButton("Abrir Desenho", self)
         self.btn_abrir_desenho.clicked.connect(lambda: abrir_desenho(self, None, self.codigo))
         self.btn_abrir_desenho.hide()
+
+        self.field_name_list = [
+            "codigo"
+        ]
+
+        object_fields = {
+            "codigo": self.campo_codigo
+        }
+
+        history_manager = SearchHistoryManager('comercial')
+        self.autocomplete_settings = AutoCompleteManager(history_manager)
+        self.autocomplete_settings.setup_autocomplete(self.field_name_list, object_fields)
 
         self.campo_codigo.returnPressed.connect(self.executar_consulta)
 
@@ -346,6 +360,11 @@ class ComercialApp(QWidget):
                         font-weight: bold;
                     }
                 """)
+
+    def btn_consultar_actions(self):
+        for field_name in self.field_name_list:
+            self.autocomplete_settings.save_search_history(field_name)
+        self.executar_consulta()
 
     def return_to_main(self):
         self.close()  # Fecha a janela atual
