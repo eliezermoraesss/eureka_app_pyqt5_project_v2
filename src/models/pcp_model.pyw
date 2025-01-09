@@ -2,6 +2,9 @@ import locale
 import os
 import sys
 
+from src.app.utils.autocomplete_feature import AutoCompleteManager
+from src.app.utils.search_history_manager import SearchHistoryManager
+
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -38,6 +41,43 @@ class CustomLineEdit(QLineEdit):
         open_search_dialog(self.entity_name, self, self.entity, self.nome_coluna, self.parentWidget())
         # Continue com o comportamento padrão
         super(CustomLineEdit, self).mousePressEvent(event)
+
+
+def numero_linhas_consulta(query_consulta):
+
+    order_by_a_remover = "ORDER BY op.R_E_C_N_O_ DESC;"
+    query_sem_order_by = query_consulta.replace(order_by_a_remover, "")
+
+    query = f"""
+                SELECT 
+                    COUNT(*) AS total_records
+                FROM ({query_sem_order_by}) AS combined_results;
+            """
+    return query
+
+
+def validar_campos(codigo_produto, numero_qp, numero_op):
+
+    if len(codigo_produto) != 13 and not codigo_produto == '':
+        exibir_mensagem("ATENÇÃO!",
+                        "Produto não encontrado!\n\nCorrija e tente "
+                        f"novamente.\n\nツ\n\nSMARTPLIC®",
+                        "info")
+        return True
+
+    if len(numero_op) != 6 and not numero_op == '':
+        exibir_mensagem("ATENÇÃO!",
+                        "Ordem de Produção não encontrada!\n\nCorrija e tente "
+                        f"novamente.\n\nツ\n\nSMARTPLIC®",
+                        "info")
+        return True
+
+    if len(numero_qp.zfill(6)) != 6 and not numero_qp == '':
+        exibir_mensagem("ATENÇÃO!",
+                        "QP não encontrada!\n\nCorrija e tente "
+                        f"novamente.\n\nツ\n\nSMARTPLIC®",
+                        "info")
+        return True
 
 
 class PcpApp(QWidget):
@@ -242,17 +282,17 @@ class PcpApp(QWidget):
         self.campo_codigo.setFixedWidth(170)
         self.add_clear_button(self.campo_codigo)
 
-        self.campo_descricao_prod = QLineEdit(self)
-        self.campo_descricao_prod.setFont(QFont(fonte_campos, tamanho_fonte_campos))
-        self.campo_descricao_prod.setMaxLength(60)
-        self.campo_descricao_prod.setFixedWidth(280)
-        self.add_clear_button(self.campo_descricao_prod)
+        self.campo_descricao = QLineEdit(self)
+        self.campo_descricao.setFont(QFont(fonte_campos, tamanho_fonte_campos))
+        self.campo_descricao.setMaxLength(60)
+        self.campo_descricao.setFixedWidth(280)
+        self.add_clear_button(self.campo_descricao)
 
-        self.campo_contem_descricao_prod = QLineEdit(self)
-        self.campo_contem_descricao_prod.setFont(QFont(fonte_campos, tamanho_fonte_campos))
-        self.campo_contem_descricao_prod.setMaxLength(60)
-        self.campo_contem_descricao_prod.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.add_clear_button(self.campo_contem_descricao_prod)
+        self.campo_contem_descricao = QLineEdit(self)
+        self.campo_contem_descricao.setFont(QFont(fonte_campos, tamanho_fonte_campos))
+        self.campo_contem_descricao.setMaxLength(60)
+        self.campo_contem_descricao.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.add_clear_button(self.campo_contem_descricao)
 
         self.campo_qp = CustomLineEdit('QPS', 'qps', 'Código', self)
         self.campo_qp.setFont(QFont(fonte_campos, tamanho_fonte_campos))
@@ -294,7 +334,7 @@ class PcpApp(QWidget):
         self.add_clear_button(self.campo_observacao)
 
         self.btn_consultar = QPushButton("Pesquisar", self)
-        self.btn_consultar.clicked.connect(self.executar_consulta)
+        self.btn_consultar.clicked.connect(self.btn_consultar_actions)
         self.btn_consultar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_consultar_estrutura = QPushButton("Consultar Estrutura", self)
@@ -344,12 +384,23 @@ class PcpApp(QWidget):
         self.btn_image_comparator.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_image_comparator.hide()
 
-        self.campo_codigo.returnPressed.connect(self.executar_consulta)
-        self.campo_qp.returnPressed.connect(self.executar_consulta)
-        self.campo_OP.returnPressed.connect(self.executar_consulta)
-        self.campo_descricao_prod.returnPressed.connect(self.executar_consulta)
-        self.campo_contem_descricao_prod.returnPressed.connect(self.executar_consulta)
-        self.campo_observacao.returnPressed.connect(self.executar_consulta)
+        self.field_name_list = [
+            "codigo",
+            "descricao",
+            "contem_descricao",
+            "qp",
+            "op",
+            "observacao"
+        ]
+
+        object_fields = {
+            "codigo": self.campo_codigo,
+            "descricao": self.campo_descricao,
+            "contem_descricao": self.campo_contem_descricao,
+            "qp": self.campo_qp,
+            "op": self.campo_OP,
+            "observacao": self.campo_observacao
+        }
 
         layout = QVBoxLayout()
         layout_title = QHBoxLayout()
@@ -369,11 +420,11 @@ class PcpApp(QWidget):
 
         container_descricao_prod = QVBoxLayout()
         container_descricao_prod.addWidget(self.label_descricao_prod)
-        container_descricao_prod.addWidget(self.campo_descricao_prod)
+        container_descricao_prod.addWidget(self.campo_descricao)
 
         container_contem_descricao_prod = QVBoxLayout()
         container_contem_descricao_prod.addWidget(self.label_contem_descricao_prod)
-        container_contem_descricao_prod.addWidget(self.campo_contem_descricao_prod)
+        container_contem_descricao_prod.addWidget(self.campo_contem_descricao)
 
         container_op = QVBoxLayout()
         container_op.addWidget(self.label_OP)
@@ -434,6 +485,22 @@ class PcpApp(QWidget):
         layout.addLayout(self.layout_footer_label)
         self.setLayout(layout)
 
+        history_manager = SearchHistoryManager('pcp')
+        self.autocomplete_settings = AutoCompleteManager(history_manager)
+        self.autocomplete_settings.setup_autocomplete(self.field_name_list, object_fields)
+
+        self.campo_codigo.returnPressed.connect(self.executar_consulta)
+        self.campo_qp.returnPressed.connect(self.executar_consulta)
+        self.campo_OP.returnPressed.connect(self.executar_consulta)
+        self.campo_descricao.returnPressed.connect(self.executar_consulta)
+        self.campo_contem_descricao.returnPressed.connect(self.executar_consulta)
+        self.campo_observacao.returnPressed.connect(self.executar_consulta)
+
+    def btn_consultar_actions(self):
+        for field_name in self.field_name_list:
+            self.autocomplete_settings.save_search_history(field_name)
+        self.executar_consulta()
+
     def return_to_main(self):
         self.close()  # Fecha a janela atual
         self.main_window.reopen()  # Reabre ou traz a janela principal ao foco
@@ -442,41 +509,6 @@ class PcpApp(QWidget):
         eng_window = PcpApp(self.main_window)
         eng_window.showMaximized()
         self.main_window.sub_windows.append(eng_window)
-
-    def validar_campos(self, codigo_produto, numero_qp, numero_op):
-
-        if len(codigo_produto) != 13 and not codigo_produto == '':
-            exibir_mensagem("ATENÇÃO!",
-                            "Produto não encontrado!\n\nCorrija e tente "
-                            f"novamente.\n\nツ\n\nSMARTPLIC®",
-                            "info")
-            return True
-
-        if len(numero_op) != 6 and not numero_op == '':
-            exibir_mensagem("ATENÇÃO!",
-                            "Ordem de Produção não encontrada!\n\nCorrija e tente "
-                            f"novamente.\n\nツ\n\nSMARTPLIC®",
-                            "info")
-            return True
-
-        if len(numero_qp.zfill(6)) != 6 and not numero_qp == '':
-            exibir_mensagem("ATENÇÃO!",
-                            "QP não encontrada!\n\nCorrija e tente "
-                            f"novamente.\n\nツ\n\nSMARTPLIC®",
-                            "info")
-            return True
-
-    def numero_linhas_consulta(self, query_consulta):
-
-        order_by_a_remover = "ORDER BY op.R_E_C_N_O_ DESC;"
-        query_sem_order_by = query_consulta.replace(order_by_a_remover, "")
-
-        query = f"""
-                    SELECT 
-                        COUNT(*) AS total_records
-                    FROM ({query_sem_order_by}) AS combined_results;
-                """
-        return query
 
     def fechar_guia(self, index):
         if index >= 0:
@@ -557,8 +589,8 @@ class PcpApp(QWidget):
         self.campo_codigo.clear()
         self.campo_qp.clear()
         self.campo_OP.clear()
-        self.campo_descricao_prod.clear()
-        self.campo_contem_descricao_prod.clear()
+        self.campo_descricao.clear()
+        self.campo_contem_descricao.clear()
         self.campo_observacao.clear()
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
@@ -680,11 +712,11 @@ class PcpApp(QWidget):
         numero_qp = self.campo_qp.text().upper().strip()
         numero_op = self.campo_OP.text().upper().strip()
         codigo_produto = self.campo_codigo.text().upper().strip()
-        descricao_produto = self.campo_descricao_prod.text().upper().strip()
-        contem_descricao = self.campo_contem_descricao_prod.text().upper().strip()
+        descricao_produto = self.campo_descricao.text().upper().strip()
+        contem_descricao = self.campo_contem_descricao.text().upper().strip()
         observacao = self.campo_observacao.text().upper().strip()
 
-        if self.validar_campos(codigo_produto, numero_qp, numero_op):
+        if validar_campos(codigo_produto, numero_qp, numero_op):
             self.btn_consultar.setEnabled(True)
             return
 
@@ -696,7 +728,8 @@ class PcpApp(QWidget):
         data_inicio_formatada = self.campo_data_inicio.date().toString("yyyyMMdd")
         data_fim_formatada = self.campo_data_fim.date().toString("yyyyMMdd")
 
-        filtro_data = f"AND C2_EMISSAO >= '{data_inicio_formatada}' AND C2_EMISSAO <= '{data_fim_formatada}'" if data_fim_formatada != '' and data_fim_formatada != '' else ''
+        filtro_data = f"AND C2_EMISSAO >= '{data_inicio_formatada}' AND C2_EMISSAO <= '{data_fim_formatada}'" \
+            if data_fim_formatada != '' and data_fim_formatada != '' else ''
 
         query = f"""
             SELECT 
@@ -761,14 +794,15 @@ class PcpApp(QWidget):
         query_consulta_op = self.query_consulta_ordem_producao()
         if query_consulta_op is None:
             return
-        query_contagem_linhas = self.numero_linhas_consulta(query_consulta_op)
+        query_contagem_linhas = numero_linhas_consulta(query_consulta_op)
 
         self.label_line_number.hide()
         self.label_indicators.hide()
         self.controle_campos_formulario(False)
         self.button_visible_control(False)
 
-        conn_str = f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};PWD={self.password}'
+        conn_str = (f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};'
+                    f'PWD={self.password}')
         self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
 
         try:

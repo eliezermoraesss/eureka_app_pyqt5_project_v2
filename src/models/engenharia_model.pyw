@@ -7,12 +7,12 @@ import time
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 import pyodbc
-from PyQt5.QtCore import Qt, pyqtSignal, QStringListModel
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, \
     QTableWidgetItem, QSizePolicy, QSpacerItem, QTabWidget, \
-    QMenu, QAction, QComboBox, QStyle, QCompleter
+    QMenu, QAction, QComboBox, QStyle
 from sqlalchemy import create_engine
 
 from src.app.views.new_product_window import NewProductWindow
