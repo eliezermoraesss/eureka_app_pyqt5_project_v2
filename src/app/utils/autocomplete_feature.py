@@ -17,6 +17,26 @@ class AutoCompleteManager:
             completer = QCompleter()
             completer.setCaseSensitivity(Qt.CaseInsensitive)
             completer.setModel(QStringListModel())
+
+            popup = completer.popup()
+            popup.setStyleSheet("""
+                   QListView {
+                       background-color: #EEEEEE;
+                       color: #000000;
+                       font-size: 14px;
+                       padding: 5px;
+                       border: 1px solid #262626;
+                       min-height: 100px;
+                   }
+                   QListView::item {
+                       padding: 5px;
+                       min-height: 25px;
+                   }
+                   QListView::item:selected {
+                       background-color: #0a79f8;
+                       color: #FFFFFF;
+                   }""")
+
             object_fields[field_name].setCompleter(completer)
 
             # Atualizar completer com dados históricos
