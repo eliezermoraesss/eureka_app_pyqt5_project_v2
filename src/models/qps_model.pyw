@@ -17,6 +17,8 @@ from sqlalchemy import create_engine, text
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.utils import exibir_mensagem, copiar_linha, exportar_excel
 from src.app.utils.load_session import load_session
+from src.app.utils.search_history_manager import SearchHistoryManager
+from src.app.utils.autocomplete_feature import AutoCompleteManager
 
 
 class UpdateTableThread(QThread):
@@ -203,31 +205,28 @@ class QpClosedApp(QWidget):
         self.label_indicators.setVisible(False)
         self.label_indicators.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
 
-        self.campo_descricao_prod = QLineEdit(self)
-        self.campo_descricao_prod.setFont(QFont(fonte_campos, tamanho_fonte_campos))
-        self.campo_descricao_prod.setMaxLength(60)
-        self.campo_descricao_prod.setFixedWidth(400)
-        self.add_clear_button(self.campo_descricao_prod)
-        self.campo_descricao_prod.returnPressed.connect(lambda: self.consultar_qps('T'))
+        self.campo_descricao = QLineEdit(self)
+        self.campo_descricao.setFont(QFont(fonte_campos, tamanho_fonte_campos))
+        self.campo_descricao.setMaxLength(60)
+        self.campo_descricao.setFixedWidth(400)
+        self.add_clear_button(self.campo_descricao)
 
-        self.campo_contem_descricao_prod = QLineEdit(self)
-        self.campo_contem_descricao_prod.setFont(QFont(fonte_campos, tamanho_fonte_campos))
-        self.campo_contem_descricao_prod.setMaxLength(60)
-        self.campo_contem_descricao_prod.setFixedWidth(400)
-        self.add_clear_button(self.campo_contem_descricao_prod)
-        self.campo_contem_descricao_prod.returnPressed.connect(lambda: self.consultar_qps('T'))
+        self.campo_contem_descricao = QLineEdit(self)
+        self.campo_contem_descricao.setFont(QFont(fonte_campos, tamanho_fonte_campos))
+        self.campo_contem_descricao.setMaxLength(60)
+        self.campo_contem_descricao.setFixedWidth(400)
+        self.add_clear_button(self.campo_contem_descricao)
 
         self.campo_qp = QLineEdit(self)
         self.campo_qp.setFont(QFont(fonte_campos, tamanho_fonte_campos))
         self.campo_qp.setMaxLength(6)
         self.campo_qp.setFixedWidth(110)
         self.add_clear_button(self.campo_qp)
-        self.campo_qp.returnPressed.connect(lambda: self.consultar_qps('T'))
 
-        self.btn_qps = QPushButton("Pesquisar", self)
-        self.btn_qps.clicked.connect(lambda: self.consultar_qps('T'))
-        self.btn_qps.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-        self.btn_qps.setObjectName("btn_qps")
+        self.btn_pesquisar = QPushButton("Pesquisar", self)
+        self.btn_pesquisar.clicked.connect(self.btn_consultar_actions)
+        self.btn_pesquisar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        self.btn_pesquisar.setObjectName("btn_pesquisar")
 
         self.btn_qps_finalizadas = QPushButton("Concluídas", self)
         self.btn_qps_finalizadas.clicked.connect(lambda: self.consultar_qps('F'))
@@ -288,11 +287,11 @@ class QpClosedApp(QWidget):
 
         container_descricao_prod = QVBoxLayout()
         container_descricao_prod.addWidget(self.label_descricao_prod)
-        container_descricao_prod.addWidget(self.campo_descricao_prod)
+        container_descricao_prod.addWidget(self.campo_descricao)
 
         container_contem_descricao_prod = QVBoxLayout()
         container_contem_descricao_prod.addWidget(self.label_contem_descricao_prod)
-        container_contem_descricao_prod.addWidget(self.campo_contem_descricao_prod)
+        container_contem_descricao_prod.addWidget(self.campo_contem_descricao)
 
         container_qp = QVBoxLayout()
         container_qp.addWidget(self.label_qp)
@@ -303,7 +302,7 @@ class QpClosedApp(QWidget):
         layout_campos_01.addLayout(container_contem_descricao_prod)
         layout_campos_01.addStretch()
 
-        self.layout_buttons.addWidget(self.btn_qps)
+        self.layout_buttons.addWidget(self.btn_pesquisar)
         self.layout_buttons.addWidget(self.btn_qps_finalizadas)
         self.layout_buttons.addWidget(self.btn_qps_abertas)
         self.layout_buttons.addWidget(self.btn_atualizar_qp)
@@ -326,6 +325,31 @@ class QpClosedApp(QWidget):
         layout.addLayout(self.layout_footer_label)
         self.setLayout(layout)
 
+        self.consultar_qps('T')
+
+        self.field_name_list = [
+            "qp",
+            "descricao",
+            "contem_descricao"
+        ]
+
+        object_fields = {
+            "qp": self.campo_qp,
+            "descricao": self.campo_descricao,
+            "contem_descricao": self.campo_contem_descricao
+        }
+
+        history_manager = SearchHistoryManager('qps')
+        self.autocomplete_settings = AutoCompleteManager(history_manager)
+        self.autocomplete_settings.setup_autocomplete(self.field_name_list, object_fields)
+
+        self.campo_qp.returnPressed.connect(lambda: self.consultar_qps('T'))
+        self.campo_descricao.returnPressed.connect(lambda: self.consultar_qps('T'))
+        self.campo_contem_descricao.returnPressed.connect(lambda: self.consultar_qps('T'))
+
+    def btn_consultar_actions(self):
+        for field_name in self.field_name_list:
+            self.autocomplete_settings.save_search_history(field_name)
         self.consultar_qps('T')
 
     def return_to_main(self):
@@ -384,8 +408,8 @@ class QpClosedApp(QWidget):
 
     def limpar_campos(self):
         self.campo_qp.clear()
-        self.campo_descricao_prod.clear()
-        self.campo_contem_descricao_prod.clear()
+        self.campo_descricao.clear()
+        self.campo_contem_descricao.clear()
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
         self.label_line_number.hide()
@@ -469,8 +493,8 @@ class QpClosedApp(QWidget):
 
     def query_consulta_qps(self, status_qp):
         numero_qp = self.campo_qp.text().upper().strip()
-        descricao = self.campo_descricao_prod.text().upper().strip()
-        contem_descricao = self.campo_contem_descricao_prod.text().upper().strip()
+        descricao = self.campo_descricao.text().upper().strip()
+        contem_descricao = self.campo_contem_descricao.text().upper().strip()
 
         palavras_contem_descricao = contem_descricao.split('*')
         clausulas_contem_descricao = " AND ".join(
