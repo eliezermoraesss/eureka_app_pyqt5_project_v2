@@ -2,9 +2,6 @@ import locale
 import os
 import sys
 
-from src.app.utils.autocomplete_feature import AutoCompleteManager
-from src.app.utils.search_history_manager import SearchHistoryManager
-
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -27,7 +24,8 @@ from src.app.utils.utils import exibir_mensagem, abrir_desenho, exportar_excel, 
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.dialog.loading_dialog import loading_dialog
 from src.app.utils.run_image_comparator import run_image_comparator_exe, run_image_comparator_model
-
+from src.app.utils.autocomplete_feature import AutoCompleteManager
+from src.app.utils.search_history_manager import SearchHistoryManager
 
 class CustomLineEdit(QLineEdit):
     def __init__(self, entity_name, entity, nome_coluna=None, parent=None):

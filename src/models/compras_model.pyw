@@ -2,6 +2,7 @@ import locale
 import os
 import sys
 
+
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -27,6 +28,8 @@ from src.app.utils.open_search_dialog import open_search_dialog
 from src.dialog.loading_dialog import loading_dialog
 from src.app.utils.consultar_nfe import visualizar_nfe
 from src.app.utils.run_image_comparator import run_image_comparator_exe, run_image_comparator_model
+from src.app.utils.autocomplete_feature import AutoCompleteManager
+from src.app.utils.search_history_manager import SearchHistoryManager
 
 
 class CustomLineEdit(QLineEdit):
@@ -161,17 +164,17 @@ class ComprasApp(QWidget):
         self.campo_codigo.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.add_clear_button(self.campo_codigo)
 
-        self.campo_descricao_prod = QLineEdit(self)
-        self.campo_descricao_prod.setFont(QFont(fonte_campos, tamanho_fonte_campos))
-        self.campo_descricao_prod.setMaxLength(60)
-        self.campo_descricao_prod.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.add_clear_button(self.campo_descricao_prod)
+        self.campo_descricao = QLineEdit(self)
+        self.campo_descricao.setFont(QFont(fonte_campos, tamanho_fonte_campos))
+        self.campo_descricao.setMaxLength(60)
+        self.campo_descricao.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.add_clear_button(self.campo_descricao)
 
-        self.campo_contem_descricao_prod = QLineEdit(self)
-        self.campo_contem_descricao_prod.setFont(QFont(fonte_campos, tamanho_fonte_campos))
-        self.campo_contem_descricao_prod.setMaxLength(60)
-        self.campo_contem_descricao_prod.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.add_clear_button(self.campo_contem_descricao_prod)
+        self.campo_contem_descricao = QLineEdit(self)
+        self.campo_contem_descricao.setFont(QFont(fonte_campos, tamanho_fonte_campos))
+        self.campo_contem_descricao.setMaxLength(60)
+        self.campo_contem_descricao.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.add_clear_button(self.campo_contem_descricao)
 
         self.campo_qp = CustomLineEdit('QPS', 'qps', 'Código', self)
         self.campo_qp.setFont(QFont(fonte_campos, tamanho_fonte_campos))
@@ -231,9 +234,9 @@ class ComprasApp(QWidget):
         self.campo_data_fim.setDate(QDate().currentDate())
         self.add_today_button(self.campo_data_fim)
 
-        self.btn_followup = QPushButton("Pesquisar", self)
-        self.btn_followup.clicked.connect(self.executar_consulta_followup)
-        self.btn_followup.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.btn_consultar = QPushButton("Pesquisar", self)
+        self.btn_consultar.clicked.connect(self.btn_consultar_actions)
+        self.btn_consultar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_onde_e_usado = QPushButton("Onde é usado?", self)
         self.btn_onde_e_usado.clicked.connect(lambda: executar_consulta_onde_usado(self, self.tree))
@@ -292,16 +295,48 @@ class ComprasApp(QWidget):
         self.btn_image_comparator.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_image_comparator.hide()
 
-        self.campo_sc.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_pedido.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_doc_nf.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_codigo.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_descricao_prod.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_contem_descricao_prod.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_qp.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_OP.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_razao_social_fornecedor.returnPressed.connect(self.executar_consulta_followup)
-        self.campo_nm_fantasia_fornecedor.returnPressed.connect(self.executar_consulta_followup)
+        self.field_name_list = [
+            "codigo",
+            "descricao",
+            "contem_descricao",
+            "ordem_producao",
+            "qp",
+            "solic_compras",
+            "pedido_compras",
+            "nf_entrada",
+            "armazem",
+            "fornecedor_razao",
+            "fornecedor_fantasia"
+        ]
+
+        object_fields = {
+            "codigo": self.campo_codigo,
+            "descricao": self.campo_descricao,
+            "contem_descricao": self.campo_contem_descricao,
+            "ordem_producao": self.campo_OP,
+            "qp": self.campo_qp,
+            "solic_compras": self.campo_sc,
+            "pedido_compras": self.campo_pedido,
+            "nf_entrada": self.campo_doc_nf,
+            "armazem": self.campo_armazem,
+            "fornecedor_razao": self.campo_razao_social_fornecedor,
+            "fornecedor_fantasia": self.campo_nm_fantasia_fornecedor
+        }
+
+        history_manager = SearchHistoryManager('compras')
+        self.autocomplete_settings = AutoCompleteManager(history_manager)
+        self.autocomplete_settings.setup_autocomplete(self.field_name_list, object_fields)
+
+        self.campo_sc.returnPressed.connect(self.executar_consulta)
+        self.campo_pedido.returnPressed.connect(self.executar_consulta)
+        self.campo_doc_nf.returnPressed.connect(self.executar_consulta)
+        self.campo_codigo.returnPressed.connect(self.executar_consulta)
+        self.campo_descricao.returnPressed.connect(self.executar_consulta)
+        self.campo_contem_descricao.returnPressed.connect(self.executar_consulta)
+        self.campo_qp.returnPressed.connect(self.executar_consulta)
+        self.campo_OP.returnPressed.connect(self.executar_consulta)
+        self.campo_razao_social_fornecedor.returnPressed.connect(self.executar_consulta)
+        self.campo_nm_fantasia_fornecedor.returnPressed.connect(self.executar_consulta)
 
         layout = QVBoxLayout()
         layout_campos_01 = QHBoxLayout()
@@ -325,11 +360,11 @@ class ComprasApp(QWidget):
 
         container_descricao_prod = QVBoxLayout()
         container_descricao_prod.addWidget(self.label_descricao_prod)
-        container_descricao_prod.addWidget(self.campo_descricao_prod)
+        container_descricao_prod.addWidget(self.campo_descricao)
 
         container_contem_descricao_prod = QVBoxLayout()
         container_contem_descricao_prod.addWidget(self.label_contem_descricao_prod)
-        container_contem_descricao_prod.addWidget(self.campo_contem_descricao_prod)
+        container_contem_descricao_prod.addWidget(self.campo_contem_descricao)
 
         container_op = QVBoxLayout()
         container_op.addWidget(self.label_OP)
@@ -381,7 +416,7 @@ class ComprasApp(QWidget):
         layout_campos_01.addStretch()
         layout_campos_02.addStretch()
 
-        layout_button_03.addWidget(self.btn_followup)
+        layout_button_03.addWidget(self.btn_consultar)
         layout_button_04.addWidget(self.btn_visualizar_nf)
         layout_button_04.addWidget(self.btn_ultimas_nfe)
         layout_button_04.addWidget(self.btn_ultimos_fornecedores)
@@ -540,7 +575,12 @@ class ComprasApp(QWidget):
                 font-weight: bold;
             }
         """)
-
+        
+    def btn_consultar_actions(self):
+        for field_name in self.field_name_list:
+            self.autocomplete_settings.save_search_history(field_name)
+        self.executar_consulta()
+        
     def return_to_main(self):
         self.close()  # Fecha a janela atual
         self.main_window.reopen()  # Reabre ou traz a janela principal ao foco
@@ -715,8 +755,8 @@ class ComprasApp(QWidget):
         self.campo_sc.clear()
         self.campo_pedido.clear()
         self.campo_codigo.clear()
-        self.campo_descricao_prod.clear()
-        self.campo_contem_descricao_prod.clear()
+        self.campo_descricao.clear()
+        self.campo_contem_descricao.clear()
         self.campo_razao_social_fornecedor.clear()
         self.campo_nm_fantasia_fornecedor.clear()
         self.campo_qp.clear()
@@ -770,15 +810,15 @@ class ComprasApp(QWidget):
     def controle_campos_formulario(self, status):
         self.campo_sc.setEnabled(status)
         self.campo_codigo.setEnabled(status)
-        self.campo_descricao_prod.setEnabled(status)
-        self.campo_contem_descricao_prod.setEnabled(status)
+        self.campo_descricao.setEnabled(status)
+        self.campo_contem_descricao.setEnabled(status)
         self.campo_razao_social_fornecedor.setEnabled(status)
         self.campo_qp.setEnabled(status)
         self.campo_OP.setEnabled(status)
         self.campo_data_inicio.setEnabled(status)
         self.campo_data_fim.setEnabled(status)
         self.campo_armazem.setEnabled(status)
-        self.btn_followup.setEnabled(status)
+        self.btn_consultar.setEnabled(status)
         self.btn_exportar_excel.setEnabled(status)
         self.btn_saldo_estoque.setEnabled(status)
         self.btn_onde_e_usado.setEnabled(status)
@@ -795,8 +835,8 @@ class ComprasApp(QWidget):
         cod_armazem = self.campo_armazem.text().upper().strip()
         razao_social_fornecedor = self.campo_razao_social_fornecedor.text().upper().strip()
         nome_fantasia_fornecedor = self.campo_nm_fantasia_fornecedor.text().upper().strip()
-        descricao_produto = self.campo_descricao_prod.text().upper().strip()
-        contem_descricao = self.campo_contem_descricao_prod.text().upper().strip()
+        descricao_produto = self.campo_descricao.text().upper().strip()
+        contem_descricao = self.campo_contem_descricao.text().upper().strip()
         checkbox_sc_somente_com_pedido = self.checkbox_exibir_somente_sc_com_pedido.isChecked()
 
         if numero_pedido.strip() != '':
@@ -1220,7 +1260,7 @@ class ComprasApp(QWidget):
             self.button_visible_control(False)
             return True
 
-    def executar_consulta_followup(self):
+    def executar_consulta(self):
         query_consulta_filtro = self.query_followup()
         query_contagem_linhas = numero_linhas_consulta(query_consulta_filtro)
 
