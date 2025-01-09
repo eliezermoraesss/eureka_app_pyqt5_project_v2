@@ -10,7 +10,7 @@ from PyQt5.QtCore import Qt, QDate, pyqtSignal
 from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtWidgets import QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QDateEdit, QLabel, \
-    QSizePolicy, QTabWidget, QMenu, QDialog, QComboBox, QApplication, QFrame
+    QSizePolicy, QTabWidget, QMenu, QDialog, QComboBox, QFrame
 from sqlalchemy import create_engine
 
 from src.app.utils.consultar_onde_usado import executar_consulta_onde_usado
@@ -24,7 +24,8 @@ from src.app.views.FilterDialog import FilterDialog
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.dialog.loading_dialog import loading_dialog
 from src.app.utils.run_image_comparator import run_image_comparator_exe, run_image_comparator_model
-
+from src.app.utils.search_history_manager import SearchHistoryManager
+from src.app.utils.autocomplete_feature import AutoCompleteManager
 
 class CustomLineEdit(QLineEdit):
     def __init__(self, entity_name, entity, nome_coluna=None, parent=None):
@@ -176,23 +177,23 @@ class VendasApp(QWidget):
         self.campo_codigo.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.add_clear_button(self.campo_codigo)
 
-        self.campo_descricao_prod = QLineEdit(self)
-        self.campo_descricao_prod.setFont(QFont(fonte_campos, tamanho_fonte_campos))
-        self.campo_descricao_prod.setMaxLength(60)
-        self.campo_descricao_prod.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.add_clear_button(self.campo_descricao_prod)
+        self.campo_descricao = QLineEdit(self)
+        self.campo_descricao.setFont(QFont(fonte_campos, tamanho_fonte_campos))
+        self.campo_descricao.setMaxLength(60)
+        self.campo_descricao.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.add_clear_button(self.campo_descricao)
 
-        self.campo_contem_descricao_prod = QLineEdit(self)
-        self.campo_contem_descricao_prod.setFont(QFont(fonte_campos, tamanho_fonte_campos))
-        self.campo_contem_descricao_prod.setMaxLength(60)
-        self.campo_contem_descricao_prod.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.add_clear_button(self.campo_contem_descricao_prod)
+        self.campo_contem_descricao = QLineEdit(self)
+        self.campo_contem_descricao.setFont(QFont(fonte_campos, tamanho_fonte_campos))
+        self.campo_contem_descricao.setMaxLength(60)
+        self.campo_contem_descricao.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.add_clear_button(self.campo_contem_descricao)
 
-        self.campo_doc_nf_entrada = QLineEdit(self)
-        self.campo_doc_nf_entrada.setFont(QFont(fonte_campos, tamanho_fonte_campos))
-        self.campo_doc_nf_entrada.setMaxLength(9)
-        self.campo_doc_nf_entrada.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.add_clear_button(self.campo_doc_nf_entrada)
+        self.campo_nf_saida = QLineEdit(self)
+        self.campo_nf_saida.setFont(QFont(fonte_campos, tamanho_fonte_campos))
+        self.campo_nf_saida.setMaxLength(9)
+        self.campo_nf_saida.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.add_clear_button(self.campo_nf_saida)
 
         self.campo_orcamento = QLineEdit(self)
         self.campo_orcamento.setFont(QFont(fonte_campos, tamanho_fonte_campos))
@@ -228,7 +229,7 @@ class VendasApp(QWidget):
         self.add_today_button(self.campo_data_fim)
 
         self.btn_pesquisar = QPushButton("Pesquisar", self)
-        self.btn_pesquisar.clicked.connect(self.executar_consulta)
+        self.btn_pesquisar.clicked.connect(self.btn_consultar_actions)
         self.btn_pesquisar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_onde_e_usado = QPushButton("Onde é usado?", self)
@@ -303,13 +304,39 @@ class VendasApp(QWidget):
         self.combobox_tipo_pedido.addItem('QR', '2')
         self.combobox_tipo_pedido.addItem('Outros', '3')
 
+        self.field_name_list = [
+            "codigo",
+            "descricao",
+            "contem_descricao",
+            "orcamento",
+            "mensagem_nota",
+            "nf_saida",
+            "pedido_venda",
+            "cliente"
+        ]
+
+        object_fields = {
+            "codigo": self.campo_codigo,
+            "descricao": self.campo_descricao,
+            "contem_descricao": self.campo_contem_descricao,
+            "orcamento": self.campo_orcamento,
+            "mensagem_nota": self.campo_msg_nota,
+            "nf_saida": self.campo_nf_saida,
+            "pedido_venda": self.campo_pedido,
+            "cliente": self.campo_nome_cliente
+        }
+
+        history_manager = SearchHistoryManager('vendas')
+        self.autocomplete_settings = AutoCompleteManager(history_manager)
+        self.autocomplete_settings.setup_autocomplete(self.field_name_list, object_fields)
+
         self.campo_pedido.returnPressed.connect(self.executar_consulta)
         self.campo_msg_nota.returnPressed.connect(self.executar_consulta)
         self.campo_orcamento.returnPressed.connect(self.executar_consulta)
-        self.campo_doc_nf_entrada.returnPressed.connect(self.executar_consulta)
+        self.campo_nf_saida.returnPressed.connect(self.executar_consulta)
         self.campo_codigo.returnPressed.connect(self.executar_consulta)
-        self.campo_descricao_prod.returnPressed.connect(self.executar_consulta)
-        self.campo_contem_descricao_prod.returnPressed.connect(self.executar_consulta)
+        self.campo_descricao.returnPressed.connect(self.executar_consulta)
+        self.campo_contem_descricao.returnPressed.connect(self.executar_consulta)
         self.campo_nome_cliente.returnPressed.connect(self.executar_consulta)
 
         layout = QVBoxLayout()
@@ -340,11 +367,11 @@ class VendasApp(QWidget):
 
         container_descricao_prod = QVBoxLayout()
         container_descricao_prod.addWidget(self.label_descricao_prod)
-        container_descricao_prod.addWidget(self.campo_descricao_prod)
+        container_descricao_prod.addWidget(self.campo_descricao)
 
         container_contem_descricao_prod = QVBoxLayout()
         container_contem_descricao_prod.addWidget(self.label_contem_descricao_prod)
-        container_contem_descricao_prod.addWidget(self.campo_contem_descricao_prod)
+        container_contem_descricao_prod.addWidget(self.campo_contem_descricao)
 
         container_op = QVBoxLayout()
         container_op.addWidget(self.label_orcamento)
@@ -352,7 +379,7 @@ class VendasApp(QWidget):
 
         container_doc_nf = QVBoxLayout()
         container_doc_nf.addWidget(self.label_nf_saida)
-        container_doc_nf.addWidget(self.campo_doc_nf_entrada)
+        container_doc_nf.addWidget(self.campo_nf_saida)
 
         container_data_ini = QVBoxLayout()
         container_data_ini.addWidget(self.label_data_inicio)
@@ -574,6 +601,11 @@ class VendasApp(QWidget):
             }
         """)
 
+    def btn_consultar_actions(self):
+        for field_name in self.field_name_list:
+            self.autocomplete_settings.save_search_history(field_name)
+        self.executar_consulta()
+
     def return_to_main(self):
         self.close()  # Fecha a janela atual
         self.main_window.reopen()  # Reabre ou traz a janela principal ao foco
@@ -729,8 +761,8 @@ class VendasApp(QWidget):
         self.campo_msg_nota.clear()
         self.campo_pedido.clear()
         self.campo_codigo.clear()
-        self.campo_descricao_prod.clear()
-        self.campo_contem_descricao_prod.clear()
+        self.campo_descricao.clear()
+        self.campo_contem_descricao.clear()
         self.campo_nome_cliente.clear()
         self.campo_orcamento.clear()
         self.combobox_status_pedido.setCurrentText('-')
@@ -782,8 +814,8 @@ class VendasApp(QWidget):
     def controle_campos_formulario(self, status):
         self.campo_msg_nota.setEnabled(status)
         self.campo_codigo.setEnabled(status)
-        self.campo_descricao_prod.setEnabled(status)
-        self.campo_contem_descricao_prod.setEnabled(status)
+        self.campo_descricao.setEnabled(status)
+        self.campo_contem_descricao.setEnabled(status)
         self.campo_nome_cliente.setEnabled(status)
         self.campo_orcamento.setEnabled(status)
         self.campo_data_inicio.setEnabled(status)
@@ -799,11 +831,11 @@ class VendasApp(QWidget):
     def query_consulta(self):
         pedido_venda = self.campo_pedido.text().upper().strip()
         orcamento = self.campo_orcamento.text().upper().strip()
-        doc_nf_saida = self.campo_doc_nf_entrada.text().upper().strip()
+        doc_nf_saida = self.campo_nf_saida.text().upper().strip()
         codigo_produto = self.campo_codigo.text().upper().strip()
         nome_cliente = self.campo_nome_cliente.text().upper().strip()
-        descricao_produto = self.campo_descricao_prod.text().upper().strip()
-        contem_descricao = self.campo_contem_descricao_prod.text().upper().strip()
+        descricao_produto = self.campo_descricao.text().upper().strip()
+        contem_descricao = self.campo_contem_descricao.text().upper().strip()
         mensagem_nota = self.campo_msg_nota.text().upper().strip()
         status_pedido = self.combobox_status_pedido.currentData()
         tipo_pedido = self.combobox_tipo_pedido.currentData()
