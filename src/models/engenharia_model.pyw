@@ -318,7 +318,7 @@ class EngenhariaApp(QWidget):
         layout.addLayout(self.layout_footer_label)
         self.setLayout(layout)
 
-        history_manager = SearchHistoryManager()
+        history_manager = SearchHistoryManager('engenharia')
         self.autocomplete_settings = AutoCompleteManager(history_manager)
         self.autocomplete_settings.setup_autocomplete(self.field_name_list, object_fields)
 
