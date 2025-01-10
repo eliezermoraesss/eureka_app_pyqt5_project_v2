@@ -66,9 +66,12 @@ def copiar_linha(item):
 
 def abrir_desenho(self, table=None, codigo_param=None):
     codigo_desenho = ''
-    item_selecionado = table.currentItem()
+    if table is not None:
+        item_selecionado = table.currentItem()
+    else:
+        item_selecionado = ''
 
-    if item_selecionado:
+    if item_selecionado or codigo_param:
         if table is not None:
             header = table.horizontalHeader()
             codigo_col = None

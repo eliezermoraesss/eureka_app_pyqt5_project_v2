@@ -28,6 +28,7 @@ from src.app.utils.autocomplete_feature import AutoCompleteManager
 from src.app.utils.search_history_manager import SearchHistoryManager
 from src.resources.styles.qss_pcp import pcp_qss
 
+
 class CustomLineEdit(QLineEdit):
     def __init__(self, entity_name, entity, nome_coluna=None, parent=None):
         super(CustomLineEdit, self).__init__(parent)
@@ -627,7 +628,7 @@ class PcpApp(QWidget):
                 C2_DATPRF AS "Prev. Entrega",
                 C2_DATRF AS "Fechamento", 
                 C2_OBS AS "Observação",
-                C2_QUJE AS "Quant. Produzida", 
+                C2_QUJE AS "Quant. Disponível", 
                 C2_AGLUT AS "Aglutinada?",
                 users.USR_NOME AS "Aberto por:" 
             FROM 
