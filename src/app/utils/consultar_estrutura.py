@@ -2,7 +2,9 @@ import ctypes
 import locale
 from datetime import datetime
 
+import pandas as pd
 import pyodbc
+from sqlalchemy import create_engine
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QAbstractItemView, QItemDelegate, \
@@ -47,7 +49,7 @@ def executar_consulta_estrutura(self, table):
                             struct.G1_COMP AS "Código", 
                             prod.B1_DESC AS "Descrição", 
                             struct.G1_QUANT AS "Quantidade", 
-                            struct.G1_XUM AS "Unid.", 
+                            prod.B1_UM AS "Unid.",
                             struct.G1_REVFIM AS "Revisão", 
                             struct.G1_INI AS "Inserido em:",
                             prod.B1_MSBLQL AS "Bloqueado?",
@@ -68,13 +70,12 @@ def executar_consulta_estrutura(self, table):
                             B1_DESC ASC;
                     """
                 self.guias_abertas.append(codigo)
-                conn = pyodbc.connect(
-                    f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}')
                 try:
-                    cursor = conn.cursor()
-                    cursor.execute(select_query_estrutura)
-
-                    if cursor.rowcount == 0:
+                    conn_str = f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+                    engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
+                    df = pd.read_sql(select_query_estrutura, engine)
+                    
+                    if df.empty:
                         QMessageBox.information(None, "Atenção", f"{codigo}\n\nEstrutura não encontrada.\n\nEureka®")
                         return
 
@@ -90,8 +91,8 @@ def executar_consulta_estrutura(self, table):
                     tabela.customContextMenuRequested.connect(
                         lambda pos: self.show_context_menu(pos, tabela))
 
-                    tabela.setColumnCount(len(cursor.description))
-                    tabela.setHorizontalHeaderLabels([desc[0] for desc in cursor.description])
+                    tabela.setColumnCount(len(df.columns))
+                    tabela.setHorizontalHeaderLabels(df.columns)
 
                     # Tornar a tabela somente leitura
                     tabela.setEditTriggers(QTableWidget.NoEditTriggers)
@@ -99,40 +100,38 @@ def executar_consulta_estrutura(self, table):
                     # Permitir edição apenas na coluna "Quantidade" (assumindo que "Quantidade" é a terceira coluna,
                     # índice 2)
                     tabela.setEditTriggers(QAbstractItemView.DoubleClicked)
-                    tabela.setItemDelegateForColumn(2, QItemDelegate(tabela))
+                    tabela.setItemDelegateForColumn(df.columns.get_loc('Quantidade'), QItemDelegate(tabela))
 
                     # Configurar a fonte da tabela
                     fonte_tabela = QFont("Segoe UI", 8)  # Substitua por sua fonte desejada e tamanho
                     tabela.setFont(fonte_tabela)
 
                     # Ajustar a altura das linhas
-                    altura_linha = 22  # Substitua pelo valor desejado
-                    tabela.verticalHeader().setDefaultSectionSize(altura_linha)
+                    tabela.verticalHeader().setDefaultSectionSize(22)
 
-                    for i, row in enumerate(cursor.fetchall()):
+                    for i, row in df.iterrows():
                         tabela.insertRow(i)
-                        for j, value in enumerate(row):
-                            if j == 2:
+                        for column_name, value in row.items():
+                            if column_name == 'Quantidade':
                                 valor_formatado = locale.format_string("%.2f", value, grouping=True)
-                            elif j == 5:
+                            elif column_name == 'Inserido em:':
                                 data_obj = datetime.strptime(value, "%Y%m%d")
                                 valor_formatado = data_obj.strftime("%d/%m/%Y")
-                            elif j == 6:  # Verifica se o valor é da coluna B1_MSBLQL
+                            elif column_name == 'Bloqueado?':  # Verifica se o valor é da coluna B1_MSBLQL
                                 # Converte o valor 1 para 'Sim' e 2 para 'Não'
-                                if value == '1':
-                                    valor_formatado = 'Sim'
-                                else:
-                                    valor_formatado = 'Não'
+                                valor_formatado = 'Sim' if value == '1' else 'Não'
                             else:
                                 valor_formatado = str(value).strip()
 
                             item = QTableWidgetItem(valor_formatado)
                             item.setForeground(QColor("#EEEEEE"))  # Definir cor do texto da coluna quantidade
 
-                            if j != 0 and j != 1:
-                                item.setTextAlignment(Qt.AlignCenter)
+                            if column_name not in ('Código', 'Descrição'):
+                                item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+                            else:
+                                item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
-                            tabela.setItem(i, j, item)
+                            tabela.setItem(i, df.columns.get_loc(column_name), item)
 
                     tabela.setSortingEnabled(True)
 
@@ -227,7 +226,8 @@ def executar_consulta_estrutura(self, table):
                     print(f"Falha na consulta de estrutura. Erro: {str(ex)}")
 
                 finally:
-                    conn.close()
+                    if 'engine' in locals():
+                        engine.dispose()
 
 
 def alterar_quantidade_estrutura(codigo_pai, codigo_filho, quantidade):
