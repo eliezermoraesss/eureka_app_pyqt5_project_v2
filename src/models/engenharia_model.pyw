@@ -693,32 +693,28 @@ class EngenhariaApp(QWidget):
                 return
 
             # Preencher a tabela com os resultados
-            for i, row in dataframe.iterrows():
-
+            for i, (index, row) in enumerate(dataframe.iterrows()):
                 self.tree.setSortingEnabled(False)  # Permitir ordenação
                 # Inserir os valores formatados na tabela
                 self.tree.insertRow(i)
-                for j, value in enumerate(row):
-                    if j == 9:  # Verifica se o valor é da coluna B1_MSBLQL
+                for column_name, value in row.items():
+                    if column_name == 'Bloqueado?':  # Verifica se o valor é da coluna B1_MSBLQL
                         # Converte o valor 1 para 'Sim' e 2 para 'Não'
                         if value == '1':
                             value = 'Sim'
                         else:
                             value = 'Não'
-                    elif j == 11 or j == 12:
+                    elif column_name == 'Cadastrado em:' or column_name == 'Data Últ. Rev.':
                         if not value.isspace():
                             data_obj = datetime.strptime(value, "%Y%m%d")
                             value = data_obj.strftime("%d/%m/%Y")
 
                     item = QTableWidgetItem(str(value).strip())
 
-                    if j != 0 and j != 1:
+                    if column_name not in ['Código', 'Descrição']:
                         item.setTextAlignment(Qt.AlignCenter)
 
-                    self.tree.setItem(i, j, item)
-
-                # Permitir que a interface gráfica seja atualizada
-                # QCoreApplication.processEvents()
+                    self.tree.setItem(i, list(row.index).index(column_name), item)
 
             self.tree.setSortingEnabled(True)  # Permitir ordenação
 
