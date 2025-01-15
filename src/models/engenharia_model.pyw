@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 
 import pyodbc
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QFont, QIcon, QPixmap
+from PyQt5.QtGui import QFont, QIcon, QPixmap, QColor, QBrush
 from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, \
     QTableWidgetItem, QSizePolicy, QSpacerItem, QTabWidget, \
@@ -665,6 +665,7 @@ class EngenhariaApp(QWidget):
             dataframe_line_number = pd.read_sql(query_contagem_linhas, self.engine)
             line_number = dataframe_line_number.iloc[0, 0]
             dataframe = pd.read_sql(query_consulta, self.engine)
+            dataframe.insert(5, 'Desenho PDF', '')
 
             if not dataframe.empty:
 
@@ -692,6 +693,9 @@ class EngenhariaApp(QWidget):
                 exibir_mensagem("EUREKA® Engenharia", 'Nada encontrado!', "info")
                 return
 
+            COLOR_FILE_EXISTS = QColor(51, 211, 145)  # green
+            COLOR_FILE_MISSING = QColor(201, 92, 118)  # light red
+
             # Preencher a tabela com os resultados
             for i, (index, row) in enumerate(dataframe.iterrows()):
                 self.tree.setSortingEnabled(False)  # Permitir ordenação
@@ -712,7 +716,25 @@ class EngenhariaApp(QWidget):
                     item = QTableWidgetItem(str(value).strip())
 
                     if column_name not in ['Código', 'Descrição']:
-                        item.setTextAlignment(Qt.AlignCenter)
+                        item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+                    else:
+                        item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+
+                    # Special handling for Desenho PDF column
+                    if column_name == 'Desenho PDF':
+                        codigo_desenho = row['Código'].strip()  # Assuming 'Código' is the column with drawing codes
+                        pdf_path = os.path.join(r"\\192.175.175.4\dados\EMPRESA\PROJETOS\PDF-OFICIAL",
+                                                f"{codigo_desenho}.PDF")
+
+                        # Check if file exists and set background color accordingly
+                        if os.path.exists(pdf_path):
+                            item.setBackground(COLOR_FILE_EXISTS)
+                            item.setText('Sim')
+                            item.setToolTip("Desenho encontrado")
+                        else:
+                            item.setBackground(COLOR_FILE_MISSING)
+                            item.setText('Não')
+                            item.setToolTip("Desenho não encontrado")
 
                     self.tree.setItem(i, list(row.index).index(column_name), item)
 

@@ -103,8 +103,8 @@ def engenharia_qss():
             }
 
             QTableWidget::item {
-                background-color: #363636;
-                color: #fff;
+                /* background-color: #363636; */
+                color: #f9feff;
                 font-weight: bold;
                 padding-right: 8px;
                 padding-left: 8px;
@@ -112,6 +112,6 @@ def engenharia_qss():
 
             QTableWidget::item:selected {
                 background-color: #000000;
-                color: #EEEEEE;
+                color: #f9feff;
                 font-weight: bold;
             }"""
