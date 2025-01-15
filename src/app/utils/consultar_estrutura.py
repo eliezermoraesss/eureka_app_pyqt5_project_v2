@@ -1,5 +1,6 @@
 import ctypes
 import locale
+import os
 from datetime import datetime
 
 import pandas as pd
@@ -74,6 +75,7 @@ def executar_consulta_estrutura(self, table):
                     conn_str = f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}'
                     engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
                     df = pd.read_sql(select_query_estrutura, engine)
+                    df.insert(5, 'Desenho PDF', '')
                     
                     if df.empty:
                         QMessageBox.information(None, "Atenção", f"{codigo}\n\nEstrutura não encontrada.\n\nEureka®")
@@ -109,6 +111,9 @@ def executar_consulta_estrutura(self, table):
                     # Ajustar a altura das linhas
                     tabela.verticalHeader().setDefaultSectionSize(22)
 
+                    COLOR_FILE_EXISTS = QColor(51, 211, 145)  # green
+                    COLOR_FILE_MISSING = QColor(201, 92, 118)  # light red
+            
                     for i, row in df.iterrows():
                         tabela.insertRow(i)
                         for column_name, value in row.items():
@@ -130,6 +135,20 @@ def executar_consulta_estrutura(self, table):
                                 item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
                             else:
                                 item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+
+                            if column_name == 'Desenho PDF':
+                                codigo_desenho = row['Código'].strip()  # Assuming 'Código' is the column with drawing codes
+                                pdf_path = os.path.join(r"\\192.175.175.4\dados\EMPRESA\PROJETOS\PDF-OFICIAL",
+                                                        f"{codigo_desenho}.PDF")
+                                
+                                if os.path.exists(pdf_path):
+                                    item.setBackground(COLOR_FILE_EXISTS)
+                                    item.setText('Sim')
+                                    item.setToolTip("Desenho encontrado")
+                                else:
+                                    item.setBackground(COLOR_FILE_MISSING)
+                                    item.setText('Não')
+                                    item.setToolTip("Desenho não encontrado")
 
                             tabela.setItem(i, df.columns.get_loc(column_name), item)
 

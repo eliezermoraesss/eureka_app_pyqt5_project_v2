@@ -64,12 +64,12 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
         self.ui.desc_comp_field.setText(self.selected_row[2])
         self.ui.tipo_field.setText(self.selected_row[3])
         self.ui.um_field.setText(self.selected_row[4])
-        self.ui.armazem_field.setText(self.selected_row[5])
-        self.ui.cc_field.setText(self.selected_row[8])
-        self.ui.grupo_field.setText(self.selected_row[6])
-        self.ui.desc_grupo_field.setText(self.selected_row[7])
-        self.ui.bloquear_combobox.setCurrentText(self.selected_row[9])
-        self.ui.endereco_field.setText(self.selected_row[13])
+        self.ui.armazem_field.setText(self.selected_row[6])
+        self.ui.cc_field.setText(self.selected_row[9])
+        self.ui.grupo_field.setText(self.selected_row[7])
+        self.ui.desc_grupo_field.setText(self.selected_row[8])
+        self.ui.bloquear_combobox.setCurrentText(self.selected_row[10])
+        self.ui.endereco_field.setText(self.selected_row[14])
 
         self.ui.btn_close.clicked.connect(self.close)
         self.ui.btn_save.clicked.connect(self.update_product)
@@ -125,12 +125,12 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
         self.selected_row[2] = self.ui.desc_comp_field.text().upper().strip()
         self.selected_row[3] = self.ui.tipo_field.text().upper().strip()
         self.selected_row[4] = self.ui.um_field.text().upper().strip()
-        self.selected_row[5] = self.ui.armazem_field.text().upper().strip()
-        self.selected_row[6] = self.ui.grupo_field.text().upper().strip()
-        self.selected_row[7] = self.ui.desc_grupo_field.text().upper().strip()
-        self.selected_row[8] = self.ui.cc_field.text().upper().strip()
-        self.selected_row[9] = self.ui.bloquear_combobox.currentText()
-        self.selected_row[13] = self.ui.endereco_field.text().upper().strip()
+        self.selected_row[6] = self.ui.armazem_field.text().upper().strip()
+        self.selected_row[7] = self.ui.grupo_field.text().upper().strip()
+        self.selected_row[8] = self.ui.desc_grupo_field.text().upper().strip()
+        self.selected_row[9] = self.ui.cc_field.text().upper().strip()
+        self.selected_row[10] = self.ui.bloquear_combobox.currentText()
+        self.selected_row[14] = self.ui.endereco_field.text().upper().strip()
 
     def verify_blank_required_fields(self):
         self.required_field_is_blank = False
@@ -174,12 +174,12 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
                 self.selected_row[2].ljust(60),
                 self.selected_row[3].ljust(2),
                 self.selected_row[4].ljust(2),
-                self.selected_row[5].ljust(2),
-                self.selected_row[6].ljust(4),
-                self.selected_row[7].ljust(30),
-                self.selected_row[8].ljust(9),
-                '1' if self.selected_row[9] == 'Sim' else '2',
-                self.selected_row[13].ljust(6),
+                self.selected_row[6].ljust(2),
+                self.selected_row[7].ljust(4),
+                self.selected_row[8].ljust(30),
+                self.selected_row[9].ljust(9),
+                '1' if self.selected_row[10] == 'Sim' else '2',
+                self.selected_row[14].ljust(6),
                 f"{self.selected_row[0]}%"
             ]
 
