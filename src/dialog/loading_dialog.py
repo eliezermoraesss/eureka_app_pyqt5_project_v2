@@ -7,7 +7,7 @@ def loading_dialog(parent, titulo, mensagem):
     dialog = QDialog(parent)
     dialog.setWindowTitle(titulo)
     dialog.setWindowModality(Qt.ApplicationModal)  # Bloqueia interações com a janela principal
-    dialog.setFixedSize(400, 150)  # Define um tamanho maior
+    dialog.setFixedSize(300, 150)  # Define um tamanho maior
     dialog.setWindowFlags(dialog.windowFlags() & ~Qt.WindowContextHelpButtonHint)  # Remove botão de ajuda
 
     layout = QVBoxLayout()

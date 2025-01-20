@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QAbstractItemView, QAction, QFileDialog)
 from PyQt5.QtCore import Qt
 from sqlalchemy import create_engine
-from db_mssql import setup_mssql
+from .db_mssql import setup_mssql
 from datetime import datetime
 
 

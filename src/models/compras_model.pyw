@@ -1157,8 +1157,7 @@ class ComprasApp(QWidget):
                 exibir_mensagem("EUREKA® Compras", 'Nenhum resultado encontrado nesta pesquisa.', "info")
                 return
 
-            dialog = loading_dialog(self, "Carregando...", "🤖 Processando dados do TOTVS..."
-                                                           "\n\n🤖 Por favor, aguarde.\n\nEureka®")
+            dialog = loading_dialog(self, "Eureka® Compras", "🤖 Consultando dados...\n\nPor favor, aguarde.")
 
             self.dataframe = pd.read_sql(query_consulta_filtro, self.engine)
             self.dataframe.insert(0, ' ', '')
