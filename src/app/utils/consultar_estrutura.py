@@ -5,23 +5,22 @@ from datetime import datetime
 
 import pandas as pd
 import pyodbc
-from sqlalchemy import create_engine
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QAbstractItemView, QItemDelegate, \
     QTableWidgetItem, QPushButton, QSizePolicy, QLabel, QSpacerItem, QMessageBox
+from sqlalchemy import create_engine
 
+from src.app.utils.utils import ajustar_largura_coluna_descricao, exportar_excel, abrir_hierarquia_estrutura
 from .db_mssql import setup_mssql
-from src.app.utils.utils import ajustar_largura_coluna_descricao, exportar_excel
 
 
 def executar_consulta_estrutura(self, table):
     """
     Executes a query to retrieve and display the structure of a product in a PyQt5 application.
 
-    Parameters:
-    self (object): The instance of the class or object that the method belongs to.
-    table (QTableWidget): A PyQt5 QTableWidget object representing the table from which the selected item will be retrieved.
+    Parameters: self (object): The instance of the class or object that the method belongs to. table (QTableWidget):
+    A PyQt5 QTableWidget object representing the table from which the selected item will be retrieved.
 
     Returns:
     None
@@ -137,7 +136,7 @@ def executar_consulta_estrutura(self, table):
                                 item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
                             if column_name == 'Desenho PDF':
-                                codigo_desenho = row['Código'].strip()  # Assuming 'Código' is the column with drawing codes
+                                codigo_desenho = row['Código'].strip()
                                 pdf_path = os.path.join(r"\\192.175.175.4\dados\EMPRESA\PROJETOS\PDF-OFICIAL",
                                                         f"{codigo_desenho}.PDF")
                                 
@@ -156,17 +155,23 @@ def executar_consulta_estrutura(self, table):
 
                     # Ajustar automaticamente a largura da coluna "Descrição"
                     ajustar_largura_coluna_descricao(tabela)
+                    
+                    codigo_pai = codigo
+                    btn_estrutura_explodida = QPushButton("Consultar estrutura explodida", self)
+                    btn_estrutura_explodida.clicked.connect(lambda: abrir_hierarquia_estrutura(self, codigo_pai))
+                    btn_estrutura_explodida.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
-                    btn_exportar_excel_estrutura = QPushButton("Exportar Excel", self)
-                    btn_exportar_excel_estrutura.clicked.connect(lambda: exportar_excel(self, tabela))
-                    btn_exportar_excel_estrutura.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+                    btn_exportar_excel = QPushButton("Exportar Excel", self)
+                    btn_exportar_excel.clicked.connect(lambda: exportar_excel(self, tabela))
+                    btn_exportar_excel.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
                     select_product_label = QLabel(f"CONSULTA DE ESTRUTURA \n\n{codigo}\t{descricao}")
                     select_product_label.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
 
                     layout_cabecalho.addWidget(select_product_label, alignment=Qt.AlignLeft)
                     layout_cabecalho.addSpacerItem(QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
-                    layout_cabecalho.addWidget(btn_exportar_excel_estrutura)
+                    layout_cabecalho.addWidget(btn_estrutura_explodida)
+                    layout_cabecalho.addWidget(btn_exportar_excel)
 
                     layout_nova_guia_estrutura.addLayout(layout_cabecalho)
                     layout_nova_guia_estrutura.addWidget(tabela)

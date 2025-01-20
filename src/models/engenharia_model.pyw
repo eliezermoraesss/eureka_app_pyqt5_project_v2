@@ -31,8 +31,6 @@ from src.app.utils.run_image_comparator import *
 from src.app.utils.autocomplete_feature import AutoCompleteManager
 from src.app.utils.search_history_manager import SearchHistoryManager
 from src.resources.styles.qss_engenharia import engenharia_qss
-from src.app.utils.hierarquia_estrutura import BOMViewer as HierarquiaEstruturaWindow
-from src.dialog.loading_dialog import loading_dialog
 
 
 class CustomLineEdit(QLineEdit):
@@ -427,7 +425,7 @@ class EngenhariaApp(QWidget):
             context_menu_consultar_estrutura.triggered.connect(lambda: executar_consulta_estrutura(self, table))
 
             context_menu_hierarquia_estrutura = QAction('Consultar estrutura explodida...', self)
-            context_menu_hierarquia_estrutura.triggered.connect(self.abrir_hierarquia_estrutura)
+            context_menu_hierarquia_estrutura.triggered.connect(lambda: abrir_hierarquia_estrutura(self))
 
             context_menu_consultar_onde_usado = QAction('Onde é usado?', self)
             context_menu_consultar_onde_usado.triggered.connect(lambda: executar_consulta_onde_usado(self, table))
@@ -492,18 +490,6 @@ class EngenhariaApp(QWidget):
             for column, value in enumerate(selected_row_table):
                 item = QTableWidgetItem(value)
                 self.tree.setItem(selected_row, column, item)
-
-    def abrir_hierarquia_estrutura(self):
-        selected_row_table = self.linha_selecionada()
-        if selected_row_table:
-            codigo_index = self.tree.horizontalHeaderItem(0).text().index("Código")
-            codigo_pai = selected_row_table[codigo_index]  # Usa o índice encontrado
-            dialog = loading_dialog(self, "Eureka® Engenharia", "🤖 Consultando dados...\n\nPor favor, aguarde.")
-            hierarquia_estrutura_window = HierarquiaEstruturaWindow(codigo_pai)
-            hierarquia_estrutura_window.showMaximized()
-            hierarquia_estrutura_window.raise_()
-            hierarquia_estrutura_window.activateWindow()
-            dialog.close()
 
     def configurar_tabela_tooltips(self, dataframe):
         tooltips = {
