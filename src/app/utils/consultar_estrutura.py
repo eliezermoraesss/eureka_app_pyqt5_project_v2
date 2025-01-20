@@ -11,7 +11,7 @@ from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QAbstractItemView, QItemDelegate, \
     QTableWidgetItem, QPushButton, QSizePolicy, QLabel, QSpacerItem, QMessageBox
 
-from src.app.utils.db_mssql import setup_mssql
+from .db_mssql import setup_mssql
 from src.app.utils.utils import ajustar_largura_coluna_descricao, exportar_excel
 
 
