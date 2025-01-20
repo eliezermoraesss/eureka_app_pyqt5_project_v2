@@ -398,3 +398,14 @@ class BOMViewer(QMainWindow):
                 os.startfile(filename)
             except Exception as e:
                 print(f"Erro ao exportar para Excel: {str(e)}")
+
+
+def main():
+    app = QApplication(sys.argv)
+    viewer = BOMViewer('E7000-009-019')
+    viewer.showMaximized()
+    sys.exit(app.exec_())
+
+
+if __name__ == "__main__":
+    main()
