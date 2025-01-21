@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QTreeWidgetItem, QSplitter, QLineEdit, QLabel, QHBoxLayout,
                              QAbstractItemView, QAction, QFileDialog)
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor
 from sqlalchemy import create_engine
 from .db_mssql import setup_mssql
 from datetime import datetime
@@ -203,8 +204,9 @@ class BOMViewer(QMainWindow):
 
         self.get_components(codigo_pai)
         self.df = pd.DataFrame(self.all_components)
+        self.df.insert(5, 'Desenho PDF', '')
         # Reordenar as colunas
-        self.df = self.df[['NIVEL', 'CODIGO', 'CODIGO_PAI', 'DESCRICAO', 'UNIDADE', 'QTD_NIVEL', 'QTD_TOTAL']]
+        self.df = self.df[['NIVEL', 'CODIGO', 'CODIGO_PAI', 'DESCRICAO', 'Desenho PDF', 'UNIDADE', 'QTD_NIVEL', 'QTD_TOTAL']]
 
         self.setup_table()
         self.build_tree()
@@ -252,14 +254,38 @@ class BOMViewer(QMainWindow):
 
     def populate_table(self, df):
         self.table.setRowCount(len(df))
+        COLOR_FILE_EXISTS = QColor(51, 211, 145)  # green
+        COLOR_FILE_MISSING = QColor(201, 92, 118)  # light red
         for i, row in df.iterrows():
-            for j, value in enumerate(row):
+            for j, (column_name, value) in enumerate(row.items()):
+                item = QTableWidgetItem()
+                
                 # Formatar quantidades (colunas QTD_NIVEL e QTD_TOTAL)
-                if j in [5, 6]:  # índices das colunas de quantidade
+                if column_name in ['QTD_NIVEL', 'QTD_TOTAL']:
                     formatted_value = self.format_quantity(value)
+                    item.setText(formatted_value)
+                # Special handling for Desenho PDF column
+                elif column_name == 'Desenho PDF':
+                    codigo_desenho = row['CODIGO'].strip()
+                    pdf_path = os.path.join(r"\\192.175.175.4\dados\EMPRESA\PROJETOS\PDF-OFICIAL",
+                                            f"{codigo_desenho}.PDF")
+                    if os.path.exists(pdf_path):
+                        item.setBackground(COLOR_FILE_EXISTS)
+                        item.setText('Sim')
+                        item.setToolTip("Desenho encontrado")
+                    else:
+                        item.setBackground(COLOR_FILE_MISSING)
+                        item.setText('Não')
+                        item.setToolTip("Desenho não encontrado")
                 else:
-                    formatted_value = str(value)
-                item = QTableWidgetItem(formatted_value)
+                    item.setText(str(value))
+                
+                # Alinhar ao centro exceto código e descrição
+                if column_name not in ['CODIGO', 'DESCRICAO']:
+                    item.setTextAlignment(Qt.AlignCenter)
+                else:
+                    item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+                
                 self.table.setItem(i, j, item)
 
     def build_tree_recursive(self, parent_item, parent_code, parent_qty):
