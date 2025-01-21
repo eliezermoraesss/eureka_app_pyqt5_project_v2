@@ -21,7 +21,7 @@ class BOMViewer(QMainWindow):
         self.codigo_pai = codigo_pai
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
         self.all_components = []
-        self.setWindowTitle('Eureka® - Visualizador de hierarquia de estrutura')
+        self.setWindowTitle(f'Eureka® - Visualizador de hierarquia de estrutura - {codigo_pai}')
 
         # Widget central
         central_widget = QWidget()
@@ -38,12 +38,19 @@ class BOMViewer(QMainWindow):
         filter_layout.addWidget(filter_label_codigo)
         filter_layout.addWidget(self.filter_input_codigo)
 
-        # Filtro por Descrição
+        # Filtro por Descrição (início)
         filter_label_desc = QLabel("Descrição:")
         self.filter_input_desc = QLineEdit()
         self.filter_input_desc.textChanged.connect(self.filter_tables)
         filter_layout.addWidget(filter_label_desc)
         filter_layout.addWidget(self.filter_input_desc)
+
+        # Filtro por Descrição (contém)
+        filter_label_desc_contains = QLabel("Contém na Descrição:")
+        self.filter_input_desc_contains = QLineEdit()
+        self.filter_input_desc_contains.textChanged.connect(self.filter_tables)
+        filter_layout.addWidget(filter_label_desc_contains)
+        filter_layout.addWidget(self.filter_input_desc_contains)
 
         layout.addLayout(filter_layout)
 
@@ -322,41 +329,51 @@ class BOMViewer(QMainWindow):
         self.build_tree_recursive(root_item, self.codigo_pai, 1.0)
 
     def filter_tables(self):
+        # Obtém o texto digitado nos campos de filtro, converte para minúsculo e remove espaços
         filter_codigo = self.filter_input_codigo.text().lower().strip()
         filter_desc = self.filter_input_desc.text().lower().strip()
+        filter_desc_contains = self.filter_input_desc_contains.text().lower().strip()
 
-        # Filtrar a tabela
+        # PARTE 1: FILTRAGEM DA TABELA
         for row in range(self.table.rowCount()):
             row_visible = True
-            codigo = self.table.item(row, 1).text().lower()  # Coluna CODIGO
-            descricao = self.table.item(row, 3).text().lower()  # Coluna DESCRICAO
+            codigo = self.table.item(row, 1).text().lower()
+            descricao = self.table.item(row, 3).text().lower()
 
             if filter_codigo and filter_codigo not in codigo:
                 row_visible = False
-            if filter_desc and filter_desc not in descricao:
+            if filter_desc and not descricao.startswith(filter_desc):  # Busca no início
+                row_visible = False
+            if filter_desc_contains and filter_desc_contains not in descricao:  # Busca em qualquer parte
                 row_visible = False
 
             self.table.setRowHidden(row, not row_visible)
 
-        # Filtrar a árvore
+        # PARTE 2: FILTRAGEM DA ÁRVORE
+        first_match = None
+        matched_items = []
+
         def process_item(item):
+            nonlocal first_match
             text = item.text(0).lower()
             item_visible = True
 
-            # Verificar se o item corresponde aos critérios de filtro
             matches_filter = True
             if filter_codigo and filter_codigo not in text:
                 matches_filter = False
-            if filter_desc and filter_desc not in text:
+            if filter_desc and not text.split('|')[1].strip().startswith(filter_desc):  # Busca no início da descrição
+                matches_filter = False
+            if filter_desc_contains and filter_desc_contains not in text.split('|')[1].strip():  # Busca em qualquer parte
                 matches_filter = False
 
-            # Destacar ou limpar o destaque do item
-            if matches_filter and (filter_codigo or filter_desc):
+            if matches_filter and (filter_codigo or filter_desc or filter_desc_contains):
                 item.setBackground(0, Qt.yellow)
+                matched_items.append(item)
+                if first_match is None:
+                    first_match = item
             else:
                 item.setBackground(0, Qt.white)
 
-            # Processar filhos
             for i in range(item.childCount()):
                 child_visible = process_item(item.child(i))
                 if child_visible:
@@ -367,6 +384,14 @@ class BOMViewer(QMainWindow):
 
         for i in range(self.tree.topLevelItemCount()):
             process_item(self.tree.topLevelItem(i))
+
+        if filter_codigo or filter_desc or filter_desc_contains:
+            self.tree.expandAll()
+            if first_match:
+                self.tree.scrollToItem(first_match)
+                self.tree.setCurrentItem(first_match)
+        else:
+            self.tree.collapseAll()
 
     def toggle_table_visibility(self):
         if self.table.isVisible():

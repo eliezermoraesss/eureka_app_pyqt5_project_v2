@@ -92,6 +92,7 @@ def abrir_desenho(self, table=None, codigo_param=None):
                     codigo_desenho = codigo
         else:
             codigo_desenho = codigo_param
+            
         pdf_path = os.path.join(r"\\192.175.175.4\dados\EMPRESA\PROJETOS\PDF-OFICIAL", f"{codigo_desenho}.PDF")
         pdf_path = os.path.normpath(pdf_path)
 

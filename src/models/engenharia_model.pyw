@@ -69,6 +69,17 @@ def abrir_janela_copiar_produto(selected_row_table):
     copy_window.exec_()
 
 
+def obter_codigo_item_selecionado(table):
+    item_selecionado = table.currentItem()
+
+    header = table.horizontalHeader()
+    for col in range(header.count()):
+        header_text = table.horizontalHeaderItem(col).text().lower()
+        if header_text == 'código':
+            codigo_desenho = table.item(item_selecionado.row(), col).text()
+            return codigo_desenho
+
+
 class EngenhariaApp(QWidget):
     guia_fechada = pyqtSignal()
 
@@ -406,8 +417,8 @@ class EngenhariaApp(QWidget):
             # A lib Qt garante que o objeto do menu será destruído após uso
             menu.setAttribute(Qt.WA_DeleteOnClose)
 
-            context_menu_nova_janela = QAction('Nova janela', self)
-            context_menu_nova_janela.triggered.connect(self.abrir_nova_janela)
+            nova_janela = QAction('Nova janela', self)
+            nova_janela.triggered.connect(self.abrir_nova_janela)
 
             new_product = QAction('Cadastrar novo produto...', self)
             new_product.triggered.connect(abrir_janela_novo_produto)
@@ -418,49 +429,50 @@ class EngenhariaApp(QWidget):
             editar_action = QAction('Editar cadastro...', self)
             editar_action.triggered.connect(self.editar_item_selecionado)
 
-            context_menu_abrir_desenho = QAction('Abrir desenho', self)
-            context_menu_abrir_desenho.triggered.connect(lambda: abrir_desenho(self, table))
+            abrir_desenho = QAction('Abrir desenho', self)
+            abrir_desenho.triggered.connect(lambda: abrir_desenho(self, table))
 
-            context_menu_consultar_estrutura = QAction('Consultar estrutura', self)
-            context_menu_consultar_estrutura.triggered.connect(lambda: executar_consulta_estrutura(self, table))
+            consultar_estrutura = QAction('Consultar estrutura', self)
+            consultar_estrutura.triggered.connect(lambda: executar_consulta_estrutura(self, table))
 
-            context_menu_hierarquia_estrutura = QAction('Consultar estrutura explodida...', self)
-            context_menu_hierarquia_estrutura.triggered.connect(lambda: abrir_hierarquia_estrutura(self))
+            codigo_pai = obter_codigo_item_selecionado(table)
+            hierarquia_estrutura = QAction('Consultar estrutura explodida...', self)
+            hierarquia_estrutura.triggered.connect(lambda: abrir_hierarquia_estrutura(self, codigo_pai))
 
-            context_menu_consultar_onde_usado = QAction('Onde é usado?', self)
-            context_menu_consultar_onde_usado.triggered.connect(lambda: executar_consulta_onde_usado(self, table))
+            consultar_onde_usado = QAction('Onde é usado?', self)
+            consultar_onde_usado.triggered.connect(lambda: executar_consulta_onde_usado(self, table))
 
-            context_menu_saldo_estoque = QAction('Saldo em estoque', self)
-            context_menu_saldo_estoque.triggered.connect(lambda: executar_saldo_em_estoque(self, table))
+            saldo_estoque = QAction('Saldo em estoque', self)
+            saldo_estoque.triggered.connect(lambda: executar_saldo_em_estoque(self, table))
 
-            context_menu_ultimo_fornecedor = QAction('Últimos Fornecedores', self)
-            context_menu_ultimo_fornecedor.triggered.connect(lambda: executar_ultimos_fornecedores(self, table))
+            ultimo_fornecedor = QAction('Últimos Fornecedores', self)
+            ultimo_fornecedor.triggered.connect(lambda: executar_ultimos_fornecedores(self, table))
 
-            context_menu_ultimas_nfe = QAction('Últimas Notas Fiscais', self)
-            context_menu_ultimas_nfe.triggered.connect(lambda: consultar_ultimas_nfe(self, table))
+            ultimas_nfe = QAction('Últimas Notas Fiscais', self)
+            ultimas_nfe.triggered.connect(lambda: consultar_ultimas_nfe(self, table))
 
-            context_menu_image_comparator = QAction('Abrir ImageComparator®', self)
-            context_menu_image_comparator.triggered.connect(lambda: run_image_comparator_model(self))
+            image_comparator = QAction('Abrir ImageComparator®', self)
+            image_comparator.triggered.connect(lambda: run_image_comparator_model(self))
 
-            context_menu_tabela_pesos = QAction('Abrir Tabela de Pesos', self)
-            context_menu_tabela_pesos.triggered.connect(lambda: abrir_tabela_pesos())
+            tabela_pesos = QAction('Abrir Tabela de Pesos', self)
+            tabela_pesos.triggered.connect(lambda: abrir_tabela_pesos())
 
-            menu.addAction(context_menu_nova_janela)
+            menu.addAction(nova_janela)
             menu.addSeparator()
             menu.addAction(new_product)
             menu.addAction(cadastro_copia_produto)
             menu.addAction(editar_action)
             menu.addSeparator()
-            menu.addAction(context_menu_abrir_desenho)
-            menu.addAction(context_menu_image_comparator)
-            menu.addAction(context_menu_tabela_pesos)
+            menu.addAction(abrir_desenho)
+            menu.addAction(image_comparator)
+            menu.addAction(tabela_pesos)
             menu.addSeparator()
-            menu.addAction(context_menu_consultar_estrutura)
-            menu.addAction(context_menu_hierarquia_estrutura)
-            menu.addAction(context_menu_consultar_onde_usado)
-            menu.addAction(context_menu_saldo_estoque)
-            menu.addAction(context_menu_ultimo_fornecedor)
-            menu.addAction(context_menu_ultimas_nfe)
+            menu.addAction(consultar_estrutura)
+            menu.addAction(hierarquia_estrutura)
+            menu.addAction(consultar_onde_usado)
+            menu.addAction(saldo_estoque)
+            menu.addAction(ultimo_fornecedor)
+            menu.addAction(ultimas_nfe)
 
             menu.exec_(table.viewport().mapToGlobal(position))
 
