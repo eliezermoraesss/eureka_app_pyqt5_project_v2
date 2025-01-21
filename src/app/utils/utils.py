@@ -161,12 +161,12 @@ def format_log_description(selected_row_before_changed, selected_row_after_chang
         2: 'Desc. Compl.: ',
         3: 'Tipo: ',
         4: 'Unid. Med.: ',
-        5: 'Armazem: ',
-        6: 'Grupo: ',
-        7: 'Desc. Grupo: ',
-        8: 'Centro Custo: ',
-        9: 'Bloqueio: ',
-        13: 'Endereco: '
+        6: 'Armazem: ',
+        7: 'Grupo: ',
+        8: 'Desc. Grupo: ',
+        9: 'Centro Custo: ',
+        10: 'Bloqueio: ',
+        14: 'Endereco: '
     }
     for value in selected_row_after_changed:
         if value not in selected_row_before_changed:
