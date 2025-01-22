@@ -23,6 +23,7 @@ class BOMViewer(QMainWindow):
         self.engine = None
         self.codigo_pai = codigo_pai
         self.descricao_pai = None
+        self.current_theme = "white"  # Tema padrão
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
         self.all_components = []
         self.setWindowTitle(f'Eureka® - Visualizador de hierarquia de estrutura - {codigo_pai}')
@@ -62,6 +63,11 @@ class BOMViewer(QMainWindow):
         self.add_clear_button(self.filter_input_desc_contains)  # Adiciona o botão de limpar com ícone
         filter_layout.addWidget(filter_label_desc_contains)
         filter_layout.addWidget(self.filter_input_desc_contains)
+
+        # Botão de alternar tema
+        self.theme_button = QPushButton("🌓 Alternar Tema")
+        self.theme_button.clicked.connect(self.toggle_theme)
+        filter_layout.addWidget(self.theme_button)
 
         layout.addLayout(filter_layout)
 
@@ -133,43 +139,7 @@ class BOMViewer(QMainWindow):
         self.setup_database()
         self.load_data()
         
-        # Aplicar estilos semelhantes ao Bootstrap
-        self.setStyleSheet("""
-            QPushButton {
-                background-color: #007bff;
-                color: white;
-                border-radius: 4px;
-                padding: 6px 12px;
-            }
-            QPushButton:hover {
-                background-color: #0056b3;
-            }
-            QLabel {
-                font-weight: bold;
-            }
-            QLineEdit {
-                border: 1px solid #ced4da;
-                border-radius: 4px;
-                padding: 6px 12px;
-                font-size: 12px;
-            }
-            QTableWidget {
-                border: 1px solid #dee2e6;
-            }
-            QHeaderView::section {
-                background-color: #f8f9fa;
-                padding: 4px;
-                border: 1px solid #dee2e6;
-                font-weight: bold;
-            }
-            QTableWidget::item:selected {
-                background-color: #cce5ff;
-                color: #004085;
-            }
-            QTreeWidget {
-                border: 1px solid #dee2e6;
-            }
-        """)
+        self.apply_theme()
 
     def setup_database(self):
         username, password, database, server = setup_mssql()
@@ -450,7 +420,6 @@ class BOMViewer(QMainWindow):
         self.build_tree_recursive(root_item, self.codigo_pai, 1.0)
 
     def filter_tables(self):
-        # Obtém o texto digitado nos campos de filtro, converte para minúsculo e remove espaços
         filter_codigo = self.filter_input_codigo.text().lower().strip()
         filter_desc = self.filter_input_desc.text().lower().strip()
         filter_desc_contains = self.filter_input_desc_contains.text().lower().strip()
@@ -463,9 +432,9 @@ class BOMViewer(QMainWindow):
 
             if filter_codigo and filter_codigo not in codigo:
                 row_visible = False
-            if filter_desc and not descricao.startswith(filter_desc):  # Busca no início
+            if filter_desc and not descricao.startswith(filter_desc):
                 row_visible = False
-            if filter_desc_contains and filter_desc_contains not in descricao:  # Busca em qualquer parte
+            if filter_desc_contains and filter_desc_contains not in descricao:
                 row_visible = False
 
             self.table.setRowHidden(row, not row_visible)
@@ -482,18 +451,22 @@ class BOMViewer(QMainWindow):
             matches_filter = True
             if filter_codigo and filter_codigo not in text:
                 matches_filter = False
-            if filter_desc and not text.split('|')[1].strip().startswith(filter_desc):  # Busca no início da descrição
+            if filter_desc and not text.split('|')[1].strip().startswith(filter_desc):
                 matches_filter = False
-            if filter_desc_contains and filter_desc_contains not in text.split('|')[1].strip():  # Busca em qualquer parte
+            if filter_desc_contains and filter_desc_contains not in text.split('|')[1].strip():
                 matches_filter = False
 
+            # Usar cores diferentes para highlight baseado no tema
+            highlight_color = Qt.yellow if self.current_theme == "white" else QColor(255, 255, 0, 70)
+            background_color = Qt.white if self.current_theme == "white" else QColor(45, 45, 45)
+
             if matches_filter and (filter_codigo or filter_desc or filter_desc_contains):
-                item.setBackground(0, Qt.yellow)
+                item.setBackground(0, highlight_color)
                 matched_items.append(item)
                 if first_match is None:
                     first_match = item
             else:
-                item.setBackground(0, Qt.white)
+                item.setBackground(0, background_color)
 
             for i in range(item.childCount()):
                 child_visible = process_item(item.child(i))
@@ -589,3 +562,131 @@ class BOMViewer(QMainWindow):
         item = self.table.item(row, column)
         if item:
             QApplication.clipboard().setText(item.text())
+
+    def toggle_theme(self):
+        self.current_theme = "dark" if self.current_theme == "white" else "white"
+        self.apply_theme()
+        # Reaplica a filtragem para atualizar as cores dos itens na árvore
+        self.filter_tables()
+
+    def apply_theme(self):
+        if self.current_theme == "white":
+            self.setStyleSheet("""
+                QMainWindow, QWidget {
+                    background-color: #ffffff;
+                    color: #000000;
+                }
+                QPushButton {
+                    background-color: #007bff;
+                    color: white;
+                    border-radius: 4px;
+                    padding: 6px 12px;
+                }
+                QPushButton:hover {
+                    background-color: #0056b3;
+                }
+                QLabel {
+                    font-weight: bold;
+                    color: #000000;
+                }
+                QLineEdit {
+                    border: 1px solid #ced4da;
+                    border-radius: 4px;
+                    padding: 6px 12px;
+                    font-size: 12px;
+                    background-color: white;
+                    color: #000000;
+                }
+                QTableWidget {
+                    border: 1px solid #dee2e6;
+                    background-color: white;
+                    color: #000000;
+                    alternate-background-color: #f8f9fa;
+                }
+                QHeaderView::section {
+                    background-color: #f8f9fa;
+                    padding: 4px;
+                    border: 1px solid #dee2e6;
+                    font-weight: bold;
+                    color: #000000;
+                }
+                QTableWidget::item:selected {
+                    background-color: #cce5ff;
+                    color: #004085;
+                }
+                QTreeWidget {
+                    border: 1px solid #dee2e6;
+                    background-color: white;
+                    color: #000000;
+                    alternate-background-color: #f8f9fa;
+                }
+                QTreeWidget::item {
+                    height: 30px;
+                    padding: 5px;
+                    margin: 2px;
+                }
+                QTreeWidget::item:selected {
+                    background-color: #cce5ff;
+                    color: #004085;
+                }
+            """)
+        else:  # dark theme
+            self.setStyleSheet("""
+                QMainWindow, QWidget {
+                    background-color: #1e1e1e;
+                    color: #ffffff;
+                }
+                QPushButton {
+                    background-color: #0d6efd;
+                    color: white;
+                    border-radius: 4px;
+                    padding: 6px 12px;
+                }
+                QPushButton:hover {
+                    background-color: #0b5ed7;
+                }
+                QLabel {
+                    font-weight: bold;
+                    color: #ffffff;
+                }
+                QLineEdit {
+                    border: 1px solid #495057;
+                    border-radius: 4px;
+                    padding: 6px 12px;
+                    font-size: 12px;
+                    background-color: #2d2d2d;
+                    color: #ffffff;
+                }
+                QTableWidget {
+                    border: 1px solid #495057;
+                    background-color: #2d2d2d;
+                    color: #ffffff;
+                    alternate-background-color: #363636;
+                }
+                QHeaderView::section {
+                    background-color: #363636;
+                    padding: 4px;
+                    border: 1px solid #495057;
+                    font-weight: bold;
+                    color: #ffffff;
+                }
+                QTableWidget::item:selected {
+                    background-color: #0d6efd;
+                    color: #ffffff;
+                }
+                QTreeWidget {
+                    border: 1px solid #495057;
+                    background-color: #2d2d2d;
+                    color: #ffffff;
+                    alternate-background-color: #363636;
+                }
+                QTreeWidget::item {
+                    height: 30px;
+                    padding: 5px;
+                    margin: 2px;
+                }
+                QTreeWidget::item:selected {
+                    background-color: #0d6efd;
+                    color: #ffffff;
+                }
+            """)
