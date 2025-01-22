@@ -671,8 +671,8 @@ class BOMViewer(QMainWindow):
                     color: #ffffff;
                 }
                 QTableWidget::item:selected {
-                    background-color: #0d6efd;
-                    color: #ffffff;
+                    background-color: #cce5ff;
+                    color: #004085;
                 }
                 QTreeWidget {
                     border: 1px solid #495057;
@@ -686,7 +686,7 @@ class BOMViewer(QMainWindow):
                     margin: 2px;
                 }
                 QTreeWidget::item:selected {
-                    background-color: #0d6efd;
-                    color: #ffffff;
+                    background-color: #cce5ff;
+                    color: #004085;
                 }
             """)
