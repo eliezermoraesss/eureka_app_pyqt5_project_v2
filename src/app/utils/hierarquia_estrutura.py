@@ -71,6 +71,7 @@ class BOMViewer(QMainWindow):
         # Tabela
         self.table = QTableWidget()
         self.table.setSortingEnabled(False)
+        self.table.setAlternatingRowColors(True)
         splitter.addWidget(self.table)
 
         # Container para árvore e botões
@@ -99,8 +100,8 @@ class BOMViewer(QMainWindow):
                 margin: 2px;
             }
             QTreeWidget::item:selected {
-                background-color: #E6E6E6;
-                color: #000000;
+                background-color: #cce5ff;
+                color: #004085;
             }
         """)
 
@@ -145,14 +146,28 @@ class BOMViewer(QMainWindow):
             }
             QLabel {
                 font-weight: bold;
+                font-size: 12px;
             }
             QLineEdit {
                 border: 1px solid #ced4da;
                 border-radius: 4px;
                 padding: 6px 12px;
+                font-size: 12px;
             }
             QTableWidget {
                 border: 1px solid #dee2e6;
+            }
+            QHeaderView::section {
+                background-color: #f8f9fa;
+                padding: 4px;
+                border: 1px solid #dee2e6;
+                font-weight: bold;
+                font-size: 12px;
+                min-height: 35px;  /* Altura mínima para o cabeçalho */
+            }
+            QTableWidget::item:selected {
+                background-color: #cce5ff;
+                color: #004085;
             }
             QTreeWidget {
                 border: 1px solid #dee2e6;
