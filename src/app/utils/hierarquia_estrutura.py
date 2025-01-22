@@ -162,8 +162,6 @@ class BOMViewer(QMainWindow):
                 padding: 4px;
                 border: 1px solid #dee2e6;
                 font-weight: bold;
-                font-size: 12px;
-                min-height: 35px;  /* Altura mínima para o cabeçalho */
             }
             QTableWidget::item:selected {
                 background-color: #cce5ff;
