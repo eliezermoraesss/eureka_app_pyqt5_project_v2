@@ -6,11 +6,11 @@ from datetime import datetime
 
 import pandas as pd
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor
+from PyQt5.QtGui import QColor, QIcon
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QPushButton, QTableWidget, QTableWidgetItem, QTreeWidget,
                              QTreeWidgetItem, QSplitter, QLineEdit, QLabel, QHBoxLayout,
-                             QAbstractItemView, QAction, QFileDialog, QMenu)
+                             QAbstractItemView, QAction, QFileDialog, QMenu, QStyle)
 from sqlalchemy import create_engine
 
 from .db_mssql import setup_mssql
@@ -22,6 +22,7 @@ class BOMViewer(QMainWindow):
         super().__init__()
         self.engine = None
         self.codigo_pai = codigo_pai
+        self.descricao_pai = None
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
         self.all_components = []
         self.setWindowTitle(f'Eureka® - Visualizador de hierarquia de estrutura - {codigo_pai}')
@@ -37,21 +38,28 @@ class BOMViewer(QMainWindow):
         # Filtro por Código
         filter_label_codigo = QLabel("Código:")
         self.filter_input_codigo = QLineEdit()
+        self.filter_input_codigo.setMaxLength(13)
+        self.filter_input_codigo.setFixedWidth(150)  # Ajusta a largura conforme o número máximo de caracteres
         self.filter_input_codigo.textChanged.connect(self.filter_tables)
+        self.add_clear_button(self.filter_input_codigo)  # Adiciona o botão de limpar com ícone
         filter_layout.addWidget(filter_label_codigo)
         filter_layout.addWidget(self.filter_input_codigo)
 
         # Filtro por Descrição (início)
         filter_label_desc = QLabel("Descrição:")
         self.filter_input_desc = QLineEdit()
+        self.filter_input_desc.setMaxLength(100)
         self.filter_input_desc.textChanged.connect(self.filter_tables)
+        self.add_clear_button(self.filter_input_desc)  # Adiciona o botão de limpar com ícone
         filter_layout.addWidget(filter_label_desc)
         filter_layout.addWidget(self.filter_input_desc)
 
         # Filtro por Descrição (contém)
         filter_label_desc_contains = QLabel("Contém na Descrição:")
         self.filter_input_desc_contains = QLineEdit()
+        self.filter_input_desc_contains.setMaxLength(60)
         self.filter_input_desc_contains.textChanged.connect(self.filter_tables)
+        self.add_clear_button(self.filter_input_desc_contains)  # Adiciona o botão de limpar com ícone
         filter_layout.addWidget(filter_label_desc_contains)
         filter_layout.addWidget(self.filter_input_desc_contains)
 
@@ -78,6 +86,10 @@ class BOMViewer(QMainWindow):
         self.tree.setIndentation(20)  # Espaçamento da indentação
         self.tree.setRootIsDecorated(True)  # Mostra as linhas de conexão
         self.tree.setItemsExpandable(True)  # Permite expandir/recolher itens
+
+        # Adicionar menu de contexto para a árvore
+        self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.tree.customContextMenuRequested.connect(self.show_tree_context_menu)
 
         # Aumentar altura das linhas e melhorar espaçamento
         self.tree.setStyleSheet("""
@@ -119,7 +131,7 @@ class BOMViewer(QMainWindow):
         # Setup banco de dados e carregar dados
         self.setup_database()
         self.load_data()
-
+        
     def setup_database(self):
         username, password, database, server = setup_mssql()
         driver = '{SQL Server}'
@@ -129,11 +141,11 @@ class BOMViewer(QMainWindow):
     def get_components(self, parent_code: str, parent_qty: float = 1.0, level: int = 1):
         query = f"""
         SELECT 
-            struct.G1_COD,
-            struct.G1_COMP,
-            prod.B1_DESC AS 'DESCRICAO',
-            struct.G1_XUM, 
-            struct.G1_QUANT 
+            struct.G1_COD AS 'Código Pai',
+            struct.G1_COMP AS 'Código',
+            prod.B1_DESC AS 'Descrição',
+            struct.G1_XUM AS 'Unidade',
+            struct.G1_QUANT AS 'Quantidade'
         FROM 
             PROTHEUS12_R27.dbo.SG1010 struct
         INNER JOIN
@@ -158,20 +170,20 @@ class BOMViewer(QMainWindow):
 
             if not df.empty:
                 for _, row in df.iterrows():
-                    total_qty = parent_qty * row['G1_QUANT']
-
+                    total_qty = parent_qty * row['Quantidade']
+    
                     component = {
-                        'NIVEL': level,
-                        'CODIGO': row['G1_COMP'].strip(),
-                        'DESCRICAO': row['DESCRICAO'].strip(),
-                        'CODIGO_PAI': row['G1_COD'].strip(),
-                        'UNIDADE': row['G1_XUM'].strip(),
-                        'QTD_NIVEL': row['G1_QUANT'],
-                        'QTD_TOTAL': total_qty
+                        'Nível': level,
+                        'Código': row['Código'].strip(),
+                        'Código Pai': row['Código Pai'].strip(),
+                        'Descrição': row['Descrição'].strip(),
+                        'Unidade': row['Unidade'].strip(),
+                        'Quantidade': row['Quantidade'],
+                        'Quantidade Total': total_qty
                     }
                     self.all_components.append(component)
 
-                    self.get_components(row['G1_COMP'], total_qty, level + 1)
+                    self.get_components(row['Código'], total_qty, level + 1)
 
         except Exception as e:
             print(f"Erro ao processar código {parent_code}: {str(e)}")
@@ -183,32 +195,33 @@ class BOMViewer(QMainWindow):
         # Adicionar item de nível mais alto
         # Primeiro precisamos buscar a descrição do item pai
         query = f"""
-        SELECT B1_DESC as DESCRICAO
+        SELECT B1_DESC as 'Descrição'
         FROM PROTHEUS12_R27.dbo.SB1010
         WHERE B1_COD = '{codigo_pai}'
         AND D_E_L_E_T_ <> '*'
         """
         try:
             df_pai = pd.read_sql(query, self.engine)
-            descricao_pai = df_pai['DESCRICAO'].iloc[0] if not df_pai.empty else ''
+            descricao_pai = df_pai['Descrição'].iloc[0] if not df_pai.empty else ''
+            self.descricao_pai = descricao_pai
         except:
             descricao_pai = ''
 
         self.all_components.append({
-            'NIVEL': 0,
-            'CODIGO': codigo_pai,
-            'DESCRICAO': descricao_pai,
-            'CODIGO_PAI': None,
-            'UNIDADE': 'UN',
-            'QTD_NIVEL': 1.0,
-            'QTD_TOTAL': 1.0
+            'Nível': 0,
+            'Código': codigo_pai.strip(),
+            'Descrição': descricao_pai.strip(),
+            'Código Pai': '-',
+            'Unidade': 'UN',
+            'Quantidade': 1.0,
+            'Quantidade Total': 1.0
         })
 
         self.get_components(codigo_pai)
         self.df = pd.DataFrame(self.all_components)
         self.df.insert(5, 'Desenho PDF', '')
         # Reordenar as colunas
-        self.df = self.df[['NIVEL', 'CODIGO', 'CODIGO_PAI', 'DESCRICAO', 'Desenho PDF', 'UNIDADE', 'QTD_NIVEL', 'QTD_TOTAL']]
+        self.df = self.df[['Nível', 'Código', 'Código Pai', 'Descrição', 'Desenho PDF', 'Unidade', 'Quantidade', 'Quantidade Total']]
 
         self.setup_table()
         self.build_tree()
@@ -229,6 +242,34 @@ class BOMViewer(QMainWindow):
         # Habilitar menu de contexto
         self.table.setContextMenuPolicy(Qt.CustomContextMenu)
         self.table.customContextMenuRequested.connect(self.show_context_menu)
+
+        # Ajustar o splitter após a tabela estar configurada
+        self.adjust_splitter_sizes()
+
+    def adjust_splitter_sizes(self):
+        # Calcular a largura total necessária para a tabela
+        total_width = 0
+        for i in range(self.table.columnCount()):
+            total_width += self.table.columnWidth(i)
+
+        # Adicionar um pouco de margem
+        total_width += 80
+
+        # Obter a largura total da janela
+        window_width = self.width()
+
+        # Calcular a largura restante para a árvore
+        tree_width = max(400, window_width - total_width)  # Mínimo de 400 pixels para a árvore
+
+        # Definir as proporções do splitter
+        splitter = self.findChild(QSplitter)
+        if splitter:
+            splitter.setSizes([total_width, tree_width])
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        # Reajustar o splitter quando a janela for redimensionada
+        self.adjust_splitter_sizes()
 
     def show_context_menu(self, position):
         menu = QMenu()
@@ -272,13 +313,13 @@ class BOMViewer(QMainWindow):
             for j, (column_name, value) in enumerate(row.items()):
                 item = QTableWidgetItem()
                 
-                # Formatar quantidades (colunas QTD_NIVEL e QTD_TOTAL)
-                if column_name in ['QTD_NIVEL', 'QTD_TOTAL']:
+                # Formatar quantidades (colunas Quantidade e Quantidade Total)
+                if column_name in ['Quantidade', 'Quantidade Total']:
                     formatted_value = self.format_quantity(value)
                     item.setText(formatted_value)
                 # Special handling for Desenho PDF column
                 elif column_name == 'Desenho PDF':
-                    codigo_desenho = row['CODIGO'].strip()
+                    codigo_desenho = row['Código'].strip()
                     pdf_path = os.path.join(r"\\192.175.175.4\dados\EMPRESA\PROJETOS\PDF-OFICIAL",
                                             f"{codigo_desenho}.PDF")
                     if os.path.exists(pdf_path):
@@ -293,7 +334,7 @@ class BOMViewer(QMainWindow):
                     item.setText(str(value))
                 
                 # Alinhar ao centro exceto código e descrição
-                if column_name not in ['CODIGO', 'DESCRICAO']:
+                if column_name not in ['Código', 'Descrição']:
                     item.setTextAlignment(Qt.AlignCenter)
                 else:
                     item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
@@ -303,11 +344,11 @@ class BOMViewer(QMainWindow):
     def build_tree_recursive(self, parent_item, parent_code, parent_qty):
         query = f"""
         SELECT 
-            struct.G1_COD,
-            struct.G1_COMP,
-            prod.B1_DESC AS 'DESCRICAO',
-            struct.G1_XUM, 
-            struct.G1_QUANT 
+            struct.G1_COD AS 'Código',
+            struct.G1_COMP AS 'Código Pai',
+            prod.B1_DESC AS 'Descrição',
+            struct.G1_XUM AS 'Unidade',
+            struct.G1_QUANT AS 'Quantidade'
         FROM 
             PROTHEUS12_R27.dbo.SG1010 struct
         INNER JOIN
@@ -331,14 +372,14 @@ class BOMViewer(QMainWindow):
             df = pd.read_sql(query, self.engine)
 
             for _, row in df.iterrows():
-                total_qty = parent_qty * row['G1_QUANT']
+                total_qty = parent_qty * row['Quantidade']
 
                 child_item = QTreeWidgetItem(parent_item)
                 formatted_qty = self.format_quantity(total_qty)
                 child_item.setText(0,
-                                   f"{row['G1_COMP'].strip()}  |  {row['DESCRICAO'].strip()}  |  {formatted_qty} {row['G1_XUM'].strip()}")
+                                   f"{row['Código Pai'].strip()}  |  {row['Descrição'].strip()}  |  {formatted_qty} {row['Unidade'].strip()}")
 
-                self.build_tree_recursive(child_item, row['G1_COMP'], total_qty)
+                self.build_tree_recursive(child_item, row['Código Pai'], total_qty)
         except Exception as e:
             print(f"Erro ao processar código {parent_code}: {str(e)}")
 
@@ -347,15 +388,15 @@ class BOMViewer(QMainWindow):
 
         # Buscar descrição do item raiz
         query = f"""
-        SELECT B1_DESC as DESCRICAO, B1_UM as UNIDADE
+        SELECT B1_DESC as 'Descrição', B1_UM as 'Unidade'
         FROM PROTHEUS12_R27.dbo.SB1010
         WHERE B1_COD = '{self.codigo_pai}'
         AND D_E_L_E_T_ <> '*'
         """
         try:
             df_root = pd.read_sql(query, self.engine)
-            root_desc = df_root['DESCRICAO'].iloc[0] if not df_root.empty else ''
-            root_unidade = df_root['UNIDADE'].iloc[0] if not df_root.empty else ''
+            root_desc = df_root['Descrição'].iloc[0] if not df_root.empty else ''
+            root_unidade = df_root['Unidade'].iloc[0] if not df_root.empty else ''
         except:
             root_desc = ''
             root_unidade = ''
@@ -440,7 +481,7 @@ class BOMViewer(QMainWindow):
     def export_to_excel(self):
         # Gerar nome do arquivo com data e hora
         now = datetime.now()
-        default_filename = f"estrutura_{self.codigo_pai}_{now.strftime('%Y%m%d_%H%M%S')}.xlsx"
+        default_filename = f"estrutura_explodida_{self.codigo_pai}_{now.strftime('%Y%m%d_%H%M%S')}.xlsx"
 
         # Obter o caminho da área de trabalho
         desktop = os.path.join(os.path.expanduser('~'), 'Desktop')
@@ -461,3 +502,42 @@ class BOMViewer(QMainWindow):
                 os.startfile(filename)
             except Exception as e:
                 print(f"Erro ao exportar para Excel: {str(e)}")
+
+    def add_clear_button(self, line_edit):
+        clear_icon = self.style().standardIcon(QStyle.SP_LineEditClearButton)
+
+        line_edit_height = line_edit.height()
+        pixmap = clear_icon.pixmap(line_edit_height - 4, line_edit_height - 4)
+        larger_clear_icon = QIcon(pixmap)
+
+        clear_action = QAction(larger_clear_icon, "Limpar", line_edit)
+        clear_action.triggered.connect(line_edit.clear)
+        line_edit.addAction(clear_action, QLineEdit.TrailingPosition)
+
+    def show_tree_context_menu(self, position):
+        item = self.tree.itemAt(position)
+        if item:
+            menu = QMenu()
+            copy_action = QAction("Copiar", self)
+            copy_action.triggered.connect(lambda: self.copy_tree_item(item))
+            
+            # Extrair o código do item (primeira parte antes do |)
+            codigo = item.text(0).split('|')[0].strip()
+            
+            open_drawing_action = QAction("Abrir desenho...", self)
+            open_drawing_action.triggered.connect(lambda: self.abrir_desenho_arvore(codigo))
+            
+            menu.addAction(copy_action)
+            menu.addAction(open_drawing_action)
+            menu.exec_(self.tree.viewport().mapToGlobal(position))
+
+    def copy_tree_item(self, item):
+        if item:
+            QApplication.clipboard().setText(item.text(0))
+
+    def abrir_desenho_arvore(self, codigo):
+        pdf_path = os.path.join(r"\\192.175.175.4\dados\EMPRESA\PROJETOS\PDF-OFICIAL",
+                               f"{codigo}.PDF")
+        
+        if os.path.exists(pdf_path):
+            os.startfile(pdf_path)

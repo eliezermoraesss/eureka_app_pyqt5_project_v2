@@ -135,7 +135,7 @@ class EngenhariaApp(QWidget):
         self.logo_label.setAlignment(Qt.AlignRight)
 
         self.campo_codigo = QLineEdit(self)
-        self.campo_codigo.setMaxLength(15)
+        self.campo_codigo.setMaxLength(13)
         self.campo_codigo.setFont(QFont(fonte, tamanho_fonte))
         self.add_clear_button(self.campo_codigo)
 
@@ -145,7 +145,7 @@ class EngenhariaApp(QWidget):
         self.add_clear_button(self.campo_descricao)
 
         self.campo_contem_descricao = QLineEdit(self)
-        self.campo_descricao.setMaxLength(100)
+        self.campo_contem_descricao.setMaxLength(60)
         self.campo_contem_descricao.setFont(QFont(fonte, tamanho_fonte))
         self.add_clear_button(self.campo_contem_descricao)
 
