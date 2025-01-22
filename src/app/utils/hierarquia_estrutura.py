@@ -146,7 +146,6 @@ class BOMViewer(QMainWindow):
             }
             QLabel {
                 font-weight: bold;
-                font-size: 12px;
             }
             QLineEdit {
                 border: 1px solid #ced4da;
