@@ -11,7 +11,8 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QAb
     QTableWidgetItem, QPushButton, QSizePolicy, QLabel, QSpacerItem, QMessageBox
 from sqlalchemy import create_engine
 
-from src.app.utils.utils import ajustar_largura_coluna_descricao, exportar_excel, abrir_hierarquia_estrutura
+from src.app.utils.utils import ajustar_largura_coluna_descricao, exportar_excel
+from .abrir_hierarquia_estrutura import abrir_hierarquia_estrutura
 from .db_mssql import setup_mssql
 
 

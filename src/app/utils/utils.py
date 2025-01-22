@@ -12,8 +12,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from PyQt5.QtCore import QCoreApplication, QUrl
 from PyQt5.QtGui import QDesktopServices
 from PyQt5.QtWidgets import QMessageBox, QHeaderView, QFileDialog
-from src.app.utils.hierarquia_estrutura import BOMViewer as HierarquiaEstruturaWindow
-from src.dialog.loading_dialog import loading_dialog
 
 
 def abrir_nova_janela(self, models):
@@ -220,17 +218,3 @@ def format_cnpj(cnpj):
 
 def abrir_tabela_pesos():
     os.startfile(r'\\192.175.175.4\desenvolvimento\REPOSITORIOS\resources\assets\excel\TABELA_PESO.xlsx')
-
-
-def abrir_hierarquia_estrutura(self, codigo_pai=None):
-    if codigo_pai is None:
-        selected_row_table = self.linha_selecionada()
-        if selected_row_table:
-            codigo_index = self.tree.horizontalHeaderItem(0).text().index("Código")
-            codigo_pai = selected_row_table[codigo_index]  # Usa o índice encontrado
-    dialog = loading_dialog(self, "Eureka® Engenharia", "🤖 Consultando dados...\n\nPor favor, aguarde!")
-    hierarquia_estrutura_window = HierarquiaEstruturaWindow(codigo_pai)
-    hierarquia_estrutura_window.showMaximized()
-    dialog.close()
-    hierarquia_estrutura_window.raise_()
-    hierarquia_estrutura_window.activateWindow()

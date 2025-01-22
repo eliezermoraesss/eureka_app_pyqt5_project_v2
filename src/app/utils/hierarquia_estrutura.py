@@ -1,18 +1,20 @@
-import sys
-import os
 import csv
 import io
-import pandas as pd
 import locale
+import os
+from datetime import datetime
+
+import pandas as pd
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QPushButton, QTableWidget, QTableWidgetItem, QTreeWidget,
                              QTreeWidgetItem, QSplitter, QLineEdit, QLabel, QHBoxLayout,
-                             QAbstractItemView, QAction, QFileDialog)
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor
+                             QAbstractItemView, QAction, QFileDialog, QMenu)
 from sqlalchemy import create_engine
+
 from .db_mssql import setup_mssql
-from datetime import datetime
+from .utils import abrir_desenho
 
 
 class BOMViewer(QMainWindow):
@@ -224,11 +226,21 @@ class BOMViewer(QMainWindow):
         self.table.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
 
-        # Habilitar a cópia dos dados da tabela
-        self.table.setContextMenuPolicy(Qt.ActionsContextMenu)
-        copy_action = QAction("Copiar", self.table)
+        # Habilitar menu de contexto
+        self.table.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.table.customContextMenuRequested.connect(self.show_context_menu)
+
+    def show_context_menu(self, position):
+        menu = QMenu()
+        copy_action = QAction("Copiar", self)
         copy_action.triggered.connect(self.copy_selection)
-        self.table.addAction(copy_action)
+        
+        open_drawing_action = QAction("Abrir desenho...", self)
+        open_drawing_action.triggered.connect(lambda: abrir_desenho(self, self.table))
+        
+        menu.addAction(copy_action)
+        menu.addAction(open_drawing_action)
+        menu.exec_(self.table.viewport().mapToGlobal(position))
 
     def copy_selection(self):
         selection = self.table.selectedIndexes()

@@ -25,6 +25,7 @@ from src.app.utils.consultar_ultimas_nfe import consultar_ultimas_nfe
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.load_session import load_session
 from src.app.utils.open_search_dialog import open_search_dialog
+from src.app.utils.abrir_hierarquia_estrutura import abrir_hierarquia_estrutura
 from src.app.utils.utils import *
 from src.app.views.copy_product_window import CopyProdutoItemWindow
 from src.app.utils.run_image_comparator import *
@@ -429,8 +430,8 @@ class EngenhariaApp(QWidget):
             editar_action = QAction('Editar cadastro...', self)
             editar_action.triggered.connect(self.editar_item_selecionado)
 
-            abrir_desenho = QAction('Abrir desenho', self)
-            abrir_desenho.triggered.connect(lambda: abrir_desenho(self, table))
+            abrir_desenho_menu = QAction('Abrir desenho', self)
+            abrir_desenho_menu.triggered.connect(lambda: abrir_desenho(self, table))
 
             consultar_estrutura = QAction('Consultar estrutura', self)
             consultar_estrutura.triggered.connect(lambda: executar_consulta_estrutura(self, table))
@@ -463,7 +464,7 @@ class EngenhariaApp(QWidget):
             menu.addAction(cadastro_copia_produto)
             menu.addAction(editar_action)
             menu.addSeparator()
-            menu.addAction(abrir_desenho)
+            menu.addAction(abrir_desenho_menu)
             menu.addAction(image_comparator)
             menu.addAction(tabela_pesos)
             menu.addSeparator()
