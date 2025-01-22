@@ -132,6 +132,33 @@ class BOMViewer(QMainWindow):
         self.setup_database()
         self.load_data()
         
+        # Aplicar estilos semelhantes ao Bootstrap
+        self.setStyleSheet("""
+            QPushButton {
+                background-color: #007bff;
+                color: white;
+                border-radius: 4px;
+                padding: 6px 12px;
+            }
+            QPushButton:hover {
+                background-color: #0056b3;
+            }
+            QLabel {
+                font-weight: bold;
+            }
+            QLineEdit {
+                border: 1px solid #ced4da;
+                border-radius: 4px;
+                padding: 6px 12px;
+            }
+            QTableWidget {
+                border: 1px solid #dee2e6;
+            }
+            QTreeWidget {
+                border: 1px solid #dee2e6;
+            }
+        """)
+
     def setup_database(self):
         username, password, database, server = setup_mssql()
         driver = '{SQL Server}'
