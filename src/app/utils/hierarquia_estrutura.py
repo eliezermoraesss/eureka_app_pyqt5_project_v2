@@ -282,6 +282,9 @@ class BOMViewer(QMainWindow):
         self.table.setContextMenuPolicy(Qt.CustomContextMenu)
         self.table.customContextMenuRequested.connect(self.show_context_menu)
 
+        # Conectar o sinal de duplo clique
+        self.table.cellDoubleClicked.connect(self.copy_cell)
+
         # Ajustar o splitter após a tabela estar configurada
         self.adjust_splitter_sizes()
 
@@ -580,3 +583,9 @@ class BOMViewer(QMainWindow):
         
         if os.path.exists(pdf_path):
             os.startfile(pdf_path)
+
+    def copy_cell(self, row, column):
+        """Copia o conteúdo da célula selecionada para a área de transferência quando houver duplo clique"""
+        item = self.table.item(row, column)
+        if item:
+            QApplication.clipboard().setText(item.text())
