@@ -1,4 +1,4 @@
-# 🎉 Sistema Eureka®
+# EUREKA!® Sistema integrado de gestão industrial
 
 <p align="center">
 <img loading="lazy" src="http://img.shields.io/static/v1?label=STATUS&message=EM%20DESENVOLVIMENTO&color=GREEN&style=for-the-badge"/>
@@ -15,6 +15,8 @@
   * [Módulo Comercial](#4-módulo-comercial-)
   * [Módulo Vendas](#5-módulo-vendas-)
 * [Recursos Adicionais](#6-recursos-adicionais-️)
+  * [Autocomplete e Histórico de Pesquisa](#61-autocomplete-e-histórico-de-pesquisa-)
+  * [Estrutura Explodida de Produtos](#62-estrutura-explodida-de-produtos-)
 * [Tecnologias Utilizadas](#-tecnologias-utilizadas)
 * [Acesso ao Projeto](#-acesso-ao-projeto)
 * [Suporte](#-suporte)
@@ -22,17 +24,21 @@
 * [Licença](#-licença)
 
 ## 🚀 Introdução
-O **Eureka®** é um sistema inovador desenvolvido para integrar quatro áreas cruciais da gestão industrial: Engenharia, PCP (Planejamento e Controle da Produção), Compras e Comercial. O objetivo do sistema é centralizar informações e automatizar processos, promovendo uma colaboração mais eficiente entre setores e decisões estratégicas mais ágeis, baseadas em dados confiáveis.
+O **EUREKA!®** é uma solução completa e inovadora desenvolvida para integrar e otimizar a gestão industrial. Com foco na integração entre Engenharia, PCP (Planejamento e Controle da Produção), Compras, Comercial e Vendas, o sistema oferece uma abordagem unificada para gerenciamento de processos e informações, complementando de forma eficiente o ERP TOTVS Protheus.
 
 ![Login](images/login.png)
 
 ![Home](images/home.png)
 
 ## 🎯 Benefícios
-- **🔄 Automação de Processos:** Centraliza informações de diferentes setores, promovendo maior colaboração.
-- **💸 Redução no uso de licenças TOTVS:** Menor concorrência entre usuários do SmartClient.
-- **📝 Substituição de Planilhas Excel:** Elimina os riscos associados a conflitos de revisão de arquivos em nuvem, garantindo maior integridade e confiabilidade dos dados.
-- **⚡ Agilidade nas Consultas:** Interface melhorada para consultas mais rápidas e pontuais, substituindo o uso do ERP Protheus.
+- **👁️ Visão Integrada:** Centraliza informações críticas de diferentes departamentos, promovendo colaboração e eficiência na tomada de decisões.
+- **⚡ Agilidade e Produtividade:** Automatiza processos manuais, liberando tempo para atividades estratégicas e reduzindo erros.
+- **📊 Confiabilidade dos Dados:** Obtém dados diretamente do ERP Protheus, garantindo informações precisas e atualizadas.
+- **🔄 Flexibilidade:** Permite exportação de relatórios em diferentes formatos e oferece opções de personalização por usuário/departamento.
+- **💡 Suporte à Decisão:** Fornece informações estratégicas e análises detalhadas para apoiar decisões em todas as áreas.
+- **🖥️ Interface Intuitiva:** Design moderno e amigável que supera a experiência do SmartClient TOTVS, facilitando o uso diário.
+- **💰 Economia em Licenças:** Reduz a concorrência por licenças TOTVS ao oferecer uma interface mais eficiente para consultas e operações rotineiras.
+- **🔗 Complementar ao TOTVS:** Potencializa a produtividade mantendo integração total com o Protheus, que permanece como núcleo essencial para gestão.
 
 ## 🛠️ Módulos do Sistema
 
@@ -107,7 +113,7 @@ O **Eureka®** é um sistema inovador desenvolvido para integrar quatro áreas c
 ![Vendas](images/vendas_06.png)
 
 ### 6. Recursos Adicionais ⚙️
-## Autocomplete e Histórico de Pesquisa 🔍
+### 6.1. Autocomplete e Histórico de Pesquisa 🔍
 ![Autocomplete](images/autocomplete_eng_01.gif)
 
 O recurso de autocompletar e histórico de pesquisa foi implementado utilizando um banco de dados SQLite local, armazenado no diretório AppData do Windows. Este recurso traz diversos benefícios:
@@ -119,7 +125,7 @@ O recurso de autocompletar e histórico de pesquisa foi implementado utilizando 
 - **⚡ Produtividade:** Minimiza erros de digitação e acelera o processo de busca de informações
 - **🎯 Precisão:** Ajuda a encontrar termos exatos já utilizados anteriormente
 
-## Estrutura Explodida de Produtos 🌳
+### 6.2. Estrutura Explodida de Produtos 🌳
 ![Hierarquia](images/hierarquia_produtos_01.gif)
 
 A funcionalidade de explosão hierárquica de estruturas permite visualizar todos os componentes de um produto de forma recursiva, oferecendo:
@@ -150,17 +156,18 @@ A funcionalidade de explosão hierárquica de estruturas permite visualizar todo
 ## 📞 Suporte
 Caso encontre **bugs** ou tenha **dúvidas**, entre em contato com a equipe de suporte. Estamos disponíveis para esclarecimentos e contamos com sua colaboração para reportar eventuais problemas.
 
-Para sugestões e melhoria, envie um [e-mail](mailto:eliezer.moraes@outlook.com.br).
+Para sugestões e/ou melhorias, envie um e-mail clicando aqui: [e-mail](mailto:eliezer.moraes@outlook.com.br).
 
 ---
 
 ## 💻 Tecnologias Utilizadas
-
-* Python 3.x
-* PyQt5
-* SQLite
-* TOTVS Protheus (Integração)
-* Git/GitHub
+```
+- Python 3.x
+- PyQt5
+- SQLite
+- TOTVS Protheus (Integração)
+- Git/GitHub
+```
 
 ## 📁 Acesso ao Projeto
 
