@@ -24,7 +24,9 @@
 * [Licença](#-licença)
 
 ## 🚀 Introdução
-O **EUREKA!®** é uma solução completa e inovadora desenvolvida para integrar e otimizar a gestão industrial. Com foco na integração entre Engenharia, PCP (Planejamento e Controle da Produção), Compras, Comercial e Vendas, o sistema oferece uma abordagem unificada para gerenciamento de processos e informações, complementando de forma eficiente o ERP TOTVS Protheus.
+O **EUREKA!®** é uma solução completa e inovadora desenvolvida para integrar e otimizar a gestão industrial. Com foco na integração entre Engenharia, PCP, Compras, Comercial e Vendas, o sistema oferece uma abordagem unificada para gerenciamento de processos e informações, complementando de forma eficiente o ERP TOTVS Protheus.
+
+![intro](images/eureka_main.gif)
 
 ![Login](images/login.png)
 
