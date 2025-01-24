@@ -734,9 +734,10 @@ class PcpApp(QWidget):
 
                 self.tree.setSortingEnabled(False)
                 self.tree.insertRow(i)
-                for j, value in enumerate(row):
+                for column_name in dataframe.columns:
+                    value = row[column_name]
                     if value is not None:
-                        if j == 0:
+                        if column_name == 'Status OP':
                             item = QTableWidgetItem()
                             if row['Fechamento'].strip() == '':
                                 item.setIcon(open_icon)
@@ -746,23 +747,16 @@ class PcpApp(QWidget):
                                 item.setText('OP FECHADA')
                             item.setTextAlignment(Qt.AlignCenter)
                         else:
-                            if j == 14 and value == 'S':
-                                value = 'Sim'
-                            elif j == 14 and value != 'S':
-                                value = 'Não'
-                            if 9 <= j <= 11 and not value.isspace():
-                                data_obj = datetime.strptime(value, "%Y%m%d")
-                                value = data_obj.strftime("%d/%m/%Y")
+                            item = process_table_item(column_name, value)
 
-                            item = QTableWidgetItem(str(value).strip())
-
-                            if j not in (6, 12, 15):
-                                item.setTextAlignment(Qt.AlignCenter)
-
+                            if column_name == 'Descrição':
+                                item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+                            else:
+                                item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
                     else:
                         item = QTableWidgetItem('')
 
-                    self.tree.setItem(i, j, item)
+                    self.tree.setItem(i, dataframe.columns.get_loc(column_name), item)
             self.tree.setSortingEnabled(True)
             self.controle_campos_formulario(True)
             self.button_visible_control(True)
@@ -799,3 +793,24 @@ class PcpApp(QWidget):
             """
         self.label_indicators.setText(indicadores_table)
         self.label_indicators.show()
+
+def format_date(value):
+    try:
+        if value and not value.isspace():
+            data_obj = datetime.strptime(value.strip(), "%Y%m%d")
+            return data_obj.strftime("%d/%m/%Y")
+    except ValueError:
+        return value
+    return ''
+
+def process_table_item(column_name, value):
+    if value is None or (isinstance(value, str) and value.strip() == ''):
+        return QTableWidgetItem('')
+        
+    if column_name in ['Data Abertura', 'Prev. Entrega', 'Fechamento']:
+        return QTableWidgetItem(format_date(value))
+    
+    if column_name == 'Aglutinada?':
+        return QTableWidgetItem('Sim' if value == 'S' else 'Não')
+        
+    return QTableWidgetItem(str(value).strip())
