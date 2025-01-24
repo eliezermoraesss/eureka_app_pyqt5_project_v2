@@ -90,7 +90,7 @@ def abrir_desenho(self, table=None, codigo_param=None):
                     codigo_desenho = codigo
         else:
             codigo_desenho = codigo_param
-            
+
         pdf_path = os.path.join(r"\\192.175.175.4\dados\EMPRESA\PROJETOS\PDF-OFICIAL", f"{codigo_desenho}.PDF")
         pdf_path = os.path.normpath(pdf_path)
 
@@ -123,7 +123,6 @@ def obter_dados_tabela(table):
 
 
 def exportar_excel(self, table=None):
-
     desktop_path = os.path.join(os.path.expanduser("~"), 'Desktop')
 
     now = datetime.now()
@@ -218,3 +217,14 @@ def format_cnpj(cnpj):
 
 def abrir_tabela_pesos():
     os.startfile(r'\\192.175.175.4\desenvolvimento\REPOSITORIOS\resources\assets\excel\TABELA_PESO.xlsx')
+
+
+def obter_codigo_item_selecionado(table):
+    item_selecionado = table.currentItem()
+
+    header = table.horizontalHeader()
+    for col in range(header.count()):
+        header_text = table.horizontalHeaderItem(col).text().lower()
+        if header_text == 'código':
+            codigo_desenho = table.item(item_selecionado.row(), col).text()
+            return codigo_desenho

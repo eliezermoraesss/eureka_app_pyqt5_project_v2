@@ -70,17 +70,6 @@ def abrir_janela_copiar_produto(selected_row_table):
     copy_window.exec_()
 
 
-def obter_codigo_item_selecionado(table):
-    item_selecionado = table.currentItem()
-
-    header = table.horizontalHeader()
-    for col in range(header.count()):
-        header_text = table.horizontalHeaderItem(col).text().lower()
-        if header_text == 'código':
-            codigo_desenho = table.item(item_selecionado.row(), col).text()
-            return codigo_desenho
-
-
 class EngenhariaApp(QWidget):
     guia_fechada = pyqtSignal()
 

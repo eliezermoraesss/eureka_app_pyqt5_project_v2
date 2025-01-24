@@ -2,6 +2,8 @@ import locale
 import os
 import sys
 
+from src.app.utils.abrir_hierarquia_estrutura import abrir_hierarquia_estrutura
+
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -20,7 +22,8 @@ from src.app.utils.consultar_onde_usado import executar_consulta_onde_usado
 from src.app.utils.consultar_saldo_estoque import executar_saldo_em_estoque
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.load_session import load_session
-from src.app.utils.utils import exibir_mensagem, abrir_desenho, exportar_excel, copiar_linha, abrir_tabela_pesos
+from src.app.utils.utils import exibir_mensagem, abrir_desenho, exportar_excel, copiar_linha, abrir_tabela_pesos, \
+    obter_codigo_item_selecionado
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.dialog.loading_dialog import loading_dialog
 from src.app.utils.run_image_comparator import run_image_comparator_exe, run_image_comparator_model
@@ -444,6 +447,10 @@ class PcpApp(QWidget):
             consultar_estrutura = QAction('Consultar estrutura', self)
             consultar_estrutura.triggered.connect(lambda: executar_consulta_estrutura(self, table))
 
+            codigo_pai = obter_codigo_item_selecionado(table)
+            hierarquia_estrutura = QAction('Consultar estrutura explodida...', self)
+            hierarquia_estrutura.triggered.connect(lambda: abrir_hierarquia_estrutura(self, codigo_pai))
+
             onde_usado = QAction('Onde é usado?', self)
             onde_usado.triggered.connect(lambda: executar_consulta_onde_usado(self, table))
 
@@ -463,6 +470,7 @@ class PcpApp(QWidget):
             menu.addAction(tabela_pesos)
             menu.addSeparator()
             menu.addAction(consultar_estrutura)
+            menu.addAction(hierarquia_estrutura)
             menu.addAction(onde_usado)
             menu.addAction(saldo_estoque)
 
