@@ -45,7 +45,7 @@ class CustomLineEdit(QLineEdit):
 
 def numero_linhas_consulta(query_consulta):
 
-    order_by_a_remover = "ORDER BY op.R_E_C_N_O_ DESC;"
+    order_by_a_remover = "ORDER BY op.C2_NUM DESC, op.C2_SEQUEN ASC;"
     query_sem_order_by = query_consulta.replace(order_by_a_remover, "")
 
     query = f"""
@@ -555,6 +555,7 @@ class PcpApp(QWidget):
         self.tree.verticalHeader().setDefaultSectionSize(self.altura_linha)
         self.tree.horizontalHeader().sectionClicked.connect(self.ordenar_tabela)
         self.tree.horizontalHeader().setStretchLastSection(False)
+        # self.tree.setAlternatingRowColors(True)
 
         # Evita múltiplas conexões para o menu de contexto
         try:
@@ -623,8 +624,8 @@ class PcpApp(QWidget):
                 C2_PRODUTO AS "Código", 
                 B1_DESC AS "Descrição", 
                 C2_QUANT AS "Quantidade",
-                C2_QUJE AS "Quantidade Disponível"
-                C2_UM AS "UM", 
+                C2_QUJE AS "Qtd. Disponível",
+                C2_UM AS "Unid.", 
                 C2_EMISSAO AS "Data Abertura", 
                 C2_DATPRF AS "Prev. Entrega",
                 C2_DATRF AS "Fechamento", 
@@ -653,7 +654,7 @@ class PcpApp(QWidget):
                 AND C2_OBS LIKE '%{observacao}%'
                 AND C2_NUM LIKE '{numero_op}%' {filtro_data}
                 AND op.D_E_L_E_T_ <> '*'
-            ORDER BY op.R_E_C_N_O_ DESC;
+            ORDER BY op.C2_NUM DESC, op.C2_SEQUEN ASC;
         """
         return query
 
@@ -812,10 +813,13 @@ def process_table_item(column_name, value):
     
     if column_name == 'Aglutinada?':
         return QTableWidgetItem('Sim' if value == 'S' else 'Não')
+    
+    if column_name in ['Quantidade', 'Qtd. Disponível']:
+        return QTableWidgetItem(format_quantity(value))
         
     return QTableWidgetItem(str(value).strip())
 
-def format_quantity(self, value):
+def format_quantity(value):
         """Formata a quantidade: inteiro sem casas decimais, decimal com duas casas"""
         if value.is_integer():
             return f"{int(value)}"
