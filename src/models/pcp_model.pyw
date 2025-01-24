@@ -555,7 +555,7 @@ class PcpApp(QWidget):
         self.tree.verticalHeader().setDefaultSectionSize(self.altura_linha)
         self.tree.horizontalHeader().sectionClicked.connect(self.ordenar_tabela)
         self.tree.horizontalHeader().setStretchLastSection(False)
-        # self.tree.setAlternatingRowColors(True)
+        self.tree.setAlternatingRowColors(True)
 
         # Evita múltiplas conexões para o menu de contexto
         try:
