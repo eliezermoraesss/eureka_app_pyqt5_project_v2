@@ -622,13 +622,13 @@ class PcpApp(QWidget):
                 C2_SEQUEN AS "Seq.",
                 C2_PRODUTO AS "Código", 
                 B1_DESC AS "Descrição", 
-                C2_QUANT AS "Quant.", 
+                C2_QUANT AS "Quantidade",
+                C2_QUJE AS "Quantidade Disponível"
                 C2_UM AS "UM", 
                 C2_EMISSAO AS "Data Abertura", 
                 C2_DATPRF AS "Prev. Entrega",
                 C2_DATRF AS "Fechamento", 
                 C2_OBS AS "Observação",
-                C2_QUJE AS "Quant. Disponível", 
                 C2_AGLUT AS "Aglutinada?",
                 users.USR_NOME AS "Aberto por:" 
             FROM 
@@ -814,3 +814,9 @@ def process_table_item(column_name, value):
         return QTableWidgetItem('Sim' if value == 'S' else 'Não')
         
     return QTableWidgetItem(str(value).strip())
+
+def format_quantity(self, value):
+        """Formata a quantidade: inteiro sem casas decimais, decimal com duas casas"""
+        if value.is_integer():
+            return f"{int(value)}"
+        return locale.format_string("%.2f", value, grouping=True)
