@@ -193,8 +193,17 @@ def executar_consulta_estrutura(self, table):
                     revisao = get_last_revision(codigo)
                     revisao_int = int(revisao) if revisao else 0
 
+                    items = []
                     for i in range(1, revisao_int + 1):
-                        combobox_revisao.addItem(str(i).zfill(3))
+                        items.append(str(i).zfill(3))
+
+                    items.sort(reverse=True)
+                    combobox_revisao.clear()
+
+                    for item in items:
+                        combobox_revisao.addItem(item)
+
+                    combobox_revisao.setCurrentIndex(0)
                     
                     codigo_pai = codigo
                     btn_estrutura_explodida = QPushButton("Consultar estrutura explodida", self)
