@@ -19,30 +19,21 @@ from .db_mssql import setup_mssql
 class ConsultaEstrutura:
     def __init__(self):
         super().__init__()
+        self.descricao = None
+        self.df = None
+        self.COLOR_FILE_EXISTS = QColor(51, 211, 145)  # green
+        self.COLOR_FILE_MISSING = QColor(201, 92, 118)  # light red
+        self.tabela = None
+        self.layout_cabecalho = None
+        self.layout_nova_guia_estrutura = None
+        self.nova_guia_estrutura = None
+        self.codigo_pai = None
+        self.combobox_revisao = None
+        self.module_object = None
+        self.table = None
         self.driver = '{SQL Server}'
         self.username, self.password, self.database, self.server = setup_mssql()
-
-    def executar_consulta_estrutura(self, module_object, table):
-        item_selecionado = table.currentItem()
-        codigo, descricao = None, None
-
-        if item_selecionado:
-            header = table.horizontalHeader()
-            codigo_col, descricao_col = None, None
-
-            for col in range(header.count()):
-                header_text = table.horizontalHeaderItem(col).text().lower()
-                if header_text == 'código':
-                    codigo_col = col
-                elif header_text == 'descrição':
-                    descricao_col = col
-
-                if codigo_col is not None and descricao_col is not None:
-                    codigo = table.item(item_selecionado.row(), codigo_col).text()
-                    descricao = table.item(item_selecionado.row(), descricao_col).text()
-
-                if codigo not in module_object.guias_abertas and codigo is not None:
-                    select_query_estrutura = f"""
+        self.QUERY_ESTRUTURA = f"""
                             SELECT 
                                 struct.G1_COMP AS "Código", 
                                 prod.B1_DESC AS "Descrição", 
@@ -59,152 +50,93 @@ class ConsultaEstrutura:
                             ON 
                                 struct.G1_COMP = prod.B1_COD AND prod.D_E_L_E_T_ <> '*'
                             WHERE 
-                                G1_COD = '{codigo}' 
+                                G1_COD = '{self.codigo_pai}'
                                 AND G1_REVFIM <> 'ZZZ' 
                                 AND struct.D_E_L_E_T_ <> '*' 
                                 AND G1_REVFIM = (SELECT MAX(G1_REVFIM) 
-                                    FROM {self.database}.dbo.SG1010 WHERE G1_COD = '{codigo}' 
+                                    FROM {self.database}.dbo.SG1010 WHERE G1_COD = '{self.codigo_pai}' 
                                 AND G1_REVFIM <> 'ZZZ' AND D_E_L_E_T_ <> '*')
                             ORDER BY 
                                 B1_DESC ASC;
                         """
-                    module_object.guias_abertas.append(codigo)
-                    try:
-                        conn_str = (f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};'
-                                    f'UID={self.username};PWD={self.password}')
-                        engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
-                        df = pd.read_sql(select_query_estrutura, engine)
-                        df.insert(5, 'Desenho PDF', '')
 
-                        if df.empty:
-                            QMessageBox.information(None, "Atenção", f"{codigo}\n\nEstrutura não encontrada.\n\nEureka®")
-                            return
+    def layout_config(self):
+        self.nova_guia_estrutura = QWidget()
+        self.layout_nova_guia_estrutura = QVBoxLayout()
+        self.layout_cabecalho = QHBoxLayout()
 
-                        nova_guia_estrutura = QWidget()
-                        layout_nova_guia_estrutura = QVBoxLayout()
-                        layout_cabecalho = QHBoxLayout()
+        self.tabela = QTableWidget(self.nova_guia_estrutura)
+        self.tabela.setSelectionBehavior(QTableWidget.SelectRows)
+        self.tabela.setSelectionMode(QTableWidget.SingleSelection)
 
-                        tabela = QTableWidget(nova_guia_estrutura)
-                        tabela.setSelectionBehavior(QTableWidget.SelectRows)
-                        tabela.setSelectionMode(QTableWidget.SingleSelection)
+        self.tabela.setContextMenuPolicy(Qt.CustomContextMenu)
 
-                        tabela.setContextMenuPolicy(Qt.CustomContextMenu)
-                        tabela.customContextMenuRequested.connect(
-                            lambda pos: module_object.show_context_menu(pos, tabela))
+        self.tabela.setColumnCount(len(self.df.columns))
+        self.tabela.setHorizontalHeaderLabels(self.df.columns)
 
-                        tabela.setColumnCount(len(df.columns))
-                        tabela.setHorizontalHeaderLabels(df.columns)
+        # Tornar a tabela somente leitura
+        self.tabela.setEditTriggers(QTableWidget.NoEditTriggers)
 
-                        # Tornar a tabela somente leitura
-                        tabela.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.tabela.setEditTriggers(QAbstractItemView.DoubleClicked)
+        self.tabela.setItemDelegateForColumn(self.df.columns.get_loc('Quantidade'), QItemDelegate(self.tabela))
 
-                        # Permitir edição apenas na coluna "Quantidade" (assumindo que "Quantidade" é a terceira coluna,
-                        # índice 2)
-                        tabela.setEditTriggers(QAbstractItemView.DoubleClicked)
-                        tabela.setItemDelegateForColumn(df.columns.get_loc('Quantidade'), QItemDelegate(tabela))
+        # Configurar a fonte da tabela
+        fonte_tabela = QFont("Segoe UI", 8)
+        self.tabela.setFont(fonte_tabela)
 
-                        # Configurar a fonte da tabela
-                        fonte_tabela = QFont("Segoe UI", 8)  # Substitua por sua fonte desejada e tamanho
-                        tabela.setFont(fonte_tabela)
+        # Ajustar a altura das linhas
+        self.tabela.verticalHeader().setDefaultSectionSize(22)
 
-                        # Ajustar a altura das linhas
-                        tabela.verticalHeader().setDefaultSectionSize(22)
+        layout_combobox = QHBoxLayout()
 
-                        COLOR_FILE_EXISTS = QColor(51, 211, 145)  # green
-                        COLOR_FILE_MISSING = QColor(201, 92, 118)  # light red
+        label_revisao = QLabel("Revisão:")
+        label_revisao.setObjectName("label_revisao")
+        self.combobox_revisao = QComboBox()
+        self.combobox_revisao.setEditable(False)
+        self.combobox_revisao.setObjectName("combobox_revisao")
 
-                        for i, row in df.iterrows():
-                            tabela.insertRow(i)
-                            for column_name, value in row.items():
-                                if column_name == 'Quantidade':
-                                    valor_formatado = locale.format_string("%.2f", value, grouping=True)
-                                elif column_name == 'Inserido em:':
-                                    data_obj = datetime.strptime(value, "%Y%m%d")
-                                    valor_formatado = data_obj.strftime("%d/%m/%Y")
-                                elif column_name == 'Bloqueado?':  # Verifica se o valor é da coluna B1_MSBLQL
-                                    # Converte o valor 1 para 'Sim' e 2 para 'Não'
-                                    valor_formatado = 'Sim' if value == '1' else 'Não'
-                                else:
-                                    valor_formatado = str(value).strip()
+        revisao = self.get_last_revision(self.codigo_pai)
+        revisao_int = int(revisao) if revisao else 0
 
-                                item = QTableWidgetItem(valor_formatado)
-                                item.setForeground(QColor("#EEEEEE"))  # Definir cor do texto da coluna quantidade
+        items = []
+        for i in range(1, revisao_int + 1):
+            items.append(str(i).zfill(3))
 
-                                if column_name not in ('Código', 'Descrição'):
-                                    item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-                                else:
-                                    item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        items.sort(reverse=True)
+        self.combobox_revisao.clear()
 
-                                if column_name == 'Desenho PDF':
-                                    codigo_desenho = row['Código'].strip()
-                                    pdf_path = os.path.join(r"\\192.175.175.4\dados\EMPRESA\PROJETOS\PDF-OFICIAL",
-                                                            f"{codigo_desenho}.PDF")
+        for item in items:
+            self.combobox_revisao.addItem(item)
 
-                                    if os.path.exists(pdf_path):
-                                        item.setBackground(COLOR_FILE_EXISTS)
-                                        item.setText('Sim')
-                                        item.setToolTip("Desenho encontrado")
-                                    else:
-                                        item.setBackground(COLOR_FILE_MISSING)
-                                        item.setText('Não')
-                                        item.setToolTip("Desenho não encontrado")
+        self.combobox_revisao.setCurrentIndex(0)
+        layout_combobox.addWidget(label_revisao)
+        layout_combobox.addWidget(self.combobox_revisao)
 
-                                tabela.setItem(i, df.columns.get_loc(column_name), item)
+        self.combobox_revisao.currentIndexChanged(self.when_combobox_revisao_changed)
 
-                        tabela.setSortingEnabled(True)
+        btn_estrutura_explodida = QPushButton("Consultar estrutura explodida", self.module_object)
+        btn_estrutura_explodida.clicked.connect(lambda: abrir_hierarquia_estrutura(self, self.codigo_pai))
+        btn_estrutura_explodida.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
-                        # Ajustar automaticamente a largura da coluna "Descrição"
-                        ajustar_largura_coluna_descricao(tabela)
+        btn_exportar_excel = QPushButton("Exportar Excel", self.module_object)
+        btn_exportar_excel.clicked.connect(lambda: exportar_excel(self, self.tabela))
+        btn_exportar_excel.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
-                        layout_combobox = QHBoxLayout()
+        select_product_label = QLabel(f"Consulta de Estrutura \n\n{self.codigo_pai}\t{self.descricao}")
+        select_product_label.setTextInteractionFlags(Qt.TextSelectableByMouse |
+                                                     Qt.TextSelectableByKeyboard)
 
-                        label_revisao = QLabel("Revisão:")
-                        label_revisao.setObjectName("label_revisao")
-                        combobox_revisao = QComboBox()
-                        combobox_revisao.setEditable(False)
-                        combobox_revisao.setObjectName("combobox_revisao")
+        self.layout_cabecalho.addWidget(select_product_label, alignment=Qt.AlignLeft)
+        self.layout_cabecalho.addSpacerItem(QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        self.layout_cabecalho.addLayout(layout_combobox)
+        self.layout_cabecalho.addWidget(btn_estrutura_explodida)
+        self.layout_cabecalho.addWidget(btn_exportar_excel)
 
-                        revisao = self.get_last_revision(codigo)
-                        revisao_int = int(revisao) if revisao else 0
+        self.layout_nova_guia_estrutura.addLayout(self.layout_cabecalho)
+        self.layout_nova_guia_estrutura.addWidget(self.tabela)
+        self.nova_guia_estrutura.setLayout(self.layout_nova_guia_estrutura)
 
-                        items = []
-                        for i in range(1, revisao_int + 1):
-                            items.append(str(i).zfill(3))
-
-                        items.sort(reverse=True)
-                        combobox_revisao.clear()
-
-                        for item in items:
-                            combobox_revisao.addItem(item)
-
-                        combobox_revisao.setCurrentIndex(0)
-                        layout_combobox.addWidget(label_revisao)
-                        layout_combobox.addWidget(combobox_revisao)
-
-                        codigo_pai = codigo
-                        btn_estrutura_explodida = QPushButton("Consultar estrutura explodida", module_object)
-                        btn_estrutura_explodida.clicked.connect(lambda: abrir_hierarquia_estrutura(self, codigo_pai))
-                        btn_estrutura_explodida.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-
-                        btn_exportar_excel = QPushButton("Exportar Excel", module_object)
-                        btn_exportar_excel.clicked.connect(lambda: exportar_excel(self, tabela))
-                        btn_exportar_excel.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-
-                        select_product_label = QLabel(f"Consulta de Estrutura \n\n{codigo}\t{descricao}")
-                        select_product_label.setTextInteractionFlags(Qt.TextSelectableByMouse |
-                                                                     Qt.TextSelectableByKeyboard)
-
-                        layout_cabecalho.addWidget(select_product_label, alignment=Qt.AlignLeft)
-                        layout_cabecalho.addSpacerItem(QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
-                        layout_cabecalho.addLayout(layout_combobox)
-                        layout_cabecalho.addWidget(btn_estrutura_explodida)
-                        layout_cabecalho.addWidget(btn_exportar_excel)
-
-                        layout_nova_guia_estrutura.addLayout(layout_cabecalho)
-                        layout_nova_guia_estrutura.addWidget(tabela)
-                        nova_guia_estrutura.setLayout(layout_nova_guia_estrutura)
-
-                        nova_guia_estrutura.setStyleSheet("""                                           
+        self.nova_guia_estrutura.setStyleSheet("""                                           
                                 * {
                                     background-color: #262626;
                                 }
@@ -285,15 +217,99 @@ class ConsultaEstrutura:
                                 }        
                             """)
 
+    def executar_consulta_estrutura(self, module_object=None, table=None, codigo=None, revision=None):
+        item_selecionado = table.currentItem()
+        codigo, descricao = None, None
+
+        if item_selecionado:
+            header = table.horizontalHeader()
+            codigo_col, descricao_col = None, None
+
+            for col in range(header.count()):
+                header_text = table.horizontalHeaderItem(col).text().lower()
+                if header_text == 'código':
+                    codigo_col = col
+                elif header_text == 'descrição':
+                    descricao_col = col
+
+                if codigo_col is not None and descricao_col is not None:
+                    codigo = table.item(item_selecionado.row(), codigo_col).text()
+                    descricao = table.item(item_selecionado.row(), descricao_col).text()
+
+                if codigo not in module_object.guias_abertas and codigo is not None:
+                    module_object.guias_abertas.append(codigo)
+                    try:
+                        self.codigo_pai = codigo
+                        self.descricao = descricao
+                        self.table = table
+                        conn_str = (f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};'
+                                    f'UID={self.username};PWD={self.password}')
+                        engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
+                        self.df = pd.read_sql(self.QUERY_ESTRUTURA, engine)
+                        self.df.insert(5, 'Desenho PDF', '')
+
+                        if self.df.empty:
+                            QMessageBox.information(None, "Atenção", f"{codigo}\n\n"
+                                                                     f"Estrutura não encontrada.\n\nEureka®")
+                            return
+
+                        self.layout_config()
+
+                        for i, row in self.df.iterrows():
+                            self.tabela.insertRow(i)
+                            for column_name, value in row.items():
+                                if column_name == 'Quantidade':
+                                    valor_formatado = locale.format_string("%.2f", value, grouping=True)
+                                elif column_name == 'Inserido em:':
+                                    data_obj = datetime.strptime(value, "%Y%m%d")
+                                    valor_formatado = data_obj.strftime("%d/%m/%Y")
+                                elif column_name == 'Bloqueado?':  # Verifica se o valor é da coluna B1_MSBLQL
+                                    # Converte o valor 1 para 'Sim' e 2 para 'Não'
+                                    valor_formatado = 'Sim' if value == '1' else 'Não'
+                                else:
+                                    valor_formatado = str(value).strip()
+
+                                item = QTableWidgetItem(valor_formatado)
+                                item.setForeground(QColor("#EEEEEE"))  # Definir cor do texto da coluna quantidade
+
+                                if column_name not in ('Código', 'Descrição'):
+                                    item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+                                else:
+                                    item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+
+                                if column_name == 'Desenho PDF':
+                                    codigo_desenho = row['Código'].strip()
+                                    pdf_path = os.path.join(r"\\192.175.175.4\dados\EMPRESA\PROJETOS\PDF-OFICIAL",
+                                                            f"{codigo_desenho}.PDF")
+
+                                    if os.path.exists(pdf_path):
+                                        item.setBackground(self.COLOR_FILE_EXISTS)
+                                        item.setText('Sim')
+                                        item.setToolTip("Desenho encontrado")
+                                    else:
+                                        item.setBackground(self.COLOR_FILE_MISSING)
+                                        item.setText('Não')
+                                        item.setToolTip("Desenho não encontrado")
+
+                                self.tabela.setItem(i, self.df.columns.get_loc(column_name), item)
+
+                        self.tabela.setSortingEnabled(True)
+
+                        # Ajustar automaticamente a largura da coluna "Descrição"
+                        ajustar_largura_coluna_descricao(self.tabela)
+
+                        self.tabela.customContextMenuRequested.connect(
+                            lambda pos: module_object.show_context_menu(pos, self.tabela))
+
                         if not module_object.existe_guias_abertas():
                             # Se não houver guias abertas, adicione a guia ao layout principal
                             module_object.layout().addWidget(module_object.tabWidget)
                             module_object.tabWidget.setVisible(True)
 
-                        module_object.tabWidget.addTab(nova_guia_estrutura, f"ESTRUTURA - {codigo}")
-                        module_object.tabWidget.setCurrentIndex(module_object.tabWidget.indexOf(nova_guia_estrutura))
-                        tabela.itemChanged.connect(
-                            lambda item: self.handle_item_change(item, tabela, codigo))
+                        module_object.tabWidget.addTab(self.nova_guia_estrutura, f"ESTRUTURA - {codigo}")
+                        module_object.tabWidget.setCurrentIndex(module_object.tabWidget.indexOf(self.nova_guia_estrutura))
+                        self.tabela.itemChanged.connect(
+                            lambda item: self.handle_item_change(item, self.tabela, codigo))
 
                     except pyodbc.Error as ex:
                         print(f"Falha na consulta de estrutura. Erro: {str(ex)}")
@@ -363,3 +379,13 @@ class ConsultaEstrutura:
         except Exception as ex:
             exibir_mensagem("EUREKA® Engenharia", f'Falha ao consultar banco de dados - {ex}\n\n'
                                                   f'get_last_revision(self)', "error")
+            
+    def when_combobox_revisao_changed(self, index):
+        selected_revision = self.combobox_revisao.itemText(index)
+        self.update_table_with_revision(selected_revision)
+
+    def update_table_with_revision(self, revision):
+        codigo = self.codigo_pai  # Assuming codigo_pai is stored in the class
+        self.executar_consulta_estrutura(self, codigo=codigo, revision=revision)
+
+
