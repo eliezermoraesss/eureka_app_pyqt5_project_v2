@@ -179,9 +179,16 @@ def executar_consulta_estrutura(self, table):
                     # Ajustar automaticamente a largura da coluna "Descrição"
                     ajustar_largura_coluna_descricao(tabela)
 
+                    layout_combobox = QHBoxLayout()
+
+                    label_revisao = QLabel("Revisão:")
+                    label_revisao.setObjectName("label_revisao")
                     combobox_revisao = QComboBox()
                     combobox_revisao.setEditable(False)
                     combobox_revisao.setObjectName("combobox_revisao")
+
+                    layout_combobox.addWidget(label_revisao)
+                    layout_combobox.addWidget(combobox_revisao)
 
                     revisao = get_last_revision(codigo)
                     revisao_int = int(revisao) if revisao else 0
@@ -203,7 +210,7 @@ def executar_consulta_estrutura(self, table):
 
                     layout_cabecalho.addWidget(select_product_label, alignment=Qt.AlignLeft)
                     layout_cabecalho.addSpacerItem(QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
-                    layout_cabecalho.addWidget(combobox_revisao)
+                    layout_cabecalho.addLayout(layout_combobox)
                     layout_cabecalho.addWidget(btn_estrutura_explodida)
                     layout_cabecalho.addWidget(btn_exportar_excel)
 
@@ -220,6 +227,28 @@ def executar_consulta_estrutura(self, table):
                                 color: #EEEEEE;
                                 font-size: 18px;
                                 font-weight: bold;
+                            }
+                            
+                            QLabel#label_revisao {
+                                font-size: 12px;
+                            }
+                            
+                            QComboBox {
+                                background-color: #EEEEEE;
+                                border: 1px solid #393E46;
+                                margin-bottom: 10px;
+                                padding: 5px 10px;
+                                border-radius: 10px;
+                                height: 24px;
+                                font-size: 16px;
+                            }                 
+                            
+                            QComboBox QAbstractItemView {
+                                background-color: #EEEEEE;
+                                color: #000000; /* Cor do texto para garantir legibilidade */
+                                selection-background-color: #3f37c9; /* Cor de seleção quando passa o mouse */
+                                selection-color: #FFFFFF; /* Cor do texto quando selecionado */
+                                border: 1px solid #393E46;
                             }
                             
                             QPushButton {
