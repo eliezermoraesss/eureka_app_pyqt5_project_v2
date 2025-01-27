@@ -749,6 +749,8 @@ class EngenhariaApp(QWidget):
             self.button_visible_control(True)
 
         except pyodbc.Error as ex:
+            exibir_mensagem("EUREKA® Engenharia", f'Falha ao consultar banco de dados - {ex}\n\n'
+                                                  f'executar_consulta(self)', "error")
             print(f"Falha na consulta. Erro: {str(ex)}")
 
         finally:

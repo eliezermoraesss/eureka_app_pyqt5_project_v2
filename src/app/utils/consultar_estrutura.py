@@ -8,12 +8,34 @@ import pyodbc
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QAbstractItemView, QItemDelegate, \
-    QTableWidgetItem, QPushButton, QSizePolicy, QLabel, QSpacerItem, QMessageBox
+    QTableWidgetItem, QPushButton, QSizePolicy, QLabel, QSpacerItem, QMessageBox, QComboBox
 from sqlalchemy import create_engine
 
-from src.app.utils.utils import ajustar_largura_coluna_descricao, exportar_excel
+from src.app.utils.utils import ajustar_largura_coluna_descricao, exportar_excel, exibir_mensagem
 from .abrir_hierarquia_estrutura import abrir_hierarquia_estrutura
 from .db_mssql import setup_mssql
+
+
+def get_last_revision(codigo):
+    query = f"""
+        SELECT 
+            B1_REVATU 
+        FROM 
+            {database}.dbo.SB1010 
+        WHERE 
+            B1_COD = ?
+        AND 
+            D_E_L_E_T_ <> '*'"""
+    try:
+        with pyodbc.connect(
+                f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};'
+                f'PWD={password}') as conn:
+            cursor = conn.cursor()
+            result = cursor.execute(query, (codigo,)).fetchone()
+            return result[0] if result else None
+    except Exception as ex:
+        exibir_mensagem("EUREKA® Engenharia", f'Falha ao consultar banco de dados - {ex}\n\n'
+                                              f'get_last_revision(self)', "error")
 
 
 def executar_consulta_estrutura(self, table):
@@ -156,6 +178,16 @@ def executar_consulta_estrutura(self, table):
 
                     # Ajustar automaticamente a largura da coluna "Descrição"
                     ajustar_largura_coluna_descricao(tabela)
+
+                    combobox_revisao = QComboBox()
+                    combobox_revisao.setEditable(False)
+                    combobox_revisao.setObjectName("combobox_revisao")
+
+                    revisao = get_last_revision(codigo)
+                    revisao_int = int(revisao) if revisao else 0
+
+                    for i in range(1, revisao_int + 1):
+                        combobox_revisao.addItem(str(i).zfill(3))
                     
                     codigo_pai = codigo
                     btn_estrutura_explodida = QPushButton("Consultar estrutura explodida", self)
@@ -171,6 +203,7 @@ def executar_consulta_estrutura(self, table):
 
                     layout_cabecalho.addWidget(select_product_label, alignment=Qt.AlignLeft)
                     layout_cabecalho.addSpacerItem(QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
+                    layout_cabecalho.addWidget(combobox_revisao)
                     layout_cabecalho.addWidget(btn_estrutura_explodida)
                     layout_cabecalho.addWidget(btn_exportar_excel)
 
