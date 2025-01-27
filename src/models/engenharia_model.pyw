@@ -17,7 +17,7 @@ from sqlalchemy import create_engine
 
 from src.app.views.new_product_window import NewProductWindow
 from src.app.views.edit_product_window import EditarProdutoItemWindow
-from src.app.utils.consultar_estrutura import executar_consulta_estrutura
+from src.app.utils.consultar_estrutura import ConsultaEstrutura
 from src.app.utils.consultar_onde_usado import executar_consulta_onde_usado
 from src.app.utils.consultar_saldo_estoque import executar_saldo_em_estoque
 from src.app.utils.consultar_ultimos_fornec import executar_ultimos_fornecedores
@@ -183,8 +183,9 @@ class EngenhariaApp(QWidget):
         self.btn_home.clicked.connect(self.return_to_main)
         self.btn_home.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
+        estrutura = ConsultaEstrutura()
         self.btn_consultar_estrutura = QPushButton("Consultar Estrutura", self)
-        self.btn_consultar_estrutura.clicked.connect(lambda: executar_consulta_estrutura(self, self.tree))
+        self.btn_consultar_estrutura.clicked.connect(lambda: estrutura.executar_consulta_estrutura(self, self.tree))
         self.btn_consultar_estrutura.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_consultar_estrutura.hide()
 
@@ -422,8 +423,9 @@ class EngenhariaApp(QWidget):
             abrir_desenho_menu = QAction('Abrir desenho', self)
             abrir_desenho_menu.triggered.connect(lambda: abrir_desenho(self, table))
 
+            estrutura = ConsultaEstrutura()
             consultar_estrutura = QAction('Consultar estrutura', self)
-            consultar_estrutura.triggered.connect(lambda: executar_consulta_estrutura(self, table))
+            consultar_estrutura.triggered.connect(lambda: estrutura.executar_consulta_estrutura(self, table))
 
             codigo_pai = obter_codigo_item_selecionado(table)
             hierarquia_estrutura = QAction('Consultar estrutura explodida...', self)

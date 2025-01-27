@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxL
     QFrame
 from sqlalchemy import create_engine
 
-from src.app.utils.consultar_estrutura import executar_consulta_estrutura
+from src.app.utils.consultar_estrutura import ConsultaEstrutura
 from src.app.utils.consultar_onde_usado import executar_consulta_onde_usado
 from src.app.utils.consultar_saldo_estoque import executar_saldo_em_estoque
 from src.app.utils.db_mssql import setup_mssql
@@ -223,8 +223,9 @@ class PcpApp(QWidget):
         self.btn_consultar.clicked.connect(self.btn_consultar_actions)
         self.btn_consultar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
+        estrutura = ConsultaEstrutura()
         self.btn_consultar_estrutura = QPushButton("Consultar Estrutura", self)
-        self.btn_consultar_estrutura.clicked.connect(lambda: executar_consulta_estrutura(self, self.tree))
+        self.btn_consultar_estrutura.clicked.connect(lambda: estrutura.executar_consulta_estrutura(self, self.tree))
         self.btn_consultar_estrutura.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_consultar_estrutura.hide()
 
@@ -444,8 +445,9 @@ class PcpApp(QWidget):
             image_comparator = QAction('Abrir ImageComparator®', self)
             image_comparator.triggered.connect(lambda: run_image_comparator_exe())
 
+            estrutura = ConsultaEstrutura()
             consultar_estrutura = QAction('Consultar estrutura', self)
-            consultar_estrutura.triggered.connect(lambda: executar_consulta_estrutura(self, table))
+            consultar_estrutura.triggered.connect(lambda: estrutura.executar_consulta_estrutura(self, table))
 
             codigo_pai = obter_codigo_item_selecionado(table)
             hierarquia_estrutura = QAction('Consultar estrutura explodida...', self)
