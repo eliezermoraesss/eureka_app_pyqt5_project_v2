@@ -186,7 +186,7 @@ class EngenhariaApp(QWidget):
         estrutura = ConsultaEstrutura()
         self.btn_consultar_estrutura = QPushButton("Consultar Estrutura", self)
         self.btn_consultar_estrutura.clicked.connect(
-            lambda: estrutura.executar_consulta_estrutura(self, table=self.tree))
+            lambda: estrutura.executar_consulta_estrutura(self, self.tree))
         self.btn_consultar_estrutura.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_consultar_estrutura.hide()
 
@@ -426,7 +426,7 @@ class EngenhariaApp(QWidget):
 
             estrutura = ConsultaEstrutura()
             consultar_estrutura = QAction('Consultar estrutura', self)
-            consultar_estrutura.triggered.connect(lambda: estrutura.executar_consulta_estrutura(self, table=table))
+            consultar_estrutura.triggered.connect(lambda: estrutura.executar_consulta_estrutura(self, table))
 
             codigo_pai = obter_codigo_item_selecionado(table)
             hierarquia_estrutura = QAction('Consultar estrutura explodida...', self)

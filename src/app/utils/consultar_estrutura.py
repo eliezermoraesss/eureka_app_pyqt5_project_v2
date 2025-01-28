@@ -19,6 +19,8 @@ from .db_mssql import setup_mssql
 class ConsultaEstrutura:
     def __init__(self):
         super().__init__()
+        self.query = None
+        self.engine = None
         self.descricao = None
         self.df = None
         self.COLOR_FILE_EXISTS = QColor(51, 211, 145)  # green
@@ -33,32 +35,6 @@ class ConsultaEstrutura:
         self.table = None
         self.driver = '{SQL Server}'
         self.username, self.password, self.database, self.server = setup_mssql()
-        self.QUERY_ESTRUTURA = f"""
-                            SELECT 
-                                struct.G1_COMP AS "Código", 
-                                prod.B1_DESC AS "Descrição", 
-                                struct.G1_QUANT AS "Quantidade", 
-                                prod.B1_UM AS "Unid.",
-                                struct.G1_REVFIM AS "Revisão", 
-                                struct.G1_INI AS "Inserido em:",
-                                prod.B1_MSBLQL AS "Bloqueado?",
-                                prod.B1_ZZLOCAL AS "Endereço"
-                            FROM 
-                                {self.database}.dbo.SG1010 struct
-                            INNER JOIN 
-                                {self.database}.dbo.SB1010 prod
-                            ON 
-                                struct.G1_COMP = prod.B1_COD AND prod.D_E_L_E_T_ <> '*'
-                            WHERE 
-                                G1_COD = '{self.codigo_pai}'
-                                AND G1_REVFIM <> 'ZZZ' 
-                                AND struct.D_E_L_E_T_ <> '*' 
-                                AND G1_REVFIM = (SELECT MAX(G1_REVFIM) 
-                                    FROM {self.database}.dbo.SG1010 WHERE G1_COD = '{self.codigo_pai}' 
-                                AND G1_REVFIM <> 'ZZZ' AND D_E_L_E_T_ <> '*')
-                            ORDER BY 
-                                B1_DESC ASC;
-                        """
 
     def layout_config(self):
         self.nova_guia_estrutura = QWidget()
@@ -112,7 +88,7 @@ class ConsultaEstrutura:
         layout_combobox.addWidget(label_revisao)
         layout_combobox.addWidget(self.combobox_revisao)
 
-        self.combobox_revisao.currentIndexChanged(self.when_combobox_revisao_changed)
+        self.combobox_revisao.currentIndexChanged.connect(self.when_combobox_revisao_changed)
 
         btn_estrutura_explodida = QPushButton("Consultar estrutura explodida", self.module_object)
         btn_estrutura_explodida.clicked.connect(lambda: abrir_hierarquia_estrutura(self, self.codigo_pai))
@@ -217,7 +193,7 @@ class ConsultaEstrutura:
                                 }        
                             """)
 
-    def executar_consulta_estrutura(self, module_object=None, table=None, codigo=None, revision=None):
+    def executar_consulta_estrutura(self, module_object, table):
         item_selecionado = table.currentItem()
         codigo, descricao = None, None
 
@@ -244,8 +220,9 @@ class ConsultaEstrutura:
                         self.table = table
                         conn_str = (f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};'
                                     f'UID={self.username};PWD={self.password}')
-                        engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
-                        self.df = pd.read_sql(self.QUERY_ESTRUTURA, engine)
+                        self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
+                        self.query = self.query_estrutura()
+                        self.df = pd.read_sql(self.query, self.engine)
                         self.df.insert(5, 'Desenho PDF', '')
 
                         if self.df.empty:
@@ -307,16 +284,17 @@ class ConsultaEstrutura:
                             module_object.tabWidget.setVisible(True)
 
                         module_object.tabWidget.addTab(self.nova_guia_estrutura, f"ESTRUTURA - {codigo}")
-                        module_object.tabWidget.setCurrentIndex(module_object.tabWidget.indexOf(self.nova_guia_estrutura))
+                        module_object.tabWidget.setCurrentIndex(module_object.tabWidget.indexOf(
+                            self.nova_guia_estrutura))
                         self.tabela.itemChanged.connect(
-                            lambda item: self.handle_item_change(item, self.tabela, codigo))
+                            lambda item_value: self.handle_item_change(item_value, self.tabela, codigo))
 
                     except pyodbc.Error as ex:
                         print(f"Falha na consulta de estrutura. Erro: {str(ex)}")
 
                     finally:
                         if 'engine' in locals():
-                            engine.dispose()
+                            self.engine.dispose()
 
     def alterar_quantidade_estrutura(self, codigo_pai, codigo_filho, quantidade):
         query_alterar_quantidade_estrutura = f"""
@@ -386,6 +364,32 @@ class ConsultaEstrutura:
 
     def update_table_with_revision(self, revision):
         codigo = self.codigo_pai  # Assuming codigo_pai is stored in the class
-        self.executar_consulta_estrutura(self, codigo=codigo, revision=revision)
+        print(f"Updating table with revision {revision} for codigo {codigo}")
 
-
+    def query_estrutura(self):
+        return f"""
+                            SELECT 
+                                struct.G1_COMP AS "Código", 
+                                prod.B1_DESC AS "Descrição", 
+                                struct.G1_QUANT AS "Quantidade", 
+                                prod.B1_UM AS "Unid.",
+                                struct.G1_REVFIM AS "Revisão", 
+                                struct.G1_INI AS "Inserido em:",
+                                prod.B1_MSBLQL AS "Bloqueado?",
+                                prod.B1_ZZLOCAL AS "Endereço"
+                            FROM 
+                                {self.database}.dbo.SG1010 struct
+                            INNER JOIN 
+                                {self.database}.dbo.SB1010 prod
+                            ON 
+                                struct.G1_COMP = prod.B1_COD AND prod.D_E_L_E_T_ <> '*'
+                            WHERE 
+                                G1_COD = '{self.codigo_pai}'
+                                AND G1_REVFIM <> 'ZZZ' 
+                                AND struct.D_E_L_E_T_ <> '*' 
+                                AND G1_REVFIM = (SELECT MAX(G1_REVFIM) 
+                                    FROM {self.database}.dbo.SG1010 WHERE G1_COD = '{self.codigo_pai}' 
+                                AND G1_REVFIM <> 'ZZZ' AND D_E_L_E_T_ <> '*')
+                            ORDER BY 
+                                B1_DESC ASC;
+                        """

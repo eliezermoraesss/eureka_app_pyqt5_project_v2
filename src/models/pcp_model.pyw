@@ -47,7 +47,6 @@ class CustomLineEdit(QLineEdit):
 
 
 def numero_linhas_consulta(query_consulta):
-
     order_by_a_remover = "ORDER BY op.C2_NUM DESC, op.C2_SEQUEN ASC;"
     query_sem_order_by = query_consulta.replace(order_by_a_remover, "")
 
@@ -60,7 +59,6 @@ def numero_linhas_consulta(query_consulta):
 
 
 def validar_campos(codigo_produto, numero_qp, numero_op):
-
     if len(codigo_produto) != 13 and not codigo_produto == '':
         exibir_mensagem("ATENÇÃO!",
                         "Produto não encontrado!\n\nCorrija e tente "
@@ -124,7 +122,7 @@ class PcpApp(QWidget):
         tamanho_fonte_campos = 16
 
         self.setStyleSheet(pcp_qss())
-        
+
         self.label_title = QLabel("PCP", self)
         self.label_title.setObjectName('label-title')
 
@@ -225,7 +223,7 @@ class PcpApp(QWidget):
 
         estrutura = ConsultaEstrutura()
         self.btn_consultar_estrutura = QPushButton("Consultar Estrutura", self)
-        self.btn_consultar_estrutura.clicked.connect(lambda: estrutura.executar_consulta_estrutura(self, table=self.tree))
+        self.btn_consultar_estrutura.clicked.connect(lambda: estrutura.executar_consulta_estrutura(self, self.tree))
         self.btn_consultar_estrutura.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_consultar_estrutura.hide()
 
@@ -295,12 +293,12 @@ class PcpApp(QWidget):
         layout_campos_02 = QHBoxLayout()
         self.layout_buttons = QHBoxLayout()
         self.layout_footer_label = QHBoxLayout()
-        
+
         layout_title.addStretch(1)
         layout_title.addWidget(self.logo_label)
         layout_title.addWidget(self.label_title)
         layout_title.addStretch(1)
-        
+
         container_codigo = QVBoxLayout()
         container_codigo.addWidget(self.label_codigo)
         container_codigo.addWidget(self.campo_codigo)
@@ -447,7 +445,7 @@ class PcpApp(QWidget):
 
             estrutura = ConsultaEstrutura()
             consultar_estrutura = QAction('Consultar estrutura', self)
-            consultar_estrutura.triggered.connect(lambda: estrutura.executar_consulta_estrutura(self, table=table))
+            consultar_estrutura.triggered.connect(lambda: estrutura.executar_consulta_estrutura(self, table))
 
             codigo_pai = obter_codigo_item_selecionado(table)
             hierarquia_estrutura = QAction('Consultar estrutura explodida...', self)
@@ -784,8 +782,10 @@ class PcpApp(QWidget):
             self.interromper_consulta_sql = False
 
     def exibir_indicadores(self, dataframe):
-        quantidade_op_aberta = dataframe['Fechamento'].apply(lambda x: x.strip() == '' if isinstance(x, str) else True).sum()
-        quantidade_op_fechada = dataframe['Fechamento'].apply(lambda x: x.strip() != '' if isinstance(x, str) else True).sum()
+        quantidade_op_aberta = dataframe['Fechamento'].apply(
+            lambda x: x.strip() == '' if isinstance(x, str) else True).sum()
+        quantidade_op_fechada = dataframe['Fechamento'].apply(
+            lambda x: x.strip() != '' if isinstance(x, str) else True).sum()
         indicadores_table = f"""
                 <table border="1" cellspacing="2" cellpadding="4" style="border-collapse: collapse; text-align: left; width: 100%;">
                     <tr>
@@ -805,6 +805,7 @@ class PcpApp(QWidget):
         self.label_indicators.setText(indicadores_table)
         self.label_indicators.show()
 
+
 def format_date(value):
     try:
         if value and not value.isspace():
@@ -814,23 +815,25 @@ def format_date(value):
         return value
     return ''
 
+
 def process_table_item(column_name, value):
     if value is None or (isinstance(value, str) and value.strip() == ''):
         return QTableWidgetItem('')
-        
+
     if column_name in ['Data Abertura', 'Prev. Entrega', 'Fechamento']:
         return QTableWidgetItem(format_date(value))
-    
+
     if column_name == 'Aglutinada?':
         return QTableWidgetItem('Sim' if value == 'S' else 'Não')
-    
+
     if column_name in ['Quantidade', 'Qtd. Disponível']:
         return QTableWidgetItem(format_quantity(value))
-        
+
     return QTableWidgetItem(str(value).strip())
 
+
 def format_quantity(value):
-        """Formata a quantidade: inteiro sem casas decimais, decimal com duas casas"""
-        if value.is_integer():
-            return f"{int(value)}"
-        return locale.format_string("%.2f", value, grouping=True)
+    """Formata a quantidade: inteiro sem casas decimais, decimal com duas casas"""
+    if value.is_integer():
+        return f"{int(value)}"
+    return locale.format_string("%.2f", value, grouping=True)
