@@ -56,6 +56,24 @@ def pcp_qss():
                 height: 24px;
                 font-size: 16px;
             }
+            
+            QComboBox {
+                background-color: #EEEEEE;
+                border: 1px solid #393E46;
+                margin-bottom: 10px;
+                padding: 5px 10px;
+                border-radius: 10px;
+                height: 20px;
+                font-size: 16px;
+            }                 
+            
+            QComboBox QAbstractItemView {
+                background-color: #EEEEEE;
+                color: #000000; /* Cor do texto para garantir legibilidade */
+                selection-background-color: #3f37c9; /* Cor de seleção quando passa o mouse */
+                selection-color: #FFFFFF; /* Cor do texto quando selecionado */
+                border: 1px solid #393E46;
+            }
 
             QPushButton {
                 background-color: #EB5B00;

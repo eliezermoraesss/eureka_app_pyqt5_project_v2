@@ -19,6 +19,7 @@ from .db_mssql import setup_mssql
 class ConsultaEstrutura:
     def __init__(self):
         super().__init__()
+        self.last_revision = None
         self.query = None
         self.engine = None
         self.descricao = None
@@ -72,6 +73,7 @@ class ConsultaEstrutura:
 
         revisao = self.get_last_revision(self.codigo_pai)
         revisao_int = int(revisao) if revisao else 0
+        self.last_revision = revisao
 
         items = []
         for i in range(1, revisao_int + 1):
@@ -212,6 +214,7 @@ class ConsultaEstrutura:
                     self.codigo_pai = codigo
                     descricao = table.item(item_selecionado.row(), descricao_col).text()
                     self.descricao = descricao
+                    self.module_object = module_object
 
                 if codigo not in module_object.guias_abertas and codigo is not None:
                     module_object.guias_abertas.append(codigo)
@@ -221,15 +224,12 @@ class ConsultaEstrutura:
                         module_object.tabWidget.setVisible(True)
 
                     try:
+                        if not self.criar_dataframe():
+                            return
+                        self.layout_config()
                         self.populate_table()
 
-                        self.tabela.customContextMenuRequested.connect(
-                            lambda pos: module_object.show_context_menu(pos, self.tabela))
-
-                        self.tabela.itemChanged.connect(
-                            lambda item_value: self.handle_item_change(item_value, self.tabela, codigo))
-
-                        module_object.tabWidget.addTab(self.nova_guia_estrutura, f"ESTRUTURA - {codigo}")
+                        module_object.tabWidget.addTab(self.nova_guia_estrutura, f"ESTRUTURA - {self.codigo_pai}")
                         module_object.tabWidget.setCurrentIndex(module_object.tabWidget.indexOf(
                             self.nova_guia_estrutura))
 
@@ -240,21 +240,23 @@ class ConsultaEstrutura:
                         if 'engine' in locals():
                             self.engine.dispose()
 
-    def populate_table(self):
+    def criar_dataframe(self, revision=None):
         conn_str = (f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};'
                     f'UID={self.username};PWD={self.password}')
         self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
-        self.query = self.query_estrutura()
+        self.query = self.query_estrutura(revision)
         self.df = pd.read_sql(self.query, self.engine)
         self.df.insert(5, 'Desenho PDF', '')
 
         if self.df.empty:
             QMessageBox.information(None, "Atenção", f"{self.codigo_pai}\n\n"
                                                      f"Estrutura não encontrada.\n\nEureka®")
-            return
+            if revision is not None:
+                self.combobox_revisao.setCurrentText(self.last_revision)
 
-        self.layout_config()
+        return False if self.df.empty else True
 
+    def populate_table(self):
         for i, row in self.df.iterrows():
             self.tabela.insertRow(i)
             for column_name, value in row.items():
@@ -297,6 +299,13 @@ class ConsultaEstrutura:
 
         # Ajustar automaticamente a largura da coluna "Descrição"
         ajustar_largura_coluna_descricao(self.tabela)
+
+        self.tabela.customContextMenuRequested.connect(
+            lambda pos: self.module_object.show_context_menu(pos, self.tabela))
+
+        self.tabela.itemChanged.connect(
+            lambda item_value: self.handle_item_change(item_value, self.tabela,
+                                                       self.codigo_pai) if self.tabela.currentItem() else None)
 
     def alterar_quantidade_estrutura(self, codigo_pai, codigo_filho, quantidade):
         query_alterar_quantidade_estrutura = f"""
@@ -359,39 +368,47 @@ class ConsultaEstrutura:
         except Exception as ex:
             exibir_mensagem("EUREKA® Engenharia", f'Falha ao consultar banco de dados - {ex}\n\n'
                                                   f'get_last_revision(self)', "error")
-            
+
     def when_combobox_revisao_changed(self, index):
         selected_revision = self.combobox_revisao.itemText(index)
         self.update_table_with_revision(selected_revision)
 
     def update_table_with_revision(self, revision):
-        codigo = self.codigo_pai  # Assuming codigo_pai is stored in the class
-        print(f"Updating table with revision {revision} for codigo {codigo}")
+        if not self.criar_dataframe(revision=revision):
+            return
+        self.tabela.setRowCount(0)  # Limpar a tabela
+        self.populate_table()
 
-    def query_estrutura(self):
-        return f"""
-                            SELECT 
-                                struct.G1_COMP AS "Código", 
-                                prod.B1_DESC AS "Descrição", 
-                                struct.G1_QUANT AS "Quantidade", 
-                                prod.B1_UM AS "Unid.",
-                                struct.G1_REVFIM AS "Revisão", 
-                                struct.G1_INI AS "Inserido em:",
-                                prod.B1_MSBLQL AS "Bloqueado?",
-                                prod.B1_ZZLOCAL AS "Endereço"
-                            FROM 
-                                {self.database}.dbo.SG1010 struct
-                            INNER JOIN 
-                                {self.database}.dbo.SB1010 prod
-                            ON 
-                                struct.G1_COMP = prod.B1_COD AND prod.D_E_L_E_T_ <> '*'
-                            WHERE 
-                                G1_COD = '{self.codigo_pai}'
-                                AND G1_REVFIM <> 'ZZZ' 
-                                AND struct.D_E_L_E_T_ <> '*' 
-                                AND G1_REVFIM = (SELECT MAX(G1_REVFIM) 
-                                    FROM {self.database}.dbo.SG1010 WHERE G1_COD = '{self.codigo_pai}' 
-                                AND G1_REVFIM <> 'ZZZ' AND D_E_L_E_T_ <> '*')
-                            ORDER BY 
-                                B1_DESC ASC;
-                        """
+    def query_estrutura(self, revision=None):
+        query = f"""
+            SELECT 
+                struct.G1_COMP AS "Código", 
+                prod.B1_DESC AS "Descrição", 
+                struct.G1_QUANT AS "Quantidade", 
+                prod.B1_UM AS "Unid.",
+                struct.G1_REVFIM AS "Revisão", 
+                struct.G1_INI AS "Inserido em:",
+                prod.B1_MSBLQL AS "Bloqueado?",
+                prod.B1_ZZLOCAL AS "Endereço"
+            FROM 
+                {self.database}.dbo.SG1010 struct
+            INNER JOIN 
+                {self.database}.dbo.SB1010 prod
+            ON 
+                struct.G1_COMP = prod.B1_COD AND prod.D_E_L_E_T_ <> '*'
+            WHERE 
+                G1_COD = '{self.codigo_pai}'
+                AND G1_REVFIM <> 'ZZZ' 
+                AND struct.D_E_L_E_T_ <> '*' 
+                AND G1_REVFIM = ?
+            ORDER BY 
+                B1_DESC ASC;
+        """
+        if revision is None:
+            revisao = f"""
+                AND G1_REVFIM = (SELECT MAX(G1_REVFIM)
+                FROM {self.database}.dbo.SG1010 WHERE G1_COD = '{self.codigo_pai}'
+                AND G1_REVFIM <> 'ZZZ' AND D_E_L_E_T_ <> '*')"""
+            return query.replace("AND G1_REVFIM = ?", revisao)
+        else:
+            return query.replace("AND G1_REVFIM = ?", f"AND G1_REVFIM = '{revision}'")
