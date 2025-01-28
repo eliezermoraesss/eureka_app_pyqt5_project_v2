@@ -32,7 +32,6 @@ class ConsultaEstrutura:
         self.codigo_pai = None
         self.combobox_revisao = None
         self.module_object = None
-        self.table = None
         self.driver = '{SQL Server}'
         self.username, self.password, self.database, self.server = setup_mssql()
 
@@ -210,84 +209,29 @@ class ConsultaEstrutura:
 
                 if codigo_col is not None and descricao_col is not None:
                     codigo = table.item(item_selecionado.row(), codigo_col).text()
+                    self.codigo_pai = codigo
                     descricao = table.item(item_selecionado.row(), descricao_col).text()
+                    self.descricao = descricao
 
                 if codigo not in module_object.guias_abertas and codigo is not None:
                     module_object.guias_abertas.append(codigo)
+                    if not module_object.existe_guias_abertas():
+                        # Se não houver guias abertas, adicione a guia ao layout principal
+                        module_object.layout().addWidget(module_object.tabWidget)
+                        module_object.tabWidget.setVisible(True)
+
                     try:
-                        self.codigo_pai = codigo
-                        self.descricao = descricao
-                        self.table = table
-                        conn_str = (f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};'
-                                    f'UID={self.username};PWD={self.password}')
-                        self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
-                        self.query = self.query_estrutura()
-                        self.df = pd.read_sql(self.query, self.engine)
-                        self.df.insert(5, 'Desenho PDF', '')
-
-                        if self.df.empty:
-                            QMessageBox.information(None, "Atenção", f"{codigo}\n\n"
-                                                                     f"Estrutura não encontrada.\n\nEureka®")
-                            return
-
-                        self.layout_config()
-
-                        for i, row in self.df.iterrows():
-                            self.tabela.insertRow(i)
-                            for column_name, value in row.items():
-                                if column_name == 'Quantidade':
-                                    valor_formatado = locale.format_string("%.2f", value, grouping=True)
-                                elif column_name == 'Inserido em:':
-                                    data_obj = datetime.strptime(value, "%Y%m%d")
-                                    valor_formatado = data_obj.strftime("%d/%m/%Y")
-                                elif column_name == 'Bloqueado?':  # Verifica se o valor é da coluna B1_MSBLQL
-                                    # Converte o valor 1 para 'Sim' e 2 para 'Não'
-                                    valor_formatado = 'Sim' if value == '1' else 'Não'
-                                else:
-                                    valor_formatado = str(value).strip()
-
-                                item = QTableWidgetItem(valor_formatado)
-                                item.setForeground(QColor("#EEEEEE"))  # Definir cor do texto da coluna quantidade
-
-                                if column_name not in ('Código', 'Descrição'):
-                                    item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-                                else:
-                                    item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-
-                                if column_name == 'Desenho PDF':
-                                    codigo_desenho = row['Código'].strip()
-                                    pdf_path = os.path.join(r"\\192.175.175.4\dados\EMPRESA\PROJETOS\PDF-OFICIAL",
-                                                            f"{codigo_desenho}.PDF")
-
-                                    if os.path.exists(pdf_path):
-                                        item.setBackground(self.COLOR_FILE_EXISTS)
-                                        item.setText('Sim')
-                                        item.setToolTip("Desenho encontrado")
-                                    else:
-                                        item.setBackground(self.COLOR_FILE_MISSING)
-                                        item.setText('Não')
-                                        item.setToolTip("Desenho não encontrado")
-
-                                self.tabela.setItem(i, self.df.columns.get_loc(column_name), item)
-
-                        self.tabela.setSortingEnabled(True)
-
-                        # Ajustar automaticamente a largura da coluna "Descrição"
-                        ajustar_largura_coluna_descricao(self.tabela)
+                        self.populate_table()
 
                         self.tabela.customContextMenuRequested.connect(
                             lambda pos: module_object.show_context_menu(pos, self.tabela))
 
-                        if not module_object.existe_guias_abertas():
-                            # Se não houver guias abertas, adicione a guia ao layout principal
-                            module_object.layout().addWidget(module_object.tabWidget)
-                            module_object.tabWidget.setVisible(True)
+                        self.tabela.itemChanged.connect(
+                            lambda item_value: self.handle_item_change(item_value, self.tabela, codigo))
 
                         module_object.tabWidget.addTab(self.nova_guia_estrutura, f"ESTRUTURA - {codigo}")
                         module_object.tabWidget.setCurrentIndex(module_object.tabWidget.indexOf(
                             self.nova_guia_estrutura))
-                        self.tabela.itemChanged.connect(
-                            lambda item_value: self.handle_item_change(item_value, self.tabela, codigo))
 
                     except pyodbc.Error as ex:
                         print(f"Falha na consulta de estrutura. Erro: {str(ex)}")
@@ -295,6 +239,64 @@ class ConsultaEstrutura:
                     finally:
                         if 'engine' in locals():
                             self.engine.dispose()
+
+    def populate_table(self):
+        conn_str = (f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};'
+                    f'UID={self.username};PWD={self.password}')
+        self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
+        self.query = self.query_estrutura()
+        self.df = pd.read_sql(self.query, self.engine)
+        self.df.insert(5, 'Desenho PDF', '')
+
+        if self.df.empty:
+            QMessageBox.information(None, "Atenção", f"{self.codigo_pai}\n\n"
+                                                     f"Estrutura não encontrada.\n\nEureka®")
+            return
+
+        self.layout_config()
+
+        for i, row in self.df.iterrows():
+            self.tabela.insertRow(i)
+            for column_name, value in row.items():
+                if column_name == 'Quantidade':
+                    valor_formatado = locale.format_string("%.2f", value, grouping=True)
+                elif column_name == 'Inserido em:':
+                    data_obj = datetime.strptime(value, "%Y%m%d")
+                    valor_formatado = data_obj.strftime("%d/%m/%Y")
+                elif column_name == 'Bloqueado?':  # Verifica se o valor é da coluna B1_MSBLQL
+                    # Converte o valor 1 para 'Sim' e 2 para 'Não'
+                    valor_formatado = 'Sim' if value == '1' else 'Não'
+                else:
+                    valor_formatado = str(value).strip()
+
+                item = QTableWidgetItem(valor_formatado)
+                item.setForeground(QColor("#EEEEEE"))  # Definir cor do texto da coluna quantidade
+
+                if column_name not in ('Código', 'Descrição'):
+                    item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+                else:
+                    item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+
+                if column_name == 'Desenho PDF':
+                    codigo_desenho = row['Código'].strip()
+                    pdf_path = os.path.join(r"\\192.175.175.4\dados\EMPRESA\PROJETOS\PDF-OFICIAL",
+                                            f"{codigo_desenho}.PDF")
+
+                    if os.path.exists(pdf_path):
+                        item.setBackground(self.COLOR_FILE_EXISTS)
+                        item.setText('Sim')
+                        item.setToolTip("Desenho encontrado")
+                    else:
+                        item.setBackground(self.COLOR_FILE_MISSING)
+                        item.setText('Não')
+                        item.setToolTip("Desenho não encontrado")
+
+                self.tabela.setItem(i, self.df.columns.get_loc(column_name), item)
+
+        self.tabela.setSortingEnabled(True)
+
+        # Ajustar automaticamente a largura da coluna "Descrição"
+        ajustar_largura_coluna_descricao(self.tabela)
 
     def alterar_quantidade_estrutura(self, codigo_pai, codigo_filho, quantidade):
         query_alterar_quantidade_estrutura = f"""
