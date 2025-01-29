@@ -36,7 +36,7 @@ class ConsultaEstrutura:
         self.driver = '{SQL Server}'
         self.username, self.password, self.database, self.server = setup_mssql()
 
-    def layout_config(self):
+    def configurar_tabela(self):
         self.nova_guia_estrutura = QWidget()
         self.layout_nova_guia_estrutura = QVBoxLayout()
         self.layout_cabecalho = QHBoxLayout()
@@ -46,6 +46,8 @@ class ConsultaEstrutura:
         self.tabela.setSelectionMode(QTableWidget.SingleSelection)
 
         self.tabela.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.tabela.customContextMenuRequested.connect(
+            lambda pos: self.module_object.show_context_menu(pos, self.tabela))
 
         self.tabela.setColumnCount(len(self.df.columns))
         self.tabela.setHorizontalHeaderLabels(self.df.columns)
@@ -63,6 +65,11 @@ class ConsultaEstrutura:
         # Ajustar a altura das linhas
         self.tabela.verticalHeader().setDefaultSectionSize(22)
 
+        self.tabela.itemChanged.connect(
+            lambda item_value: self.handle_item_change(item_value, self.tabela,
+                                                       self.codigo_pai) if self.tabela.currentItem() else None)
+
+    def configurar_layout(self):
         layout_combobox = QHBoxLayout()
 
         label_revisao = QLabel("Revisão:")
@@ -226,8 +233,9 @@ class ConsultaEstrutura:
                     try:
                         if not self.criar_dataframe():
                             return
-                        self.layout_config()
+                        self.configurar_tabela()
                         self.populate_table()
+                        self.configurar_layout()
 
                         module_object.tabWidget.addTab(self.nova_guia_estrutura, f"ESTRUTURA - {self.codigo_pai}")
                         module_object.tabWidget.setCurrentIndex(module_object.tabWidget.indexOf(
@@ -299,13 +307,6 @@ class ConsultaEstrutura:
 
         # Ajustar automaticamente a largura da coluna "Descrição"
         ajustar_largura_coluna_descricao(self.tabela)
-
-        self.tabela.customContextMenuRequested.connect(
-            lambda pos: self.module_object.show_context_menu(pos, self.tabela))
-
-        self.tabela.itemChanged.connect(
-            lambda item_value: self.handle_item_change(item_value, self.tabela,
-                                                       self.codigo_pai) if self.tabela.currentItem() else None)
 
     def alterar_quantidade_estrutura(self, codigo_pai, codigo_filho, quantidade):
         query_alterar_quantidade_estrutura = f"""
