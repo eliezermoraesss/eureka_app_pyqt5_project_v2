@@ -23,7 +23,7 @@ class BOMViewer(QMainWindow):
         self.engine = None
         self.codigo_pai = codigo_pai
         self.descricao_pai = None
-        self.current_theme = "white"  # Tema padrão
+        self.current_theme = "dark"  # Tema padrão
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
         self.all_components = []
         self.setWindowTitle(f'Eureka® - Visualizador de hierarquia de estrutura - {codigo_pai}')
