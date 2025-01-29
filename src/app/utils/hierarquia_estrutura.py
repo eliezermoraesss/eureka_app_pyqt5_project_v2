@@ -10,11 +10,18 @@ from PyQt5.QtGui import QColor, QIcon
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QPushButton, QTableWidget, QTableWidgetItem, QTreeWidget,
                              QTreeWidgetItem, QSplitter, QLineEdit, QLabel, QHBoxLayout,
-                             QAbstractItemView, QAction, QFileDialog, QMenu, QStyle)
+                             QAbstractItemView, QAction, QFileDialog, QMenu, QStyle, QComboBox)
 from sqlalchemy import create_engine
 
 from .db_mssql import setup_mssql
 from .utils import abrir_desenho
+
+
+def format_quantity(value):
+    """Formata a quantidade: inteiro sem casas decimais, decimal com duas casas"""
+    if value.is_integer():
+        return f"{int(value)}"
+    return locale.format_string("%.2f", value, grouping=True)
 
 
 class BOMViewer(QMainWindow):
@@ -35,6 +42,14 @@ class BOMViewer(QMainWindow):
 
         # Criar layout para filtro
         filter_layout = QHBoxLayout()
+
+        # Filtro por Nível
+        filter_label_nivel = QLabel("Nível:")
+        self.filter_combobox_nivel = QComboBox()
+        self.filter_combobox_nivel.addItem("")  # Nível padrão vazio
+        self.filter_combobox_nivel.currentIndexChanged.connect(self.filter_tables)
+        filter_layout.addWidget(filter_label_nivel)
+        filter_layout.addWidget(self.filter_combobox_nivel)
 
         # Filtro por Código
         filter_label_codigo = QLabel("Código:")
@@ -232,8 +247,14 @@ class BOMViewer(QMainWindow):
         # Reordenar as colunas
         self.df = self.df[['Nível', 'Código', 'Código Pai', 'Descrição', 'Desenho PDF', 'Unidade', 'Quantidade', 'Quantidade Total']]
 
+        self.populate_nivel_combobox()
         self.setup_table()
         self.build_tree()
+
+    def populate_nivel_combobox(self):
+        niveis = sorted(self.df['Nível'].unique())
+        for nivel in niveis:
+            self.filter_combobox_nivel.addItem(str(nivel))
 
     def setup_table(self):
         self.table.setColumnCount(len(self.df.columns))
@@ -311,12 +332,6 @@ class BOMViewer(QMainWindow):
             csv.writer(stream, delimiter='\t').writerows(table)
             QApplication.clipboard().setText(stream.getvalue())
 
-    def format_quantity(self, value):
-        """Formata a quantidade: inteiro sem casas decimais, decimal com duas casas"""
-        if value.is_integer():
-            return f"{int(value)}"
-        return locale.format_string("%.2f", value, grouping=True)
-
     def populate_table(self, df):
         self.table.setRowCount(len(df))
         COLOR_FILE_EXISTS = QColor(51, 211, 145)  # green
@@ -327,7 +342,7 @@ class BOMViewer(QMainWindow):
                 
                 # Formatar quantidades (colunas Quantidade e Quantidade Total)
                 if column_name in ['Quantidade', 'Quantidade Total']:
-                    formatted_value = self.format_quantity(value)
+                    formatted_value = format_quantity(value)
                     item.setText(formatted_value)
                 # Special handling for Desenho PDF column
                 elif column_name == 'Desenho PDF':
@@ -387,7 +402,7 @@ class BOMViewer(QMainWindow):
                 total_qty = parent_qty * row['Quantidade']
 
                 child_item = QTreeWidgetItem(parent_item)
-                formatted_qty = self.format_quantity(total_qty)
+                formatted_qty = format_quantity(total_qty)
                 child_item.setText(0,
                                    f"{row['Código Pai'].strip()}  |  {row['Descrição'].strip()}  |  {formatted_qty} {row['Unidade'].strip()}")
 
@@ -415,11 +430,12 @@ class BOMViewer(QMainWindow):
 
         # Iniciar a construção da árvore com o nó raiz
         root_item = QTreeWidgetItem(self.tree)
-        formatted_qty = self.format_quantity(1.0)
+        formatted_qty = format_quantity(1.0)
         root_item.setText(0, f"{self.codigo_pai}  |  {root_desc.strip()}  |  {formatted_qty} {root_unidade.strip()}")
         self.build_tree_recursive(root_item, self.codigo_pai, 1.0)
 
     def filter_tables(self):
+        filter_nivel = self.filter_combobox_nivel.currentText().strip()
         filter_codigo = self.filter_input_codigo.text().lower().strip()
         filter_desc = self.filter_input_desc.text().lower().strip()
         filter_desc_contains = self.filter_input_desc_contains.text().lower().strip()
@@ -427,9 +443,12 @@ class BOMViewer(QMainWindow):
         # PARTE 1: FILTRAGEM DA TABELA
         for row in range(self.table.rowCount()):
             row_visible = True
+            nivel = self.table.item(row, 0).text().strip()
             codigo = self.table.item(row, 1).text().lower()
             descricao = self.table.item(row, 3).text().lower()
 
+            if filter_nivel and filter_nivel != nivel:
+                row_visible = False
             if filter_codigo and filter_codigo not in codigo:
                 row_visible = False
             if filter_desc and not descricao.startswith(filter_desc):
@@ -597,6 +616,20 @@ class BOMViewer(QMainWindow):
                     background-color: white;
                     color: #000000;
                 }
+                QComboBox {
+                    border: 1px solid #ced4da;
+                    border-radius: 4px;
+                    padding: 6px 12px;
+                    font-size: 12px;
+                    background-color: white;
+                    color: #000000;
+                }
+                QComboBox QAbstractItemView {
+                    background-color: white;
+                    color: #000000;
+                    selection-background-color: #007bff;
+                    selection-color: white;
+                }
                 QTableWidget {
                     border: 1px solid #dee2e6;
                     background-color: white;
@@ -656,6 +689,20 @@ class BOMViewer(QMainWindow):
                     font-size: 12px;
                     background-color: #2d2d2d;
                     color: #ffffff;
+                }
+                QComboBox {
+                    border: 1px solid #495057;
+                    border-radius: 4px;
+                    padding: 6px 12px;
+                    font-size: 12px;
+                    background-color: #2d2d2d;
+                    color: #ffffff;
+                }
+                QComboBox QAbstractItemView {
+                    background-color: #2d2d2d;
+                    color: #ffffff;
+                    selection-background-color: #0d6efd;
+                    selection-color: white;
                 }
                 QTableWidget {
                     border: 1px solid #495057;
