@@ -254,7 +254,7 @@ class ConsultaEstrutura:
         self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
         self.query = self.query_estrutura(revision)
         self.df = pd.read_sql(self.query, self.engine)
-        self.df.insert(5, 'Desenho PDF', '')
+        self.df.insert(6, 'Desenho PDF', '')
 
         if self.df.empty:
             QMessageBox.information(None, "Atenção", f"{self.codigo_pai}\n\n"
@@ -309,16 +309,20 @@ class ConsultaEstrutura:
         ajustar_largura_coluna_descricao(self.tabela)
 
     def alterar_quantidade_estrutura(self, codigo_pai, codigo_filho, quantidade):
+        revision = self.combobox_revisao.currentText()
         query_alterar_quantidade_estrutura = f"""
-                UPDATE {self.database}.dbo.SG1010 
-                SET G1_QUANT = {quantidade} 
-                WHERE G1_COD = '{codigo_pai}' 
-                AND G1_COMP = '{codigo_filho}'
-                AND G1_REVFIM <> 'ZZZ' AND D_E_L_E_T_ <> '*'
-                AND G1_REVFIM = (SELECT MAX(G1_REVFIM) FROM {self.database}.dbo.SG1010 
-                WHERE G1_COD = '{codigo_pai}' 
-                AND G1_REVFIM <> 'ZZZ' 
-                AND D_E_L_E_T_ <> '*');
+                UPDATE 
+                    {self.database}.dbo.SG1010 
+                SET 
+                    G1_QUANT = {quantidade} 
+                WHERE 
+                    G1_COD = '{codigo_pai}' 
+                AND 
+                    G1_COMP = '{codigo_filho}'
+                AND 
+                    G1_REVFIM <> 'ZZZ'
+                AND 
+                    '{revision}' BETWEEN G1_REVINI AND G1_REVFIM
             """
         try:
             with pyodbc.connect(
@@ -387,6 +391,7 @@ class ConsultaEstrutura:
                 prod.B1_DESC AS "Descrição", 
                 struct.G1_QUANT AS "Quantidade", 
                 prod.B1_UM AS "Unid.",
+                struct.G1_REVINI AS "Revisão Inicial",
                 struct.G1_REVFIM AS "Revisão Final", 
                 struct.G1_INI AS "Inserido em:",
                 prod.B1_MSBLQL AS "Bloqueado?",
@@ -412,5 +417,5 @@ class ConsultaEstrutura:
                 AND G1_REVFIM <> 'ZZZ' AND D_E_L_E_T_ <> '*')"""
             return query.replace("???", revisao)
         else:
-            return (query.replace("???", f"AND '{revision}' BETWEEN struct.G1_REVINI AND struct.G1_REVFIM ")
+            return (query.replace("???", f"AND '{revision}' BETWEEN struct.G1_REVINI AND struct.G1_REVFIM")
                     .replace("AND struct.D_E_L_E_T_ <> '*'", ""))
