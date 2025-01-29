@@ -16,7 +16,7 @@ from .abrir_hierarquia_estrutura import abrir_hierarquia_estrutura
 from .db_mssql import setup_mssql
 
 
-class ConsultaEstrutura:
+class ConsultaEstrutura(QWidget):
     def __init__(self):
         super().__init__()
         self.last_revision = None
