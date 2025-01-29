@@ -386,7 +386,7 @@ class ConsultaEstrutura:
                 prod.B1_DESC AS "Descrição", 
                 struct.G1_QUANT AS "Quantidade", 
                 prod.B1_UM AS "Unid.",
-                struct.G1_REVFIM AS "Revisão", 
+                struct.G1_REVFIM AS "Revisão Final", 
                 struct.G1_INI AS "Inserido em:",
                 prod.B1_MSBLQL AS "Bloqueado?",
                 prod.B1_ZZLOCAL AS "Endereço"
@@ -400,7 +400,7 @@ class ConsultaEstrutura:
                 G1_COD = '{self.codigo_pai}'
                 AND G1_REVFIM <> 'ZZZ' 
                 AND struct.D_E_L_E_T_ <> '*' 
-                AND G1_REVFIM = ?
+                ???
             ORDER BY 
                 B1_DESC ASC;
         """
@@ -409,6 +409,7 @@ class ConsultaEstrutura:
                 AND G1_REVFIM = (SELECT MAX(G1_REVFIM)
                 FROM {self.database}.dbo.SG1010 WHERE G1_COD = '{self.codigo_pai}'
                 AND G1_REVFIM <> 'ZZZ' AND D_E_L_E_T_ <> '*')"""
-            return query.replace("AND G1_REVFIM = ?", revisao)
+            return query.replace("???", revisao)
         else:
-            return query.replace("AND G1_REVFIM = ?", f"AND G1_REVFIM = '{revision}'")
+            return (query.replace("???", f"AND '{revision}' BETWEEN struct.G1_REVINI AND struct.G1_REVFIM ")
+                    .replace("AND struct.D_E_L_E_T_ <> '*'", ""))
