@@ -28,11 +28,18 @@ class MainWindow(QtWidgets.QMainWindow):
         self.processes = []
         self.user_role = None
         self.authorized_high_users = ['admin',
-                                      'Comercial',
-                                      'Diretoria',
-                                      'Compras',
-                                      'PCP'
-                                      ]
+        'Almoxarifado',
+        'Comercial',
+        'Compras',
+        'Desenvolvimento',
+        'Diretoria',
+        'Elétrica',
+        'Engenharia',
+        'Expedição',
+        'Fiscal',
+        'PCP',
+        'Produção'
+        ]
         self.authorized_level_one_users = ['Engenharia',
                                            'Elétrica',
                                            'Fiscal'
@@ -55,13 +62,6 @@ class MainWindow(QtWidgets.QMainWindow):
             # Abre a URL no navegador padrão do sistema
             url = ('https://app.powerbi.com/groups/me/reports/f4562fea-7618-4f05-8df7-0750108248f8/d752779fc7009764'
                    '78f5?experience=power-bi')
-            open_dashboard_firefox(url)
-
-        @authorize(self.authorized_level_one_users, self)
-        def execute_dashboard_model_level_one(checked=False):
-            # Abre a URL no navegador padrão do sistema
-            url = ('https://app.powerbi.com/links/vd-7YEt8uK?ctid=1a30606f-47bf-4606-aa81-7245533ad2d9&pbi_source='
-                   'linkShare&bookmarkGuid=994bd70e-7716-4df7-aed5-88c7cbb0dbe1')
             open_dashboard_firefox(url)
 
         def execute_engenharia_model():
@@ -94,10 +94,8 @@ class MainWindow(QtWidgets.QMainWindow):
             vendas_window.showMaximized()
             self.sub_windows.append(vendas_window)
 
-        if self.user_role in self.authorized_level_one_users:
-            self.home_window.btn_dashboard.clicked.connect(execute_dashboard_model_level_one)
-        else:
-            self.home_window.btn_dashboard.clicked.connect(execute_dashboard_model)
+
+        self.home_window.btn_dashboard.clicked.connect(execute_dashboard_model)
         self.home_window.btn_engenharia.clicked.connect(execute_engenharia_model)
         self.home_window.btn_pcp.clicked.connect(execute_pcp_model)
         self.home_window.btn_compras.clicked.connect(execute_compras_model)
