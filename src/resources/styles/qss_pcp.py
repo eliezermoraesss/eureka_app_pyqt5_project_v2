@@ -97,7 +97,7 @@ def pcp_qss():
 
             QTableWidget {
                 border: 1px solid #000000;
-                background-color: #EEEEEE;
+                background-color: #373A40;
                 padding-left: 10px;
                 margin: 0;
             }

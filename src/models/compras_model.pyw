@@ -984,6 +984,8 @@ class ComprasApp(QWidget):
             if self.tree.horizontalHeaderItem(i).text() == 'APROVAÇÃO':
                 self.tree.setColumnHidden(i, True)
                 break
+
+        self.table_line_number(self.dataframe.shape[0])
         self.exibir_indicadores(dataframe)
         self.tree.viewport().update()
         # self.tree.setSortingEnabled(True)

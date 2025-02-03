@@ -1,6 +1,6 @@
 def compras_qss():
     return """* {
-                background-color: #363636;
+                background-color: #111827;
             }
     
             QLabel, QCheckBox {
@@ -65,14 +65,14 @@ def compras_qss():
             }
     
             QPushButton {
-                background-color: #AF125A;
-                color: #eeeeee;
-                padding: 5px 10px;
-                border: 2px solid #AF125A;
+                background-color: #5603ad;
+                color: #FFFFFF;
+                padding: 5px 8px;
+                border: 1px solid #5603ad;
                 border-radius: 8px;
                 font-style: "Segoe UI";
-                font-size: 11px;
-                height: 20px;
+                font-size: 12px;
+                height: 22px;
                 font-weight: bold;
                 margin: 5px;
             }
@@ -82,8 +82,8 @@ def compras_qss():
             }
     
             QPushButton:hover, QPushButton:hover#btn_home {
-                background-color: #EFF2F1;
-                color: #3A0CA3
+                background-color: #2A6F97;
+                font-weight: bold;
             }
     
             QPushButton:pressed, QPushButton:pressed#btn_home {
@@ -96,7 +96,7 @@ def compras_qss():
             }
             
             QTableWidget#table_area {
-                background-color: #302c2c;
+                background-color: #111827;
             }
             
             QTableWidget QHeaderView::section {
@@ -107,7 +107,7 @@ def compras_qss():
             }
     
             QTableWidget QHeaderView::section:horizontal {
-                border-top: 1px solid #393E46;
+                border-top: 1px solid #000000;
                 font-size: 11px;
                 font-weight: bold;
                 padding: 5px;
