@@ -964,7 +964,7 @@ class ComprasApp(QWidget):
                             item.setText('SEM PEDIDO COMPRA')
                             dataframe.at[index, ' '] = 'SEM PEDIDO COMPRA'
                     else:
-                        if column_name in ('QP/QR', 'SOLIC. COMPRA'):
+                        if column_name in ('QP/QR', 'SOLIC. COMPRA', 'DOC. NF ENTRADA'):
                             value = value.lstrip('0')
                         if column_name in ('QTD. SOLIC. COMPRAS', 'QTD. PEDIDO COMPRA', 'QTD. ENTREGUE',
                                            'VALOR UNIT. PC', 'VALOR TOTAL PC', 'VALOR UNIT. NF', 'VALOR TOTAL NF'):
