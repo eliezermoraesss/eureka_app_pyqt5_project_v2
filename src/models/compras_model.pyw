@@ -21,7 +21,7 @@ from src.app.utils.consultar_ultimos_fornec import executar_ultimos_fornecedores
 from src.app.utils.consultar_ultimas_nfe import consultar_ultimas_nfe
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.load_session import load_session
-from src.app.utils.utils import exibir_mensagem, copiar_linha, exportar_excel, numero_linhas_consulta
+from src.app.utils.utils import exibir_mensagem, copiar_linha, exportar_excel
 from src.app.views.FilterDialog import FilterDialog
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.dialog.loading_dialog import loading_dialog
@@ -120,9 +120,6 @@ class ComprasApp(QWidget):
         self.label_indicators.setVisible(False)
         self.label_indicators.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
 
-        self.checkbox_exibir_somente_sc_com_pedido = QCheckBox("Ocultar Solic. de Compras SEM Pedido de Compras", self)
-        self.checkbox_exibir_somente_sc_com_pedido.setObjectName("checkbox-sc")
-
         self.label_sc = QLabel("Solicitação de Compra:", self)
         self.label_sc.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.label_pedido = QLabel("Pedido de Compra:", self)
@@ -195,6 +192,7 @@ class ComprasApp(QWidget):
         self.campo_OP.setFont(QFont(fonte_campos, tamanho_fonte_campos))
         self.campo_OP.setMaxLength(6)
         self.campo_OP.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.campo_OP.setValidator(QIntValidator(0, 999999,self))
         self.add_clear_button(self.campo_OP)
 
         self.campo_armazem = CustomLineEdit('Armazém', 'armazem', 'Código', self)
@@ -414,7 +412,6 @@ class ComprasApp(QWidget):
         layout_campos_02.addLayout(container_campo_armazem)
         layout_campos_02.addLayout(container_fornecedor)
         layout_campos_02.addLayout(container_nm_fantasia_forn)
-        layout_campos_02.addWidget(self.checkbox_exibir_somente_sc_com_pedido)
         layout_campos_01.addStretch()
         layout_campos_02.addStretch()
 
@@ -572,8 +569,12 @@ class ComprasApp(QWidget):
         larger_clear_icon = QIcon(pixmap)
 
         clear_action = QAction(larger_clear_icon, "Limpar", line_edit)
-        clear_action.triggered.connect(line_edit.clear)
+        clear_action.triggered.connect(lambda: self.clear_and_filter(line_edit))
         line_edit.addAction(clear_action, QLineEdit.TrailingPosition)
+
+    def clear_and_filter(self, line_edit):
+        line_edit.clear()
+        self.filter_table()
 
     def configurar_tabela(self, dataframe):
         self.table_area.hide()
@@ -645,7 +646,6 @@ class ComprasApp(QWidget):
         self.campo_armazem.clear()
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
-        self.checkbox_exibir_somente_sc_com_pedido.setChecked(False)
         self.label_line_number.hide()
         self.label_indicators.hide()
 
@@ -707,32 +707,46 @@ class ComprasApp(QWidget):
         self.btn_image_comparator.setEnabled(status)
 
     def filter_table(self):
-        filter_pedido = self.campo_pedido.text().strip().upper()
+            filter_sc = self.campo_sc.text().strip()
+            filter_pedido = self.campo_pedido.text().strip()
+            filter_nf = self.campo_doc_nf.text().strip()
+            filter_qp = self.campo_qp.text().strip()
+            filter_op = self.campo_OP.text().strip()
+            filter_codigo = self.campo_codigo.text().strip().upper()
+            filter_armazem = self.campo_armazem.text().strip().upper()
+            filter_razao_social_fornecedor = self.campo_razao_social_fornecedor.text().strip().upper()
+            filter_nm_fantasia_fornecedor = self.campo_nm_fantasia_fornecedor.text().strip().upper()
+            filter_descricao = self.campo_descricao.text().strip().upper()
+            filter_contem_descricao = self.campo_contem_descricao.text().strip().upper()
 
-        filtered_df = self.dataframe_original.copy()
+            filtered_df = self.dataframe_original.copy()
 
-        if filter_pedido:
-            filtered_df = filtered_df[filtered_df['PEDIDO COMPRA'].str.contains(filter_pedido, na=False)]
+            if filter_sc:
+                filtered_df = filtered_df[filtered_df['SOLIC. COMPRA'].str.endswith(filter_sc, na=False)]
+            if filter_pedido:
+                filtered_df = filtered_df[filtered_df['PEDIDO COMPRA'].str.endswith(filter_pedido, na=False)]
+            if filter_nf:
+                filtered_df = filtered_df[filtered_df['DOC. NF ENTRADA'].str.endswith(filter_nf, na=False)]
+            if filter_qp:
+                filtered_df = filtered_df[filtered_df['QP/QR'].str.endswith(filter_qp, na=False)]
+            if filter_op:
+                filtered_df = filtered_df[filtered_df['OP'].str.endswith(filter_op, na=False)]
+            if filter_codigo:
+                filtered_df = filtered_df[filtered_df['CÓDIGO'].str.startswith(filter_codigo, na=False)]
+            if filter_armazem:
+                filtered_df = filtered_df[filtered_df['CÓD. ARMAZÉM'].str.startswith(filter_armazem, na=False)]
+            if filter_razao_social_fornecedor:
+                filtered_df = filtered_df[filtered_df['RAZÃO SOCIAL FORNECEDOR'].str.contains(filter_razao_social_fornecedor, na=False)]
+            if filter_nm_fantasia_fornecedor:
+                filtered_df = filtered_df[filtered_df['NOME FANTASIA FORNECEDOR'].str.contains(filter_nm_fantasia_fornecedor, na=False)]
+            if filter_descricao:
+                filtered_df = filtered_df[filtered_df['DESCRIÇÃO'].str.startswith(filter_descricao, na=False)]
+            if filter_contem_descricao:
+                filtered_df = filtered_df[filtered_df['DESCRIÇÃO'].str.contains(filter_contem_descricao, na=False)]
 
-        self.atualizar_tabela(filtered_df)
+            self.atualizar_tabela(filtered_df)
 
     def query_followup(self):
-        numero_sc = self.campo_sc.text().upper().strip()
-        numero_pedido = self.campo_pedido.text().upper().strip()
-        numero_nf = self.campo_doc_nf.text().upper().strip()
-        numero_qp = self.campo_qp.text().upper().strip()
-        numero_op = self.campo_OP.text().upper().strip()
-        codigo_produto = self.campo_codigo.text().upper().strip()
-        cod_armazem = self.campo_armazem.text().upper().strip()
-        razao_social_fornecedor = self.campo_razao_social_fornecedor.text().upper().strip()
-        nome_fantasia_fornecedor = self.campo_nm_fantasia_fornecedor.text().upper().strip()
-        descricao_produto = self.campo_descricao.text().upper().strip()
-        contem_descricao = self.campo_contem_descricao.text().upper().strip()
-
-        palavras_contem_descricao = contem_descricao.split('*')
-        clausulas_contem_descricao = " AND ".join(
-            [f"PC.C7_DESCRI LIKE '%{palavra}%'" for palavra in palavras_contem_descricao])
-
         data_inicio_formatada = self.campo_data_inicio.date().toString("yyyyMMdd")
         data_fim_formatada = self.campo_data_fim.date().toString("yyyyMMdd")
 
