@@ -236,7 +236,7 @@ class ComprasApp(QWidget):
         self.add_today_button(self.campo_data_fim)
 
         self.btn_consultar = QPushButton("Pesquisar", self)
-        self.btn_consultar.clicked.connect(self.btn_consultar_actions)
+        self.btn_consultar.clicked.connect(self.btn_pesquisar)
         self.btn_consultar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_onde_e_usado = QPushButton("Onde é usado?", self)
@@ -332,16 +332,16 @@ class ComprasApp(QWidget):
         self.autocomplete_settings = AutoCompleteManager(history_manager)
         self.autocomplete_settings.setup_autocomplete(self.field_name_list, object_fields)
 
-        self.campo_sc.returnPressed.connect(self.btn_consultar_actions)
-        self.campo_pedido.returnPressed.connect(self.btn_consultar_actions)
-        self.campo_doc_nf.returnPressed.connect(self.btn_consultar_actions)
-        self.campo_codigo.returnPressed.connect(self.btn_consultar_actions)
-        self.campo_descricao.returnPressed.connect(self.btn_consultar_actions)
-        self.campo_contem_descricao.returnPressed.connect(self.btn_consultar_actions)
-        self.campo_qp.returnPressed.connect(self.btn_consultar_actions)
-        self.campo_OP.returnPressed.connect(self.btn_consultar_actions)
-        self.campo_razao_social_fornecedor.returnPressed.connect(self.btn_consultar_actions)
-        self.campo_nm_fantasia_fornecedor.returnPressed.connect(self.btn_consultar_actions)
+        self.campo_sc.returnPressed.connect(self.btn_pesquisar)
+        self.campo_pedido.returnPressed.connect(self.btn_pesquisar)
+        self.campo_doc_nf.returnPressed.connect(self.btn_pesquisar)
+        self.campo_codigo.returnPressed.connect(self.btn_pesquisar)
+        self.campo_descricao.returnPressed.connect(self.btn_pesquisar)
+        self.campo_contem_descricao.returnPressed.connect(self.btn_pesquisar)
+        self.campo_qp.returnPressed.connect(self.btn_pesquisar)
+        self.campo_OP.returnPressed.connect(self.btn_pesquisar)
+        self.campo_razao_social_fornecedor.returnPressed.connect(self.btn_pesquisar)
+        self.campo_nm_fantasia_fornecedor.returnPressed.connect(self.btn_pesquisar)
 
         layout = QVBoxLayout()
         layout_campos_01 = QHBoxLayout()
@@ -403,6 +403,8 @@ class ComprasApp(QWidget):
         container_nm_fantasia_forn.addWidget(self.label_nm_fantasia_forn)
         container_nm_fantasia_forn.addWidget(self.campo_nm_fantasia_fornecedor)
 
+        layout_campos_01.addStretch()
+        layout_campos_02.addStretch()
         layout_campos_01.addLayout(container_qp)
         layout_campos_01.addLayout(container_sc)
         layout_campos_01.addLayout(container_pedido)
@@ -419,6 +421,8 @@ class ComprasApp(QWidget):
         layout_campos_01.addStretch()
         layout_campos_02.addStretch()
 
+        layout_button_03.addStretch()
+        layout_button_04.addStretch()
         layout_button_03.addWidget(self.btn_consultar)
         layout_button_04.addWidget(self.btn_visualizar_nf)
         layout_button_04.addWidget(self.btn_ultimas_nfe)
@@ -474,14 +478,37 @@ class ComprasApp(QWidget):
         else:
             self.tree.setGeometry(self.tree.x(), self.tree.y(), self.tree.width(), self.tree.height() + self.layout_footer_label.sizeHint().height())
 
-    def btn_consultar_actions(self):
+    def not_found_message(self, df):
+        if not self.table_line_number(df.shape[0]):
+            self.clean_screen()
+            exibir_mensagem("Eureka!® Compras", 'Nenhum resultado encontrado nesta pesquisa.', "info")
+            return False
+        else:
+            return True
+
+    def btn_pesquisar(self):
         for field_name in self.field_name_list:
             self.autocomplete_settings.save_search_history(field_name)
         if self.dataframe_original is None:
+            dialog = loading_dialog(self, "Eureka® Compras", "🤖 Consultando dados...\n\nPor favor, aguarde!")
             self.executar_consulta()
-            self.filter_table()
+            self.dataframe_original = self.dataframe.copy()
+            filtered_df = self.filter_table()
+            if not self.not_found_message(filtered_df):
+                self.dataframe_original = None
+                dialog.close()
+                return
+            self.atualizar_tabela(filtered_df)
+            dialog.close()
         else:
-            self.filter_table()
+            dialog = loading_dialog(self, "Eureka® Compras", "🤖 Consultando dados...\n\nPor favor, aguarde!")
+            filtered_df = self.filter_table()
+            if not self.not_found_message(filtered_df):
+                self.dataframe_original = None
+                dialog.close()
+                return
+            self.atualizar_tabela(filtered_df)
+            dialog.close()
         
     def return_to_main(self):
         self.close()  # Fecha a janela atual
@@ -598,7 +625,7 @@ class ComprasApp(QWidget):
 
     def clear_and_filter(self, line_edit):
         line_edit.clear()
-        self.filter_table()
+        self.btn_pesquisar()
 
     def configurar_tabela(self, dataframe):
         self.table_area.hide()
@@ -772,7 +799,7 @@ class ComprasApp(QWidget):
             if filter_contem_descricao:
                 filtered_df = filtered_df[filtered_df['DESCRIÇÃO'].str.contains(filter_contem_descricao, na=False)]
 
-            self.atualizar_tabela(filtered_df)
+            return filtered_df
 
     def query_followup(self):
         data_inicio_formatada = self.campo_data_inicio.date().toString("yyyyMMdd")
@@ -876,7 +903,12 @@ class ComprasApp(QWidget):
             """
         return query
 
-    def atualizar_tabela(self, dataframe):
+    def atualizar_tabela(self, dataframe, filtro=None):
+        # if filtro is None:
+        #     dataframe.insert(0, ' ', '')
+        #     dataframe[''] = ''
+        #     dataframe.insert(16, 'CONTADOR DE DIAS', '')
+
         self.tree.setRowCount(len(dataframe.index))
         self.tree.clearContents()
         self.tree.setRowCount(0)
@@ -1085,34 +1117,21 @@ class ComprasApp(QWidget):
             return False
 
     def executar_consulta(self):
-        query_consulta_filtro = self.query_followup()
-
-        self.label_line_number.hide()
-        self.label_indicators.hide()
-        self.controle_campos_formulario(False)
-        self.button_visible_control(False)
-
         conn_str = (f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};'
                     f'PWD={self.password}')
         self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
-
         try:
-            dialog = loading_dialog(self, "Eureka® Compras", "🤖 Consultando dados...\n\nPor favor, aguarde!")
+            query_consulta_filtro = self.query_followup()
+
+            self.label_line_number.hide()
+            self.label_indicators.hide()
+            self.controle_campos_formulario(False)
+            self.button_visible_control(False)
 
             self.dataframe = pd.read_sql(query_consulta_filtro, self.engine)
-
-            # if not self.table_line_number(self.dataframe.shape[0]):
-            #     self.clean_screen()
-            #     exibir_mensagem("Eureka!® Compras", 'Nenhum resultado encontrado nesta pesquisa.', "info")
-            #     return
-
             self.dataframe.insert(0, ' ', '')
             self.dataframe[''] = ''
             self.dataframe.insert(16, 'CONTADOR DE DIAS', '')
-
-            self.atualizar_tabela(self.dataframe)
-            self.dataframe_original = self.dataframe.copy()
-            dialog.close()
 
         except Exception as ex:
             exibir_mensagem('Erro ao consultar TOTVS', f'Erro: {str(ex)}', 'error')
@@ -1156,14 +1175,14 @@ class ComprasApp(QWidget):
                 # Apply the filter to the dataframe
                 self.dataframe = self.dataframe[self.dataframe[nome_coluna].isin(filtro_selecionado)]
 
-                self.atualizar_tabela(self.dataframe)
+                self.atualizar_tabela(self.dataframe, filtro=True)
                 self.btn_limpar_filtro.show()
         # Reativa os sinais do cabeçalho
         self.tree.horizontalHeader().blockSignals(False)
 
     def limpar_filtros(self):
         dialog = loading_dialog(self, "Eureka®", "🤖 Removendo filtros...\n\nRestaurando a consulta inicial")
-        self.atualizar_tabela(self.dataframe_original)
+        self.atualizar_tabela(self.dataframe_original, filtro=True)
         self.btn_limpar_filtro.hide()
         self.dataframe = self.dataframe_original.copy()
         dialog.close()
