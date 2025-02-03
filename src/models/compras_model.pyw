@@ -157,6 +157,7 @@ class ComprasApp(QWidget):
         self.campo_pedido.setFont(QFont(fonte_campos, tamanho_fonte_campos))
         self.campo_pedido.setMaxLength(6)
         self.campo_pedido.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.campo_pedido.setValidator(QIntValidator(0, 999999,self))
         self.add_clear_button(self.campo_pedido)
 
         self.campo_codigo = QLineEdit(self)
@@ -187,6 +188,7 @@ class ComprasApp(QWidget):
         self.campo_doc_nf.setFont(QFont(fonte_campos, tamanho_fonte_campos))
         self.campo_doc_nf.setMaxLength(9)
         self.campo_doc_nf.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.campo_doc_nf.setValidator(QIntValidator(0, 999999999,self))
         self.add_clear_button(self.campo_doc_nf)
 
         self.campo_OP = QLineEdit(self)
