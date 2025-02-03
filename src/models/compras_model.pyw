@@ -296,6 +296,10 @@ class ComprasApp(QWidget):
         self.btn_image_comparator.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_image_comparator.hide()
 
+        self.btn_toggle_footer = QPushButton("Ocultar Status", self)
+        self.btn_toggle_footer.clicked.connect(self.toggle_footer)
+        self.btn_toggle_footer.hide()
+
         self.field_name_list = [
             "codigo",
             "descricao",
@@ -434,6 +438,7 @@ class ComprasApp(QWidget):
         self.layout_footer_label.addStretch(1)
         self.layout_footer_label.addWidget(self.label_line_number)
         self.layout_footer_label.addWidget(self.label_indicators)
+        self.layout_footer_label.addWidget(self.btn_toggle_footer)
         self.layout_footer_label.addStretch(1)
         self.layout_footer_label.addWidget(self.logo_label)
 
@@ -449,7 +454,26 @@ class ComprasApp(QWidget):
         self.setLayout(layout)
 
         self.setStyleSheet(compras_qss())
-        
+
+    # Method to toggle the footer visibility and adjust the table size
+    def toggle_footer(self):
+        if self.label_line_number.isVisible():
+            self.label_line_number.hide()
+            self.label_indicators.hide()
+            self.btn_toggle_footer.setText("Exibir Status")
+        else:
+            self.label_line_number.show()
+            self.label_indicators.show()
+            self.btn_toggle_footer.setText("Ocultar Status")
+        self.adjust_table_size()
+
+    # Method to adjust the table size
+    def adjust_table_size(self):
+        if self.label_line_number.isVisible():
+            self.tree.setGeometry(self.tree.x(), self.tree.y(), self.tree.width(), self.tree.height() - self.layout_footer_label.sizeHint().height())
+        else:
+            self.tree.setGeometry(self.tree.x(), self.tree.y(), self.tree.width(), self.tree.height() + self.layout_footer_label.sizeHint().height())
+
     def btn_consultar_actions(self):
         for field_name in self.field_name_list:
             self.autocomplete_settings.save_search_history(field_name)
@@ -657,6 +681,7 @@ class ComprasApp(QWidget):
         self.btn_ultimas_nfe.hide()
         self.btn_limpar_filtro.hide()
         self.btn_visualizar_nf.hide()
+        self.btn_toggle_footer.hide()
 
         self.guias_abertas.clear()
         self.guias_abertas_onde_usado.clear()
@@ -679,6 +704,7 @@ class ComprasApp(QWidget):
             self.btn_ultimas_nfe.hide()
             self.btn_visualizar_nf.hide()
             self.btn_image_comparator.hide()
+            self.btn_toggle_footer.hide()
         else:
             self.btn_exportar_excel.show()
             self.btn_onde_e_usado.show()
@@ -687,6 +713,7 @@ class ComprasApp(QWidget):
             self.btn_ultimas_nfe.show()
             self.btn_visualizar_nf.show()
             self.btn_image_comparator.show()
+            self.btn_toggle_footer.show()
 
     def controle_campos_formulario(self, status):
         self.campo_sc.setEnabled(status)
@@ -705,6 +732,7 @@ class ComprasApp(QWidget):
         self.btn_onde_e_usado.setEnabled(status)
         self.btn_ultimos_fornecedores.setEnabled(status)
         self.btn_image_comparator.setEnabled(status)
+        self.btn_toggle_footer.setEnabled(status)
 
     def filter_table(self):
             filter_sc = self.campo_sc.text().strip()
