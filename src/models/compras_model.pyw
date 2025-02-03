@@ -499,6 +499,7 @@ class ComprasApp(QWidget):
                 dialog.close()
                 return
             self.atualizar_tabela(filtered_df)
+            self.dataframe = filtered_df.copy()
             dialog.close()
         else:
             dialog = loading_dialog(self, "Eureka® Compras", "🤖 Consultando dados...\n\nPor favor, aguarde!")
@@ -508,6 +509,7 @@ class ComprasApp(QWidget):
                 dialog.close()
                 return
             self.atualizar_tabela(filtered_df)
+            self.dataframe = filtered_df.copy()
             dialog.close()
         
     def return_to_main(self):
@@ -682,9 +684,7 @@ class ComprasApp(QWidget):
             item.setToolTip(tooltip)
             self.tree.setHorizontalHeaderItem(i, item)
 
-    def clean_screen(self):
-        self.table_area.show()
-        self.tree.hide()
+    def clean_fields(self):
         self.campo_sc.clear()
         self.campo_pedido.clear()
         self.campo_codigo.clear()
@@ -695,6 +695,13 @@ class ComprasApp(QWidget):
         self.campo_qp.clear()
         self.campo_OP.clear()
         self.campo_armazem.clear()
+
+    def clean_screen(self):
+        self.table_area.show()
+        self.tree.hide()
+
+        self.clean_fields()
+
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
         self.label_line_number.hide()
@@ -903,12 +910,7 @@ class ComprasApp(QWidget):
             """
         return query
 
-    def atualizar_tabela(self, dataframe, filtro=None):
-        # if filtro is None:
-        #     dataframe.insert(0, ' ', '')
-        #     dataframe[''] = ''
-        #     dataframe.insert(16, 'CONTADOR DE DIAS', '')
-
+    def atualizar_tabela(self, dataframe):
         self.tree.setRowCount(len(dataframe.index))
         self.tree.clearContents()
         self.tree.setRowCount(0)
@@ -1045,7 +1047,7 @@ class ComprasApp(QWidget):
                 self.tree.setColumnHidden(i, True)
                 break
 
-        self.table_line_number(self.dataframe.shape[0])
+        self.table_line_number(dataframe.shape[0])
         self.exibir_indicadores(dataframe)
         self.tree.viewport().update()
         # self.tree.setSortingEnabled(True)
@@ -1175,14 +1177,15 @@ class ComprasApp(QWidget):
                 # Apply the filter to the dataframe
                 self.dataframe = self.dataframe[self.dataframe[nome_coluna].isin(filtro_selecionado)]
 
-                self.atualizar_tabela(self.dataframe, filtro=True)
+                self.atualizar_tabela(self.dataframe)
                 self.btn_limpar_filtro.show()
         # Reativa os sinais do cabeçalho
         self.tree.horizontalHeader().blockSignals(False)
 
     def limpar_filtros(self):
         dialog = loading_dialog(self, "Eureka®", "🤖 Removendo filtros...\n\nRestaurando a consulta inicial")
-        self.atualizar_tabela(self.dataframe_original, filtro=True)
-        self.btn_limpar_filtro.hide()
+        self.clean_fields()
         self.dataframe = self.dataframe_original.copy()
+        self.atualizar_tabela(self.dataframe_original)
+        self.btn_limpar_filtro.hide()
         dialog.close()
