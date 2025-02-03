@@ -14,6 +14,7 @@ EXEC sp_spaceused 'tb_baseline';
 EXEC xp_fixeddrives;
 
 SELECT * FROM enaplic_management.dbo.eureka_users;
+SELECT * FROM enaplic_management.dbo.eureka_users WHERE full_name LIKE '%Elton%'
 
 UPDATE enaplic_management.dbo.eureka_users
 SET role = 'admin'
@@ -23,9 +24,11 @@ SELECT * FROM enaplic_management.dbo.eureka_password_reset;
 
 SELECT * FROM enaplic_management.dbo.tb_dashboard_indicators;
 
+DELETE FROM enaplic_management.dbo.tb_dashboard_indicators;
+
 SELECT * FROM enaplic_management.dbo.tb_qps;
 
-SELECT * FROM enaplic_management.dbo.tb_qps WHERE cod_qp = '005552';
+SELECT * FROM enaplic_management.dbo.tb_qps WHERE cod_qp = '007933';
 
 SELECT * FROM enaplic_management.dbo.tb_user_logs;
 
@@ -36,8 +39,10 @@ SELECT * FROM enaplic_management.dbo.tb_user_logs
 WHERE part_number LIKE 'M-059-201-128%';
 
 SELECT * FROM enaplic_management.dbo.tb_baseline ORDER BY id DESC;
+SELECT DISTINCT cod_qp FROM enaplic_management.dbo.tb_baseline;
+SELECT COUNT(*) FROM enaplic_management.dbo.tb_baseline;
 
-SELECT COUNT(*) FROM enaplic_management.dbo.tb_baseline WHERE cod_qp = '005552';
+SELECT COUNT(*) FROM enaplic_management.dbo.tb_baseline WHERE cod_qp = '007933';
 
 SELECT * FROM enaplic_management.dbo.tb_baseline WHERE cod_qp = '005552';
 
@@ -189,7 +194,7 @@ CREATE TABLE enaplic_management.dbo.tb_user_logs (
 );
 
 ALTER TABLE enaplic_management.dbo.tb_user_logs
-ALTER COLUMN log_description NVARCHAR()
+ALTER COLUMN log_description NVARCHAR
 
 DELETE FROM enaplic_management.dbo.tb_user_logs
 

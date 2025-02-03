@@ -184,19 +184,13 @@ def format_log_description(selected_row_before_changed, selected_row_after_chang
 
 def numero_linhas_consulta(query_consulta):
     order_by_followup = f"""ORDER BY PC.R_E_C_N_O_ DESC;"""
-    order_by_sc = f"""ORDER BY "SOLIC. COMPRA" DESC;"""
-
-    query_sem_order_by = ""
-    if order_by_followup in query_consulta:
-        query_sem_order_by = query_consulta.replace(order_by_followup, "")
-    elif order_by_sc in query_consulta:
-        query_sem_order_by = query_consulta.replace(order_by_sc, "")
+    query_count = query_consulta.replace(order_by_followup, "")
 
     query = f"""
             SELECT 
                 COUNT(*) AS total_records
             FROM 
-                ({query_sem_order_by}
+                ({query_count}
                 )
             AS combined_results;
         """
