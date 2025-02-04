@@ -224,6 +224,8 @@ class ConsultaEstrutura(QWidget):
                     self.module_object = module_object
 
                 if codigo not in module_object.guias_abertas and codigo is not None:
+                    if not self.criar_dataframe():
+                        return
                     module_object.guias_abertas.append(codigo)
                     if not module_object.existe_guias_abertas():
                         # Se não houver guias abertas, adicione a guia ao layout principal
@@ -231,8 +233,6 @@ class ConsultaEstrutura(QWidget):
                         module_object.tabWidget.setVisible(True)
 
                     try:
-                        if not self.criar_dataframe():
-                            return
                         self.configurar_tabela()
                         self.populate_table()
                         self.configurar_layout()
