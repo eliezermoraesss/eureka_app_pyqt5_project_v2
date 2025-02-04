@@ -626,9 +626,7 @@ class PcpApp(QWidget):
         query = f"""
             SELECT 
                 C2_ZZNUMQP AS "QP", 
-                C2_NUM AS "OP", 
-                C2_ITEM AS "Item", 
-                C2_SEQUEN AS "Seq.",
+                CONCAT(C2_NUM, C2_ITEM, C2_SEQUEN) AS "OP",
                 C2_PRODUTO AS "Código", 
                 B1_DESC AS "Descrição", 
                 C2_QUANT AS "Quantidade",
@@ -639,6 +637,9 @@ class PcpApp(QWidget):
                 C2_DATRF AS "Fechamento", 
                 C2_OBS AS "Observação",
                 C2_AGLUT AS "Aglutinada?",
+                C2_NUM AS "OP GERAL", 
+                C2_ITEM AS "Item", 
+                C2_SEQUEN AS "Seq.",
                 users.USR_NOME AS "Aberto por:" 
             FROM 
                 {self.database}.dbo.SC2010 op
@@ -660,7 +661,7 @@ class PcpApp(QWidget):
                 AND prod.B1_DESC LIKE '{descricao_produto}%'
                 AND {clausulas_contem_descricao}
                 AND C2_OBS LIKE '%{observacao}%'
-                AND C2_NUM LIKE '{numero_op}%' {filtro_data}
+                AND CONCAT(C2_NUM, C2_ITEM, C2_SEQUEN) LIKE '{numero_op}%' {filtro_data}
                 AND op.D_E_L_E_T_ <> '*'
             ORDER BY op.C2_NUM DESC, op.C2_SEQUEN ASC;
         """

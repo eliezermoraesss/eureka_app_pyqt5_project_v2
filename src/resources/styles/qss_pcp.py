@@ -104,7 +104,7 @@ def pcp_qss():
 
             QTableWidget QHeaderView::section {
                 background-color: #262626;
-                color: #A7A6A6;
+                color: #EEEEEE;
                 padding: 5px;
                 height: 18px;
             }
