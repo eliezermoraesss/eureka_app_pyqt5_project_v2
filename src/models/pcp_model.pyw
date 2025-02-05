@@ -596,6 +596,7 @@ class PcpApp(QWidget):
         query = f"""
             SELECT 
                 C2_ZZNUMQP AS "QP",
+                qps.des_qp AS "PROJETO",
                 CONCAT(C2_NUM, C2_ITEM, C2_SEQUEN) AS "OP",
                 C2_PRODUTO AS "Código", 
                 B1_DESC AS "Descrição", 
@@ -606,7 +607,8 @@ class PcpApp(QWidget):
                 C2_DATPRF AS "Prev. Entrega",
                 C2_DATRF AS "Fechamento", 
                 C2_OBS AS "Observação",
-                C2_CC AS "Centro de Custo",
+                C2_CC AS "Código CC",
+                cc.CTT_DESC01 AS "Centro de Custo",
                 C2_AGLUT AS "Aglutinada?",
                 C2_NUM AS "OP GERAL", 
                 C2_ITEM AS "Item", 
@@ -626,6 +628,14 @@ class PcpApp(QWidget):
                     FROM {self.database}.dbo.SYS_USR users
                     WHERE users.USR_CNLOGON = op.C2_XMAQUIN 
                 AND users.D_E_L_E_T_ <> '*')
+            LEFT JOIN
+                {self.database}.dbo.CTT010 cc 
+            ON 
+                C2_CC = CTT_CUSTO
+            LEFT JOIN
+                enaplic_management.dbo.tb_qps qps
+            ON 
+                cod_qp COLLATE Latin1_General_CI_AI = C2_ZZNUMQP COLLATE Latin1_General_CI_AI
             WHERE 
                 {filtro_data}
                 AND op.D_E_L_E_T_ <> '*'
@@ -715,6 +725,7 @@ class PcpApp(QWidget):
             self.dataframe.insert(0, 'Status OP', '')
 
         except Exception as ex:
+            print(ex)
             exibir_mensagem('Erro ao consultar tabela', f'Erro: {str(ex)}', 'error')
 
         finally:

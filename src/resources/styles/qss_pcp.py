@@ -100,6 +100,7 @@ def pcp_qss():
                 background-color: #EEEEEE;
                 padding-left: 10px;
                 margin: 0;
+                alternate-background-color: #f8f9fa;
                 gridline-color: transparent; /* Remove vertical grid lines */
             }
 
