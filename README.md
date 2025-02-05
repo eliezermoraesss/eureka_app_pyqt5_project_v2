@@ -24,7 +24,21 @@
 * [Licença](#-licença)
 
 ## 🚀 Introdução
-O **EUREKA!®** é uma solução completa e inovadora desenvolvida para integrar e otimizar a gestão industrial. Com foco na integração entre Engenharia, PCP, Compras, Comercial e Vendas, o sistema oferece uma abordagem unificada para gerenciamento de processos e informações, complementando de forma eficiente o ERP TOTVS Protheus.
+O **Eureka!®** é uma aplicação desktop com o objetivo de 
+proporcionar ao usuário uma experiência de usabilidade fácil, dinâmica e limpa.
+Seu design foi pensado para ser agradável e fácil de usar.
+Ele centraliza e integra dados de diferentes departamentos, Engenharia, PCP, Compras, Comercial e Vendas, proporcionando uma visão 
+integrada, limpa e centralizada. 
+Sua fonte de dados é a base de dados SQL Server do ERP Protheus TOTVS, garantindo 
+confiabilidade e precisão nas informações, além de automatizar processos manuais, reduzindo 
+erros e aumentando a produtividade. 
+Com uma interface moderna e intuitiva, o Eureka supera a experiência do SmartClient 
+TOTVS, agilizando consultas e cadastros ao uso usuário reduzindo tempo aumentando a produtividade. 
+Sua flexibilidade permite exportação de relatórios nos formatos Excel e PDF.
+Além disso, a solução reduz a concorrência por licenças TOTVS, gerando economia sem 
+comprometer a produtividade. Complementar ao TOTVS, hoje tem sido uma ferramenta 
+indispensável na empresa, pois economiza muito tempo de análise, consulta, cadastros, geração de relatórios e 
+informações que antes demandavam muito tempo para serem obtidas e consolidadas.
 
 ![intro](images/eureka_main.gif)
 
