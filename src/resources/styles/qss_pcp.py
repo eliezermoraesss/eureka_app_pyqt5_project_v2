@@ -100,6 +100,7 @@ def pcp_qss():
                 background-color: #EEEEEE;
                 padding-left: 10px;
                 margin: 0;
+                gridline-color: transparent; /* Remove vertical grid lines */
             }
 
             QTableWidget QHeaderView::section {

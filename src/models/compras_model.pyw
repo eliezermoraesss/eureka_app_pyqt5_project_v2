@@ -222,7 +222,7 @@ class ComprasApp(QWidget):
         self.campo_data_inicio.setDisplayFormat("dd/MM/yyyy")
 
         data_atual = QDate.currentDate()
-        intervalo_meses = 6
+        intervalo_meses = 12
         data_inicio = data_atual.addMonths(-intervalo_meses)
         self.campo_data_inicio.setDate(data_inicio)
         self.add_today_button(self.campo_data_inicio)
@@ -917,7 +917,6 @@ class ComprasApp(QWidget):
         self.tree.setColumnCount(0)
         self.configurar_tabela(dataframe)
         self.configurar_tabela_tooltips(dataframe)
-        # self.tree.setSortingEnabled(False)
 
         # Construir caminhos relativos
         script_dir = os.path.dirname(os.path.abspath(__file__))

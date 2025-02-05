@@ -45,19 +45,6 @@ class CustomLineEdit(QLineEdit):
         # Continue com o comportamento padrão
         super(CustomLineEdit, self).mousePressEvent(event)
 
-
-def numero_linhas_consulta(query_consulta):
-    order_by_a_remover = "ORDER BY op.C2_NUM DESC, op.C2_SEQUEN ASC;"
-    query_sem_order_by = query_consulta.replace(order_by_a_remover, "")
-
-    query = f"""
-                SELECT 
-                    COUNT(*) AS total_records
-                FROM ({query_sem_order_by}) AS combined_results;
-            """
-    return query
-
-
 def validar_campos(codigo_produto, numero_qp, numero_op):
     if len(codigo_produto) != 13 and not codigo_produto == '':
         exibir_mensagem("ATENÇÃO!",
@@ -86,6 +73,8 @@ class PcpApp(QWidget):
 
     def __init__(self, main_window):
         super().__init__()
+        self.dataframe = None
+        self.dataframe_original = None
         self.main_window = main_window
         user_data = load_session()
         username = user_data["username"]
@@ -98,7 +87,6 @@ class PcpApp(QWidget):
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
         self.engine = None
-        self.interromper_consulta_sql = False
         self.tree = QTableWidget(self)
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
@@ -186,8 +174,8 @@ class PcpApp(QWidget):
 
         self.campo_OP = QLineEdit(self)
         self.campo_OP.setFont(QFont(fonte_campos, tamanho_fonte_campos))
-        self.campo_OP.setMaxLength(6)
-        self.campo_OP.setFixedWidth(110)
+        self.campo_OP.setMaxLength(11)
+        self.campo_OP.setFixedWidth(220)
         self.add_clear_button(self.campo_OP)
 
         self.campo_data_inicio = QDateEdit(self)
@@ -218,7 +206,7 @@ class PcpApp(QWidget):
         self.add_clear_button(self.campo_observacao)
 
         self.btn_consultar = QPushButton("Pesquisar", self)
-        self.btn_consultar.clicked.connect(self.btn_consultar_actions)
+        self.btn_consultar.clicked.connect(self.btn_pesquisar)
         self.btn_consultar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         estrutura = ConsultaEstrutura()
@@ -374,17 +362,12 @@ class PcpApp(QWidget):
         self.autocomplete_settings = AutoCompleteManager(history_manager)
         self.autocomplete_settings.setup_autocomplete(self.field_name_list, object_fields)
 
-        self.campo_codigo.returnPressed.connect(self.executar_consulta)
-        self.campo_qp.returnPressed.connect(self.executar_consulta)
-        self.campo_OP.returnPressed.connect(self.executar_consulta)
-        self.campo_descricao.returnPressed.connect(self.executar_consulta)
-        self.campo_contem_descricao.returnPressed.connect(self.executar_consulta)
-        self.campo_observacao.returnPressed.connect(self.executar_consulta)
-
-    def btn_consultar_actions(self):
-        for field_name in self.field_name_list:
-            self.autocomplete_settings.save_search_history(field_name)
-        self.executar_consulta()
+        self.campo_codigo.returnPressed.connect(self.btn_pesquisar)
+        self.campo_qp.returnPressed.connect(self.btn_pesquisar)
+        self.campo_OP.returnPressed.connect(self.btn_pesquisar)
+        self.campo_descricao.returnPressed.connect(self.btn_pesquisar)
+        self.campo_contem_descricao.returnPressed.connect(self.btn_pesquisar)
+        self.campo_observacao.returnPressed.connect(self.btn_pesquisar)
 
     def return_to_main(self):
         self.close()  # Fecha a janela atual
@@ -529,12 +512,16 @@ class PcpApp(QWidget):
         btn_today.setGeometry(20, 5, largura, altura)
         btn_today.clicked.connect(lambda: date_edit.setDate(QDate.currentDate()))
 
+    def clear_and_filter(self, line_edit):
+        line_edit.clear()
+        self.btn_pesquisar()
+
     def add_clear_button(self, line_edit):
         clear_icon = self.style().standardIcon(QStyle.SP_LineEditClearButton)
         pixmap = clear_icon.pixmap(40, 40)  # Redimensionar o ícone para 20x20 pixels
         larger_clear_icon = QIcon(pixmap)
         clear_action = QAction(larger_clear_icon, "Clear", line_edit)
-        clear_action.triggered.connect(line_edit.clear)
+        clear_action.triggered.connect(lambda: self.clear_and_filter(line_edit))
         line_edit.addAction(clear_action, QLineEdit.TrailingPosition)
 
     def obter_dados_tabela(self):
@@ -600,32 +587,15 @@ class PcpApp(QWidget):
         self.btn_consultar_estrutura.setEnabled(status)
 
     def query_consulta_ordem_producao(self):
-
-        numero_qp = self.campo_qp.text().upper().strip()
-        numero_op = self.campo_OP.text().upper().strip()
-        codigo_produto = self.campo_codigo.text().upper().strip()
-        descricao_produto = self.campo_descricao.text().upper().strip()
-        contem_descricao = self.campo_contem_descricao.text().upper().strip()
-        observacao = self.campo_observacao.text().upper().strip()
-
-        if validar_campos(codigo_produto, numero_qp, numero_op):
-            self.btn_consultar.setEnabled(True)
-            return
-
-        numero_qp = numero_qp.zfill(6) if numero_qp != '' else numero_qp
-
-        palavras_contem_descricao = contem_descricao.split('*')
-        clausulas_contem_descricao = " AND ".join(
-            [f"prod.B1_DESC LIKE '%{palavra}%'" for palavra in palavras_contem_descricao])
         data_inicio_formatada = self.campo_data_inicio.date().toString("yyyyMMdd")
         data_fim_formatada = self.campo_data_fim.date().toString("yyyyMMdd")
 
-        filtro_data = f"AND C2_EMISSAO >= '{data_inicio_formatada}' AND C2_EMISSAO <= '{data_fim_formatada}'" \
+        filtro_data = f"C2_EMISSAO >= '{data_inicio_formatada}' AND C2_EMISSAO <= '{data_fim_formatada}'" \
             if data_fim_formatada != '' and data_fim_formatada != '' else ''
 
         query = f"""
             SELECT 
-                C2_ZZNUMQP AS "QP", 
+                C2_ZZNUMQP AS "QP",
                 CONCAT(C2_NUM, C2_ITEM, C2_SEQUEN) AS "OP",
                 C2_PRODUTO AS "Código", 
                 B1_DESC AS "Descrição", 
@@ -636,6 +606,7 @@ class PcpApp(QWidget):
                 C2_DATPRF AS "Prev. Entrega",
                 C2_DATRF AS "Fechamento", 
                 C2_OBS AS "Observação",
+                C2_CC AS "Centro de Custo",
                 C2_AGLUT AS "Aglutinada?",
                 C2_NUM AS "OP GERAL", 
                 C2_ITEM AS "Item", 
@@ -656,14 +627,9 @@ class PcpApp(QWidget):
                     WHERE users.USR_CNLOGON = op.C2_XMAQUIN 
                 AND users.D_E_L_E_T_ <> '*')
             WHERE 
-                C2_ZZNUMQP LIKE '%{numero_qp}'
-                AND C2_PRODUTO LIKE '{codigo_produto}%'
-                AND prod.B1_DESC LIKE '{descricao_produto}%'
-                AND {clausulas_contem_descricao}
-                AND C2_OBS LIKE '%{observacao}%'
-                AND CONCAT(C2_NUM, C2_ITEM, C2_SEQUEN) LIKE '{numero_op}%' {filtro_data}
+                {filtro_data}
                 AND op.D_E_L_E_T_ <> '*'
-            ORDER BY op.C2_NUM DESC, op.C2_SEQUEN ASC;
+            ORDER BY CONCAT(C2_NUM, C2_ITEM, C2_SEQUEN) DESC;
         """
         return query
 
@@ -683,94 +649,70 @@ class PcpApp(QWidget):
             item.setToolTip(tooltip)
             self.tree.setHorizontalHeaderItem(i, item)
 
+    def table_line_number(self, line_number):
+        if line_number >= 1:
+            if line_number > 1:
+                message = f"Foram encontrados {line_number} itens"
+            else:
+                message = f"Foi encontrado {line_number} item"
+
+            self.label_line_number.setText(f"{message}")
+            self.label_line_number.show()
+            return True
+        else:
+            self.controle_campos_formulario(True)
+            self.button_visible_control(False)
+            return False
+
+    def not_found_message(self, df):
+        if not self.table_line_number(df.shape[0]):
+            self.clean_screen()
+            exibir_mensagem("Eureka!® PCP", 'Nenhum resultado encontrado nesta pesquisa.', "info")
+            return False
+        else:
+            return True
+
+    def btn_pesquisar(self):
+        message = "🔍 Consultando dados...\n\nAguarde por favor..."
+        for field_name in self.field_name_list:
+            self.autocomplete_settings.save_search_history(field_name)
+        if self.dataframe_original is None:
+            dialog = loading_dialog(self, "Eureka® PCP", message)
+            self.executar_consulta()
+            self.dataframe_original = self.dataframe.copy()
+            filtered_df = self.filter_table()
+            if not self.not_found_message(filtered_df):
+                self.dataframe_original = None
+                dialog.close()
+                return
+            self.atualizar_tabela(filtered_df)
+            self.dataframe = filtered_df.copy()
+            dialog.close()
+        else:
+            dialog = loading_dialog(self, "Eureka® PCP", message)
+            filtered_df = self.filter_table()
+            if not self.not_found_message(filtered_df):
+                self.dataframe_original = None
+                dialog.close()
+                return
+            self.atualizar_tabela(filtered_df)
+            self.dataframe = filtered_df.copy()
+            dialog.close()
+
     def executar_consulta(self):
-        query_consulta_op = self.query_consulta_ordem_producao()
-        if query_consulta_op is None:
-            return
-        query_contagem_linhas = numero_linhas_consulta(query_consulta_op)
-
-        self.label_line_number.hide()
-        self.label_indicators.hide()
-        self.controle_campos_formulario(False)
-        self.button_visible_control(False)
-
         conn_str = (f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};'
                     f'PWD={self.password}')
         self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
-
         try:
-            dataframe_line_number = pd.read_sql(query_contagem_linhas, self.engine)
-            line_number = dataframe_line_number.iloc[0, 0]
+            query_consulta_op = self.query_consulta_ordem_producao()
 
-            if line_number >= 1:
-                if line_number > 1:
-                    message = f"Foram encontrados {line_number} OPs"
-                else:
-                    message = f"Foi encontrado {line_number} OP"
+            self.label_line_number.hide()
+            self.label_indicators.hide()
+            self.controle_campos_formulario(False)
+            self.button_visible_control(False)
 
-                self.label_line_number.setText(f"{message}")
-                self.label_line_number.show()
-
-            else:
-                exibir_mensagem("EUREKA® PCP", 'Nenhum registro foi encontrado.\n\nEureka®', "info")
-                self.controle_campos_formulario(True)
-                self.button_visible_control(False)
-                return
-
-            dialog = loading_dialog(self, "Carregando...", "🤖 Processando dados do TOTVS..."
-                                                           "\n\n🤖 Por favor, aguarde.\n\nEureka®")
-
-            dataframe = pd.read_sql(query_consulta_op, self.engine)
-            dataframe.insert(0, 'Status OP', '')
-
-            self.exibir_indicadores(dataframe)
-            self.configurar_tabela(dataframe)
-            self.configurar_tabela_tooltips(dataframe)
-
-            self.tree.horizontalHeader().setSortIndicator(-1, Qt.AscendingOrder)
-            self.tree.setRowCount(0)
-
-            # Construir caminhos relativos
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            open_icon_path = os.path.join(script_dir, '..', 'resources', 'images', 'red.png')
-            closed_icon_path = os.path.join(script_dir, '..', 'resources', 'images', 'green.png')
-
-            open_icon = QIcon(open_icon_path)
-            closed_icon = QIcon(closed_icon_path)
-
-            for i, row in dataframe.iterrows():
-                if self.interromper_consulta_sql:
-                    break
-
-                self.tree.setSortingEnabled(False)
-                self.tree.insertRow(i)
-                for column_name in dataframe.columns:
-                    value = row[column_name]
-                    if value is not None:
-                        if column_name == 'Status OP':
-                            item = QTableWidgetItem()
-                            if row['Fechamento'].strip() == '':
-                                item.setIcon(open_icon)
-                                item.setText('OP ABERTA')
-                            else:
-                                item.setIcon(closed_icon)
-                                item.setText('OP FECHADA')
-                            item.setTextAlignment(Qt.AlignCenter)
-                        else:
-                            item = process_table_item(column_name, value)
-
-                            if column_name == 'Descrição':
-                                item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-                            else:
-                                item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-                    else:
-                        item = QTableWidgetItem('')
-
-                    self.tree.setItem(i, dataframe.columns.get_loc(column_name), item)
-            self.tree.setSortingEnabled(True)
-            self.controle_campos_formulario(True)
-            self.button_visible_control(True)
-            dialog.close()
+            self.dataframe = pd.read_sql(query_consulta_op, self.engine)
+            self.dataframe.insert(0, 'Status OP', '')
 
         except Exception as ex:
             exibir_mensagem('Erro ao consultar tabela', f'Erro: {str(ex)}', 'error')
@@ -780,7 +722,81 @@ class PcpApp(QWidget):
             if hasattr(self, 'engine'):
                 self.engine.dispose()
                 self.engine = None
-            self.interromper_consulta_sql = False
+
+    def filter_table(self):
+        filter_qp = self.campo_qp.text().strip()
+        filter_op = self.campo_OP.text().strip()
+        filter_codigo = self.campo_codigo.text().strip().upper()
+        filter_descricao = self.campo_descricao.text().strip().upper()
+        filter_contem_descricao = self.campo_contem_descricao.text().strip().upper()
+        filter_observacao = self.campo_observacao.text().strip().upper()
+
+        filtered_df = self.dataframe_original.copy()
+
+        if filter_qp:
+            filtered_df = filtered_df[filtered_df['QP'].str.endswith(filter_qp, na=False)]
+        if filter_op:
+            filtered_df = filtered_df[filtered_df['OP'].str.startswith(filter_op, na=False)]
+        if filter_codigo:
+            filtered_df = filtered_df[filtered_df['Código'].str.startswith(filter_codigo, na=False)]
+        if filter_descricao:
+            filtered_df = filtered_df[filtered_df['Descrição'].str.startswith(filter_descricao, na=False)]
+        if filter_contem_descricao:
+            filtered_df = filtered_df[filtered_df['Descrição'].str.contains(filter_contem_descricao, na=False)]
+        if filter_observacao:
+            filtered_df = filtered_df[filtered_df['Observação'].str.contains(filter_observacao, na=False)]
+
+        return filtered_df
+
+    def atualizar_tabela(self, dataframe):
+        self.tree.setRowCount(len(dataframe.index))
+        self.tree.clearContents()
+        self.tree.setRowCount(0)
+        self.tree.setColumnCount(0)
+        self.configurar_tabela(dataframe)
+        self.configurar_tabela_tooltips(dataframe)
+
+        # Construir caminhos relativos
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        open_icon_path = os.path.join(script_dir, '..', 'resources', 'images', 'red.png')
+        closed_icon_path = os.path.join(script_dir, '..', 'resources', 'images', 'green.png')
+
+        open_icon = QIcon(open_icon_path)
+        closed_icon = QIcon(closed_icon_path)
+
+        for i, row in dataframe.iterrows():
+            self.tree.setSortingEnabled(False)
+            self.tree.insertRow(i)
+            for column_name in dataframe.columns:
+                value = row[column_name]
+                if value is not None:
+                    if column_name == 'Status OP':
+                        item = QTableWidgetItem()
+                        if row['Fechamento'].strip() == '':
+                            item.setIcon(open_icon)
+                            item.setText('OP ABERTA')
+                        else:
+                            item.setIcon(closed_icon)
+                            item.setText('OP FECHADA')
+                        item.setTextAlignment(Qt.AlignCenter)
+                    else:
+                        item = process_table_item(column_name, value)
+
+                        if column_name == 'Descrição':
+                            item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+                        else:
+                            item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+                else:
+                    item = QTableWidgetItem('')
+
+                self.tree.setItem(i, dataframe.columns.get_loc(column_name), item)
+
+        self.table_line_number(dataframe.shape[0])
+        self.exibir_indicadores(dataframe)
+        self.tree.viewport().update()
+        self.tree.setSortingEnabled(True)
+        self.controle_campos_formulario(True)
+        self.button_visible_control(True)
 
     def exibir_indicadores(self, dataframe):
         quantidade_op_aberta = dataframe['Fechamento'].apply(
@@ -820,6 +836,9 @@ def format_date(value):
 def process_table_item(column_name, value):
     if value is None or (isinstance(value, str) and value.strip() == ''):
         return QTableWidgetItem('')
+
+    if column_name == 'QP':
+        return QTableWidgetItem(value.lstrip('0'))
 
     if column_name in ['Data Abertura', 'Prev. Entrega', 'Fechamento']:
         return QTableWidgetItem(format_date(value))

@@ -91,6 +91,10 @@ def compras_qss():
                 color: #fff;
             }
             
+            QTableWidget {
+                border: 1px solid #111827;
+            }
+            
             QTableWidget#result_table {
                 background-color: #EEEEEE;
             }
