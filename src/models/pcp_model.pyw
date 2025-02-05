@@ -87,9 +87,18 @@ class PcpApp(QWidget):
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
         self.engine = None
+
+        self.table_area = QTableWidget(self)
+        self.table_area.setColumnCount(0)
+        self.table_area.setRowCount(0)
+        self.table_area.setObjectName("table_area")
+
         self.tree = QTableWidget(self)
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
+        self.tree.setObjectName("result_table")
+        self.tree.hide()
+
         self.nova_janela = None
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -114,11 +123,6 @@ class PcpApp(QWidget):
         self.label_title = QLabel("PCP", self)
         self.label_title.setObjectName('label-title')
 
-        self.line = QFrame(self)
-        self.line.setObjectName('line')
-        self.line.setFrameShape(QFrame.HLine)
-        self.line.setFrameShadow(QFrame.Sunken)
-
         self.label_line_number = QLabel("", self)
         self.label_line_number.setObjectName("label-line-number")
         self.label_line_number.setVisible(False)
@@ -136,17 +140,17 @@ class PcpApp(QWidget):
         self.logo_label.setPixmap(pixmap_logo)
         self.logo_label.setAlignment(Qt.AlignRight)
 
-        self.label_codigo = QLabel("Código:", self)
-        self.label_descricao_prod = QLabel("Descrição:", self)
-        self.label_contem_descricao_prod = QLabel("Contém na descrição:", self)
+        self.label_codigo = QLabel("Código", self)
+        self.label_descricao_prod = QLabel("Descrição", self)
+        self.label_contem_descricao_prod = QLabel("Contém na descrição", self)
         self.label_contem_descricao_prod.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.label_OP = QLabel("Número OP:", self)
-        self.label_qp = QLabel("Número QP:", self)
-        self.label_data_inicio = QLabel("Data inicial:", self)
+        self.label_OP = QLabel("OP", self)
+        self.label_qp = QLabel("QP", self)
+        self.label_data_inicio = QLabel("Data inicial", self)
         self.label_data_inicio.setObjectName("data-inicio")
-        self.label_data_fim = QLabel("Data final:", self)
+        self.label_data_fim = QLabel("Data final", self)
         self.label_data_fim.setObjectName("data-fim")
-        self.label_campo_observacao = QLabel("Observação:", self)
+        self.label_campo_observacao = QLabel("Observação", self)
 
         self.campo_codigo = QLineEdit(self)
         self.campo_codigo.setFont(QFont(fonte_campos, tamanho_fonte_campos))
@@ -283,7 +287,6 @@ class PcpApp(QWidget):
         self.layout_footer_label = QHBoxLayout()
 
         layout_title.addStretch(1)
-        layout_title.addWidget(self.logo_label)
         layout_title.addWidget(self.label_title)
         layout_title.addStretch(1)
 
@@ -347,13 +350,14 @@ class PcpApp(QWidget):
         self.layout_footer_label.addWidget(self.label_line_number)
         self.layout_footer_label.addWidget(self.label_indicators)
         self.layout_footer_label.addStretch(1)
+        self.layout_footer_label.addWidget(self.logo_label)
 
         layout.addLayout(layout_title)
-        layout.addWidget(self.line)
 
         layout.addLayout(layout_campos_01)
         layout.addLayout(layout_campos_02)
         layout.addLayout(self.layout_buttons)
+        layout.addWidget(self.table_area)
         layout.addWidget(self.tree)
         layout.addLayout(self.layout_footer_label)
         self.setLayout(layout)
@@ -460,6 +464,8 @@ class PcpApp(QWidget):
             menu.exec_(table.viewport().mapToGlobal(position))
 
     def clean_screen(self):
+        self.table_area.show()
+        self.tree.hide()
         self.campo_codigo.clear()
         self.campo_qp.clear()
         self.campo_OP.clear()
@@ -539,6 +545,8 @@ class PcpApp(QWidget):
         return data
 
     def configurar_tabela(self, dataframe):
+        self.table_area.hide()
+        self.tree.show()
         self.tree.setColumnCount(len(dataframe.columns))
         self.tree.setHorizontalHeaderLabels(dataframe.columns)
         self.tree.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
@@ -855,7 +863,10 @@ def process_table_item(column_name, value):
         return QTableWidgetItem(format_date(value))
 
     if column_name == 'Aglutinada?':
-        return QTableWidgetItem('Sim' if value == 'S' else 'Não')
+        if value == 'S':
+            return QTableWidgetItem('Sim')
+        elif value == ' ':
+            return QTableWidgetItem('Não')
 
     if column_name in ['Quantidade', 'Qtd. Disponível']:
         return QTableWidgetItem(format_quantity(value))

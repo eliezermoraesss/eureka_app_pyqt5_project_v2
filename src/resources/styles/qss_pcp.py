@@ -16,9 +16,10 @@ def pcp_qss():
             }
             
             QLabel#label-title {
-                margin: 10px;
-                font-size: 30px;
+                margin: 10px 0 20px 0;
+                font-size: 18px;
                 font-weight: bold;
+                font-style: "Segoe UI";
             }
             
             QDateEdit {
@@ -76,32 +77,51 @@ def pcp_qss():
             }
 
             QPushButton {
-                background-color: #EB5B00;
-                color: #EEEEEE;
+                background-color: #0d6efd;
+                color: #FFFFFF;
                 padding: 7px 10px;
-                border: 2px;
-                border-radius: 8px;
-                font-size: 12px;
-                height: 20px;
-                font-weight: bold;
+                border: 2px solid #0d6efd;
+                border-radius: 10px;
+                font-size: 18px;
+                height: 32px;
+                font-weight: 400;
                 margin: 0px 5px 10px 5px;
             }
             
             QPushButton#btn_home {
-                background-color: #c1121f;
+                background-color: #dc3545; /* Bootstrap danger */
+                border-color: #dc3545;
             }
 
-            QPushButton:hover, QPushButton:hover#btn_home { background-color: #E84545; color: #fff }
-    
-            QPushButton:pressed, QPushButton:pressed#btn_home { background-color: #6703c5; color: #fff; }
+            QPushButton:hover, QPushButton:hover#btn_home { 
+                background-color: #0b5ed7;
+                border-color: #0a58ca;
+            }
+
+            QPushButton#btn_home:hover {
+                background-color: #bb2d3b;
+                border-color: #b02a37;
+            }
+
+            QPushButton:pressed, QPushButton:pressed#btn_home { 
+                background-color: #0a58ca;
+                border-color: #0a53be;
+            }
 
             QTableWidget {
                 border: 1px solid #000000;
-                background-color: #EEEEEE;
                 padding-left: 10px;
                 margin: 0;
                 alternate-background-color: #f8f9fa;
                 gridline-color: transparent; /* Remove vertical grid lines */
+            }
+            
+            QTableWidget#result_table {
+                background-color: #EEEEEE;
+            }
+            
+            QTableWidget#table_area {
+                background-color: #373A40;
             }
 
             QTableWidget QHeaderView::section {
@@ -126,11 +146,4 @@ def pcp_qss():
                 background-color: #000000;
                 color: #EEEEEE;
                 font-weight: bold;
-            }
-            
-            QFrame#line {
-                color: white;
-                background-color: white;
-                border: 1px solid white;
-                margin-bottom: 3px;
             }"""
