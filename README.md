@@ -43,7 +43,7 @@ comprometer a produtividade.
 Ele não substitui o uso do SmartClient TOTVS, mas para determinadas tarefa tem sido uma ferramenta 
 indispensável na empresa, pois economiza muito tempo de análise, consulta, cadastros, geração de relatórios e 
 informações que antes demandavam muito tempo para serem obtidas e consolidadas, devido a algumas limitações de 
-de usabilidade que o SmartClient tem, que de certa forma atrapalham e atrasam o fluxo do trabalho.
+usabilidade que o SmartClient tem, que de certa forma 'engessam', atrapalham e atrasam o fluxo do trabalho.
 
 O Eureka!® vem para suprir essas necessidades, oferecendo uma solução mais ágil e eficiente de interação.
 
