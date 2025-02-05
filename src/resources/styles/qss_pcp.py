@@ -23,7 +23,7 @@ def pcp_qss():
             }
             
             QDateEdit {
-                background-color: #DFE0E2;
+                background-color: #FFFFFF;
                 border: 1px solid #262626;
                 margin-bottom: 20px;
                 padding: 5px 10px;
@@ -89,9 +89,9 @@ def pcp_qss():
                 padding: 7px 10px;
                 border: 2px solid #0d6efd;
                 border-radius: 10px;
-                font-size: 18px;
+                font-size: 16px;
                 height: 20px;
-                font-weight: 400;
+                font-weight: 300;
                 margin: 0px 5px 10px 5px;
             }
             
@@ -132,7 +132,7 @@ def pcp_qss():
             }
 
             QTableWidget QHeaderView::section {
-                background-color: #262626;
+                background-color: #373A40;
                 color: #EEEEEE;
                 padding: 5px;
                 height: 18px;
@@ -150,7 +150,7 @@ def pcp_qss():
             }
 
             QTableWidget::item:selected {
-                background-color: #000000;
-                color: #EEEEEE;
+                background-color: #CCE5FF;
+                color: #000000;
                 font-weight: bold;
             }"""

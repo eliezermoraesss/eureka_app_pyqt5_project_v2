@@ -261,6 +261,10 @@ class PcpApp(QWidget):
         self.btn_image_comparator.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_image_comparator.hide()
 
+        self.btn_toggle_footer = QPushButton("Ocultar Status", self)
+        self.btn_toggle_footer.clicked.connect(self.toggle_footer)
+        self.btn_toggle_footer.hide()
+
         self.field_name_list = [
             "codigo",
             "descricao",
@@ -322,6 +326,8 @@ class PcpApp(QWidget):
         container_observacao.addWidget(self.label_campo_observacao)
         container_observacao.addWidget(self.campo_observacao)
 
+        layout_campos_01.addStretch()
+        layout_campos_02.addStretch()
         layout_campos_01.addLayout(container_qp)
         layout_campos_01.addLayout(container_op)
         layout_campos_01.addLayout(container_codigo)
@@ -333,6 +339,7 @@ class PcpApp(QWidget):
         layout_campos_01.addStretch()
         layout_campos_02.addStretch()
 
+        self.layout_buttons.addStretch()
         self.layout_buttons.addWidget(self.btn_consultar)
         self.layout_buttons.addWidget(self.btn_consultar_estrutura)
         self.layout_buttons.addWidget(self.btn_onde_e_usado)
@@ -349,6 +356,7 @@ class PcpApp(QWidget):
         self.layout_footer_label.addStretch(1)
         self.layout_footer_label.addWidget(self.label_line_number)
         self.layout_footer_label.addWidget(self.label_indicators)
+        self.layout_footer_label.addWidget(self.btn_toggle_footer)
         self.layout_footer_label.addStretch(1)
         self.layout_footer_label.addWidget(self.logo_label)
 
@@ -372,6 +380,25 @@ class PcpApp(QWidget):
         self.campo_descricao.returnPressed.connect(self.btn_pesquisar)
         self.campo_contem_descricao.returnPressed.connect(self.btn_pesquisar)
         self.campo_observacao.returnPressed.connect(self.btn_pesquisar)
+
+    # Method to toggle the footer visibility and adjust the table size
+    def toggle_footer(self):
+        if self.label_line_number.isVisible():
+            self.label_line_number.hide()
+            self.label_indicators.hide()
+            self.btn_toggle_footer.setText("Exibir Status")
+        else:
+            self.label_line_number.show()
+            self.label_indicators.show()
+            self.btn_toggle_footer.setText("Ocultar Status")
+        self.adjust_table_size()
+
+    # Method to adjust the table size
+    def adjust_table_size(self):
+        if self.label_line_number.isVisible():
+            self.tree.setGeometry(self.tree.x(), self.tree.y(), self.tree.width(), self.tree.height() - self.layout_footer_label.sizeHint().height())
+        else:
+            self.tree.setGeometry(self.tree.x(), self.tree.y(), self.tree.width(), self.tree.height() + self.layout_footer_label.sizeHint().height())
 
     def return_to_main(self):
         self.close()  # Fecha a janela atual
@@ -483,6 +510,7 @@ class PcpApp(QWidget):
         self.btn_onde_e_usado.hide()
         self.btn_saldo_estoque.hide()
         self.btn_image_comparator.hide()
+        self.btn_toggle_footer.hide()
 
         self.guias_abertas.clear()
         self.guias_abertas_onde_usado.clear()
@@ -501,6 +529,7 @@ class PcpApp(QWidget):
             self.btn_image_comparator.hide()
             self.btn_onde_e_usado.hide()
             self.btn_saldo_estoque.hide()
+            self.btn_toggle_footer.hide()
         else:
             self.btn_abrir_desenho.show()
             self.btn_consultar_estrutura.show()
@@ -508,6 +537,7 @@ class PcpApp(QWidget):
             self.btn_image_comparator.show()
             self.btn_onde_e_usado.show()
             self.btn_saldo_estoque.show()
+            self.btn_toggle_footer.show()
 
     def add_today_button(self, date_edit):
         calendar = date_edit.calendarWidget()
@@ -593,6 +623,7 @@ class PcpApp(QWidget):
         self.btn_onde_e_usado.setEnabled(status)
         self.btn_saldo_estoque.setEnabled(status)
         self.btn_consultar_estrutura.setEnabled(status)
+        self.btn_toggle_footer.setEnabled(status)
 
     def query_consulta_ordem_producao(self):
         data_inicio_formatada = self.campo_data_inicio.date().toString("yyyyMMdd")
