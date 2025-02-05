@@ -26,19 +26,26 @@
 ## 🚀 Introdução
 O **Eureka!®** é uma aplicação desktop com o objetivo de 
 proporcionar ao usuário uma experiência de usabilidade fácil, dinâmica e limpa.
+
 Seu design foi pensado para ser agradável e fácil de usar.
 Ele centraliza e integra dados de diferentes departamentos, Engenharia, PCP, Compras, Comercial e Vendas, proporcionando uma visão 
-integrada, limpa e centralizada. 
-Sua fonte de dados é a base de dados SQL Server do ERP Protheus TOTVS, garantindo 
+integrada, limpa e centralizada.
+
+Sua fonte de dados é a base de dados SQL Server do ERP TOTVS Protheus, garantindo 
 confiabilidade e precisão nas informações, além de automatizar processos manuais, reduzindo 
 erros e aumentando a produtividade. 
-Com uma interface moderna e intuitiva, o Eureka supera a experiência do SmartClient 
-TOTVS, agilizando consultas e cadastros ao usuário, reduzindo tempo e aumentando a produtividade. 
+
+Com uma interface moderna e intuitiva o Eureka!® agiliza consultas e cadastros, reduzindo tempo e aumentando a produtividade do usuário. 
 Sua flexibilidade permite exportação de relatórios nos formatos Excel e PDF.
 Além disso, a solução reduz a concorrência por licenças TOTVS, gerando economia sem 
-comprometer a produtividade. Complementar ao TOTVS, hoje tem sido uma ferramenta 
+comprometer a produtividade.
+
+Ele não substitui o uso do SmartClient TOTVS, mas para determinadas tarefa tem sido uma ferramenta 
 indispensável na empresa, pois economiza muito tempo de análise, consulta, cadastros, geração de relatórios e 
-informações que antes demandavam muito tempo para serem obtidas e consolidadas.
+informações que antes demandavam muito tempo para serem obtidas e consolidadas, devido a algumas limitações de 
+de usabilidade que o SmartClient tem, que de certa forma atrapalham e atrasam o fluxo do trabalho.
+
+O Eureka!® vem para suprir essas necessidades, oferecendo uma solução mais ágil e eficiente de interação.
 
 ![intro](images/eureka_main.gif)
 
