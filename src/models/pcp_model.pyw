@@ -120,7 +120,7 @@ class PcpApp(QWidget):
 
         self.setStyleSheet(pcp_qss())
 
-        self.label_title = QLabel("PCP", self)
+        self.label_title = QLabel("Gestão de Ordens de Produção", self)
         self.label_title.setObjectName('label-title')
 
         self.label_line_number = QLabel("", self)

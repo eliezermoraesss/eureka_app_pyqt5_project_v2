@@ -1,25 +1,25 @@
 def pcp_qss():
     return """* {
-                background-color: #373A40;
+                background-color: #D3D3D3;
+                font-style: "Segoe UI";
             }
 
             QLabel {
-                color: #DFE0E2;
-                font-size: 12px;
-                font-weight: bold;
-                padding-left: 3px;
+                color: #212529; /* Bootstrap dark text */
+                font-size: 14px;
+                font-weight: 400;
+                padding-left: 4px;
             }
             
             QLabel#label-line-number, QLabel#label-indicators {
-                font-size: 14px;
-                font-weight: bold;
+                font-size: 16px;
+                font-weight: 500;
             }
             
             QLabel#label-title {
-                margin: 10px 0 20px 0;
-                font-size: 18px;
-                font-weight: bold;
-                font-style: "Segoe UI";
+                margin: 16px;
+                font-size: 32px;
+                font-weight: 600;
             }
             
             QDateEdit {
@@ -50,12 +50,19 @@ def pcp_qss():
             }
 
             QLineEdit {
-                background-color: #EEEEEE;
-                border: 1px solid #262626;
-                padding: 5px 10px;
+                background-color: #FFFFFF;
+                color: #212529;
+                padding: 6px 12px;
+                border: 1px solid #ced4da;
                 border-radius: 10px;
+                font-size: 14px;
                 height: 24px;
-                font-size: 16px;
+            }
+
+            QLineEdit:focus {
+                border-color: #86b7fe;
+                outline: 0;
+                box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
             }
             
             QComboBox {
@@ -83,7 +90,7 @@ def pcp_qss():
                 border: 2px solid #0d6efd;
                 border-radius: 10px;
                 font-size: 18px;
-                height: 32px;
+                height: 20px;
                 font-weight: 400;
                 margin: 0px 5px 10px 5px;
             }
