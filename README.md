@@ -33,7 +33,7 @@ Sua fonte de dados é a base de dados SQL Server do ERP Protheus TOTVS, garantin
 confiabilidade e precisão nas informações, além de automatizar processos manuais, reduzindo 
 erros e aumentando a produtividade. 
 Com uma interface moderna e intuitiva, o Eureka supera a experiência do SmartClient 
-TOTVS, agilizando consultas e cadastros ao uso usuário reduzindo tempo aumentando a produtividade. 
+TOTVS, agilizando consultas e cadastros ao usuário, reduzindo tempo e aumentando a produtividade. 
 Sua flexibilidade permite exportação de relatórios nos formatos Excel e PDF.
 Além disso, a solução reduz a concorrência por licenças TOTVS, gerando economia sem 
 comprometer a produtividade. Complementar ao TOTVS, hoje tem sido uma ferramenta 
