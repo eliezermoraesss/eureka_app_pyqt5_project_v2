@@ -276,8 +276,8 @@ class PcpApp(QWidget):
         self.combobox_aglutinado.setEditable(False)
         self.combobox_aglutinado.setObjectName('combobox-aglutinado')
         self.combobox_aglutinado.addItem('')
-        self.combobox_aglutinado.addItem('Sim','S')
-        self.combobox_aglutinado.addItem('Não', ' ')
+        self.combobox_aglutinado.addItem('Sim')
+        self.combobox_aglutinado.addItem('Não')
 
         self.field_name_list = [
             "codigo",
@@ -804,6 +804,8 @@ class PcpApp(QWidget):
         filter_descricao = self.campo_descricao.text().strip().upper()
         filter_contem_descricao = self.campo_contem_descricao.text().strip().upper()
         filter_observacao = self.campo_observacao.text().strip().upper()
+        filter_status_op = self.combobox_status_op.currentText().upper()
+        filter_aglutinado = self.combobox_aglutinado.currentText().upper()
 
         filtered_df = self.dataframe_original.copy()
 
@@ -819,7 +821,16 @@ class PcpApp(QWidget):
             filtered_df = filtered_df[filtered_df['Descrição'].str.contains(filter_contem_descricao, na=False)]
         if filter_observacao:
             filtered_df = filtered_df[filtered_df['Observação'].str.contains(filter_observacao, na=False)]
-
+        if filter_status_op:
+            if filter_status_op == 'FECHADA':
+                filtered_df = filtered_df[filtered_df['Fechamento'].str.strip() != '']
+            elif filter_status_op == 'ABERTA':
+                filtered_df = filtered_df[filtered_df['Fechamento'].str.contains('        ', na=False)]
+        if filter_aglutinado:
+            if filter_aglutinado == 'SIM':
+                filtered_df = filtered_df[filtered_df['Aglutinada?'].str.contains('S', na=False)]
+            elif filter_aglutinado == 'NÃO':
+                filtered_df = filtered_df[filtered_df['Aglutinada?'].str.contains(' ', na=False)]
         return filtered_df
 
     def atualizar_tabela(self, dataframe):
@@ -847,10 +858,10 @@ class PcpApp(QWidget):
                         item = QTableWidgetItem()
                         if row['Fechamento'].strip() == '':
                             item.setIcon(open_icon)
-                            item.setText('OP ABERTA')
+                            item.setText('ABERTA')
                         else:
                             item.setIcon(closed_icon)
-                            item.setText('OP FECHADA')
+                            item.setText('FECHADA')
                         item.setTextAlignment(Qt.AlignCenter)
                     else:
                         item = process_table_item(column_name, value)

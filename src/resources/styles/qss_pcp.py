@@ -78,7 +78,7 @@ def pcp_qss():
                 padding: 7px 10px;
                 border: 2px solid #0d6efd;
                 border-radius: 10px;
-                font-size: 16px;
+                font-size: 14px;
                 height: 20px;
                 font-weight: 300;
                 margin: 0px 5px 10px 5px;
