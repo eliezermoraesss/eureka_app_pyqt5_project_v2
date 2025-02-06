@@ -2,8 +2,6 @@ import locale
 import os
 import sys
 
-from src.resources.styles.qss_vendas import vendas_qss
-
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -28,6 +26,7 @@ from src.dialog.loading_dialog import loading_dialog
 from src.app.utils.run_image_comparator import run_image_comparator_exe, run_image_comparator_model
 from src.app.utils.search_history_manager import SearchHistoryManager
 from src.app.utils.autocomplete_feature import AutoCompleteManager
+from src.resources.styles.qss_vendas import vendas_qss
 
 class CustomLineEdit(QLineEdit):
     def __init__(self, entity_name, entity, nome_coluna=None, parent=None):

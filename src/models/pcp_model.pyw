@@ -722,7 +722,7 @@ class PcpApp(QWidget):
             return True
 
     def btn_pesquisar(self):
-        message = "🔍 Consultando dados...\n\nAguarde por favor..."
+        message = "🔄 Processando dados...\n\n⏱️ Aguarde por favor..."
         for field_name in self.field_name_list:
             self.autocomplete_settings.save_search_history(field_name)
         if self.dataframe_original is None:
@@ -814,11 +814,10 @@ class PcpApp(QWidget):
         open_icon = QIcon(open_icon_path)
         closed_icon = QIcon(closed_icon_path)
 
-        for i, row in dataframe.iterrows():
+        for i, (index, row) in enumerate(dataframe.iterrows()):
             self.tree.setSortingEnabled(False)
             self.tree.insertRow(i)
-            for column_name in dataframe.columns:
-                value = row[column_name]
+            for column_name, value in row.items():
                 if value is not None:
                     if column_name == 'Status OP':
                         item = QTableWidgetItem()
@@ -838,8 +837,7 @@ class PcpApp(QWidget):
                             item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
                 else:
                     item = QTableWidgetItem('')
-
-                self.tree.setItem(i, dataframe.columns.get_loc(column_name), item)
+                self.tree.setItem(i, list(row.index).index(column_name), item)
 
         self.table_line_number(dataframe.shape[0])
         self.exibir_indicadores(dataframe)
