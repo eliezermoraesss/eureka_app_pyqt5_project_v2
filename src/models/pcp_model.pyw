@@ -341,11 +341,11 @@ class PcpApp(QWidget):
         container_data_fim.addWidget(self.campo_data_fim)
 
         container_combobox_status_op = QVBoxLayout()
-        container_combobox_status_op.addWidget(QLabel("Status OP"))
+        container_combobox_status_op.addWidget(QLabel("SITUAÇÃO OP"))
         container_combobox_status_op.addWidget(self.combobox_status_op)
 
         container_combobox_aglutinado = QVBoxLayout()
-        container_combobox_aglutinado.addWidget(QLabel("Aglutinada?"))
+        container_combobox_aglutinado.addWidget(QLabel("AGLUTINADA?"))
         container_combobox_aglutinado.addWidget(self.combobox_aglutinado)
 
         layout_campos_01.addStretch()
