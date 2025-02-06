@@ -22,17 +22,16 @@ def pcp_qss():
                 font-weight: 600;
             }
             
-            QDateEdit {
+            QDateEdit, QComboBox {
                 background-color: #FFFFFF;
-                border: 1px solid #262626;
-                margin-bottom: 20px;
+                border: 1px solid #ced4da;
                 padding: 5px 10px;
                 border-radius: 10px;
-                height: 24px;
-                font-size: 16px;
+                height: 20px;
+                font-size: 14px;
             }
             
-            QDateEdit::drop-down {
+            QDateEdit::drop-down, QComboBox::drop-down {
                 subcontrol-origin: padding;
                 subcontrol-position: top right;
                 width: 30px;
@@ -63,22 +62,12 @@ def pcp_qss():
                 border-color: #86b7fe;
                 outline: 0;
                 box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-            }
-            
-            QComboBox {
-                background-color: #EEEEEE;
-                border: 1px solid #393E46;
-                margin-bottom: 10px;
-                padding: 5px 10px;
-                border-radius: 10px;
-                height: 20px;
-                font-size: 16px;
-            }                 
+            }              
             
             QComboBox QAbstractItemView {
                 background-color: #EEEEEE;
                 color: #000000; /* Cor do texto para garantir legibilidade */
-                selection-background-color: #3f37c9; /* Cor de seleção quando passa o mouse */
+                selection-background-color: #0a79f8; /* Cor de seleção quando passa o mouse */
                 selection-color: #FFFFFF; /* Cor do texto quando selecionado */
                 border: 1px solid #393E46;
             }

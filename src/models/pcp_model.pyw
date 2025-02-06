@@ -14,7 +14,7 @@ from PyQt5.QtCore import Qt, QDate, pyqtSignal
 from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtWidgets import QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QDateEdit, QLabel, QSizePolicy, QTabWidget, QMenu, \
-    QFrame
+    QFrame, QComboBox
 from sqlalchemy import create_engine
 
 from src.app.utils.consultar_estrutura import ConsultaEstrutura
@@ -265,6 +265,20 @@ class PcpApp(QWidget):
         self.btn_toggle_footer.clicked.connect(self.toggle_footer)
         self.btn_toggle_footer.hide()
 
+        self.combobox_status_op = QComboBox(self)
+        self.combobox_status_op.setEditable(False)
+        self.combobox_status_op.setObjectName('combobox-status-op')
+        self.combobox_status_op.addItem('')
+        self.combobox_status_op.addItem('Aberta')
+        self.combobox_status_op.addItem('Fechada')
+
+        self.combobox_aglutinado = QComboBox(self)
+        self.combobox_aglutinado.setEditable(False)
+        self.combobox_aglutinado.setObjectName('combobox-aglutinado')
+        self.combobox_aglutinado.addItem('')
+        self.combobox_aglutinado.addItem('Sim','S')
+        self.combobox_aglutinado.addItem('Não', ' ')
+
         self.field_name_list = [
             "codigo",
             "descricao",
@@ -306,6 +320,10 @@ class PcpApp(QWidget):
         container_contem_descricao_prod.addWidget(self.label_contem_descricao_prod)
         container_contem_descricao_prod.addWidget(self.campo_contem_descricao)
 
+        container_observacao = QVBoxLayout()
+        container_observacao.addWidget(self.label_campo_observacao)
+        container_observacao.addWidget(self.campo_observacao)
+
         container_op = QVBoxLayout()
         container_op.addWidget(self.label_OP)
         container_op.addWidget(self.campo_OP)
@@ -322,9 +340,13 @@ class PcpApp(QWidget):
         container_data_fim.addWidget(self.label_data_fim)
         container_data_fim.addWidget(self.campo_data_fim)
 
-        container_observacao = QVBoxLayout()
-        container_observacao.addWidget(self.label_campo_observacao)
-        container_observacao.addWidget(self.campo_observacao)
+        container_combobox_status_op = QVBoxLayout()
+        container_combobox_status_op.addWidget(QLabel("Status OP"))
+        container_combobox_status_op.addWidget(self.combobox_status_op)
+
+        container_combobox_aglutinado = QVBoxLayout()
+        container_combobox_aglutinado.addWidget(QLabel("Aglutinada?"))
+        container_combobox_aglutinado.addWidget(self.combobox_aglutinado)
 
         layout_campos_01.addStretch()
         layout_campos_02.addStretch()
@@ -336,6 +358,8 @@ class PcpApp(QWidget):
         layout_campos_01.addLayout(container_observacao)
         layout_campos_02.addLayout(container_data_ini)
         layout_campos_02.addLayout(container_data_fim)
+        layout_campos_02.addLayout(container_combobox_status_op)
+        layout_campos_02.addLayout(container_combobox_aglutinado)
         layout_campos_01.addStretch()
         layout_campos_02.addStretch()
 
