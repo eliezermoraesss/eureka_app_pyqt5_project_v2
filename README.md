@@ -6,22 +6,24 @@
 
 ## 📑 Índice 
 
-* [Introdução](#-introdução)
-* [Benefícios](#-benefícios)
-* [Módulos do Sistema](#️-módulos-do-sistema)
-  * [Módulo Engenharia](#1-módulo-engenharia-️)
-  * [Módulo PCP](#2-módulo-pcp-)
-  * [Módulo Compras](#3-módulo-compras-)
-  * [Módulo Comercial](#4-módulo-comercial-)
-  * [Módulo Vendas](#5-módulo-vendas-)
-* [Recursos Adicionais](#6-recursos-adicionais-️)
-  * [Autocomplete e Histórico de Pesquisa](#61-autocomplete-e-histórico-de-pesquisa-)
-  * [Estrutura Explodida de Produtos](#62-estrutura-explodida-de-produtos-)
-* [Tecnologias Utilizadas](#-tecnologias-utilizadas)
-* [Acesso ao Projeto](#-acesso-ao-projeto)
-* [Suporte](#-suporte)
-* [Autores](#-autores)
-* [Licença](#-licença)
+- [EUREKA!® Sistema integrado de gestão industrial](#eureka-sistema-integrado-de-gestão-industrial)
+  - [📑 Índice](#-índice)
+  - [🚀 Introdução](#-introdução)
+  - [🎯 Benefícios](#-benefícios)
+  - [🛠️ Módulos do Sistema](#️-módulos-do-sistema)
+    - [1. Módulo Engenharia 🏗️](#1-módulo-engenharia-️)
+    - [2. Módulo PCP 🏭](#2-módulo-pcp-)
+    - [3. Módulo Compras 🛒](#3-módulo-compras-)
+    - [4. Módulo Comercial 📊](#4-módulo-comercial-)
+    - [5. Módulo Vendas 💼](#5-módulo-vendas-)
+    - [6. Recursos Adicionais ⚙️](#6-recursos-adicionais-️)
+    - [6.1. Autocomplete e Histórico de Pesquisa 🔍](#61-autocomplete-e-histórico-de-pesquisa-)
+    - [6.2. Estrutura Explodida de Produtos 🌳](#62-estrutura-explodida-de-produtos-)
+  - [📞 Suporte](#-suporte)
+  - [💻 Tecnologias Utilizadas](#-tecnologias-utilizadas)
+  - [📁 Acesso ao Projeto](#-acesso-ao-projeto)
+  - [👥 Autores](#-autores)
+  - [📝 Licença](#-licença)
 
 ## 🚀 Introdução
 O **Eureka!®** é uma aplicação desktop com o objetivo de 
@@ -187,9 +189,20 @@ Para sugestões e/ou melhorias, envie um e-mail clicando aqui: [e-mail](mailto:e
 ```
 - Python 3.x
 - PyQt5
+- CSS
+- SQL Server
 - SQLite
 - TOTVS Protheus (Integração)
 - Git/GitHub
+- Pandas
+- SQLAlchemy
+- pyodbc
+- requests
+- XlsxWriter
+- openpyxl
+- reportlab
+- PyPDF2
+- pyinstaller (gerar o executável)
 ```
 
 ## 📁 Acesso ao Projeto
