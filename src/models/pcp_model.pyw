@@ -2,7 +2,8 @@ import locale
 import os
 import sys
 
-from src.app.utils.abrir_hierarquia_estrutura import abrir_hierarquia_estrutura
+from src.app.views.production_order_1 import PrintProductionOrderDialog
+from src.dialog.confirmation_dialog import show_confirmation_dialog
 
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -14,7 +15,7 @@ from PyQt5.QtCore import Qt, QDate, pyqtSignal
 from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtWidgets import QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QDateEdit, QLabel, QSizePolicy, QTabWidget, QMenu, \
-    QFrame, QComboBox
+    QComboBox, QMessageBox
 from sqlalchemy import create_engine
 
 from src.app.utils.consultar_estrutura import ConsultaEstrutura
@@ -30,6 +31,7 @@ from src.app.utils.run_image_comparator import run_image_comparator_exe, run_ima
 from src.app.utils.autocomplete_feature import AutoCompleteManager
 from src.app.utils.search_history_manager import SearchHistoryManager
 from src.resources.styles.qss_pcp import pcp_qss
+from src.app.utils.abrir_hierarquia_estrutura import abrir_hierarquia_estrutura
 
 
 class CustomLineEdit(QLineEdit):
@@ -265,6 +267,9 @@ class PcpApp(QWidget):
         self.btn_toggle_footer.clicked.connect(self.toggle_footer)
         self.btn_toggle_footer.hide()
 
+        self.btn_imprimir_op = QPushButton("Imprimir OP", self)
+        self.btn_imprimir_op.clicked.connect(self.imprimir_op)
+
         self.combobox_status_op = QComboBox(self)
         self.combobox_status_op.setEditable(False)
         self.combobox_status_op.setObjectName('combobox-status-op')
@@ -381,6 +386,7 @@ class PcpApp(QWidget):
         self.layout_footer_label.addWidget(self.label_line_number)
         self.layout_footer_label.addWidget(self.label_indicators)
         self.layout_footer_label.addWidget(self.btn_toggle_footer)
+        self.layout_footer_label.addWidget(self.btn_imprimir_op)
         self.layout_footer_label.addStretch(1)
         self.layout_footer_label.addWidget(self.logo_label)
 
@@ -404,6 +410,19 @@ class PcpApp(QWidget):
         self.campo_descricao.returnPressed.connect(self.btn_pesquisar)
         self.campo_contem_descricao.returnPressed.connect(self.btn_pesquisar)
         self.campo_observacao.returnPressed.connect(self.btn_pesquisar)
+
+    def imprimir_op(self):
+        df_op_aberta = self.filter_table(situacao_op='ABERTA')
+        line_number = df_op_aberta.shape[0]
+        title = "Eureka® PCP - Impressão de OP"
+        message = f"Foram encontradas {line_number} OP(s) abertas.\n\nDeseja prosseguir com a impressão?"
+        response = show_confirmation_dialog(title, message)
+
+        if response == QMessageBox.Yes:
+            print_dialog = PrintProductionOrderDialog(self.dataframe, self)
+            print_dialog.show()
+        else:
+            return
 
     # Method to toggle the footer visibility and adjust the table size
     def toggle_footer(self):
@@ -535,6 +554,7 @@ class PcpApp(QWidget):
         self.btn_saldo_estoque.hide()
         self.btn_image_comparator.hide()
         self.btn_toggle_footer.hide()
+        self.btn_imprimir_op.hide()
 
         self.guias_abertas.clear()
         self.guias_abertas_onde_usado.clear()
@@ -554,6 +574,7 @@ class PcpApp(QWidget):
             self.btn_onde_e_usado.hide()
             self.btn_saldo_estoque.hide()
             self.btn_toggle_footer.hide()
+            self.btn_imprimir_op.hide()
         else:
             self.btn_abrir_desenho.show()
             self.btn_consultar_estrutura.show()
@@ -562,6 +583,7 @@ class PcpApp(QWidget):
             self.btn_onde_e_usado.show()
             self.btn_saldo_estoque.show()
             self.btn_toggle_footer.show()
+            self.btn_imprimir_op.show()
 
     def add_today_button(self, date_edit):
         calendar = date_edit.calendarWidget()
@@ -648,6 +670,7 @@ class PcpApp(QWidget):
         self.btn_saldo_estoque.setEnabled(status)
         self.btn_consultar_estrutura.setEnabled(status)
         self.btn_toggle_footer.setEnabled(status)
+        self.btn_imprimir_op.setEnabled(status)
 
     def query_consulta_ordem_producao(self):
         data_inicio_formatada = self.campo_data_inicio.date().toString("yyyyMMdd")
@@ -746,7 +769,7 @@ class PcpApp(QWidget):
             return True
 
     def btn_pesquisar(self):
-        message = "🔄 Processando dados...\n\n⏱️ Aguarde por favor..."
+        message = "🔄 Processando dados...\n\n⏱️ Por favor aguarde..."
         for field_name in self.field_name_list:
             self.autocomplete_settings.save_search_history(field_name)
         if self.dataframe_original is None:
@@ -797,14 +820,17 @@ class PcpApp(QWidget):
                 self.engine.dispose()
                 self.engine = None
 
-    def filter_table(self):
+    def filter_table(self, situacao_op=None):
         filter_qp = self.campo_qp.text().strip()
         filter_op = self.campo_OP.text().strip()
         filter_codigo = self.campo_codigo.text().strip().upper()
         filter_descricao = self.campo_descricao.text().strip().upper()
         filter_contem_descricao = self.campo_contem_descricao.text().strip().upper()
         filter_observacao = self.campo_observacao.text().strip().upper()
-        filter_status_op = self.combobox_status_op.currentText().upper()
+        if situacao_op is None:
+            filter_status_op = self.combobox_status_op.currentText().upper()
+        else:
+            filter_status_op = situacao_op
         filter_aglutinado = self.combobox_aglutinado.currentText().upper()
 
         filtered_df = self.dataframe_original.copy()

@@ -487,10 +487,11 @@ class ComprasApp(QWidget):
             return True
 
     def btn_pesquisar(self):
+        message = "🔄 Processando dados...\n\n⏱️ Por favor aguarde..."
         for field_name in self.field_name_list:
             self.autocomplete_settings.save_search_history(field_name)
         if self.dataframe_original is None:
-            dialog = loading_dialog(self, "Eureka® Compras", "🤖 Consultando dados...\n\nPor favor, aguarde!")
+            dialog = loading_dialog(self, "Eureka® Compras", message)
             self.executar_consulta()
             self.dataframe_original = self.dataframe.copy()
             filtered_df = self.filter_table()
@@ -502,7 +503,7 @@ class ComprasApp(QWidget):
             self.dataframe = filtered_df.copy()
             dialog.close()
         else:
-            dialog = loading_dialog(self, "Eureka® Compras", "🤖 Consultando dados...\n\nPor favor, aguarde!")
+            dialog = loading_dialog(self, "Eureka® Compras", message)
             filtered_df = self.filter_table()
             if not self.not_found_message(filtered_df):
                 self.dataframe_original = None

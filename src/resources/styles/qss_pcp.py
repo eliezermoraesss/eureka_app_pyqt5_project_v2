@@ -1,5 +1,6 @@
 def pcp_qss():
-    return """* {
+    return """
+            * {
                 background-color: #D3D3D3;
                 font-style: "Segoe UI";
             }
@@ -17,37 +18,11 @@ def pcp_qss():
             }
             
             QLabel#label-title {
-                margin: 16px;
-                font-size: 32px;
+                margin: 10px;
+                font-size: 28px;
                 font-weight: 600;
             }
             
-            QDateEdit, QComboBox {
-                background-color: #FFFFFF;
-                border: 1px solid #ced4da;
-                padding: 5px 10px;
-                border-radius: 10px;
-                height: 20px;
-                font-size: 14px;
-            }
-            
-            QDateEdit::drop-down, QComboBox::drop-down {
-                subcontrol-origin: padding;
-                subcontrol-position: top right;
-                width: 30px;
-                border-left-width: 1px;
-                border-left-color: darkgray;
-                border-left-style: solid;
-                border-top-right-radius: 3px;
-                border-bottom-right-radius: 3px;
-            }
-            
-            QDateEdit::down-arrow {
-                image: url(../resources/images/arrow.png);
-                width: 10px;
-                height: 10px;
-            }
-
             QLineEdit {
                 background-color: #FFFFFF;
                 color: #212529;
@@ -62,7 +37,34 @@ def pcp_qss():
                 border-color: #86b7fe;
                 outline: 0;
                 box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-            }              
+            }
+            
+            QDateEdit, QComboBox {
+                background-color: #FFFFFF;
+                border: 1px solid #ced4da;
+                padding: 5px 10px;
+                border-radius: 10px;
+                height: 20px;
+                font-size: 14px;
+                margin: 0px 0px 10px 0px;
+            }
+            
+            QDateEdit::drop-down, QComboBox::drop-down {
+                subcontrol-origin: padding;
+                subcontrol-position: top right;
+                width: 30px;
+                border-left-width: 1px;
+                border-left-color: darkgray;
+                border-left-style: solid;
+                border-top-right-radius: 3px;
+                border-bottom-right-radius: 3px;
+            }
+            
+            QDateEdit::down-arrow, QComboBox::down-arrow {
+                image: url(../resources/images/arrow.png);
+                width: 10px;
+                height: 10px;
+            }        
             
             QComboBox QAbstractItemView {
                 background-color: #EEEEEE;
@@ -121,14 +123,17 @@ def pcp_qss():
             }
 
             QTableWidget QHeaderView::section {
-                background-color: #373A40;
+                background-color: #302c2c;
                 color: #EEEEEE;
-                padding: 5px;
-                height: 18px;
+                font-weight: bold;
+                height: 25px;
             }
 
             QTableWidget QHeaderView::section:horizontal {
-                border-top: 1px solid #333;
+                font-size: 11px;
+                font-weight: bold;
+                padding: 5px;
+                height: 25px;
             }
 
             QTableWidget::item {
@@ -142,4 +147,5 @@ def pcp_qss():
                 background-color: #CCE5FF;
                 color: #000000;
                 font-weight: bold;
-            }"""
+            }
+            """
