@@ -12,7 +12,7 @@ from PyQt5.QtCore import Qt, QDate, pyqtSignal, QSize
 from PyQt5.QtGui import QFont, QIcon, QPixmap, QIntValidator
 from PyQt5.QtWidgets import QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QDateEdit, QLabel, \
-    QSizePolicy, QTabWidget, QMenu, QCheckBox, QDialog
+    QSizePolicy, QTabWidget, QMenu, QDialog
 from sqlalchemy import create_engine
 
 from src.app.utils.consultar_onde_usado import executar_consulta_onde_usado
@@ -30,6 +30,7 @@ from src.app.utils.run_image_comparator import run_image_comparator_exe, run_ima
 from src.app.utils.autocomplete_feature import AutoCompleteManager
 from src.app.utils.search_history_manager import SearchHistoryManager
 from src.resources.styles.qss_compras import compras_qss
+from src.app.views.solic_compras_window import SolicitacaoComprasWindow
 
 
 class CustomLineEdit(QLineEdit):
@@ -44,6 +45,11 @@ class CustomLineEdit(QLineEdit):
         open_search_dialog(self.entity_name, self, self.entity, self.nome_coluna, self.parentWidget())
         # Continue com o comportamento padrão
         super(CustomLineEdit, self).mousePressEvent(event)
+
+
+def abrir_janela_solicitacao_compra():
+    solic_window = SolicitacaoComprasWindow()
+    solic_window.showMaximized()
 
 
 class ComprasApp(QWidget):
@@ -277,6 +283,10 @@ class ComprasApp(QWidget):
         self.btn_nova_janela.clicked.connect(self.abrir_nova_janela)
         self.btn_nova_janela.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
+        self.btn_solic_compra = QPushButton("Solicitação de Compra", self)
+        self.btn_solic_compra.clicked.connect(abrir_janela_solicitacao_compra)
+        self.btn_solic_compra.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
         self.btn_exportar_excel = QPushButton("Exportar Excel", self)
         self.btn_exportar_excel.clicked.connect(lambda: exportar_excel(self, self.tree))
         self.btn_exportar_excel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -424,6 +434,7 @@ class ComprasApp(QWidget):
         layout_button_03.addStretch()
         layout_button_04.addStretch()
         layout_button_03.addWidget(self.btn_consultar)
+        layout_button_03.addWidget(self.btn_solic_compra)
         layout_button_04.addWidget(self.btn_visualizar_nf)
         layout_button_04.addWidget(self.btn_ultimas_nfe)
         layout_button_04.addWidget(self.btn_ultimos_fornecedores)

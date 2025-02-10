@@ -32,7 +32,6 @@ from src.app.utils.search_history_manager import SearchHistoryManager
 from src.resources.styles.qss_pcp import pcp_qss
 from src.app.utils.abrir_hierarquia_estrutura import abrir_hierarquia_estrutura
 from src.dialog.confirmation_dialog import show_confirmation_dialog
-from src.app.utils.print_op import PrintProductionOrderDialog
 
 
 class CustomLineEdit(QLineEdit):

@@ -8,9 +8,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from datetime import datetime
 
 import pandas as pd
-from PyQt5.QtCore import Qt, QDate, QProcess, pyqtSignal, QSize
+from PyQt5.QtCore import Qt, QDate, pyqtSignal, QSize
 from PyQt5.QtGui import QFont, QIcon, QPixmap
-from PyQt5.QtWidgets import QApplication, QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
+from PyQt5.QtWidgets import QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QDateEdit, QLabel, \
     QComboBox, QSizePolicy, QTabWidget, QMenu, QCheckBox
 from sqlalchemy import create_engine
@@ -901,13 +901,3 @@ class SolicitacaoComprasWindow(QWidget):
             tooltip = tooltip_map.get(header)
             item.setToolTip(tooltip)
             self.tree.setHorizontalHeaderItem(i, item)
-
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = SolicitacaoComprasWindow()
-    username, password, database, server = setup_mssql()
-    driver = '{SQL Server}'
-    window.showMaximized()
-    sys.exit(app.exec_())
