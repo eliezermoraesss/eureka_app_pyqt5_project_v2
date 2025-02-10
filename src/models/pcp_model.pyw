@@ -2,9 +2,6 @@ import locale
 import os
 import sys
 
-from src.app.views.production_order_1 import PrintProductionOrderDialog
-from src.dialog.confirmation_dialog import show_confirmation_dialog
-
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -32,6 +29,8 @@ from src.app.utils.autocomplete_feature import AutoCompleteManager
 from src.app.utils.search_history_manager import SearchHistoryManager
 from src.resources.styles.qss_pcp import pcp_qss
 from src.app.utils.abrir_hierarquia_estrutura import abrir_hierarquia_estrutura
+from src.dialog.confirmation_dialog import show_confirmation_dialog
+from src.app.utils.print_op import PrintProductionOrderDialog
 
 
 class CustomLineEdit(QLineEdit):
@@ -269,6 +268,7 @@ class PcpApp(QWidget):
 
         self.btn_imprimir_op = QPushButton("Imprimir OP", self)
         self.btn_imprimir_op.clicked.connect(self.imprimir_op)
+        self.btn_imprimir_op.hide()
 
         self.combobox_status_op = QComboBox(self)
         self.combobox_status_op.setEditable(False)
@@ -414,12 +414,12 @@ class PcpApp(QWidget):
     def imprimir_op(self):
         df_op_aberta = self.filter_table(situacao_op='ABERTA')
         line_number = df_op_aberta.shape[0]
-        title = "Eureka® PCP - Impressão de OP"
-        message = f"Foram encontradas {line_number} OP(s) abertas.\n\nDeseja prosseguir com a impressão?"
+        title = "Imprimir OP"
+        message = f"Foram encontradas {line_number} OPs.\n\nDeseja prosseguir com a impressão?"
         response = show_confirmation_dialog(title, message)
 
         if response == QMessageBox.Yes:
-            print_dialog = PrintProductionOrderDialog(self.dataframe, self)
+            print_dialog = PrintProductionOrderDialog(df_op_aberta, self)
             print_dialog.show()
         else:
             return
