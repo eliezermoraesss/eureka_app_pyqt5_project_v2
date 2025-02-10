@@ -2,6 +2,8 @@ import locale
 import os
 import sys
 
+from src.app.views.print_op_window import PrintOPWindowV2
+
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -419,7 +421,7 @@ class PcpApp(QWidget):
         response = show_confirmation_dialog(title, message)
 
         if response == QMessageBox.Yes:
-            print_dialog = PrintProductionOrderDialog(df_op_aberta, self)
+            print_dialog = PrintOPWindowV2(self, df_op_aberta)
             print_dialog.show()
         else:
             return

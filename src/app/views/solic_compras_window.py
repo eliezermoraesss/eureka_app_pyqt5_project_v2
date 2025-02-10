@@ -224,16 +224,6 @@ class SolicitacaoComprasWindow(QWidget):
         self.btn_sc.clicked.connect(self.executar_consulta_solic_compras)
         self.btn_sc.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        self.btn_abrir_engenharia = QPushButton("Engenharia", self)
-        self.btn_abrir_engenharia.setObjectName("btn_engenharia")
-        self.btn_abrir_engenharia.clicked.connect(self.abrir_modulo_engenharia)
-        self.btn_abrir_engenharia.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-
-        self.btn_abrir_pcp = QPushButton("PCP", self)
-        self.btn_abrir_pcp.setObjectName("PCP")
-        self.btn_abrir_pcp.clicked.connect(self.abrir_modulo_pcp)
-        self.btn_abrir_pcp.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-
         self.btn_onde_e_usado = QPushButton("Onde é usado?", self)
         self.btn_onde_e_usado.clicked.connect(lambda: executar_consulta_onde_usado(self, self.tree))
         self.btn_onde_e_usado.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -268,7 +258,7 @@ class SolicitacaoComprasWindow(QWidget):
         self.btn_exportar_excel.hide()
 
         self.btn_fechar = QPushButton("Fechar", self)
-        self.btn_fechar.clicked.connect(self.fechar_janela)
+        self.btn_fechar.clicked.connect(self.close)
         self.btn_fechar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.campo_sc.returnPressed.connect(self.executar_consulta_solic_compras)
@@ -362,8 +352,6 @@ class SolicitacaoComprasWindow(QWidget):
         self.layout_buttons.addWidget(self.btn_nova_janela)
         self.layout_buttons.addWidget(self.btn_limpar)
         self.layout_buttons.addWidget(self.btn_exportar_excel)
-        self.layout_buttons.addWidget(self.btn_abrir_engenharia)
-        self.layout_buttons.addWidget(self.btn_abrir_pcp)
         self.layout_buttons.addWidget(self.btn_fechar)
         self.layout_buttons.addStretch()
 
@@ -914,20 +902,6 @@ class SolicitacaoComprasWindow(QWidget):
             item.setToolTip(tooltip)
             self.tree.setHorizontalHeaderItem(i, item)
 
-    def fechar_janela(self):
-        self.close()
-
-    def abrir_modulo_engenharia(self):
-        process = QProcess()
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        script_path = os.path.join(script_dir, 'engenharia_model.pyw')
-        process.startDetached("python", [script_path])
-
-    def abrir_modulo_pcp(self):
-        process = QProcess()
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        script_path = os.path.join(script_dir, 'pcp_model.pyw')
-        process.startDetached("python", [script_path])
 
 
 if __name__ == "__main__":
