@@ -61,7 +61,7 @@ class ComprasApp(QWidget):
         self.filtro_dialog = None
         self.dataframe_original = None
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
-        self.lista_status_tabela = ['SEM PEDIDO COMPRA', 'EM APROVAÇÃO', 'AGUARDANDO ENTREGA', 'ENTREGA PARCIAL',
+        self.lista_status_tabela = ['EM APROVAÇÃO', 'AGUARDANDO ENTREGA', 'ENTREGA PARCIAL',
                                     'PEDIDO ENCERRADO']
 
         user_data = load_session()
@@ -1083,11 +1083,6 @@ class ComprasApp(QWidget):
                         <th style="text-align: middle; vertical-align: middle;">Status</th>
                         <th style="text-align: right; vertical-align: middle;">Itens</th>
                         <th style="text-align: right; vertical-align: middle;">Pedidos</th>
-                    </tr>
-                    <tr>
-                        <td style="vertical-align: middle;">SEM PEDIDO DE COMPRA</td>
-                        <td style="text-align: right; vertical-align: middle;">{contagem_itens['SEM PEDIDO COMPRA']}</td>
-                        <td style="text-align: right; vertical-align: middle;">{contagem_pedidos['SEM PEDIDO COMPRA']}</td>
                     </tr>
                     <tr>
                         <td style="vertical-align: middle;">EM APROVAÇÃO</td>
