@@ -2,8 +2,6 @@ import locale
 import os
 import sys
 
-from src.app.views.print_op_window import PrintOPWindowV2
-
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -32,6 +30,7 @@ from src.app.utils.search_history_manager import SearchHistoryManager
 from src.resources.styles.qss_pcp import pcp_qss
 from src.app.utils.abrir_hierarquia_estrutura import abrir_hierarquia_estrutura
 from src.dialog.confirmation_dialog import show_confirmation_dialog
+from src.app.utils.print_op_v2 import PrintProductionOrderDialogV2
 
 
 class CustomLineEdit(QLineEdit):
@@ -420,7 +419,7 @@ class PcpApp(QWidget):
         response = show_confirmation_dialog(title, message)
 
         if response == QMessageBox.Yes:
-            print_dialog = PrintOPWindowV2(self, df_op_aberta)
+            print_dialog = PrintProductionOrderDialogV2(df_op_aberta, self.dataframe_original, self)
             print_dialog.show()
         else:
             return
