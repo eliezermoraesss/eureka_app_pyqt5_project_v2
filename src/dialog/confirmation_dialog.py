@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QMessageBox
 
-def show_confirmation_dialog(title, message):
-    msg_box = QMessageBox()
+def show_confirmation_dialog(self, title, message):
+    msg_box = QMessageBox(self)
     msg_box.setIcon(QMessageBox.Question)
     msg_box.setWindowTitle(title)
     msg_box.setText(message)

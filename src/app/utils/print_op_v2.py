@@ -5,7 +5,7 @@ import pandas as pd
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QThread, pyqtSignal, QUrl
 from PyQt5.QtGui import QDesktopServices
-from PyQt5.QtWidgets import (QVBoxLayout, QMessageBox, QProgressBar)
+from PyQt5.QtWidgets import (QVBoxLayout, QMessageBox, QProgressBar, QLabel)
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT
 from reportlab.lib.pagesizes import A4
@@ -24,10 +24,11 @@ class PDFGeneratorThread(QThread):
     error = pyqtSignal(str)
     progress = pyqtSignal(int)
 
-    def __init__(self, df: pd.DataFrame, df_op_table, output_path: str):
+    def __init__(self, df: pd.DataFrame, df_op_table, output_dir: str):
         super().__init__()
+        self.output_path = None
         self.df = df
-        self.output_path = output_path
+        self.output_dir = output_dir
         self.df_op_table = df_op_table
 
     def run(self):
@@ -35,6 +36,9 @@ class PDFGeneratorThread(QThread):
             total_rows = len(self.df)
             for index, row in self.df.iterrows():
                 progress = int((index + 1) / total_rows * 100)
+                timestamp = datetime.now().strftime('%d%m%Y_%H%M%S')
+                self.output_path = os.path.join(self.output_dir,
+                                           f"OP_{row['OP'].strip()}_{row['Código'].strip()}_{timestamp}.pdf")
                 generate_production_order_pdf(row, self.output_path, self.progress, self.df_op_table)
                 self.progress.emit(progress)
             self.finished.emit(self.output_path)
@@ -60,7 +64,7 @@ def generate_hierarchical_table(df: pd.DataFrame, canvas_obj, y_position: float)
     """Generates the hierarchical table for the production order"""
     # Define column widths and headers
     col_widths = [60, 100, 250, 60, 40]  # Adjusted widths
-    headers = ['OP', 'Código Pai', 'Descrição', 'Qtde', 'Un.']
+    headers = ['OP', 'Código Pai', 'Descrição', 'Quantidade Usada', 'Unid.']
 
     # Prepare data for table
     table_data = [headers]
@@ -73,20 +77,19 @@ def generate_hierarchical_table(df: pd.DataFrame, canvas_obj, y_position: float)
             str(row['Unid'])
         ])
 
-    # Create and style table
     table = Table(table_data, colWidths=col_widths)
     table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.transparent),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('FONTNAME', (0, 0), (-1, 0), 'Courier'),
+        ('FONTSIZE', (0, 0), (-1, 0), 8),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
         ('BACKGROUND', (0, 1), (-1, -1), colors.white),
         ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 9),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('FONTNAME', (0, 1), (-1, -1), 'Courier'),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('LINEBELOW', (0, 0), (-1, -1), 1, colors.black),  # Horizontal grid lines
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
     ]))
@@ -149,6 +152,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
     """Generates PDF for a single Production Order"""
     # Create PDF
     c = canvas.Canvas(output_path, pagesize=A4)
+    c.setFont('Courier', 10)
     width, height = A4
     margin = 15 * mm
 
@@ -159,7 +163,8 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
 
     # Barcode
     barcode_path = get_resource_path('images', 'barcode.png')
-    c.drawImage(barcode_path, width - margin * 8, height - margin * 2, width=100, preserveAspectRatio=True)
+    barcode_y_position = height - margin * 2 - 100  # Ajuste a posição y do código de barras
+    c.drawImage(barcode_path, width - margin * 8, barcode_y_position, width=100, preserveAspectRatio=True)
     progress_callback.emit(40)
 
     # Production Order Information
@@ -232,7 +237,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
 
     # Workflow Image
     workflow_path = get_resource_path('images', 'roteiro.png')
-    workflow_y_position = table_y_position - 250
+    workflow_y_position = barcode_y_position - 700  # Ajuste a posição y do roteiro
     c.drawImage(workflow_path, margin, workflow_y_position, width=width-2*margin, preserveAspectRatio=True)
 
     # Save first page
@@ -250,12 +255,14 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
 
     if os.path.exists(drawing_path):
         merger = PdfMerger()
+        progress_callback.emit(94)
         merger.append(output_path)  # First append the production order page
         merger.append(drawing_path)  # Then append the technical drawing
 
         # Create a temporary file for the merged result
         temp_output = output_path + '.temp'
         merger.write(temp_output)
+        progress_callback.emit(98)
         merger.close()
 
         # Replace the original file with the merged result
@@ -267,17 +274,19 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
         width, height = A4
 
         c.showPage()
-        c.setFont("Helvetica-Bold", 24)
+        c.setFont("Courier-Oblique", 24)
         c.drawCentredString(width/2, height/2, "DESENHO NÃO ENCONTRADO")
         c.save()
 
         # Merge the original page with the "Drawing not found" page
         merger = PdfMerger()
+        progress_callback.emit(94)
         merger.append(output_path)
         merger.append(output_path + '.temp')
 
         temp_output = output_path + '.merged'
         merger.write(temp_output)
+        progress_callback.emit(98)
         merger.close()
 
         # Clean up temporary files and replace the original
@@ -288,6 +297,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
 class PrintProductionOrderDialogV2(QtWidgets.QDialog):
     def __init__(self, df: pd.DataFrame, df_op_table, parent=None):
         super().__init__(parent)
+        self.label_status = None
         self.pdf_thread = None
         self.progress_bar = None
         self.layout = None
@@ -297,14 +307,18 @@ class PrintProductionOrderDialogV2(QtWidgets.QDialog):
         self.print_production_order()
 
     def init_ui(self):
-        self.setWindowTitle("Publicando Ordem de Produção")
+        self.setWindowTitle("Impressão de OP")
         self.setGeometry(100, 100, 400, 100)
 
         self.layout = QVBoxLayout(self)
 
+        self.label_status = QLabel("Publicando Ordem de Produção...", self)
+
         # Progress bar
         self.progress_bar = QProgressBar(self)
         self.progress_bar.setRange(0, 100)
+
+        self.layout.addWidget(self.label_status)
         self.layout.addWidget(self.progress_bar)
 
         self.setLayout(self.layout)
@@ -313,10 +327,7 @@ class PrintProductionOrderDialogV2(QtWidgets.QDialog):
         output_dir = r"\\192.175.175.4\dados\EMPRESA\PRODUCAO\ORDEM_DE_PRODUCAO"
         os.makedirs(output_dir, exist_ok=True)
 
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        output_path = os.path.join(output_dir, f"OP_{timestamp}.pdf")
-
-        self.pdf_thread = PDFGeneratorThread(self.df, self.df_op_table, output_path)
+        self.pdf_thread = PDFGeneratorThread(self.df, self.df_op_table, output_dir)
         self.pdf_thread.finished.connect(self.on_pdf_generation_complete)
         self.pdf_thread.error.connect(self.on_pdf_generation_error)
         self.pdf_thread.progress.connect(self.update_progress)
@@ -326,7 +337,7 @@ class PrintProductionOrderDialogV2(QtWidgets.QDialog):
         self.progress_bar.setValue(value)
 
     def on_pdf_generation_complete(self, path):
-        QMessageBox.information(self, "PDF Gerado", f"PDF gerado com sucesso!")
+        QMessageBox.information(self, "", f"PDF gerado com sucesso!")
         QDesktopServices.openUrl(QUrl.fromLocalFile(path))
         self.close()
 

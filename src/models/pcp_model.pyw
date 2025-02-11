@@ -416,7 +416,7 @@ class PcpApp(QWidget):
         line_number = df_op_aberta.shape[0]
         title = "Imprimir OP"
         message = f"Foram encontradas {line_number} OPs.\n\nDeseja prosseguir com a impressão?"
-        response = show_confirmation_dialog(title, message)
+        response = show_confirmation_dialog(self, title, message)
 
         if response == QMessageBox.Yes:
             print_dialog = PrintProductionOrderDialogV2(df_op_aberta, self.dataframe_original, self)
