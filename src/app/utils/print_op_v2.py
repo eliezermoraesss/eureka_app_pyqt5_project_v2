@@ -77,19 +77,20 @@ def generate_hierarchical_table(df: pd.DataFrame, canvas_obj, y_position: float)
             str(row['Unid'])
         ])
 
+    # Create and style table
     table = Table(table_data, colWidths=col_widths)
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.transparent),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Courier'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica'),
         ('FONTSIZE', (0, 0), (-1, 0), 8),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
         ('BACKGROUND', (0, 1), (-1, -1), colors.white),
         ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-        ('FONTNAME', (0, 1), (-1, -1), 'Courier'),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
         ('FONTSIZE', (0, 1), (-1, -1), 8),
-        ('LINEBELOW', (0, 0), (-1, -1), 1, colors.black),  # Horizontal grid lines
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
     ]))
@@ -149,10 +150,11 @@ def consultar_hierarquia_tabela(codigo):
 
 def generate_production_order_pdf(row: pd.Series, output_path: str, progress_callback, dataframe_geral):
     codigo = row['Código'].strip()
+    num_qp = row['QP'].strip()
     """Generates PDF for a single Production Order"""
     # Create PDF
     c = canvas.Canvas(output_path, pagesize=A4)
-    c.setFont('Courier', 10)
+    c.setFont('Helvetica', 10)
     width, height = A4
     margin = 15 * mm
 
@@ -195,8 +197,11 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
         codigos_onde_usado = dataframe_onde_usado['Código'].unique()
         codigos_onde_usado = [item.strip() for item in codigos_onde_usado]
 
-        # Filter dataframe_op to only include rows where 'Código' is in codigos_onde_usado
-        dataframe_filtrado = dataframe_geral[dataframe_geral['Código'].str.strip().isin(codigos_onde_usado)]
+        # Filter dataframe_op to only include rows where 'Código' is in codigos_onde_usado and 'QP' matches num_qp
+        dataframe_filtrado = dataframe_geral[
+            dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
+            (dataframe_geral['QP'].str.strip() == num_qp)
+        ]
 
         # Add the OP column to the filtered dataframe if it doesn't exist
         if 'OP' not in dataframe_filtrado.columns:
@@ -274,7 +279,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
         width, height = A4
 
         c.showPage()
-        c.setFont("Courier-Oblique", 24)
+        c.setFont("Helvetica-Oblique", 24)
         c.drawCentredString(width/2, height/2, "DESENHO NÃO ENCONTRADO")
         c.save()
 
