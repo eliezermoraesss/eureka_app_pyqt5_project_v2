@@ -13,6 +13,9 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Table, TableStyle, Paragraph
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.fonts import addMapping
 from sqlalchemy import create_engine
 
 from src.app.utils.db_mssql import setup_mssql
@@ -57,22 +60,22 @@ def create_header_style():
         fontSize=8,
         spaceAfter=20,
         alignment=TA_LEFT,
-        fontName='Courier'
+        fontName='Courier-New'
     )
 
 def generate_hierarchical_table(df: pd.DataFrame, canvas_obj, y_position: float):
     """Generates the hierarchical table for the production order"""
     # Define column widths and headers
     col_widths = [60, 100, 250, 60, 40]  # Adjusted widths
-    headers = ['OP', 'Código Pai', 'Descrição', 'Quantidade Usada', 'Unid.']
+    headers = ['OP Pai', 'Código Pai', 'Descrição', 'Quantidade\nUsada', 'Unid.']
 
     # Prepare data for table
     table_data = [headers]
     for _, row in df.iterrows():
         table_data.append([
             str(row['OP']),
-            str(row['Código Pai']),
-            str(row['Descrição']),
+            str(row['Código Pai']).strip(),
+            str(row['Descrição']).strip(),
             str(row['Quantidade']),
             str(row['Unid'])
         ])
@@ -83,13 +86,13 @@ def generate_hierarchical_table(df: pd.DataFrame, canvas_obj, y_position: float)
         ('BACKGROUND', (0, 0), (-1, 0), colors.transparent),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Courier'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Courier-New'),
         ('FONTSIZE', (0, 0), (-1, 0), 8),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
         ('LINEBELOW', (0, 0), (-1, 0), 1, colors.black),
         ('BACKGROUND', (0, 1), (-1, -1), colors.white),
         ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-        ('FONTNAME', (0, 1), (-1, -1), 'Courier'),
+        ('FONTNAME', (0, 1), (-1, -1), 'Courier-New'),
         ('FONTSIZE', (0, 1), (-1, -1), 8),
         ('GRID', (0, 0), (-1, -1), 1, colors.transparent),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
@@ -132,12 +135,8 @@ def consultar_hierarquia_tabela(codigo):
                     ORDER BY B1_DESC ASC;
                 """
     try:
-        print(f"Executing query: {query_onde_usado}")
-
         with engine.connect() as connection:
             dataframe = pd.read_sql(query_onde_usado, connection)
-        print(f"Query returned {len(dataframe)} rows")
-
         return dataframe if not dataframe.empty else pd.DataFrame()
 
     except Exception as ex:
@@ -167,7 +166,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
     progress_callback.emit(20)
 
     #Título
-    c.setFont("Courier-Bold", 8)
+    c.setFont("Courier-New-Bold", 8)
     c.drawCentredString(margin, height - margin * 8, f"ORDEM DE PRODUÇÃO - Número: {num_op} - QP: {num_qp}")
     progress_callback.emit(30)
 
@@ -185,12 +184,12 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
 
     op_info = [
             f"QP - {row['QP']}   {row['PROJETO']}",
-            f"Produto: {row['Código']}  {row['Descrição']}",
+            f"Produto: {row['Código'].strip()}  {row['Descrição'].strip()}",
             f"Quantidade: {row['Quantidade']}   {row["Unid."]}",
             f"Centro de Custo: {row['Código CC']}   {row['Centro de Custo']}",
             f"Emissão OP: {data_emissao}",
             f"Previsão de Entrega: {data_entrega}",
-            f"Observação: {row['Observação']}"
+            f"Observação: {row['Observação'].strip()}"
         ]
 
     y_position = height - margin * 8
@@ -247,7 +246,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
         dataframe_final = dataframe_final.sort_values('OP')
 
         # Generate the table
-        table_y_position = y_position - 30
+        table_y_position = y_position - 60
         generate_hierarchical_table(dataframe_final, c, table_y_position)
         progress_callback.emit(80)
     else:
@@ -255,7 +254,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
 
     # Roteiro
     workflow_path = get_resource_path('images', 'roteiro.png')
-    workflow_y_position = barcode_y_position - 790  # Ajuste a posição y do roteiro
+    workflow_y_position = barcode_y_position - 770  # Ajuste a posição y do roteiro
     c.drawImage(workflow_path, margin, workflow_y_position, width=width-2*margin, preserveAspectRatio=True)
 
     # Save first page
@@ -292,7 +291,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
         width, height = A4
 
         c.showPage()
-        c.setFont("Helvetica-Oblique", 24)
+        c.setFont("Courier-New-Italic", 24)
         c.drawCentredString(width/2, height/2, "DESENHO NÃO ENCONTRADO")
         c.save()
 
@@ -312,6 +311,21 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
         os.replace(temp_output, output_path)
         progress_callback.emit(100)
 
+
+def registrar_fonte_personalizada():
+    # Registra todas as variações da fonte Courier
+    pdfmetrics.registerFont(TTFont('Courier-New', r'C:\WINDOWS\FONTS\COUR.TTF'))
+    pdfmetrics.registerFont(TTFont('Courier-New-Bold', r'C:\WINDOWS\FONTS\COURBD.TTF'))
+    pdfmetrics.registerFont(TTFont('Courier-New-Italic', r'C:\WINDOWS\FONTS\COURI.TTF'))
+    pdfmetrics.registerFont(TTFont('Courier-New-BoldItalic', r'C:\WINDOWS\FONTS\COURBI.TTF'))
+
+    # Mapeia as variações da fonte
+    addMapping('Courier-New', 0, 0, 'Courier-New')              # normal
+    addMapping('Courier-New', 1, 0, 'Courier-New-Bold')         # bold
+    addMapping('Courier-New', 0, 1, 'Courier-New-Italic')       # italic
+    addMapping('Courier-New', 1, 1, 'Courier-New-BoldItalic')   # bold & italic
+
+
 class PrintProductionOrderDialogV2(QtWidgets.QDialog):
     def __init__(self, df: pd.DataFrame, df_op_table, parent=None):
         super().__init__(parent)
@@ -322,6 +336,7 @@ class PrintProductionOrderDialogV2(QtWidgets.QDialog):
         self.df = df
         self.df_op_table = df_op_table
         self.init_ui()
+        registrar_fonte_personalizada()
         self.print_production_order()
 
     def init_ui(self):
