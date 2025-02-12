@@ -66,18 +66,21 @@ def create_header_style():
 def generate_hierarchical_table(df: pd.DataFrame, canvas_obj, y_position: float):
     """Generates the hierarchical table for the production order"""
     # Define column widths and headers
-    col_widths = [60, 100, 250, 60, 40]  # Adjusted widths
-    headers = ['OP Pai', 'Código Pai', 'Descrição', 'Quantidade\nUsada', 'Unid.']
+    col_widths = [60, 70, 200, 60, 160]  # Adjusted widths
+    headers = ['OP Pai', 'Código Pai', 'Descrição', 'Quantidade', 'Centro de Custo']
 
     # Prepare data for table
     table_data = [headers]
     for _, row in df.iterrows():
+        descricao = str(row['Descrição']).strip()
+        if len(descricao) > 35:
+            descricao = descricao[:35] + '...'
         table_data.append([
             str(row['OP']),
             str(row['Código Pai']).strip(),
-            str(row['Descrição']).strip(),
+            descricao,
             str(row['Quantidade']),
-            str(row['Unid'])
+            str(row['Centro de Custo'].strip())
         ])
 
     # Create and style table
@@ -86,7 +89,7 @@ def generate_hierarchical_table(df: pd.DataFrame, canvas_obj, y_position: float)
         ('BACKGROUND', (0, 0), (-1, 0), colors.transparent),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Courier-New'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Courier-New-Bold'),
         ('FONTSIZE', (0, 0), (-1, 0), 8),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
         ('LINEBELOW', (0, 0), (-1, 0), 1, colors.black),
@@ -177,15 +180,6 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
     c.drawString(title_x, title_y, title_text)
     progress_callback.emit(30)
 
-    # Data e hora impressão OP
-    title_text = f"Data da impressão: {data_hora_impressao}"
-    title_font_size = 12
-    c.setFont("Courier-New", title_font_size)
-    title_x_data = 200
-    title_y_data = 810  # Adjust this value as needed to position the title vertically
-    c.drawString(title_x_data, title_y_data, title_text)
-    progress_callback.emit(30)
-
     title_text = f"QP: {num_qp} {row['PROJETO']}"
     title_font_size = 12
     c.setFont("Courier-New-Bold", title_font_size)
@@ -202,8 +196,8 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
     # Barcode
     barcode_path = get_resource_path('images', 'barcode.png')
     barcode_width = 100
-    barcode_x = 200
-    barcode_y = 200  # Adjust this value as needed to position the barcode vertically
+    barcode_x = 475
+    barcode_y = 565  # Adjust this value as needed to position the barcode vertically
     c.drawImage(barcode_path, barcode_x, barcode_y, width=barcode_width, preserveAspectRatio=True)
     progress_callback.emit(40)
 
@@ -214,16 +208,16 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
     data_entrega = datetime.strptime(row['Prev. Entrega'].strip(), "%Y%m%d").strftime("%d/%m/%Y")
 
     op_info = [
-            f"OP: {row['OP']}",
-            f"Produto: {row['Código'].strip()}  {row['Descrição'].strip()}",
-            f"Quantidade: {row['Quantidade']}   {row['Unid.']}",
-            f"Centro de Custo: {row['Código CC']}   {row['Centro de Custo']}",
-            f"Emissão OP: {data_emissao}",
-            f"Previsão de Entrega: {data_entrega}",
-            f"Observação: {row['Observação'].strip()}"
-        ]
+        f"Produto: {row['Código'].strip()}  {row['Descrição'].strip()}",
+        f"Quantidade: {row['Quantidade']}   {row['Unid.']}",
+        f"Centro de Custo: {row['Código CC']}   {row['Centro de Custo']}",
+        f"Dt. Abertura da OP: {data_emissao}",
+        f"Previsão de Entrega: {data_entrega}",
+        f"Dt. Impressão da OP: {data_hora_impressao}",
+        f"Observação: {row['Observação'].strip()}"
+    ]
 
-    y_position = 720  # Adjust this value as needed to position the information vertically
+    y_position = 750  # Adjust this value as needed to position the information vertically
     for line in op_info:
         p = Paragraph(line, header_style)
         p.wrapOn(c, width - 2*margin, 20)
@@ -264,7 +258,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
             'Código',
             'Descrição',
             'Quantidade_onde_usado',
-            'Unid'
+            'Centro de Custo'
         ]].copy()
 
         # Rename columns to match the expected format
@@ -284,8 +278,8 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
         print(f"No hierarchical data found for código: {row['Código']}")
 
     # Roteiro
-    workflow_path = get_resource_path('images', 'roteiro.png')
-    workflow_y_position = table_y_position - 650  # Adjust this value as needed to position the workflow vertically
+    workflow_path = get_resource_path('images', 'roteiro_v2.png')
+    workflow_y_position = table_y_position - 700  # Adjust this value as needed to position the workflow vertically
     c.drawImage(workflow_path, margin, workflow_y_position, width=width-2*margin, preserveAspectRatio=True)
 
     # Save first page
