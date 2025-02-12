@@ -278,7 +278,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
         print(f"No hierarchical data found for código: {row['Código']}")
 
     # Roteiro
-    workflow_path = get_resource_path('images', 'roteiro_v2.png')
+    workflow_path = get_resource_path('images', 'roteiro_v3.png')
     workflow_y_position = table_y_position - 700  # Adjust this value as needed to position the workflow vertically
     c.drawImage(workflow_path, margin, workflow_y_position, width=width-2*margin, preserveAspectRatio=True)
 
