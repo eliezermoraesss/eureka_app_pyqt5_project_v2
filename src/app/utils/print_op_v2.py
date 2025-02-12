@@ -36,9 +36,8 @@ class PDFGeneratorThread(QThread):
             total_rows = len(self.df)
             for index, row in self.df.iterrows():
                 progress = int((index + 1) / total_rows * 100)
-                timestamp = datetime.now().strftime('%d%m%Y_%H%M%S')
                 self.output_path = os.path.join(self.output_dir,
-                                           f"OP_{row['OP'].strip()}_{row['Código'].strip()}_{timestamp}.pdf")
+                                           f"OP_{row['OP'].strip()}_{row['Código'].strip()}.pdf")
                 generate_production_order_pdf(row, self.output_path, self.progress, self.df_op_table)
                 self.progress.emit(progress)
             self.finished.emit(self.output_path)
@@ -54,10 +53,11 @@ def create_header_style():
     """Creates and returns custom header style"""
     return ParagraphStyle(
         'CustomHeader',
-        parent=getSampleStyleSheet()['Heading1'],
-        fontSize=12,
-        spaceAfter=30,
-        alignment=TA_LEFT
+        parent=getSampleStyleSheet()['Heading3'],
+        fontSize=8,
+        spaceAfter=20,
+        alignment=TA_LEFT,
+        fontName='Courier'
     )
 
 def generate_hierarchical_table(df: pd.DataFrame, canvas_obj, y_position: float):
@@ -81,16 +81,17 @@ def generate_hierarchical_table(df: pd.DataFrame, canvas_obj, y_position: float)
     table = Table(table_data, colWidths=col_widths)
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.transparent),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Courier'),
         ('FONTSIZE', (0, 0), (-1, 0), 8),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('LINEBELOW', (0, 0), (-1, 0), 1, colors.black),
         ('BACKGROUND', (0, 1), (-1, -1), colors.white),
         ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTNAME', (0, 1), (-1, -1), 'Courier'),
         ('FONTSIZE', (0, 1), (-1, -1), 8),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('GRID', (0, 0), (-1, -1), 1, colors.transparent),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
     ]))
@@ -149,38 +150,50 @@ def consultar_hierarquia_tabela(codigo):
         engine.dispose()
 
 def generate_production_order_pdf(row: pd.Series, output_path: str, progress_callback, dataframe_geral):
+    hora_impressao = datetime.now().strftime('%H:%M:%S')
+    data_impressao = datetime.now().strftime('%d/%m/%Y')
     codigo = row['Código'].strip()
     num_qp = row['QP'].strip()
+    num_op = row['OP'].strip()
     """Generates PDF for a single Production Order"""
     # Create PDF
     c = canvas.Canvas(output_path, pagesize=A4)
-    c.setFont('Helvetica', 10)
     width, height = A4
-    margin = 15 * mm
+    margin = 10 * mm
 
-    # Header
+    # Logo
     logo_path = get_resource_path('images', 'logo_enaplic.jpg')
-    c.drawImage(logo_path, margin, height - margin * 2, width=100, preserveAspectRatio=True)
+    c.drawImage(logo_path, margin, height - margin * 3, width=100, preserveAspectRatio=True)
     progress_callback.emit(20)
+
+    #Título
+    c.setFont("Courier-Bold", 8)
+    c.drawCentredString(margin, height - margin * 8, f"ORDEM DE PRODUÇÃO - Número: {num_op} - QP: {num_qp}")
+    progress_callback.emit(30)
 
     # Barcode
     barcode_path = get_resource_path('images', 'barcode.png')
-    barcode_y_position = height - margin * 2 - 100  # Ajuste a posição y do código de barras
-    c.drawImage(barcode_path, width - margin * 8, barcode_y_position, width=100, preserveAspectRatio=True)
+    barcode_y_position = height - margin * 3 - 100  # Ajuste a posição y do código de barras
+    c.drawImage(barcode_path, width - margin * 10, barcode_y_position, width=100, preserveAspectRatio=True)
     progress_callback.emit(40)
 
     # Production Order Information
     header_style = create_header_style()
 
-    op_info = [
-        f"OP: {row['OP']}",
-        f"Produto: {row['Código']} - {row['Descrição']}",
-        f"Quantidade: {row['Quantidade']}",
-        f"Data Abertura: {row['Data Abertura']}",
-        f"Previsão Entrega: {row['Prev. Entrega']}"
-    ]
+    data_emissao = datetime.strptime(row['Data Abertura'].strip(), "%Y%m%d").strftime("%d/%m/%Y")
+    data_entrega = datetime.strptime(row['Prev. Entrega'].strip(), "%Y%m%d").strftime("%d/%m/%Y")
 
-    y_position = height - margin * 4
+    op_info = [
+            f"QP - {row['QP']}   {row['PROJETO']}",
+            f"Produto: {row['Código']}  {row['Descrição']}",
+            f"Quantidade: {row['Quantidade']}   {row["Unid."]}",
+            f"Centro de Custo: {row['Código CC']}   {row['Centro de Custo']}",
+            f"Emissão OP: {data_emissao}",
+            f"Previsão de Entrega: {data_entrega}",
+            f"Observação: {row['Observação']}"
+        ]
+
+    y_position = height - margin * 8
     for line in op_info:
         p = Paragraph(line, header_style)
         p.wrapOn(c, width - 2*margin, 20)
@@ -240,9 +253,9 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
     else:
         print(f"No hierarchical data found for código: {row['Código']}")
 
-    # Workflow Image
+    # Roteiro
     workflow_path = get_resource_path('images', 'roteiro.png')
-    workflow_y_position = barcode_y_position - 700  # Ajuste a posição y do roteiro
+    workflow_y_position = barcode_y_position - 790  # Ajuste a posição y do roteiro
     c.drawImage(workflow_path, margin, workflow_y_position, width=width-2*margin, preserveAspectRatio=True)
 
     # Save first page
