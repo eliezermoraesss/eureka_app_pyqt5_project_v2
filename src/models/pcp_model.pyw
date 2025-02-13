@@ -412,14 +412,19 @@ class PcpApp(QWidget):
         self.campo_observacao.returnPressed.connect(self.btn_pesquisar)
 
     def imprimir_op(self):
+        # Imprime somente OP ABERTA
         df_op_aberta = self.filter_table(situacao_op='ABERTA')
+
+        # Filtro o dataframe geral pelo campo Fechamento. As OPs devem estar ABERTAS para construir a tabela de hierarquia
+        df_geral_op_aberta = self.dataframe_original[self.dataframe_original['Fechamento'].str.contains('        ', na=False)]
+
         line_number = df_op_aberta.shape[0]
         title = "Imprimir OP"
         message = f"Foram encontradas {line_number} OPs.\n\nDeseja prosseguir com a impressão?"
         response = show_confirmation_dialog(self, title, message)
 
         if response == QMessageBox.Yes:
-            print_dialog = PrintProductionOrderDialogV2(df_op_aberta, self.dataframe_original, self)
+            print_dialog = PrintProductionOrderDialogV2(df_op_aberta, df_geral_op_aberta, self)
             print_dialog.show()
         else:
             return
@@ -703,7 +708,10 @@ class PcpApp(QWidget):
             FROM 
                 {self.database}.dbo.SC2010 op
             LEFT JOIN 
-                SB1010 prod ON C2_PRODUTO = B1_COD
+                SB1010 prod
+            ON 
+                C2_PRODUTO = B1_COD
+                AND prod.D_E_L_E_T_ <> '*'
             LEFT JOIN 
                 {self.database}.dbo.SYS_USR users
             ON 
@@ -856,7 +864,7 @@ class PcpApp(QWidget):
             if filter_aglutinado == 'SIM':
                 filtered_df = filtered_df[filtered_df['Aglutinada?'].str.contains('S', na=False)]
             elif filter_aglutinado == 'NÃO':
-                filtered_df = filtered_df[filtered_df['Aglutinada?'].str.contains(' ', na=False)]
+                filtered_df = filtered_df[filtered_df['Aglutinada?'].str.strip() == '']
         return filtered_df
 
     def atualizar_tabela(self, dataframe):

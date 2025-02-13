@@ -108,7 +108,15 @@ def generate_hierarchical_table(df: pd.DataFrame, canvas_obj, y_position: float)
 
     # Draw table
     table.wrapOn(canvas_obj, 530, 400)
-    table.drawOn(canvas_obj, 30, y_position)
+    table_height = table._height
+
+    # Check if the table fits on the current page
+    if y_position - table_height < 0:
+        canvas_obj.showPage()  # Create a new page
+        y_position = 800  # Reset y_position for the new page
+
+    # Draw table
+    table.drawOn(canvas_obj, 30, y_position - table_height)
 
 def consultar_hierarquia_tabela(codigo):
     username, password, database, server = setup_mssql()
@@ -166,6 +174,8 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
     codigo = row['Código'].strip()
     num_qp = row['QP'].strip()
     num_op = row['OP'].strip()
+    op_geral = row['OP GERAL']
+    op_aglutinada = row['Aglutinada?']
     """Generates PDF for a single Production Order"""
     # Create PDF
     c = canvas.Canvas(output_path, pagesize=A4)
@@ -244,7 +254,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
         codigos_onde_usado = dataframe_onde_usado['Código'].unique()
         codigos_onde_usado = [item.strip() for item in codigos_onde_usado]
 
-        # Filter dataframe_op to only include rows where 'Código' is in codigos_onde_usado and 'QP' matches num_qp
+        # Filter dataframe_geral to only include rows where 'Código' is in codigos_onde_usado and 'QP' matches num_qp
         dataframe_filtrado = dataframe_geral[
             dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
             (dataframe_geral['QP'].str.strip() == num_qp)
@@ -262,19 +272,21 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
             suffixes=('', '_onde_usado')
         )
 
-        # Select and rename columns as needed
+        dataframe_final['Qtd Usada'] = dataframe_final['Quantidade'] * dataframe_final['Quantidade_onde_usado']
+
+        # Select columns as needed
         dataframe_final = dataframe_final[[
             'OP',
             'Código',
             'Descrição',
-            'Quantidade_onde_usado',
+            'Qtd Usada',
             'Centro de Custo'
         ]].copy()
 
         # Rename columns to match the expected format
         dataframe_final = dataframe_final.rename(columns={
             'Código': 'Código Pai',
-            'Quantidade_onde_usado': 'Quantidade'
+            'Qtd Usada': 'Quantidade'
         })
 
         # Sort the dataframe if needed
@@ -289,7 +301,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
 
     # Roteiro
     workflow_path = get_resource_path('images', 'roteiro_v3.png')
-    workflow_y_position = table_y_position - 700  # Adjust this value as needed to position the workflow vertically
+    workflow_y_position = table_y_position - 900  # Adjust this value as needed to position the workflow vertically
     c.drawImage(workflow_path, margin, workflow_y_position, width=width-2*margin, preserveAspectRatio=True)
 
     # Save first page
