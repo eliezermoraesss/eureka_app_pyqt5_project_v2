@@ -1,4 +1,5 @@
 import os
+import tempfile
 from datetime import datetime
 
 import pandas as pd
@@ -6,6 +7,8 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import QThread, pyqtSignal, QUrl
 from PyQt5.QtGui import QDesktopServices
 from PyQt5.QtWidgets import (QVBoxLayout, QMessageBox, QProgressBar, QLabel)
+from barcode import Code128
+from barcode.writer import ImageWriter
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT
 from reportlab.lib.pagesizes import A4
@@ -17,6 +20,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.fonts import addMapping
 from sqlalchemy import create_engine
+from PyPDF2 import PdfMerger
 
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.utils import exibir_mensagem
@@ -151,6 +155,12 @@ def consultar_hierarquia_tabela(codigo):
         # Fecha a conexão com o banco de dados se estiver aberta
         engine.dispose()
 
+def generate_barcode(data):
+    temp_barcode = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
+    Code128(data, writer=ImageWriter()).write(temp_barcode)
+    temp_barcode.close()
+    return temp_barcode.name
+
 def generate_production_order_pdf(row: pd.Series, output_path: str, progress_callback, dataframe_geral):
     data_hora_impressao = datetime.now().strftime('%d/%m/%Y   %H:%M:%S')
     codigo = row['Código'].strip()
@@ -194,10 +204,10 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
     c.line(margin, line_y, width - margin, line_y)
 
     # Barcode
-    barcode_path = get_resource_path('images', 'barcode.png')
     barcode_width = 100
     barcode_x = 475
     barcode_y = 565  # Adjust this value as needed to position the barcode vertically
+    barcode_path = generate_barcode(num_op)
     c.drawImage(barcode_path, barcode_x, barcode_y, width=barcode_width, preserveAspectRatio=True)
     progress_callback.emit(40)
 
@@ -292,8 +302,6 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
         r"\\192.175.175.4\dados\EMPRESA\PROJETOS\PDF-OFICIAL",
         f"{codigo_desenho}.PDF"
     ))
-
-    from PyPDF2 import PdfMerger
 
     if os.path.exists(drawing_path):
         merger = PdfMerger()
