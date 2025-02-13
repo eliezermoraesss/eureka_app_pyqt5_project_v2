@@ -286,6 +286,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
             suffixes=('', '_onde_usado')
         )
 
+        # Multiplica quantidade usada do filho pela quantidade do pai
         dataframe_final['Qtd Usada'] = dataframe_final['Quantidade'] * dataframe_final['Quantidade_onde_usado']
 
         # Select columns as needed
@@ -307,7 +308,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
         dataframe_final = dataframe_final.sort_values('OP')
 
         # Generate the table
-        table_y_position = y_position - 60
+        table_y_position = y_position
         generate_hierarchical_table(dataframe_final, c, table_y_position)
         progress_callback.emit(80)
     else:
@@ -315,7 +316,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
 
     # Roteiro
     workflow_path = get_resource_path('images', 'roteiro_v3.png')
-    workflow_y_position = table_y_position - 900  # Adjust this value as needed to position the workflow vertically
+    workflow_y_position = table_y_position - 780  # Adjust this value as needed to position the workflow vertically
     c.drawImage(workflow_path, margin, workflow_y_position, width=width-2*margin, preserveAspectRatio=True)
 
     # Save first page
