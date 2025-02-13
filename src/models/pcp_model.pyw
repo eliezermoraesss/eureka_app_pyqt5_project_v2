@@ -69,6 +69,10 @@ def validar_campos(codigo_produto, numero_qp, numero_op):
         return True
 
 
+def clear_and_filter(line_edit):
+    line_edit.clear()
+
+
 class PcpApp(QWidget):
     guia_fechada = pyqtSignal()
 
@@ -599,16 +603,12 @@ class PcpApp(QWidget):
         btn_today.setGeometry(20, 5, largura, altura)
         btn_today.clicked.connect(lambda: date_edit.setDate(QDate.currentDate()))
 
-    def clear_and_filter(self, line_edit):
-        line_edit.clear()
-        self.btn_pesquisar()
-
     def add_clear_button(self, line_edit):
         clear_icon = self.style().standardIcon(QStyle.SP_LineEditClearButton)
         pixmap = clear_icon.pixmap(40, 40)  # Redimensionar o ícone para 20x20 pixels
         larger_clear_icon = QIcon(pixmap)
         clear_action = QAction(larger_clear_icon, "Clear", line_edit)
-        clear_action.triggered.connect(lambda: self.clear_and_filter(line_edit))
+        clear_action.triggered.connect(lambda: clear_and_filter(line_edit))
         line_edit.addAction(clear_action, QLineEdit.TrailingPosition)
 
     def obter_dados_tabela(self):
