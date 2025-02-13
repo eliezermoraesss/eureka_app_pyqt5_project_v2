@@ -254,11 +254,25 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
         codigos_onde_usado = dataframe_onde_usado['Código'].unique()
         codigos_onde_usado = [item.strip() for item in codigos_onde_usado]
 
-        # Filter dataframe_geral to only include rows where 'Código' is in codigos_onde_usado and 'QP' matches num_qp
-        dataframe_filtrado = dataframe_geral[
-            dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
-            (dataframe_geral['QP'].str.strip() == num_qp)
-        ]
+        if op_aglutinada == 'S':
+            # Filter dataframe_geral to only include rows where 'Código' is in codigos_onde_usado and 'QP' matches num_qp
+            dataframe_filtrado = dataframe_geral[
+                dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
+                (dataframe_geral['QP'].str.strip() == num_qp)
+            ]
+        else:
+            dataframe_aglutinados = dataframe_geral[
+                dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
+                (dataframe_geral['QP'].str.strip() == num_qp) &
+                (dataframe_geral['Aglutinada?'].str.strip() == 'S')
+            ]
+            dataframe_nao_aglutinados = dataframe_geral[
+                dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
+                (dataframe_geral['QP'].str.strip() == num_qp) &
+                (dataframe_geral['Aglutinada?'].str.strip() != 'S') &
+                (dataframe_geral['OP'].str.contains(op_geral, na=False))
+            ]
+            dataframe_filtrado = pd.concat([dataframe_aglutinados, dataframe_nao_aglutinados])
 
         # Add the OP column to the filtered dataframe if it doesn't exist
         if 'OP' not in dataframe_filtrado.columns:
