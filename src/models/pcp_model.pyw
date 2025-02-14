@@ -73,6 +73,16 @@ def clear_and_filter(line_edit):
     line_edit.clear()
 
 
+def add_today_button(date_edit):
+    calendar = date_edit.calendarWidget()
+    calendar.setGeometry(10, 10, 600, 400)
+    btn_today = QPushButton("Hoje", calendar)
+    largura = 50
+    altura = 20
+    btn_today.setGeometry(20, 5, largura, altura)
+    btn_today.clicked.connect(lambda: date_edit.setDate(QDate.currentDate()))
+
+
 class PcpApp(QWidget):
     guia_fechada = pyqtSignal()
 
@@ -198,7 +208,7 @@ class PcpApp(QWidget):
         data_inicio = data_atual.addMonths(-intervalo_meses)
 
         self.campo_data_inicio.setDate(data_inicio)
-        self.add_today_button(self.campo_data_inicio)
+        add_today_button(self.campo_data_inicio)
 
         self.campo_data_fim = QDateEdit(self)
         self.campo_data_fim.setFont(QFont(fonte_campos, 10))
@@ -206,7 +216,7 @@ class PcpApp(QWidget):
         self.campo_data_fim.setCalendarPopup(True)
         self.campo_data_fim.setDisplayFormat("dd/MM/yyyy")
         self.campo_data_fim.setDate(QDate().currentDate())
-        self.add_today_button(self.campo_data_fim)
+        add_today_button(self.campo_data_fim)
 
         self.campo_observacao = QLineEdit(self)
         self.campo_observacao.setFont(QFont(fonte_campos, tamanho_fonte_campos))
@@ -277,14 +287,14 @@ class PcpApp(QWidget):
         self.combobox_status_op = QComboBox(self)
         self.combobox_status_op.setEditable(False)
         self.combobox_status_op.setObjectName('combobox-status-op')
-        self.combobox_status_op.addItem('')
+        self.combobox_status_op.addItem('-')
         self.combobox_status_op.addItem('Aberta')
         self.combobox_status_op.addItem('Fechada')
 
         self.combobox_aglutinado = QComboBox(self)
         self.combobox_aglutinado.setEditable(False)
         self.combobox_aglutinado.setObjectName('combobox-aglutinado')
-        self.combobox_aglutinado.addItem('')
+        self.combobox_aglutinado.addItem('-')
         self.combobox_aglutinado.addItem('Sim')
         self.combobox_aglutinado.addItem('Não')
 
@@ -379,9 +389,6 @@ class PcpApp(QWidget):
         self.layout_buttons.addWidget(self.btn_saldo_estoque)
         self.layout_buttons.addWidget(self.btn_nova_janela)
         self.layout_buttons.addWidget(self.btn_limpar)
-        self.layout_buttons.addWidget(self.btn_abrir_desenho)
-        self.layout_buttons.addWidget(self.btn_exportar_excel)
-        self.layout_buttons.addWidget(self.btn_image_comparator)
         self.layout_buttons.addWidget(self.btn_fechar)
         self.layout_buttons.addWidget(self.btn_home)
         self.layout_buttons.addStretch()
@@ -391,6 +398,9 @@ class PcpApp(QWidget):
         self.layout_footer_label.addWidget(self.label_indicators)
         self.layout_footer_label.addWidget(self.btn_toggle_footer)
         self.layout_footer_label.addWidget(self.btn_imprimir_op)
+        self.layout_footer_label.addWidget(self.btn_abrir_desenho)
+        self.layout_footer_label.addWidget(self.btn_exportar_excel)
+        self.layout_footer_label.addWidget(self.btn_image_comparator)
         self.layout_footer_label.addStretch(1)
         self.layout_footer_label.addWidget(self.logo_label)
 
@@ -593,15 +603,6 @@ class PcpApp(QWidget):
             self.btn_saldo_estoque.show()
             self.btn_toggle_footer.show()
             self.btn_imprimir_op.show()
-
-    def add_today_button(self, date_edit):
-        calendar = date_edit.calendarWidget()
-        calendar.setGeometry(10, 10, 600, 400)
-        btn_today = QPushButton("Hoje", calendar)
-        largura = 50
-        altura = 20
-        btn_today.setGeometry(20, 5, largura, altura)
-        btn_today.clicked.connect(lambda: date_edit.setDate(QDate.currentDate()))
 
     def add_clear_button(self, line_edit):
         clear_icon = self.style().standardIcon(QStyle.SP_LineEditClearButton)
