@@ -262,6 +262,11 @@ class PcpApp(QWidget):
         self.btn_abrir_desenho.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_abrir_desenho.hide()
 
+        self.btn_visualizar_op = QPushButton("Visualizar OP", self)
+        self.btn_visualizar_op.clicked.connect(lambda: open_op(self, self.tree))
+        self.btn_visualizar_op.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.btn_visualizar_op.hide()
+
         self.btn_exportar_excel = QPushButton("Exportar Excel", self)
         self.btn_exportar_excel.clicked.connect(lambda: exportar_excel(self, self.tree))
         self.btn_exportar_excel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -402,6 +407,7 @@ class PcpApp(QWidget):
         self.layout_footer_label.addWidget(self.btn_toggle_footer)
         self.layout_footer_label.addWidget(self.btn_imprimir_op)
         self.layout_footer_label.addWidget(self.btn_abrir_desenho)
+        self.layout_footer_label.addWidget(self.btn_visualizar_op)
         self.layout_footer_label.addWidget(self.btn_exportar_excel)
         self.layout_footer_label.addWidget(self.btn_image_comparator)
         self.layout_footer_label.addStretch(1)
@@ -578,6 +584,7 @@ class PcpApp(QWidget):
         self.label_indicators.hide()
 
         self.btn_abrir_desenho.hide()
+        self.btn_visualizar_op.hide()
         self.btn_consultar_estrutura.hide()
         self.btn_exportar_excel.hide()
         self.btn_onde_e_usado.hide()
@@ -598,6 +605,7 @@ class PcpApp(QWidget):
     def button_visible_control(self, visible):
         if visible == "False":
             self.btn_abrir_desenho.hide()
+            self.btn_visualizar_op.hide()
             self.btn_consultar_estrutura.hide()
             self.btn_exportar_excel.hide()
             self.btn_image_comparator.hide()
@@ -607,6 +615,7 @@ class PcpApp(QWidget):
             self.btn_imprimir_op.hide()
         else:
             self.btn_abrir_desenho.show()
+            self.btn_visualizar_op.show()
             self.btn_consultar_estrutura.show()
             self.btn_exportar_excel.show()
             self.btn_image_comparator.show()
@@ -683,6 +692,7 @@ class PcpApp(QWidget):
         self.btn_exportar_excel.setEnabled(status)
         self.btn_image_comparator.setEnabled(status)
         self.btn_abrir_desenho.setEnabled(status)
+        self.btn_visualizar_op.setEnabled(status)
         self.btn_onde_e_usado.setEnabled(status)
         self.btn_saldo_estoque.setEnabled(status)
         self.btn_consultar_estrutura.setEnabled(status)

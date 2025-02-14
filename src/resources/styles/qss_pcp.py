@@ -7,13 +7,13 @@ def pcp_qss():
 
             QLabel {
                 color: #000000; /* #212529; /* Bootstrap dark text */
-                font-size: 12px;
+                font-size: 14px;
                 font-weight: 400;
                 padding-left: 4px;
             }
             
             QLabel#label-line-number, QLabel#label-indicators {
-                font-size: 16px;
+                font-size: 14px;
                 font-weight: 500;
             }
             
