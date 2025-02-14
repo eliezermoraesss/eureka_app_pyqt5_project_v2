@@ -700,7 +700,7 @@ class PcpApp(QWidget):
                 C2_OBS AS "Observação",
                 C2_CC AS "Código CC",
                 cc.CTT_DESC01 AS "Centro de Custo",
-                C2_AGLUT AS "Aglutinada?",
+                C2_AGLUT AS "Aglutinado",
                 C2_NUM AS "OP GERAL", 
                 C2_ITEM AS "Item", 
                 C2_SEQUEN AS "Seq.",
@@ -861,9 +861,9 @@ class PcpApp(QWidget):
                 filtered_df = filtered_df[filtered_df['Fechamento'].str.contains('        ', na=False)]
         if filter_aglutinado:
             if filter_aglutinado == 'SIM':
-                filtered_df = filtered_df[filtered_df['Aglutinada?'].str.contains('S', na=False)]
+                filtered_df = filtered_df[filtered_df['Aglutinado'].str.contains('S', na=False)]
             elif filter_aglutinado == 'NÃO':
-                filtered_df = filtered_df[filtered_df['Aglutinada?'].str.strip() == '']
+                filtered_df = filtered_df[filtered_df['Aglutinado'].str.strip() == '']
         return filtered_df
 
     def atualizar_tabela(self, dataframe):
@@ -898,7 +898,6 @@ class PcpApp(QWidget):
                         item.setTextAlignment(Qt.AlignCenter)
                     else:
                         item = process_table_item(column_name, value)
-
                         if column_name == 'Descrição':
                             item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
                         else:
@@ -950,9 +949,6 @@ def format_date(value):
 
 
 def process_table_item(column_name, value):
-    if value is None or (isinstance(value, str) and value.strip() == ''):
-        return QTableWidgetItem('')
-
     if column_name == 'QP':
         return QTableWidgetItem(value.lstrip('0'))
 
@@ -963,11 +959,8 @@ def process_table_item(column_name, value):
     if column_name in ['Data Abertura', 'Prev. Entrega', 'Fechamento']:
         return QTableWidgetItem(format_date(value))
 
-    if column_name == 'Aglutinada?':
-        if value == 'S':
-            return QTableWidgetItem('Sim')
-        elif value == ' ':
-            return QTableWidgetItem('Não')
+    if column_name == 'Aglutinado':
+        return QTableWidgetItem('Sim') if value == 'S' else QTableWidgetItem('Não')
 
     if column_name in ['Quantidade', 'Qtd. Disponível']:
         return QTableWidgetItem(format_quantity(value))
