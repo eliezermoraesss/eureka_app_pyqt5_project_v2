@@ -958,6 +958,10 @@ def process_table_item(column_name, value):
     if column_name == 'QP':
         return QTableWidgetItem(value.lstrip('0'))
 
+    if column_name == 'PROJETO':
+        if len(value.strip()) > 45:
+            value = value[:45] + '...'
+
     if column_name in ['Data Abertura', 'Prev. Entrega', 'Fechamento']:
         return QTableWidgetItem(format_date(value))
 
