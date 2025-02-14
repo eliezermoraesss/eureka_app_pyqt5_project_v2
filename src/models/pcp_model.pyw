@@ -9,7 +9,7 @@ from datetime import datetime
 
 import pandas as pd
 from PyQt5.QtCore import Qt, QDate, pyqtSignal
-from PyQt5.QtGui import QFont, QIcon, QPixmap, QKeySequence
+from PyQt5.QtGui import QFont, QIcon, QPixmap, QKeySequence, QColor
 from PyQt5.QtWidgets import QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QDateEdit, QLabel, QSizePolicy, QTabWidget, QMenu, \
     QComboBox, QMessageBox, QShortcut
@@ -547,6 +547,18 @@ class PcpApp(QWidget):
 
             menu.exec_(table.viewport().mapToGlobal(position))
 
+    def hide_button(self):
+        self.btn_abrir_desenho.hide()
+        self.btn_visualizar_op.hide()
+        self.btn_consultar_estrutura.hide()
+        self.btn_exportar_excel.hide()
+        self.btn_onde_e_usado.hide()
+        self.btn_saldo_estoque.hide()
+        self.btn_image_comparator.hide()
+        self.btn_toggle_footer.hide()
+        self.btn_imprimir_op.hide()
+
+
     def clean_screen(self):
         self.table_area.show()
         self.tree.hide()
@@ -561,16 +573,6 @@ class PcpApp(QWidget):
         self.label_line_number.hide()
         self.label_indicators.hide()
 
-        self.btn_abrir_desenho.hide()
-        self.btn_visualizar_op.hide()
-        self.btn_consultar_estrutura.hide()
-        self.btn_exportar_excel.hide()
-        self.btn_onde_e_usado.hide()
-        self.btn_saldo_estoque.hide()
-        self.btn_image_comparator.hide()
-        self.btn_toggle_footer.hide()
-        self.btn_imprimir_op.hide()
-
         self.guias_abertas.clear()
         self.guias_abertas_onde_usado.clear()
         self.guias_abertas_saldo.clear()
@@ -579,6 +581,8 @@ class PcpApp(QWidget):
             self.tabWidget.removeTab(0)
         self.tabWidget.setVisible(False)
         self.guia_fechada.emit()
+
+        self.hide_button()
 
     def button_visible_control(self, visible):
         if visible == "False":
@@ -771,6 +775,8 @@ class PcpApp(QWidget):
     def not_found_message(self, df):
         if not self.table_line_number(df.shape[0]):
             exibir_mensagem("Eureka!® PCP", 'Nenhum resultado encontrado nesta pesquisa.', "info")
+            if self.tree.isHidden():
+                self.hide_button()
             return False
         else:
             return True
@@ -881,6 +887,9 @@ class PcpApp(QWidget):
 
         open_icon = QIcon(open_icon_path)
         closed_icon = QIcon(closed_icon_path)
+
+        COLOR_FILE_EXISTS = QColor(51, 211, 145)  # green
+        COLOR_FILE_MISSING = QColor(201, 92, 118)  # light red
 
         for i, (index, row) in enumerate(dataframe.iterrows()):
             self.tree.setSortingEnabled(False)
