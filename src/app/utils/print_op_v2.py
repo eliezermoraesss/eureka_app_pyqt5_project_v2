@@ -177,7 +177,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
     num_qp = row['QP'].strip()
     num_op = row['OP'].strip()
     op_geral = row['OP GERAL']
-    op_aglutinada = row['Aglutinada?']
+    op_aglutinada = row['Aglutinado']
     """Generates PDF for a single Production Order"""
     # Create PDF
     c = canvas.Canvas(output_path, pagesize=A4)
@@ -260,12 +260,12 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
             dataframe_aglutinados = dataframe_geral[
                 dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
                 (dataframe_geral['QP'].str.strip() == num_qp) &
-                (dataframe_geral['Aglutinada?'].str.strip() == 'S')
+                (dataframe_geral['Aglutinado'].str.strip() == 'S')
             ]
             dataframe_nao_aglutinados = dataframe_geral[
                 dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
                 (dataframe_geral['QP'].str.strip() == num_qp) &
-                (dataframe_geral['Aglutinada?'].str.strip() != 'S') &
+                (dataframe_geral['Aglutinado'].str.strip() != 'S') &
                 (dataframe_geral['OP'].str.contains(op_geral, na=False))
             ]
             dataframe_filtrado = pd.concat([dataframe_aglutinados, dataframe_nao_aglutinados])

@@ -822,6 +822,7 @@ class PcpApp(QWidget):
 
             self.dataframe = pd.read_sql(query_consulta_op, self.engine)
             self.dataframe.insert(0, 'Status OP', '')
+            self.dataframe.insert(12, 'OP Impressa', '')
 
         except Exception as ex:
             print(ex)
@@ -891,6 +892,8 @@ class PcpApp(QWidget):
         COLOR_FILE_EXISTS = QColor(51, 211, 145)  # green
         COLOR_FILE_MISSING = QColor(201, 92, 118)  # light red
 
+        COLOR_OP_COLUMN = QColor(92, 151, 209)
+
         for i, (index, row) in enumerate(dataframe.iterrows()):
             self.tree.setSortingEnabled(False)
             self.tree.insertRow(i)
@@ -907,6 +910,17 @@ class PcpApp(QWidget):
                         item.setTextAlignment(Qt.AlignCenter)
                     else:
                         item = process_table_item(column_name, value)
+                        if column_name == 'OP Impressa':
+                            num_op = row['OP'].strip()
+                            codigo = row['Código'].strip()
+                            op_path = os.path.join(r"\\192.175.175.4\dados\EMPRESA\PRODUCAO\ORDEM_DE_PRODUCAO",
+                                                   f"OP_{num_op}_{codigo}.pdf")
+                            if os.path.exists(op_path):
+                                item.setBackground(COLOR_FILE_EXISTS)
+                                item.setText('Sim')
+                            else:
+                                item.setBackground(COLOR_FILE_MISSING)
+                                item.setText('Não')
                         if column_name == 'Descrição':
                             item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
                         else:
