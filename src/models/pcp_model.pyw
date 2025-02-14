@@ -9,10 +9,10 @@ from datetime import datetime
 
 import pandas as pd
 from PyQt5.QtCore import Qt, QDate, pyqtSignal
-from PyQt5.QtGui import QFont, QIcon, QPixmap
+from PyQt5.QtGui import QFont, QIcon, QPixmap, QKeySequence
 from PyQt5.QtWidgets import QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QDateEdit, QLabel, QSizePolicy, QTabWidget, QMenu, \
-    QComboBox, QMessageBox
+    QComboBox, QMessageBox, QShortcut
 from sqlalchemy import create_engine
 
 from src.app.utils.consultar_estrutura import ConsultaEstrutura
@@ -298,6 +298,9 @@ class PcpApp(QWidget):
         self.combobox_aglutinado.addItem('Sim')
         self.combobox_aglutinado.addItem('Não')
 
+        self.shortcut_print_op = QShortcut(QKeySequence("Ctrl+P"), self)
+        self.shortcut_print_op.activated.connect(self.check_and_print_op)
+
         self.field_name_list = [
             "codigo",
             "descricao",
@@ -424,6 +427,10 @@ class PcpApp(QWidget):
         self.campo_descricao.returnPressed.connect(self.btn_pesquisar)
         self.campo_contem_descricao.returnPressed.connect(self.btn_pesquisar)
         self.campo_observacao.returnPressed.connect(self.btn_pesquisar)
+
+    def check_and_print_op(self):
+        if self.tree.isVisible():
+            self.imprimir_op()
 
     def imprimir_op(self):
         # Imprime somente OP ABERTA
