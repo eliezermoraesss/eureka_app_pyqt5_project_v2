@@ -12,6 +12,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from PyQt5.QtCore import QCoreApplication, QUrl
 from PyQt5.QtGui import QDesktopServices
 from PyQt5.QtWidgets import QMessageBox, QHeaderView, QFileDialog
+from src.dialog.information_dialog import information_dialog
 
 
 def abrir_nova_janela(self, models):
@@ -101,6 +102,40 @@ def abrir_desenho(self, table=None, codigo_param=None):
             mensagem = f"Desenho não encontrado!\n\n:-("
             QMessageBox.information(self, f"{codigo_desenho}", mensagem)
 
+def open_op(self, table):
+    op_code = ''
+    product_code = ''
+    item_selecionado = table.currentItem()
+
+    if item_selecionado:
+        header = table.horizontalHeader()
+        op_col = None
+        product_col = None
+
+        for col in range(header.count()):
+            header_text = table.horizontalHeaderItem(col).text().lower()
+            if header_text == 'código':
+                product_col = col
+            elif header_text == 'op':
+                op_col = col
+
+            if product_col is not None:
+                codigo = table.item(item_selecionado.row(), product_col).text()
+                product_code = codigo
+            elif op_col is not None:
+                op = table.item(item_selecionado.row(), op_col).text()
+                op_code = op
+
+        pdf_path = os.path.join(r"\\192.175.175.4\dados\EMPRESA\PRODUCAO\ORDEM_DE_PRODUCAO", f"OP_{op_code}_{product_code}.pdf")
+        pdf_path = os.path.normpath(pdf_path)
+
+        if os.path.exists(pdf_path):
+            QCoreApplication.processEvents()
+            QDesktopServices.openUrl(QUrl.fromLocalFile(pdf_path))
+        else:
+            title = f"Eureka® PCP - OP {op_code}"
+            message = f"OP não encontrada!\n🙁"
+            information_dialog(self, title, message)
 
 def ajustar_largura_coluna_descricao(tree_widget):
     header = tree_widget.horizontalHeader()

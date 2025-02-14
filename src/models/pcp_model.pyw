@@ -21,7 +21,7 @@ from src.app.utils.consultar_saldo_estoque import executar_saldo_em_estoque
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.load_session import load_session
 from src.app.utils.utils import exibir_mensagem, abrir_desenho, exportar_excel, copiar_linha, abrir_tabela_pesos, \
-    obter_codigo_item_selecionado
+    obter_codigo_item_selecionado, open_op
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.dialog.loading_dialog import loading_dialog
 from src.app.utils.run_image_comparator import run_image_comparator_exe, run_image_comparator_model
@@ -126,7 +126,7 @@ class PcpApp(QWidget):
         self.guias_abertas_onde_usado = []
         self.guias_abertas_saldo = []
 
-        self.altura_linha = 30
+        self.altura_linha = 60
         self.tamanho_fonte_tabela = 10
 
         self.fonte_tabela = 'Open Sans'
@@ -363,11 +363,11 @@ class PcpApp(QWidget):
         container_data_fim.addWidget(self.campo_data_fim)
 
         container_combobox_status_op = QVBoxLayout()
-        container_combobox_status_op.addWidget(QLabel("SITUAÇÃO OP"))
+        container_combobox_status_op.addWidget(QLabel("Status OP"))
         container_combobox_status_op.addWidget(self.combobox_status_op)
 
         container_combobox_aglutinado = QVBoxLayout()
-        container_combobox_aglutinado.addWidget(QLabel("AGLUTINADA?"))
+        container_combobox_aglutinado.addWidget(QLabel("Aglutinação"))
         container_combobox_aglutinado.addWidget(self.combobox_aglutinado)
 
         layout_campos_01.addStretch()
@@ -546,16 +546,20 @@ class PcpApp(QWidget):
             tabela_pesos = QAction('Abrir Tabela de Pesos', self)
             tabela_pesos.triggered.connect(lambda: abrir_tabela_pesos())
 
+            visualizar_op = QAction('Visualizar OP', self)
+            visualizar_op.triggered.connect(lambda: open_op(self, table))
+
             menu.addAction(nova_janela)
-            menu.addSeparator()
             menu.addAction(abrir_desenho_menu)
-            menu.addAction(image_comparator)
-            menu.addAction(tabela_pesos)
+            menu.addAction(visualizar_op)
             menu.addSeparator()
             menu.addAction(consultar_estrutura)
             menu.addAction(hierarquia_estrutura)
             menu.addAction(onde_usado)
             menu.addAction(saldo_estoque)
+            menu.addSeparator()
+            menu.addAction(image_comparator)
+            menu.addAction(tabela_pesos)
 
             menu.exec_(table.viewport().mapToGlobal(position))
 
