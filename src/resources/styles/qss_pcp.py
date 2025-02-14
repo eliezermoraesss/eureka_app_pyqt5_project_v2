@@ -149,4 +149,48 @@ def pcp_qss():
                 color: #000000;
                 font-weight: bold;
             }
+            
+            QScrollBar:horizontal {
+                background: #f8f9fa;
+                height: 15px;
+                margin: 0px 20px 0 20px;
+                border: 1px solid #ced4da;
+                border-radius: 5px;
+            }
+
+            QScrollBar::handle:horizontal {
+                background: #0d6efd;
+                min-width: 20px;
+                border-radius: 5px;
+            }
+
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+                background: #f8f9fa;
+                width: 20px;
+                subcontrol-origin: margin;
+                border: 1px solid #ced4da;
+                border-radius: 5px;
+            }
+
+            QScrollBar:vertical {
+                background: #f8f9fa;
+                width: 15px;
+                margin: 20px 0 20px 0;
+                border: 1px solid #ced4da;
+                border-radius: 5px;
+            }
+
+            QScrollBar::handle:vertical {
+                background: #0d6efd;
+                min-height: 20px;
+                border-radius: 5px;
+            }
+
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                background: #f8f9fa;
+                height: 20px;
+                subcontrol-origin: margin;
+                border: 1px solid #ced4da;
+                border-radius: 5px;
+            }
             """
