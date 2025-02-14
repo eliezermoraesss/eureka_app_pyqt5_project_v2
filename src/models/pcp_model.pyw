@@ -46,28 +46,6 @@ class CustomLineEdit(QLineEdit):
         # Continue com o comportamento padrão
         super(CustomLineEdit, self).mousePressEvent(event)
 
-def validar_campos(codigo_produto, numero_qp, numero_op):
-    if len(codigo_produto) != 13 and not codigo_produto == '':
-        exibir_mensagem("ATENÇÃO!",
-                        "Produto não encontrado!\n\nCorrija e tente "
-                        f"novamente.\n\nツ\n\nSMARTPLIC®",
-                        "info")
-        return True
-
-    if len(numero_op) != 6 and not numero_op == '':
-        exibir_mensagem("ATENÇÃO!",
-                        "Ordem de Produção não encontrada!\n\nCorrija e tente "
-                        f"novamente.\n\nツ\n\nSMARTPLIC®",
-                        "info")
-        return True
-
-    if len(numero_qp.zfill(6)) != 6 and not numero_qp == '':
-        exibir_mensagem("ATENÇÃO!",
-                        "QP não encontrada!\n\nCorrija e tente "
-                        f"novamente.\n\nツ\n\nSMARTPLIC®",
-                        "info")
-        return True
-
 
 def clear_and_filter(line_edit):
     line_edit.clear()
@@ -402,14 +380,14 @@ class PcpApp(QWidget):
         self.layout_buttons.addStretch()
 
         self.layout_footer_label.addStretch(1)
-        self.layout_footer_label.addWidget(self.label_line_number)
-        self.layout_footer_label.addWidget(self.label_indicators)
-        self.layout_footer_label.addWidget(self.btn_toggle_footer)
         self.layout_footer_label.addWidget(self.btn_imprimir_op)
         self.layout_footer_label.addWidget(self.btn_abrir_desenho)
         self.layout_footer_label.addWidget(self.btn_visualizar_op)
         self.layout_footer_label.addWidget(self.btn_exportar_excel)
         self.layout_footer_label.addWidget(self.btn_image_comparator)
+        self.layout_footer_label.addWidget(self.label_line_number)
+        self.layout_footer_label.addWidget(self.label_indicators)
+        self.layout_footer_label.addWidget(self.btn_toggle_footer)
         self.layout_footer_label.addStretch(1)
         self.layout_footer_label.addWidget(self.logo_label)
 
@@ -446,8 +424,8 @@ class PcpApp(QWidget):
         df_geral_op_aberta = self.dataframe_original[self.dataframe_original['Fechamento'].str.contains('        ', na=False)]
 
         line_number = df_op_aberta.shape[0]
-        title = "Imprimir OP"
-        message = f"Foram encontradas {line_number} OPs.\n\nDeseja prosseguir com a impressão?"
+        title = "Eureka® PCP - Imprimir OP"
+        message = f"Foram encontradas {line_number} OP. 🔎\n\nDeseja prosseguir com a impressão? 🖨️"
         response = show_confirmation_dialog(self, title, message)
 
         if response == QMessageBox.Yes:
@@ -792,7 +770,6 @@ class PcpApp(QWidget):
 
     def not_found_message(self, df):
         if not self.table_line_number(df.shape[0]):
-            self.clean_screen()
             exibir_mensagem("Eureka!® PCP", 'Nenhum resultado encontrado nesta pesquisa.', "info")
             return False
         else:

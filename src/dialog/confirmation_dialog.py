@@ -6,7 +6,7 @@ def show_confirmation_dialog(self, title, message):
     msg_box.setWindowTitle(title)
     msg_box.setText(message)
     msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-    msg_box.setDefaultButton(QMessageBox.No)
+    msg_box.setDefaultButton(QMessageBox.Yes)
     yes_button = msg_box.button(QMessageBox.Yes)
     yes_button.setText("Sim")
     no_button = msg_box.button(QMessageBox.No)

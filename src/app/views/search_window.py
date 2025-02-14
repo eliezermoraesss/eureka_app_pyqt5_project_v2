@@ -33,8 +33,8 @@ class SearchWindow(QDialog):
         self.ui.btn_search.clicked.connect(self.get_parameters_values)
         self.ui.btn_ok.clicked.connect(self.accept_selection)
         self.ui.btn_close.clicked.connect(self.close)
-
         self.ui.search_field.returnPressed.connect(self.get_parameters_values)
+        self.ui.search_field.setFocus()
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:

@@ -24,12 +24,13 @@ from PyPDF2 import PdfMerger
 
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.utils import exibir_mensagem
+from src.dialog.information_dialog import information_dialog
 
 
 class PDFGeneratorThread(QThread):
     finished = pyqtSignal(str)
     error = pyqtSignal(str)
-    progress = pyqtSignal(int)
+    progress = pyqtSignal(int, int, int)
 
     def __init__(self, df: pd.DataFrame, df_op_table, output_dir: str):
         super().__init__()
@@ -40,13 +41,14 @@ class PDFGeneratorThread(QThread):
 
     def run(self):
         try:
+            self.df.reset_index(drop=True, inplace=True)
             total_rows = len(self.df)
             for index, row in self.df.iterrows():
                 progress = int((index + 1) / total_rows * 100)
                 self.output_path = os.path.join(self.output_dir,
                                            f"OP_{row['OP'].strip()}_{row['Código'].strip()}.pdf")
-                generate_production_order_pdf(row, self.output_path, self.progress, self.df_op_table)
-                self.progress.emit(progress)
+                self.progress.emit(progress, index + 1, total_rows)
+                generate_production_order_pdf(row, self.output_path, self.df_op_table)
             self.finished.emit(self.output_path)
         except Exception as e:
             self.error.emit(str(e))
@@ -169,7 +171,7 @@ def generate_barcode(data):
     temp_barcode.close()
     return temp_barcode.name
 
-def generate_production_order_pdf(row: pd.Series, output_path: str, progress_callback, dataframe_geral):
+def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_geral):
     data_hora_impressao = datetime.now().strftime('%d/%m/%Y   %H:%M:%S')
     codigo = row['Código'].strip()
     num_qp = row['QP'].strip()
@@ -188,7 +190,6 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
     logo_x = margin
     logo_y = height - margin * 3
     c.drawImage(logo_path, logo_x, logo_y, width=logo_width, preserveAspectRatio=True)
-    progress_callback.emit(20)
 
     # Title
     title_text = f"ORDEM DE PRODUÇÃO - {num_op}"
@@ -198,7 +199,6 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
     title_x = (width - title_width) / 2
     title_y = 810  # Adjust this value as needed to position the title vertically
     c.drawString(title_x, title_y, title_text)
-    progress_callback.emit(30)
 
     title_text = f"QP: {num_qp} {row['PROJETO']}"
     title_font_size = 12
@@ -207,7 +207,6 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
     title_x = (width - title_width) / 2
     title_y = title_y - 20  # Adjust this value as needed to position the title vertically
     c.drawString(title_x, title_y, title_text)
-    progress_callback.emit(35)
 
     # Add line below the title
     line_y = title_y - 10
@@ -219,7 +218,6 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
     barcode_y = 565  # Adjust this value as needed to position the barcode vertically
     barcode_path = generate_barcode(num_op)
     c.drawImage(barcode_path, barcode_x, barcode_y, width=barcode_width, preserveAspectRatio=True)
-    progress_callback.emit(40)
 
     # Informações da Ordem de Produção
     header_style = create_header_style()
@@ -243,8 +241,6 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
         p.wrapOn(c, width - 2*margin, 20)
         p.drawOn(c, margin, y_position)
         y_position -= 15
-
-    progress_callback.emit(60)
 
     # Tabela hierárquica
     dataframe_onde_usado = consultar_hierarquia_tabela(codigo)
@@ -310,7 +306,6 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
         # Generate the table
         table_y_position = y_position
         generate_hierarchical_table(dataframe_final, c, table_y_position)
-        progress_callback.emit(80)
     else:
         print(f"No hierarchical data found for código: {row['Código']}")
 
@@ -321,7 +316,6 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
 
     # Save first page
     c.save()
-    progress_callback.emit(90)
 
     # Handle technical drawing (Page 2)
     codigo_desenho = row['Código'].strip()
@@ -332,19 +326,16 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
 
     if os.path.exists(drawing_path):
         merger = PdfMerger()
-        progress_callback.emit(94)
         merger.append(output_path)  # First append the production order page
         merger.append(drawing_path)  # Then append the technical drawing
 
         # Create a temporary file for the merged result
         temp_output = output_path + '.temp'
         merger.write(temp_output)
-        progress_callback.emit(98)
         merger.close()
 
         # Replace the original file with the merged result
         os.replace(temp_output, output_path)
-        progress_callback.emit(100)
     else:
         # Create a new page with the "Drawing not found" message
         c = canvas.Canvas(output_path + '.temp', pagesize=A4)
@@ -357,19 +348,16 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, progress_cal
 
         # Merge the original page with the "Drawing not found" page
         merger = PdfMerger()
-        progress_callback.emit(94)
         merger.append(output_path)
         merger.append(output_path + '.temp')
 
         temp_output = output_path + '.merged'
         merger.write(temp_output)
-        progress_callback.emit(98)
         merger.close()
 
         # Clean up temporary files and replace the original
         os.remove(output_path + '.temp')
         os.replace(temp_output, output_path)
-        progress_callback.emit(100)
 
 
 def registrar_fonte_personalizada():
@@ -400,7 +388,7 @@ class PrintProductionOrderDialogV2(QtWidgets.QDialog):
         self.print_production_order()
 
     def init_ui(self):
-        self.setWindowTitle("Impressão de OP")
+        self.setWindowTitle("Eureka® PCP - Imprimir OP")
         self.setGeometry(100, 100, 400, 100)
 
         self.layout = QVBoxLayout(self)
@@ -415,6 +403,13 @@ class PrintProductionOrderDialogV2(QtWidgets.QDialog):
         self.layout.addWidget(self.progress_bar)
 
         self.setLayout(self.layout)
+        self.center()
+
+    def center(self):
+        qr = self.frameGeometry()
+        cp = QtWidgets.QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
 
     def print_production_order(self):
         output_dir = r"\\192.175.175.4\dados\EMPRESA\PRODUCAO\ORDEM_DE_PRODUCAO"
@@ -423,17 +418,20 @@ class PrintProductionOrderDialogV2(QtWidgets.QDialog):
         self.pdf_thread = PDFGeneratorThread(self.df, self.df_op_table, output_dir)
         self.pdf_thread.finished.connect(self.on_pdf_generation_complete)
         self.pdf_thread.error.connect(self.on_pdf_generation_error)
-        self.pdf_thread.progress.connect(self.update_progress)
+        self.pdf_thread.progress.connect(lambda value, current, total: self.update_progress(value, current, total))
         self.pdf_thread.start()
 
-    def update_progress(self, value):
+    def update_progress(self, value, current, total):
         self.progress_bar.setValue(value)
+        self.label_status.setText(f"Publicando OP {current} de {total}")
 
     def on_pdf_generation_complete(self, path):
-        QMessageBox.information(self, "", f"PDF gerado com sucesso!")
+        information_dialog(self, "Eureka® PCP - Imprimir OP", "Processo finalizado com sucesso! ✅🥳\n\n"
+                                                              "Os arquivos foram salvos em:\n"
+                                                              r"\192.175.175.4\dados\EMPRESA\PRODUCAO\ORDEM_DE_PRODUCAO")
         QDesktopServices.openUrl(QUrl.fromLocalFile(path))
         self.close()
 
     def on_pdf_generation_error(self, error):
-        QMessageBox.critical(self, "Erro", f"Erro ao gerar PDF: {error}")
+        QMessageBox.critical(self, "Eureka® PCP - Erro", f"Erro ao gerar PDF ❌\nErro: {error}")
         self.close()
