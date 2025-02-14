@@ -2,12 +2,12 @@ def pcp_qss():
     return """
             * {
                 background-color: #D3D3D3;
-                font-style: "Segoe UI";
+                font-style: "Open Sans";
             }
 
             QLabel {
-                color: #212529; /* Bootstrap dark text */
-                font-size: 14px;
+                color: #000000; /* #212529; /* Bootstrap dark text */
+                font-size: 12px;
                 font-weight: 400;
                 padding-left: 4px;
             }
@@ -18,6 +18,7 @@ def pcp_qss():
             }
             
             QLabel#label-title {
+                color: #212529;
                 margin: 10px;
                 font-size: 28px;
                 font-weight: 600;

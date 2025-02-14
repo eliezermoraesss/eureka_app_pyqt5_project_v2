@@ -129,8 +129,8 @@ class PcpApp(QWidget):
         self.altura_linha = 30
         self.tamanho_fonte_tabela = 10
 
-        self.fonte_tabela = 'Segoe UI'
-        fonte_campos = "Segoe UI"
+        self.fonte_tabela = 'Open Sans'
+        fonte_campos = "Open Sans"
         tamanho_fonte_campos = 16
 
         self.setStyleSheet(pcp_qss())
@@ -924,8 +924,8 @@ class PcpApp(QWidget):
         indicadores_table = f"""
                 <table border="1" cellspacing="2" cellpadding="4" style="border-collapse: collapse; text-align: left; width: 100%;">
                     <tr>
-                        <th style="text-align: middle; vertical-align: middle;">STATUS</th>
-                        <th style="text-align: right; vertical-align: middle;">QUANTIDADE</th>
+                        <th style="text-align: middle; vertical-align: middle;">Status</th>
+                        <th style="text-align: right; vertical-align: middle;">Quantidade</th>
                     </tr>
                     <tr>
                         <td style="vertical-align: middle;">OP ABERTA</td>
