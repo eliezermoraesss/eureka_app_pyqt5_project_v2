@@ -138,7 +138,7 @@ class PcpApp(QWidget):
         self.label_contem_descricao_prod = QLabel("Contém na descrição", self)
         self.label_contem_descricao_prod.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.label_OP = QLabel("OP", self)
-        self.label_qp = QLabel("QP", self)
+        self.label_qp = QLabel("QP/QR", self)
         self.label_data_inicio = QLabel("Data inicial", self)
         self.label_data_inicio.setObjectName("data-inicio")
         self.label_data_fim = QLabel("Data final", self)
@@ -284,6 +284,9 @@ class PcpApp(QWidget):
         self.shortcut_print_op = QShortcut(QKeySequence("Ctrl+P"), self)
         self.shortcut_print_op.activated.connect(self.check_and_print_op)
 
+        self.shortcut_esc = QShortcut(QKeySequence("Esc"), self)
+        self.shortcut_esc.activated.connect(self.deselect_table_row)
+
         self.field_name_list = [
             "codigo",
             "descricao",
@@ -411,6 +414,9 @@ class PcpApp(QWidget):
         self.campo_descricao.returnPressed.connect(self.btn_pesquisar)
         self.campo_contem_descricao.returnPressed.connect(self.btn_pesquisar)
         self.campo_observacao.returnPressed.connect(self.btn_pesquisar)
+
+    def deselect_table_row(self):
+        self.tree.clearSelection()
 
     def check_and_print_op(self):
         if self.tree.isVisible():
@@ -690,7 +696,12 @@ class PcpApp(QWidget):
 
         query = f"""
             SELECT 
-                C2_ZZNUMQP AS "QP",
+                C2_ZZNUMQP AS "QP/QR",
+                CASE
+                    WHEN C6_XTPOPER = 1 THEN 'QP'
+                    WHEN C6_XTPOPER = 2 THEN 'QR'
+                    ELSE 'Outros'
+                END AS 'Tipo',
                 qps.des_qp AS "PROJETO",
                 CONCAT(C2_NUM, C2_ITEM, C2_SEQUEN) AS "OP",
                 C2_PRODUTO AS "Código", 
@@ -734,6 +745,16 @@ class PcpApp(QWidget):
                 enaplic_management.dbo.tb_qps qps
             ON 
                 cod_qp COLLATE Latin1_General_CI_AI = C2_ZZNUMQP COLLATE Latin1_General_CI_AI
+            LEFT JOIN (
+                SELECT 
+                    C6_NUM, 
+                    C6_XTPOPER, 
+                    ROW_NUMBER() OVER (PARTITION BY C6_NUM ORDER BY C6_NUM) AS row_num
+                FROM 
+                    {self.database}.dbo.SC6010
+            ) itemPV
+            ON 
+                C2_ZZNUMQP = itemPV.C6_NUM AND itemPV.row_num = 1
             WHERE 
                 {filtro_data}
                 AND op.D_E_L_E_T_ <> '*'
@@ -850,7 +871,7 @@ class PcpApp(QWidget):
         filtered_df = self.dataframe_original.copy()
 
         if filter_qp:
-            filtered_df = filtered_df[filtered_df['QP'].str.endswith(filter_qp, na=False)]
+            filtered_df = filtered_df[filtered_df['QP/QR'].str.endswith(filter_qp, na=False)]
         if filter_op:
             filtered_df = filtered_df[filtered_df['OP'].str.startswith(filter_op, na=False)]
         if filter_codigo:
@@ -889,10 +910,9 @@ class PcpApp(QWidget):
         open_icon = QIcon(open_icon_path)
         closed_icon = QIcon(closed_icon_path)
 
-        COLOR_FILE_EXISTS = QColor(51, 211, 145)  # green
-        COLOR_FILE_MISSING = QColor(201, 92, 118)  # light red
-
-        COLOR_OP_COLUMN = QColor(92, 151, 209)
+        COLOR_GREEN = QColor(51, 211, 145)  # green
+        COLOR_RED = QColor(248, 180, 180)  # light red
+        COLOR_OP_COLUMN = QColor(189, 224, 254) # azul
 
         for i, (index, row) in enumerate(dataframe.iterrows()):
             self.tree.setSortingEnabled(False)
@@ -904,22 +924,29 @@ class PcpApp(QWidget):
                         if row['Fechamento'].strip() == '':
                             item.setIcon(open_icon)
                             item.setText('ABERTA')
+                            item.setBackground(COLOR_RED)
                         else:
                             item.setIcon(closed_icon)
                             item.setText('FECHADA')
+                            item.setBackground(COLOR_GREEN)
                         item.setTextAlignment(Qt.AlignCenter)
+                        item.setFont(QFont(self.fonte_tabela, self.tamanho_fonte_tabela, QFont.Bold))
                     else:
                         item = process_table_item(column_name, value)
+                        if column_name in ['OP', 'PROJETO', 'QP/QR', 'Tipo']:
+                            item.setBackground(COLOR_OP_COLUMN)
+                            item.setFont(QFont(self.fonte_tabela, self.tamanho_fonte_tabela, QFont.Bold))
                         if column_name == 'OP Impressa':
                             num_op = row['OP'].strip()
                             codigo = row['Código'].strip()
+                            item.setFont(QFont(self.fonte_tabela, self.tamanho_fonte_tabela, QFont.Bold))
                             op_path = os.path.join(r"\\192.175.175.4\dados\EMPRESA\PRODUCAO\ORDEM_DE_PRODUCAO",
                                                    f"OP_{num_op}_{codigo}.pdf")
                             if os.path.exists(op_path):
-                                item.setBackground(COLOR_FILE_EXISTS)
+                                item.setBackground(COLOR_GREEN)
                                 item.setText('Sim')
                             else:
-                                item.setBackground(COLOR_FILE_MISSING)
+                                item.setBackground(COLOR_RED)
                                 item.setText('Não')
                         if column_name == 'Descrição':
                             item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
@@ -972,7 +999,7 @@ def format_date(value):
 
 
 def process_table_item(column_name, value):
-    if column_name == 'QP':
+    if column_name == 'QP/QR':
         return QTableWidgetItem(value.lstrip('0'))
 
     if column_name == 'PROJETO':

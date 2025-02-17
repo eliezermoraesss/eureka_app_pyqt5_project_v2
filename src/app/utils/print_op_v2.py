@@ -174,8 +174,9 @@ def generate_barcode(data):
 def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_geral):
     data_hora_impressao = datetime.now().strftime('%d/%m/%Y   %H:%M:%S')
     codigo = row['Código'].strip()
-    num_qp = row['QP'].strip()
+    num_qp = row['QP/QR'].strip()
     num_op = row['OP'].strip()
+    tipo = row['Tipo'].strip()
     op_geral = row['OP GERAL']
     op_aglutinada = row['Aglutinado']
     """Generates PDF for a single Production Order"""
@@ -200,7 +201,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
     title_y = 810  # Adjust this value as needed to position the title vertically
     c.drawString(title_x, title_y, title_text)
 
-    title_text = f"QP: {num_qp} {row['PROJETO']}"
+    title_text = f"{tipo}: {num_qp} {row['PROJETO']}"
     title_font_size = 12
     c.setFont("Courier-New-Bold", title_font_size)
     title_width = c.stringWidth(title_text, "Courier-New-Bold", title_font_size)
@@ -254,17 +255,17 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
             # Filter dataframe_geral to only include rows where 'Código' is in codigos_onde_usado and 'QP' matches num_qp
             dataframe_filtrado = dataframe_geral[
                 dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
-                (dataframe_geral['QP'].str.strip() == num_qp)
+                (dataframe_geral['QP/QR'].str.strip() == num_qp)
             ]
         else:
             dataframe_aglutinados = dataframe_geral[
                 dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
-                (dataframe_geral['QP'].str.strip() == num_qp) &
+                (dataframe_geral['QP/QR'].str.strip() == num_qp) &
                 (dataframe_geral['Aglutinado'].str.strip() == 'S')
             ]
             dataframe_nao_aglutinados = dataframe_geral[
                 dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
-                (dataframe_geral['QP'].str.strip() == num_qp) &
+                (dataframe_geral['QP/QR'].str.strip() == num_qp) &
                 (dataframe_geral['Aglutinado'].str.strip() != 'S') &
                 (dataframe_geral['OP'].str.contains(op_geral, na=False))
             ]
@@ -359,6 +360,8 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
         os.remove(output_path + '.temp')
         os.replace(temp_output, output_path)
 
+    # Open the generated PDF
+    QDesktopServices.openUrl(QUrl(QUrl.fromLocalFile(output_path)))
 
 def registrar_fonte_personalizada():
     # Registra todas as variações da fonte Courier
@@ -429,7 +432,6 @@ class PrintProductionOrderDialogV2(QtWidgets.QDialog):
         information_dialog(self, "Eureka® PCP - Imprimir OP", "Processo finalizado com sucesso! ✅🥳\n\n"
                                                               "Os arquivos foram salvos em:\n"
                                                               r"\192.175.175.4\dados\EMPRESA\PRODUCAO\ORDEM_DE_PRODUCAO")
-        QDesktopServices.openUrl(QUrl.fromLocalFile(path))
         self.close()
 
     def on_pdf_generation_error(self, error):
