@@ -112,7 +112,7 @@ def pcp_qss():
                 padding-left: 10px;
                 margin: 0;
                 alternate-background-color: #f8f9fa;
-                gridline-color: transparent; /* Remove vertical grid lines */
+                gridline-color: transparent; /*#ccc; /* Remove vertical grid lines */
             }
             
             QTableWidget#result_table {

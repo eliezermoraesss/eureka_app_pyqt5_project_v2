@@ -46,17 +46,19 @@ class PDFGeneratorThread(QThread):
             for index, row in self.df.iterrows():
                 progress = int((index + 1) / total_rows * 100)
                 self.output_path = os.path.join(self.output_dir,
-                                           f"OP_{row['OP'].strip()}_{row['Código'].strip()}.pdf")
+                                                f"OP_{row['OP'].strip()}_{row['Código'].strip()}.pdf")
                 self.progress.emit(progress, index + 1, total_rows)
                 generate_production_order_pdf(row, self.output_path, self.df_op_table)
             self.finished.emit(self.output_path)
         except Exception as e:
             self.error.emit(str(e))
 
+
 def get_resource_path(resource_type: str, filename: str) -> str:
     """Returns the path for various resource types"""
     script_dir = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(script_dir, '..', '..', 'resources', resource_type, filename)
+
 
 def create_header_style():
     """Creates and returns custom header style"""
@@ -69,24 +71,24 @@ def create_header_style():
         fontName='Courier-New'
     )
 
+
 def generate_hierarchical_table(df: pd.DataFrame, canvas_obj, y_position: float):
     """Generates the hierarchical table for the production order"""
     # Define column widths and headers
-    col_widths = [60, 70, 200, 60, 160]  # Adjusted widths
-    headers = ['OP Pai', 'Código Pai', 'Descrição', 'Quantidade', 'Centro de Custo']
+    col_widths = [70, 70, 336, 60]  # Adjusted widths
+    headers = ['OP Pai', 'Código Pai', 'Descrição', 'Quantidade']
 
     # Prepare data for table
     table_data = [headers]
     for _, row in df.iterrows():
         descricao = str(row['Descrição']).strip()
-        if len(descricao) > 35:
-            descricao = descricao[:35] + '...'
+        if len(descricao) > 60:
+            descricao = descricao[:60] + '...'
         table_data.append([
             str(row['OP']),
             str(row['Código Pai']).strip(),
             descricao,
-            str(row['Quantidade']),
-            str(row['Centro de Custo'].strip())
+            str(row['Quantidade'])
         ])
 
     # Create and style table
@@ -119,6 +121,7 @@ def generate_hierarchical_table(df: pd.DataFrame, canvas_obj, y_position: float)
 
     # Draw table
     table.drawOn(canvas_obj, 30, y_position - table_height)
+
 
 def consultar_hierarquia_tabela(codigo):
     username, password, database, server = setup_mssql()
@@ -165,11 +168,13 @@ def consultar_hierarquia_tabela(codigo):
         # Fecha a conexão com o banco de dados se estiver aberta
         engine.dispose()
 
+
 def generate_barcode(data):
     temp_barcode = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
     Code128(data, writer=ImageWriter()).write(temp_barcode)
     temp_barcode.close()
     return temp_barcode.name
+
 
 def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_geral):
     data_hora_impressao = datetime.now().strftime('%d/%m/%Y   %H:%M:%S')
@@ -179,6 +184,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
     tipo = row['Tipo'].strip()
     op_geral = row['OP GERAL']
     op_aglutinada = row['Aglutinado']
+
     """Generates PDF for a single Production Order"""
     # Create PDF
     c = canvas.Canvas(output_path, pagesize=A4)
@@ -201,7 +207,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
     title_y = 810  # Adjust this value as needed to position the title vertically
     c.drawString(title_x, title_y, title_text)
 
-    title_text = f"{tipo}: {num_qp} {row['PROJETO']}"
+    title_text = f"{tipo}: {num_qp} {row['PROJETO']}" if tipo == 'QP' else f"{row['PROJETO']}"
     title_font_size = 12
     c.setFont("Courier-New-Bold", title_font_size)
     title_width = c.stringWidth(title_text, "Courier-New-Bold", title_font_size)
@@ -239,9 +245,13 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
     y_position = 750  # Adjust this value as needed to position the information vertically
     for line in op_info:
         p = Paragraph(line, header_style)
-        p.wrapOn(c, width - 2*margin, 20)
+        p.wrapOn(c, width - 2 * margin, 20)
         p.drawOn(c, margin, y_position)
         y_position -= 15
+
+    # Add line below the title
+    c.line(margin, y_position, width - margin, y_position)
+    y_position -= 15
 
     # Tabela hierárquica
     dataframe_onde_usado = consultar_hierarquia_tabela(codigo)
@@ -256,19 +266,19 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
             dataframe_filtrado = dataframe_geral[
                 dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
                 (dataframe_geral['QP/QR'].str.strip() == num_qp)
-            ]
+                ]
         else:
             dataframe_aglutinados = dataframe_geral[
                 dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
                 (dataframe_geral['QP/QR'].str.strip() == num_qp) &
                 (dataframe_geral['Aglutinado'].str.strip() == 'S')
-            ]
+                ]
             dataframe_nao_aglutinados = dataframe_geral[
                 dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
                 (dataframe_geral['QP/QR'].str.strip() == num_qp) &
                 (dataframe_geral['Aglutinado'].str.strip() != 'S') &
                 (dataframe_geral['OP'].str.contains(op_geral, na=False))
-            ]
+                ]
             dataframe_filtrado = pd.concat([dataframe_aglutinados, dataframe_nao_aglutinados])
 
         # Add the OP column to the filtered dataframe if it doesn't exist
@@ -291,8 +301,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
             'OP',
             'Código',
             'Descrição',
-            'Qtd Usada',
-            'Centro de Custo'
+            'Qtd Usada'
         ]].copy()
 
         # Rename columns to match the expected format
@@ -304,6 +313,22 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
         # Sort the dataframe if needed
         dataframe_final = dataframe_final.sort_values('OP')
 
+        # Title hierarchical table
+        title_text = f"LISTA DOS PAIS (ONDE É USADO)"
+        title_font_size = 10
+        c.setFont("Courier-New-Bold", title_font_size)
+        title_width = c.stringWidth(title_text, "Courier-New-Bold", title_font_size)
+        title_x = (width - title_width) / 2
+        c.drawString(title_x, y_position, title_text)
+        y_position -= 15
+
+        # Total destinado
+        total_destinado = dataframe_final['Quantidade'].sum()
+        p = Paragraph(f"Total destinado: {total_destinado}  {row['Unid.']}", header_style)
+        p.wrapOn(c, width - 2 * margin, 20)
+        p.drawOn(c, margin, y_position)
+        y_position -= 5
+
         # Generate the table
         table_y_position = y_position
         generate_hierarchical_table(dataframe_final, c, table_y_position)
@@ -313,7 +338,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
     # Roteiro
     workflow_path = get_resource_path('images', 'roteiro_v3.png')
     workflow_y_position = table_y_position - 780  # Adjust this value as needed to position the workflow vertically
-    c.drawImage(workflow_path, margin, workflow_y_position, width=width-2*margin, preserveAspectRatio=True)
+    c.drawImage(workflow_path, margin, workflow_y_position, width=width - 2 * margin, preserveAspectRatio=True)
 
     # Save first page
     c.save()
@@ -344,7 +369,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
 
         c.showPage()
         c.setFont("Courier-New-Italic", 24)
-        c.drawCentredString(width/2, height/2, "DESENHO NÃO ENCONTRADO")
+        c.drawCentredString(width / 2, height / 2, "DESENHO NÃO ENCONTRADO")
         c.save()
 
         # Merge the original page with the "Drawing not found" page
@@ -363,6 +388,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
     # Open the generated PDF
     QDesktopServices.openUrl(QUrl(QUrl.fromLocalFile(output_path)))
 
+
 def registrar_fonte_personalizada():
     # Registra todas as variações da fonte Courier
     pdfmetrics.registerFont(TTFont('Courier-New', r'C:\WINDOWS\FONTS\COUR.TTF'))
@@ -371,10 +397,10 @@ def registrar_fonte_personalizada():
     pdfmetrics.registerFont(TTFont('Courier-New-BoldItalic', r'C:\WINDOWS\FONTS\COURBI.TTF'))
 
     # Mapeia as variações da fonte
-    addMapping('Courier-New', 0, 0, 'Courier-New')              # normal
-    addMapping('Courier-New', 1, 0, 'Courier-New-Bold')         # bold
-    addMapping('Courier-New', 0, 1, 'Courier-New-Italic')       # italic
-    addMapping('Courier-New', 1, 1, 'Courier-New-BoldItalic')   # bold & italic
+    addMapping('Courier-New', 0, 0, 'Courier-New')  # normal
+    addMapping('Courier-New', 1, 0, 'Courier-New-Bold')  # bold
+    addMapping('Courier-New', 0, 1, 'Courier-New-Italic')  # italic
+    addMapping('Courier-New', 1, 1, 'Courier-New-BoldItalic')  # bold & italic
 
 
 class PrintProductionOrderDialogV2(QtWidgets.QDialog):
@@ -428,7 +454,7 @@ class PrintProductionOrderDialogV2(QtWidgets.QDialog):
         self.progress_bar.setValue(value)
         self.label_status.setText(f"Publicando OP {current} de {total}")
 
-    def on_pdf_generation_complete(self, path):
+    def on_pdf_generation_complete(self):
         information_dialog(self, "Eureka® PCP - Imprimir OP", "Processo finalizado com sucesso! ✅🥳\n\n"
                                                               "Os arquivos foram salvos em:\n"
                                                               r"\192.175.175.4\dados\EMPRESA\PRODUCAO\ORDEM_DE_PRODUCAO")

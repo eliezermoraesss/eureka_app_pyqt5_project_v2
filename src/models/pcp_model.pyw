@@ -858,6 +858,13 @@ class PcpApp(QWidget):
             self.dataframe.insert(0, 'Status OP', '')
             self.dataframe.insert(12, 'PDF da OP', '')
 
+            # Iterate through the rows of the DataFrame
+            for index, row in self.dataframe.iterrows():
+                # Check if the 'Projeto' column is empty
+                if pd.isna(row['PROJETO']) or row['PROJETO'].strip() == '':
+                    # Update the 'Projeto' column with the value from the 'Observação' column
+                    self.dataframe.at[index, 'PROJETO'] = row['Observação'].strip()
+
         except Exception as ex:
             print(ex)
             exibir_mensagem('Erro ao consultar tabela', f'Erro: {str(ex)}', 'error')
@@ -911,7 +918,7 @@ class PcpApp(QWidget):
                 filtered_df = filtered_df[filtered_df['Tipo'].str.strip() == 'QP']
             elif filter_tipo == 'QR':
                 filtered_df = filtered_df[filtered_df['Tipo'].str.strip() == 'QR']
-            else:
+            elif filter_tipo == 'OUTROS':
                 filtered_df = filtered_df[filtered_df['Tipo'].str.strip() == 'Outros']
         return filtered_df
 
@@ -933,7 +940,7 @@ class PcpApp(QWidget):
 
         COLOR_GREEN = QColor(51, 211, 145)  # green
         COLOR_RED = QColor(248, 180, 180)  # light red
-        COLOR_OP_COLUMN = QColor(189, 224, 254) # azul
+        COLOR_OP_COLUMN = QColor(125, 211, 252) # light blue
 
         for i, (index, row) in enumerate(dataframe.iterrows()):
             self.tree.setSortingEnabled(False)
