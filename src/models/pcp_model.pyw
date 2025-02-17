@@ -856,7 +856,7 @@ class PcpApp(QWidget):
 
             self.dataframe = pd.read_sql(query_consulta_op, self.engine)
             self.dataframe.insert(0, 'Status OP', '')
-            self.dataframe.insert(12, 'OP Impressa', '')
+            self.dataframe.insert(12, 'PDF da OP', '')
 
         except Exception as ex:
             print(ex)
@@ -957,7 +957,7 @@ class PcpApp(QWidget):
                         if column_name in ['OP', 'PROJETO', 'QP/QR', 'Tipo']:
                             item.setBackground(COLOR_OP_COLUMN)
                             item.setFont(QFont(self.fonte_tabela, self.tamanho_fonte_tabela, QFont.Bold))
-                        if column_name == 'OP Impressa':
+                        if column_name == 'PDF da OP':
                             num_op = row['OP'].strip()
                             codigo = row['Código'].strip()
                             item.setFont(QFont(self.fonte_tabela, self.tamanho_fonte_tabela, QFont.Bold))
