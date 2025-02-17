@@ -182,7 +182,7 @@ class PcpApp(QWidget):
         self.campo_data_inicio.setDisplayFormat("dd/MM/yyyy")
 
         data_atual = QDate.currentDate()
-        intervalo_meses = 12
+        intervalo_meses = 6
         data_inicio = data_atual.addMonths(-intervalo_meses)
 
         self.campo_data_inicio.setDate(data_inicio)
@@ -281,6 +281,14 @@ class PcpApp(QWidget):
         self.combobox_aglutinado.addItem('Sim')
         self.combobox_aglutinado.addItem('Não')
 
+        self.combobox_tipo = QComboBox(self)
+        self.combobox_tipo.setEditable(False)
+        self.combobox_tipo.setObjectName('combobox-tipo')
+        self.combobox_tipo.addItem('-')
+        self.combobox_tipo.addItem('QP')
+        self.combobox_tipo.addItem('QR')
+        self.combobox_tipo.addItem('Outros')
+
         self.shortcut_print_op = QShortcut(QKeySequence("Ctrl+P"), self)
         self.shortcut_print_op.activated.connect(self.check_and_print_op)
 
@@ -356,6 +364,10 @@ class PcpApp(QWidget):
         container_combobox_aglutinado.addWidget(QLabel("Aglutinação"))
         container_combobox_aglutinado.addWidget(self.combobox_aglutinado)
 
+        container_combobox_tipo = QVBoxLayout()
+        container_combobox_tipo.addWidget(QLabel("Tipo (QP/QR)"))
+        container_combobox_tipo.addWidget(self.combobox_tipo)
+
         layout_campos_01.addStretch()
         layout_campos_02.addStretch()
         layout_campos_01.addLayout(container_qp)
@@ -368,6 +380,7 @@ class PcpApp(QWidget):
         layout_campos_02.addLayout(container_data_fim)
         layout_campos_02.addLayout(container_combobox_status_op)
         layout_campos_02.addLayout(container_combobox_aglutinado)
+        layout_campos_02.addLayout(container_combobox_tipo)
         layout_campos_01.addStretch()
         layout_campos_02.addStretch()
 
@@ -867,6 +880,7 @@ class PcpApp(QWidget):
         else:
             filter_status_op = situacao_op
         filter_aglutinado = self.combobox_aglutinado.currentText().upper()
+        filter_tipo = self.combobox_tipo.currentText().upper()
 
         filtered_df = self.dataframe_original.copy()
 
@@ -892,6 +906,13 @@ class PcpApp(QWidget):
                 filtered_df = filtered_df[filtered_df['Aglutinado'].str.contains('S', na=False)]
             elif filter_aglutinado == 'NÃO':
                 filtered_df = filtered_df[filtered_df['Aglutinado'].str.strip() == '']
+        if filter_tipo:
+            if filter_tipo == 'QP':
+                filtered_df = filtered_df[filtered_df['Tipo'].str.strip() == 'QP']
+            elif filter_tipo == 'QR':
+                filtered_df = filtered_df[filtered_df['Tipo'].str.strip() == 'QR']
+            else:
+                filtered_df = filtered_df[filtered_df['Tipo'].str.strip() == 'Outros']
         return filtered_df
 
     def atualizar_tabela(self, dataframe):
