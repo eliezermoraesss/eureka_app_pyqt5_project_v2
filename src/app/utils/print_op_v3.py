@@ -1,8 +1,10 @@
 import os
+import subprocess
 import tempfile
 from datetime import datetime
 
 import pandas as pd
+import win32api
 import win32print
 from PyPDF2 import PdfMerger
 from PyQt5 import QtWidgets
@@ -422,6 +424,62 @@ def registrar_fonte_personalizada():
     addMapping('Courier-New', 1, 1, 'Courier-New-BoldItalic')  # bold & italic
 
 
+class PrinterSelectionDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.duplex_checkbox = None
+        self.printer_combo = None
+        self.selected_printer = None
+        self.is_duplex = True
+        self.init_ui()
+
+    def init_ui(self):
+        self.setWindowTitle("Selecionar Impressora")
+        self.setGeometry(100, 100, 400, 150)
+        layout = QVBoxLayout()
+
+        # Printer selection combo box
+        label = QLabel("Selecione a impressora:")
+        self.printer_combo = QComboBox()
+
+        # Get list of printers
+        printers = [printer[2] for printer in win32print.EnumPrinters(2)]  # 2 = Installed printers
+        self.printer_combo.addItems(printers)
+
+        # Set default printer as selected
+        default_printer = win32print.GetDefaultPrinter()
+        default_index = self.printer_combo.findText(default_printer)
+        if default_index >= 0:
+            self.printer_combo.setCurrentIndex(default_index)
+
+        # Duplex printing checkbox
+        self.duplex_checkbox = QCheckBox("Impressão frente e verso")
+        self.duplex_checkbox.setChecked(True)
+
+        # Buttons
+        buttons_layout = QVBoxLayout()
+        print_button = QPushButton("Imprimir")
+        cancel_button = QPushButton("Cancelar")
+
+        print_button.clicked.connect(self.accept)
+        cancel_button.clicked.connect(self.reject)
+
+        # Add widgets to layout
+        layout.addWidget(label)
+        layout.addWidget(self.printer_combo)
+        layout.addWidget(self.duplex_checkbox)
+        layout.addWidget(print_button)
+        layout.addWidget(cancel_button)
+
+        self.setLayout(layout)
+
+    def get_selected_printer(self):
+        return self.printer_combo.currentText()
+
+    def is_duplex_selected(self):
+        return self.duplex_checkbox.isChecked()
+
+
 class PrintProductionOrderDialogV2(QtWidgets.QDialog):
     def __init__(self, df: pd.DataFrame, df_op_table, selected_row=None, parent=None):
         super().__init__(parent)
@@ -432,6 +490,7 @@ class PrintProductionOrderDialogV2(QtWidgets.QDialog):
         self.df = df
         self.df_op_table = df_op_table
         self.selected_row = selected_row
+        self.generated_pdfs = []
         self.init_ui()
         registrar_fonte_personalizada()
         self.print_production_order()
@@ -474,11 +533,143 @@ class PrintProductionOrderDialogV2(QtWidgets.QDialog):
         self.progress_bar.setValue(value)
         self.label_status.setText(f"Publicando OP {current} de {total}")
 
+    def print_pdf_with_sumatrapdf(self, printer_name, pdf_path, duplex=True):
+        try:
+            # Path to SumatraPDF (you might need to adjust this path)
+            sumatra_path = r"C:\Users\Eliezer\AppData\Local\SumatraPDF.exe"
+
+            # Build the command
+            command = [
+                sumatra_path,
+                "-print-to", printer_name,
+                "-print-settings", f"duplex={duplex and 'yes' or 'no'}",
+                pdf_path
+            ]
+
+            # Run the command
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+
+            if process.returncode == 0:
+                return True
+            else:
+                raise Exception(f"Error printing: {stderr.decode()}")
+
+        except Exception as e:
+            QMessageBox.warning(
+                self,
+                "Erro na Impressão",
+                f"Erro ao imprimir {os.path.basename(pdf_path)}: {str(e)}"
+            )
+            return False
+
+    def print_pdfs_with_default_program(self, printer_name, pdf_path):
+        try:
+            # Set the specified printer as default
+            previous_printer = win32print.GetDefaultPrinter()
+            win32print.SetDefaultPrinter(printer_name)
+
+            # Print using the default Windows print command
+            win32api.ShellExecute(
+                0,
+                "print",
+                pdf_path,
+                None,
+                ".",
+                0
+            )
+
+            # Restore the previous default printer
+            win32print.SetDefaultPrinter(previous_printer)
+            return True
+
+        except Exception as e:
+            QMessageBox.warning(
+                self,
+                "Erro na Impressão",
+                f"Erro ao imprimir {os.path.basename(pdf_path)}: {str(e)}"
+            )
+            return False
+
+    def print_pdfs(self):
+        if not self.generated_pdfs:
+            QMessageBox.warning(self, "Aviso", "Nenhum PDF encontrado para impressão!")
+            return
+
+        try:
+            printer_dialog = PrinterSelectionDialog(self)
+            if printer_dialog.exec_() == QDialog.Accepted:
+                selected_printer = printer_dialog.get_selected_printer()
+                is_duplex = printer_dialog.is_duplex_selected()
+
+                success_count = 0
+                total_files = len(self.generated_pdfs)
+
+                # First try with SumatraPDF
+                try:
+                    for pdf_path in self.generated_pdfs:
+                        if self.print_pdf_with_sumatrapdf(selected_printer, pdf_path, is_duplex):
+                            success_count += 1
+                except Exception:
+                    # If SumatraPDF fails, fall back to default Windows printing
+                    for pdf_path in self.generated_pdfs:
+                        if self.print_pdfs_with_default_program(selected_printer, pdf_path):
+                            success_count += 1
+
+                if success_count > 0:
+                    QMessageBox.information(
+                        self,
+                        "Sucesso",
+                        f"{success_count} de {total_files} documentos enviados para impressora {selected_printer}"
+                    )
+                else:
+                    QMessageBox.warning(
+                        self,
+                        "Aviso",
+                        "Nenhum documento foi impresso devido a erros."
+                    )
+
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Erro",
+                f"Erro ao iniciar impressão: {str(e)}"
+            )
+
     def on_pdf_generation_complete(self):
-        information_dialog(self, "Eureka® PCP - Impressão de OP", "Processo finalizado com sucesso! ✅🥳\n\n"
-                                                              "Os arquivos foram salvos em:\n"
-                                                              r"\192.175.175.4\dados\EMPRESA\PRODUCAO\ORDEM_DE_PRODUCAO")
+        # Store the generated PDF paths
+        self.generated_pdfs = []
+        output_dir = r"\\192.175.175.4\dados\EMPRESA\PRODUCAO\ORDEM_DE_PRODUCAO"
+        for file in os.listdir(output_dir):
+            if file.endswith('.pdf'):
+                self.generated_pdfs.append(os.path.join(output_dir, file))
+
+        # Ask if user wants to print
+        reply = QMessageBox.question(
+            self,
+            'Impressão',
+            'Deseja enviar para impressora?',
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+
+        if reply == QMessageBox.Yes:
+            self.print_pdfs()
+
+        information_dialog(
+            self,
+            "Eureka® PCP - Impressão de OP",
+            "Processo finalizado com sucesso! ✅🥳\n\n"
+            "Os arquivos foram salvos em:\n"
+            r"\192.175.175.4\dados\EMPRESA\PRODUCAO\ORDEM_DE_PRODUCAO"
+        )
         self.close()
+
+    # def on_pdf_generation_complete(self):
+    #     information_dialog(self, "Eureka® PCP - Impressão de OP", "Processo finalizado com sucesso! ✅🥳\n\n"
+    #                                                           "Os arquivos foram salvos em:\n"
+    #                                                           r"\192.175.175.4\dados\EMPRESA\PRODUCAO\ORDEM_DE_PRODUCAO")
+    #     self.close()
 
     def on_pdf_generation_error(self, error):
         QMessageBox.critical(self, "Eureka® PCP - Erro", f"Erro ao gerar PDF ❌\nErro: {error}")

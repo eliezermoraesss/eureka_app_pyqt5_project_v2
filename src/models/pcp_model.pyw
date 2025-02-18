@@ -398,8 +398,8 @@ class PcpApp(QWidget):
 
         self.layout_footer_label.addStretch(1)
         self.layout_footer_label.addWidget(self.btn_imprimir_op)
-        self.layout_footer_label.addWidget(self.btn_abrir_desenho)
         self.layout_footer_label.addWidget(self.btn_visualizar_op)
+        self.layout_footer_label.addWidget(self.btn_abrir_desenho)
         self.layout_footer_label.addWidget(self.btn_exportar_excel)
         self.layout_footer_label.addWidget(self.btn_image_comparator)
         self.layout_footer_label.addWidget(self.label_line_number)
@@ -560,7 +560,7 @@ class PcpApp(QWidget):
             # A lib Qt garante que o objeto do menu será destruído após uso
             menu.setAttribute(Qt.WA_DeleteOnClose)
 
-            abrir_desenho_menu = QAction('Abrir desenho', self)
+            abrir_desenho_menu = QAction('Abrir desenho...', self)
             abrir_desenho_menu.triggered.connect(lambda: abrir_desenho(self, table))
 
             image_comparator = QAction('Abrir ImageComparator®', self)
@@ -580,10 +580,10 @@ class PcpApp(QWidget):
             saldo_estoque = QAction('Saldo em estoque', self)
             saldo_estoque.triggered.connect(lambda: executar_saldo_em_estoque(self, table))
 
-            nova_janela = QAction('Nova janela', self)
+            nova_janela = QAction('Nova janela...', self)
             nova_janela.triggered.connect(self.abrir_nova_janela)
 
-            tabela_pesos = QAction('Abrir Tabela de Pesos', self)
+            tabela_pesos = QAction('Abrir Tabela de Pesos...', self)
             tabela_pesos.triggered.connect(lambda: abrir_tabela_pesos())
 
             visualizar_op = QAction('Visualizar...', self)

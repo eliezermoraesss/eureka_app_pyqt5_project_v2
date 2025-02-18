@@ -7,7 +7,7 @@ def pcp_qss():
 
             QLabel {
                 color: #000000; /* #212529; /* Bootstrap dark text */
-                font-size: 14px;
+                font-size: 12px;
                 font-weight: 400;
                 padding-left: 4px;
             }
@@ -81,7 +81,7 @@ def pcp_qss():
                 padding: 7px 10px;
                 border: 2px solid #0d6efd;
                 border-radius: 10px;
-                font-size: 14px;
+                font-size: 12px;
                 height: 20px;
                 font-weight: 300;
                 margin: 0px 5px 10px 5px;
