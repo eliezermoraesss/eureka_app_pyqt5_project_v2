@@ -32,12 +32,13 @@ class PDFGeneratorThread(QThread):
     error = pyqtSignal(str)
     progress = pyqtSignal(int, int, int)
 
-    def __init__(self, df: pd.DataFrame, df_op_table, output_dir: str):
+    def __init__(self, df: pd.DataFrame, df_op_table, output_dir: str, selected_row):
         super().__init__()
         self.output_path = None
         self.df = df
         self.output_dir = output_dir
         self.df_op_table = df_op_table
+        self.selected_row = selected_row
 
     def run(self):
         try:
@@ -48,7 +49,7 @@ class PDFGeneratorThread(QThread):
                 self.output_path = os.path.join(self.output_dir,
                                                 f"OP_{row['OP'].strip()}_{row['Código'].strip()}.pdf")
                 self.progress.emit(progress, index + 1, total_rows)
-                generate_production_order_pdf(row, self.output_path, self.df_op_table)
+                generate_production_order_pdf(row, self.output_path, self.df_op_table, self.selected_row)
             self.finished.emit(self.output_path)
         except Exception as e:
             self.error.emit(str(e))
@@ -176,14 +177,17 @@ def generate_barcode(data):
     return temp_barcode.name
 
 
-def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_geral):
+def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_geral, selected_row):
     data_hora_impressao = datetime.now().strftime('%d/%m/%Y   %H:%M:%S')
     codigo = row['Código'].strip()
-    num_qp = row['QP/QR'].strip()
+    num_qp = row['QP QR'].strip().zfill(6)
     num_op = row['OP'].strip()
     tipo = row['Tipo'].strip()
     op_geral = row['OP GERAL']
     op_aglutinada = row['Aglutinado']
+
+    if selected_row:
+        op_aglutinada = 'S' if op_aglutinada == 'Sim' else ''
 
     """Generates PDF for a single Production Order"""
     # Create PDF
@@ -229,12 +233,16 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
     # Informações da Ordem de Produção
     header_style = create_header_style()
 
-    data_emissao = datetime.strptime(row['Data Abertura'].strip(), "%Y%m%d").strftime("%d/%m/%Y")
-    data_entrega = datetime.strptime(row['Prev. Entrega'].strip(), "%Y%m%d").strftime("%d/%m/%Y")
+    if not selected_row:
+        data_emissao = datetime.strptime(row['Data Abertura'].strip(), "%Y%m%d").strftime("%d/%m/%Y")
+        data_entrega = datetime.strptime(row['Prev Entrega'].strip(), "%Y%m%d").strftime("%d/%m/%Y")
+    else:
+        data_emissao = row['Data Abertura'].strip()
+        data_entrega = row['Prev Entrega'].strip()
 
     op_info = [
         f"Produto: {row['Código'].strip()}  {row['Descrição'].strip()}",
-        f"Quantidade: {row['Quantidade']}   {row['Unid.']}",
+        f"Quantidade: {row['Quantidade']}   {row['Unid']}",
         f"Centro de Custo: {row['Código CC']}   {row['Centro de Custo']}",
         f"Dt. Abertura da OP: {data_emissao}",
         f"Previsão de Entrega: {data_entrega}",
@@ -265,17 +273,17 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
             # Filter dataframe_geral to only include rows where 'Código' is in codigos_onde_usado and 'QP' matches num_qp
             dataframe_filtrado = dataframe_geral[
                 dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
-                (dataframe_geral['QP/QR'].str.strip() == num_qp)
+                (dataframe_geral['QP QR'].str.strip() == num_qp)
                 ]
         else:
             dataframe_aglutinados = dataframe_geral[
                 dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
-                (dataframe_geral['QP/QR'].str.strip() == num_qp) &
+                (dataframe_geral['QP QR'].str.strip() == num_qp) &
                 (dataframe_geral['Aglutinado'].str.strip() == 'S')
                 ]
             dataframe_nao_aglutinados = dataframe_geral[
                 dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
-                (dataframe_geral['QP/QR'].str.strip() == num_qp) &
+                (dataframe_geral['QP QR'].str.strip() == num_qp) &
                 (dataframe_geral['Aglutinado'].str.strip() != 'S') &
                 (dataframe_geral['OP'].str.contains(op_geral, na=False))
                 ]
@@ -324,7 +332,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
 
         # Total destinado
         total_destinado = dataframe_final['Quantidade'].sum()
-        p = Paragraph(f"Total destinado: {total_destinado}  {row['Unid.']}", header_style)
+        p = Paragraph(f"Total destinado: {total_destinado}  {row['Unid']}", header_style)
         p.wrapOn(c, width - 2 * margin, 20)
         p.drawOn(c, margin, y_position)
         y_position -= 5
@@ -404,7 +412,7 @@ def registrar_fonte_personalizada():
 
 
 class PrintProductionOrderDialogV2(QtWidgets.QDialog):
-    def __init__(self, df: pd.DataFrame, df_op_table, parent=None):
+    def __init__(self, df: pd.DataFrame, df_op_table, selected_row=None, parent=None):
         super().__init__(parent)
         self.label_status = None
         self.pdf_thread = None
@@ -412,12 +420,13 @@ class PrintProductionOrderDialogV2(QtWidgets.QDialog):
         self.layout = None
         self.df = df
         self.df_op_table = df_op_table
+        self.selected_row = selected_row
         self.init_ui()
         registrar_fonte_personalizada()
         self.print_production_order()
 
     def init_ui(self):
-        self.setWindowTitle("Eureka® PCP - Imprimir OP")
+        self.setWindowTitle("Eureka® PCP - Impressão de OP")
         self.setGeometry(100, 100, 400, 100)
 
         self.layout = QVBoxLayout(self)
@@ -444,7 +453,7 @@ class PrintProductionOrderDialogV2(QtWidgets.QDialog):
         output_dir = r"\\192.175.175.4\dados\EMPRESA\PRODUCAO\ORDEM_DE_PRODUCAO"
         os.makedirs(output_dir, exist_ok=True)
 
-        self.pdf_thread = PDFGeneratorThread(self.df, self.df_op_table, output_dir)
+        self.pdf_thread = PDFGeneratorThread(self.df, self.df_op_table, output_dir, self.selected_row)
         self.pdf_thread.finished.connect(self.on_pdf_generation_complete)
         self.pdf_thread.error.connect(self.on_pdf_generation_error)
         self.pdf_thread.progress.connect(lambda value, current, total: self.update_progress(value, current, total))
@@ -455,7 +464,7 @@ class PrintProductionOrderDialogV2(QtWidgets.QDialog):
         self.label_status.setText(f"Publicando OP {current} de {total}")
 
     def on_pdf_generation_complete(self):
-        information_dialog(self, "Eureka® PCP - Imprimir OP", "Processo finalizado com sucesso! ✅🥳\n\n"
+        information_dialog(self, "Eureka® PCP - Impressão de OP", "Processo finalizado com sucesso! ✅🥳\n\n"
                                                               "Os arquivos foram salvos em:\n"
                                                               r"\192.175.175.4\dados\EMPRESA\PRODUCAO\ORDEM_DE_PRODUCAO")
         self.close()

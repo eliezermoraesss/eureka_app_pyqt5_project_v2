@@ -8,11 +8,11 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from datetime import datetime
 
 import pandas as pd
-from PyQt5.QtCore import Qt, QDate, pyqtSignal
+from PyQt5.QtCore import Qt, QDate, pyqtSignal, QEvent
 from PyQt5.QtGui import QFont, QIcon, QPixmap, QKeySequence, QColor
 from PyQt5.QtWidgets import QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QDateEdit, QLabel, QSizePolicy, QTabWidget, QMenu, \
-    QComboBox, QMessageBox, QShortcut
+    QComboBox, QMessageBox, QShortcut, QAbstractItemView
 from sqlalchemy import create_engine
 
 from src.app.utils.consultar_estrutura import ConsultaEstrutura
@@ -90,6 +90,7 @@ class PcpApp(QWidget):
         self.tree.setColumnCount(0)
         self.tree.setRowCount(0)
         self.tree.setObjectName("result_table")
+        self.tree.installEventFilter(self)
         self.tree.hide()
 
         self.nova_janela = None
@@ -264,7 +265,7 @@ class PcpApp(QWidget):
         self.btn_toggle_footer.hide()
 
         self.btn_imprimir_op = QPushButton("Imprimir OP", self)
-        self.btn_imprimir_op.clicked.connect(self.imprimir_op)
+        self.btn_imprimir_op.clicked.connect(self.imprimir_selecionados)
         self.btn_imprimir_op.hide()
 
         self.combobox_status_op = QComboBox(self)
@@ -376,11 +377,11 @@ class PcpApp(QWidget):
         layout_campos_01.addLayout(container_descricao_prod)
         layout_campos_01.addLayout(container_contem_descricao_prod)
         layout_campos_01.addLayout(container_observacao)
-        layout_campos_02.addLayout(container_data_ini)
-        layout_campos_02.addLayout(container_data_fim)
         layout_campos_02.addLayout(container_combobox_status_op)
         layout_campos_02.addLayout(container_combobox_aglutinado)
         layout_campos_02.addLayout(container_combobox_tipo)
+        layout_campos_02.addLayout(container_data_ini)
+        layout_campos_02.addLayout(container_data_fim)
         layout_campos_01.addStretch()
         layout_campos_02.addStretch()
 
@@ -428,27 +429,63 @@ class PcpApp(QWidget):
         self.campo_contem_descricao.returnPressed.connect(self.btn_pesquisar)
         self.campo_observacao.returnPressed.connect(self.btn_pesquisar)
 
+    def imprimir_selecionados(self):
+        selected_df = self.get_selected_rows()
+        if selected_df.shape[0] >= 1:
+            self.imprimir_op(selected_df)
+        else:
+            self.imprimir_op()
+
+    def eventFilter(self, obj, event):
+        if obj == self.tree:
+            if event.type() == QEvent.KeyPress and event.key() == Qt.Key_Control:
+                self.tree.setSelectionMode(QAbstractItemView.MultiSelection)
+            elif event.type() == QEvent.KeyRelease and event.key() == Qt.Key_Control:
+                self.tree.setSelectionMode(QAbstractItemView.SingleSelection)
+
+        return super().eventFilter(obj, event)
+
+    def get_selected_rows(self):
+        select_rows = self.tree.selectionModel().selectedRows()
+        selected_data = []
+
+        for row in select_rows:
+            row_data = []
+            for column in range(self.tree.columnCount()):
+                item = self.tree.item(row.row(), column)
+                row_data.append(item.text() if item else "")
+            selected_data.append(row_data)
+
+        selected_df = pd.DataFrame(selected_data, columns=
+        [self.tree.horizontalHeaderItem(i).text() for i in range(self.tree.columnCount())])
+        return selected_df
+
     def deselect_table_row(self):
         self.tree.clearSelection()
 
     def check_and_print_op(self):
         if self.tree.isVisible():
-            self.imprimir_op()
+            self.imprimir_selecionados()
 
-    def imprimir_op(self):
-        # Imprime somente OP ABERTA
-        df_op_aberta = self.filter_table(situacao_op='ABERTA')
+    def imprimir_op(self, df=None):
+        if df is None:
+            selected_row = False
+            # Imprime somente OP ABERTA
+            df = self.filter_table(situacao_op='ABERTA')
+        else:
+            selected_row = True
 
+        df_op_aberta = df[df['Fechamento'].str.strip() == '']
         # Filtro o dataframe geral pelo campo Fechamento. As OPs devem estar ABERTAS para construir a tabela de hierarquia
-        df_geral_op_aberta = self.dataframe_original[self.dataframe_original['Fechamento'].str.contains('        ', na=False)]
+        df_geral_op_aberta = self.dataframe_original[self.dataframe_original['Fechamento'].str.strip() == '']
 
         line_number = df_op_aberta.shape[0]
-        title = "Eureka® PCP - Imprimir OP"
+        title = "Eureka® PCP - Impressão de OP"
         message = f"Foram encontradas {line_number} OP. 🔎\n\nDeseja prosseguir com a impressão? 🖨️"
         response = show_confirmation_dialog(self, title, message)
 
         if response == QMessageBox.Yes:
-            print_dialog = PrintProductionOrderDialogV2(df_op_aberta, df_geral_op_aberta, self)
+            print_dialog = PrintProductionOrderDialogV2(df_op_aberta, df_geral_op_aberta, selected_row=selected_row, parent=self)
             print_dialog.show()
         else:
             return
@@ -709,7 +746,7 @@ class PcpApp(QWidget):
 
         query = f"""
             SELECT 
-                C2_ZZNUMQP AS "QP/QR",
+                C2_ZZNUMQP AS "QP QR",
                 CASE
                     WHEN C6_XTPOPER = 1 THEN 'QP'
                     WHEN C6_XTPOPER = 2 THEN 'QR'
@@ -720,10 +757,10 @@ class PcpApp(QWidget):
                 C2_PRODUTO AS "Código", 
                 B1_DESC AS "Descrição", 
                 C2_QUANT AS "Quantidade",
-                C2_QUJE AS "Qtd. Disponível",
-                C2_UM AS "Unid.", 
+                C2_QUJE AS "Qtd Disponível",
+                C2_UM AS "Unid", 
                 C2_EMISSAO AS "Data Abertura", 
-                C2_DATPRF AS "Prev. Entrega",
+                C2_DATPRF AS "Prev Entrega",
                 C2_DATRF AS "Fechamento", 
                 C2_OBS AS "Observação",
                 C2_CC AS "Código CC",
@@ -731,7 +768,7 @@ class PcpApp(QWidget):
                 C2_AGLUT AS "Aglutinado",
                 C2_NUM AS "OP GERAL", 
                 C2_ITEM AS "Item", 
-                C2_SEQUEN AS "Seq.",
+                C2_SEQUEN AS "Seq",
                 users.USR_NOME AS "Aberto por:" 
             FROM 
                 {self.database}.dbo.SC2010 op
@@ -892,7 +929,7 @@ class PcpApp(QWidget):
         filtered_df = self.dataframe_original.copy()
 
         if filter_qp:
-            filtered_df = filtered_df[filtered_df['QP/QR'].str.endswith(filter_qp, na=False)]
+            filtered_df = filtered_df[filtered_df['QP QR'].str.endswith(filter_qp, na=False)]
         if filter_op:
             filtered_df = filtered_df[filtered_df['OP'].str.startswith(filter_op, na=False)]
         if filter_codigo:
@@ -907,7 +944,7 @@ class PcpApp(QWidget):
             if filter_status_op == 'FECHADA':
                 filtered_df = filtered_df[filtered_df['Fechamento'].str.strip() != '']
             elif filter_status_op == 'ABERTA':
-                filtered_df = filtered_df[filtered_df['Fechamento'].str.contains('        ', na=False)]
+                filtered_df = filtered_df[filtered_df['Fechamento'].str.strip() == '']
         if filter_aglutinado:
             if filter_aglutinado == 'SIM':
                 filtered_df = filtered_df[filtered_df['Aglutinado'].str.contains('S', na=False)]
@@ -961,7 +998,7 @@ class PcpApp(QWidget):
                         item.setFont(QFont(self.fonte_tabela, self.tamanho_fonte_tabela, QFont.Bold))
                     else:
                         item = process_table_item(column_name, value)
-                        if column_name in ['OP', 'PROJETO', 'QP/QR', 'Tipo']:
+                        if column_name in ['OP', 'PROJETO', 'QP QR', 'Tipo']:
                             item.setBackground(COLOR_OP_COLUMN)
                             item.setFont(QFont(self.fonte_tabela, self.tamanho_fonte_tabela, QFont.Bold))
                         if column_name == 'PDF da OP':
@@ -1027,20 +1064,20 @@ def format_date(value):
 
 
 def process_table_item(column_name, value):
-    if column_name == 'QP/QR':
+    if column_name == 'QP QR':
         return QTableWidgetItem(value.lstrip('0'))
 
     if column_name == 'PROJETO':
         if len(value.strip()) > 45:
             value = value[:45] + '...'
 
-    if column_name in ['Data Abertura', 'Prev. Entrega', 'Fechamento']:
+    if column_name in ['Data Abertura', 'Prev Entrega', 'Fechamento']:
         return QTableWidgetItem(format_date(value))
 
     if column_name == 'Aglutinado':
         return QTableWidgetItem('Sim') if value == 'S' else QTableWidgetItem('Não')
 
-    if column_name in ['Quantidade', 'Qtd. Disponível']:
+    if column_name in ['Quantidade', 'Qtd Disponível']:
         return QTableWidgetItem(format_quantity(value))
 
     return QTableWidgetItem(str(value).strip())
