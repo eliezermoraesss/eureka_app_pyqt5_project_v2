@@ -586,11 +586,15 @@ class PcpApp(QWidget):
             tabela_pesos = QAction('Abrir Tabela de Pesos', self)
             tabela_pesos.triggered.connect(lambda: abrir_tabela_pesos())
 
-            visualizar_op = QAction('Visualizar OP', self)
+            visualizar_op = QAction('Visualizar...', self)
             visualizar_op.triggered.connect(lambda: open_op(self, table))
+
+            imprimir_op = QAction('Imprimir...', self)
+            imprimir_op.triggered.connect(self.imprimir_selecionados)
 
             menu.addAction(nova_janela)
             menu.addAction(abrir_desenho_menu)
+            menu.addAction(imprimir_op)
             menu.addAction(visualizar_op)
             menu.addSeparator()
             menu.addAction(consultar_estrutura)
