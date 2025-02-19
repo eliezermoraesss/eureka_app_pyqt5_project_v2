@@ -2,13 +2,15 @@ import locale
 import os
 import sys
 
+from src.app.utils.print_op_v3 import PrintProductionOrderDialogV3
+
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from datetime import datetime
 
 import pandas as pd
-from PyQt5.QtCore import Qt, QDate, pyqtSignal, QEvent
+from PyQt5.QtCore import Qt, QDate, pyqtSignal, QEvent, QSize
 from PyQt5.QtGui import QFont, QIcon, QPixmap, QKeySequence, QColor
 from PyQt5.QtWidgets import QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QDateEdit, QLabel, QSizePolicy, QTabWidget, QMenu, \
@@ -21,7 +23,7 @@ from src.app.utils.consultar_saldo_estoque import executar_saldo_em_estoque
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.load_session import load_session
 from src.app.utils.utils import exibir_mensagem, abrir_desenho, exportar_excel, copiar_linha, abrir_tabela_pesos, \
-    obter_codigo_item_selecionado, open_op
+    obter_codigo_item_selecionado, open_op, generate_barcode
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.dialog.loading_dialog import loading_dialog
 from src.app.utils.run_image_comparator import run_image_comparator_exe, run_image_comparator_model
@@ -371,17 +373,17 @@ class PcpApp(QWidget):
 
         layout_campos_01.addStretch()
         layout_campos_02.addStretch()
-        layout_campos_01.addLayout(container_qp)
-        layout_campos_01.addLayout(container_op)
-        layout_campos_01.addLayout(container_codigo)
-        layout_campos_01.addLayout(container_descricao_prod)
-        layout_campos_01.addLayout(container_contem_descricao_prod)
-        layout_campos_01.addLayout(container_observacao)
-        layout_campos_02.addLayout(container_combobox_status_op)
-        layout_campos_02.addLayout(container_combobox_aglutinado)
-        layout_campos_02.addLayout(container_combobox_tipo)
-        layout_campos_02.addLayout(container_data_ini)
-        layout_campos_02.addLayout(container_data_fim)
+        layout_campos_02.addLayout(container_qp)
+        layout_campos_02.addLayout(container_op)
+        layout_campos_02.addLayout(container_codigo)
+        layout_campos_02.addLayout(container_descricao_prod)
+        layout_campos_02.addLayout(container_contem_descricao_prod)
+        layout_campos_02.addLayout(container_observacao)
+        layout_campos_01.addLayout(container_combobox_status_op)
+        layout_campos_01.addLayout(container_combobox_aglutinado)
+        layout_campos_01.addLayout(container_combobox_tipo)
+        layout_campos_01.addLayout(container_data_ini)
+        layout_campos_01.addLayout(container_data_fim)
         layout_campos_01.addStretch()
         layout_campos_02.addStretch()
 
@@ -428,6 +430,8 @@ class PcpApp(QWidget):
         self.campo_descricao.returnPressed.connect(self.btn_pesquisar)
         self.campo_contem_descricao.returnPressed.connect(self.btn_pesquisar)
         self.campo_observacao.returnPressed.connect(self.btn_pesquisar)
+
+        self.btn_pesquisar()
 
     def imprimir_selecionados(self):
         selected_df = self.get_selected_rows()
@@ -632,6 +636,9 @@ class PcpApp(QWidget):
         self.tree.setRowCount(0)
         self.label_line_number.hide()
         self.label_indicators.hide()
+        self.combobox_tipo.setCurrentText('-')
+        self.combobox_aglutinado.setCurrentText('-')
+        self.combobox_status_op.setCurrentText('-')
 
         self.guias_abertas.clear()
         self.guias_abertas_onde_usado.clear()
@@ -730,6 +737,9 @@ class PcpApp(QWidget):
         self.campo_observacao.setEnabled(status)
         self.campo_data_inicio.setEnabled(status)
         self.campo_data_fim.setEnabled(status)
+        self.combobox_tipo.setEnabled(status)
+        self.combobox_aglutinado.setEnabled(status)
+        self.combobox_status_op.setEnabled(status)
         self.btn_consultar.setEnabled(status)
         self.btn_exportar_excel.setEnabled(status)
         self.btn_image_comparator.setEnabled(status)
@@ -756,7 +766,7 @@ class PcpApp(QWidget):
                     WHEN C6_XTPOPER = 2 THEN 'QR'
                     ELSE 'Outros'
                 END AS 'Tipo',
-                qps.des_qp AS "PROJETO",
+                qps.des_qp AS "Projeto",
                 CONCAT(C2_NUM, C2_ITEM, C2_SEQUEN) AS "OP",
                 C2_PRODUTO AS "Código", 
                 B1_DESC AS "Descrição", 
@@ -897,14 +907,15 @@ class PcpApp(QWidget):
 
             self.dataframe = pd.read_sql(query_consulta_op, self.engine)
             self.dataframe.insert(0, 'Status OP', '')
+            # self.dataframe.insert(5, 'Barcode', '')
             self.dataframe.insert(12, 'PDF da OP', '')
 
             # Iterate through the rows of the DataFrame
             for index, row in self.dataframe.iterrows():
                 # Check if the 'Projeto' column is empty
-                if pd.isna(row['PROJETO']) or row['PROJETO'].strip() == '':
+                if pd.isna(row['Projeto']) or row['Projeto'].strip() == '':
                     # Update the 'Projeto' column with the value from the 'Observação' column
-                    self.dataframe.at[index, 'PROJETO'] = row['Observação'].strip()
+                    self.dataframe.at[index, 'Projeto'] = row['Observação'].strip()
 
         except Exception as ex:
             print(ex)
@@ -1002,7 +1013,14 @@ class PcpApp(QWidget):
                         item.setFont(QFont(self.fonte_tabela, self.tamanho_fonte_tabela, QFont.Bold))
                     else:
                         item = process_table_item(column_name, value)
-                        if column_name in ['OP', 'PROJETO', 'QP QR', 'Tipo']:
+                        # if column_name == 'Barcode':
+                        #     item.setSizeHint(QSize(324, 280))
+                        #     barcode_path = generate_barcode(row['OP'].strip())
+                        #     pixmap = QPixmap(barcode_path)
+                        #     resized_pixmap = pixmap.scaled(324, 280, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                        #     barcode = QIcon(resized_pixmap)
+                        #     item.setIcon(barcode)
+                        if column_name in ['OP', 'Projeto', 'QP QR', 'Tipo']:
                             item.setBackground(COLOR_OP_COLUMN)
                             item.setFont(QFont(self.fonte_tabela, self.tamanho_fonte_tabela, QFont.Bold))
                         if column_name == 'PDF da OP':
@@ -1071,7 +1089,7 @@ def process_table_item(column_name, value):
     if column_name == 'QP QR':
         return QTableWidgetItem(value.lstrip('0'))
 
-    if column_name == 'PROJETO':
+    if column_name == 'Projeto':
         if len(value.strip()) > 45:
             value = value[:45] + '...'
 

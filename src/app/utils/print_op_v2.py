@@ -1,16 +1,12 @@
 import os
-import tempfile
 from datetime import datetime
 
 import pandas as pd
-import win32print
 from PyPDF2 import PdfMerger
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QThread, pyqtSignal, QUrl
 from PyQt5.QtGui import QDesktopServices
-from PyQt5.QtWidgets import (QVBoxLayout, QMessageBox, QProgressBar, QLabel, QDialog, QComboBox, QCheckBox, QPushButton)
-from barcode import Code128
-from barcode.writer import ImageWriter
+from PyQt5.QtWidgets import (QVBoxLayout, QMessageBox, QProgressBar, QLabel)
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT
 from reportlab.lib.fonts import addMapping
@@ -24,7 +20,7 @@ from reportlab.platypus import Table, TableStyle, Paragraph
 from sqlalchemy import create_engine
 
 from src.app.utils.db_mssql import setup_mssql
-from src.app.utils.utils import exibir_mensagem
+from src.app.utils.utils import exibir_mensagem, generate_barcode
 from src.dialog.information_dialog import information_dialog
 
 
@@ -181,13 +177,6 @@ def consultar_hierarquia_tabela(codigo):
         engine.dispose()
 
 
-def generate_barcode(data):
-    temp_barcode = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
-    Code128(data, writer=ImageWriter()).write(temp_barcode)
-    temp_barcode.close()
-    return temp_barcode.name
-
-
 def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_geral, selected_row):
     data_hora_impressao = datetime.now().strftime('%d/%m/%Y   %H:%M:%S')
     codigo = row['Código'].strip()
@@ -222,7 +211,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
     title_y = 810  # Adjust this value as needed to position the title vertically
     c.drawString(title_x, title_y, title_text)
 
-    title_text = f"{tipo}: {num_qp} {row['PROJETO']}" if tipo == 'QP' else f"{row['PROJETO']}"
+    title_text = f"{tipo}: {num_qp} {row['Projeto']}" if tipo == 'QP' else f"{row['Projeto']}"
     title_font_size = 12
     c.setFont("Courier-New-Bold", title_font_size)
     title_width = c.stringWidth(title_text, "Courier-New-Bold", title_font_size)

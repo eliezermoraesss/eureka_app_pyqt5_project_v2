@@ -1,10 +1,13 @@
 import os
+import tempfile
 import tkinter as tk
 from datetime import datetime
 from tkinter import messagebox
 import sys
 import pandas as pd
 import pyperclip
+from barcode import Code128
+from barcode.writer import ImageWriter
 
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -257,3 +260,9 @@ def obter_codigo_item_selecionado(table):
         if header_text == 'código':
             codigo_desenho = table.item(item_selecionado.row(), col).text()
             return codigo_desenho
+
+def generate_barcode(data):
+    temp_barcode = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
+    Code128(data, writer=ImageWriter()).write(temp_barcode)
+    temp_barcode.close()
+    return temp_barcode.name

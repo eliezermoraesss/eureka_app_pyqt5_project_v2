@@ -480,7 +480,7 @@ class PrinterSelectionDialog(QDialog):
         return self.duplex_checkbox.isChecked()
 
 
-class PrintProductionOrderDialogV2(QtWidgets.QDialog):
+class PrintProductionOrderDialogV3(QtWidgets.QDialog):
     def __init__(self, df: pd.DataFrame, df_op_table, selected_row=None, parent=None):
         super().__init__(parent)
         self.label_status = None
