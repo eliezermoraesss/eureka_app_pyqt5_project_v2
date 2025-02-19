@@ -91,7 +91,7 @@ def pcp_qss():
                 font-size: 12px;
                 height: 20px;
                 font-weight: 300;
-                margin: 0px 5px 10px 5px;
+                margin: 10px 5px;
             }
             
             QPushButton#btn_home {

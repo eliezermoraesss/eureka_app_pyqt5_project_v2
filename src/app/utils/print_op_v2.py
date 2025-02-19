@@ -181,7 +181,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
     try:
         data_hora_impressao = datetime.now().strftime('%d/%m/%Y   %H:%M:%S')
         codigo = row['Código'].strip()
-        num_qp = row['QP QR'].strip().zfill(6)
+        num_qp = row['QP/QR'].strip().zfill(6)
         num_op = row['OP'].strip()
         tipo = row['Tipo'].strip()
         op_geral = row['OP GERAL']
@@ -274,17 +274,17 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
                 # Filter dataframe_geral to only include rows where 'Código' is in codigos_onde_usado and 'QP' matches num_qp
                 dataframe_filtrado = dataframe_geral[
                     dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
-                    (dataframe_geral['QP QR'].str.strip() == num_qp)
+                    (dataframe_geral['QP/QR'].str.strip() == num_qp)
                     ]
             else:
                 dataframe_aglutinados = dataframe_geral[
                     dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
-                    (dataframe_geral['QP QR'].str.strip() == num_qp) &
+                    (dataframe_geral['QP/QR'].str.strip() == num_qp) &
                     (dataframe_geral['Aglutinado'].str.strip() == 'S')
                     ]
                 dataframe_nao_aglutinados = dataframe_geral[
                     dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
-                    (dataframe_geral['QP QR'].str.strip() == num_qp) &
+                    (dataframe_geral['QP/QR'].str.strip() == num_qp) &
                     (dataframe_geral['Aglutinado'].str.strip() != 'S') &
                     (dataframe_geral['OP'].str.contains(op_geral, na=False))
                     ]

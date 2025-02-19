@@ -768,7 +768,7 @@ class PcpApp(QWidget):
 
         query = f"""
             SELECT 
-                C2_ZZNUMQP AS "QP QR",
+                C2_ZZNUMQP AS "QP/QR",
                 CASE
                     WHEN C6_XTPOPER = 1 THEN 'QP'
                     WHEN C6_XTPOPER = 2 THEN 'QR'
@@ -952,7 +952,7 @@ class PcpApp(QWidget):
         filtered_df = self.dataframe_original.copy()
 
         if filter_qp:
-            filtered_df = filtered_df[filtered_df['QP QR'].str.endswith(filter_qp, na=False)]
+            filtered_df = filtered_df[filtered_df['QP/QR'].str.endswith(filter_qp, na=False)]
         if filter_op:
             filtered_df = filtered_df[filtered_df['OP'].str.startswith(filter_op, na=False)]
         if filter_codigo:
@@ -1030,7 +1030,7 @@ class PcpApp(QWidget):
                             barcode = QIcon(barcode_path)
                             item.setIcon(barcode)
                             os.remove(barcode_path)
-                        if column_name in ['OP', 'Projeto', 'QP QR', 'Tipo']:
+                        if column_name in ['OP', 'Projeto', 'QP/QR', 'Tipo']:
                             item.setBackground(COLOR_OP_COLUMN)
                             item.setFont(QFont(self.fonte_tabela, self.tamanho_fonte_tabela, QFont.Bold))
                         if column_name == 'PDF da OP':
@@ -1097,7 +1097,7 @@ def format_date(value):
 
 
 def process_table_item(column_name, value):
-    if column_name == 'QP QR':
+    if column_name == 'QP/QR':
         return QTableWidgetItem(value.lstrip('0'))
 
     if column_name == 'Projeto':
