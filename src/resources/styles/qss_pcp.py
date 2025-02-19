@@ -74,6 +74,13 @@ def pcp_qss():
                 selection-color: #FFFFFF; /* Cor do texto quando selecionado */
                 border: 1px solid #393E46;
             }
+            
+            QCheckBox {
+                color: #000000;
+                font-size: 14px;
+                font-weight: 400;
+                padding-left: 4px;
+            }
 
             QPushButton {
                 background-color: #0d6efd;

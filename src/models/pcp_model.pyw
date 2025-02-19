@@ -14,7 +14,7 @@ from PyQt5.QtCore import Qt, QDate, pyqtSignal, QEvent, QSize
 from PyQt5.QtGui import QFont, QIcon, QPixmap, QKeySequence, QColor
 from PyQt5.QtWidgets import QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QDateEdit, QLabel, QSizePolicy, QTabWidget, QMenu, \
-    QComboBox, QMessageBox, QShortcut, QAbstractItemView
+    QComboBox, QMessageBox, QShortcut, QAbstractItemView, QCheckBox
 from sqlalchemy import create_engine
 
 from src.app.utils.consultar_estrutura import ConsultaEstrutura
@@ -262,7 +262,7 @@ class PcpApp(QWidget):
         self.btn_image_comparator.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.btn_image_comparator.hide()
 
-        self.btn_toggle_footer = QPushButton("Ocultar Status", self)
+        self.btn_toggle_footer = QPushButton("Ocultar Indicadores", self)
         self.btn_toggle_footer.clicked.connect(self.toggle_footer)
         self.btn_toggle_footer.hide()
 
@@ -291,6 +291,10 @@ class PcpApp(QWidget):
         self.combobox_tipo.addItem('QP')
         self.combobox_tipo.addItem('QR')
         self.combobox_tipo.addItem('Outros')
+
+        self.checkbox_barcode = QCheckBox("Gerar Código de Barras", self)
+        self.checkbox_barcode.stateChanged.connect(self.btn_pesquisar)
+        self.checkbox_barcode.hide()
 
         self.shortcut_print_op = QShortcut(QKeySequence("Ctrl+P"), self)
         self.shortcut_print_op.activated.connect(self.check_and_print_op)
@@ -384,6 +388,7 @@ class PcpApp(QWidget):
         layout_campos_01.addLayout(container_combobox_tipo)
         layout_campos_01.addLayout(container_data_ini)
         layout_campos_01.addLayout(container_data_fim)
+        layout_campos_01.addWidget(self.checkbox_barcode)
         layout_campos_01.addStretch()
         layout_campos_02.addStretch()
 
@@ -431,7 +436,7 @@ class PcpApp(QWidget):
         self.campo_contem_descricao.returnPressed.connect(self.btn_pesquisar)
         self.campo_observacao.returnPressed.connect(self.btn_pesquisar)
 
-        self.btn_pesquisar()
+        # self.btn_pesquisar()
 
     def imprimir_selecionados(self):
         selected_df = self.get_selected_rows()
@@ -499,11 +504,11 @@ class PcpApp(QWidget):
         if self.label_line_number.isVisible():
             self.label_line_number.hide()
             self.label_indicators.hide()
-            self.btn_toggle_footer.setText("Exibir Status")
+            self.btn_toggle_footer.setText("Exibir Indicadores")
         else:
             self.label_line_number.show()
             self.label_indicators.show()
-            self.btn_toggle_footer.setText("Ocultar Status")
+            self.btn_toggle_footer.setText("Ocultar Indicadores")
         self.adjust_table_size()
 
     # Method to adjust the table size
@@ -624,6 +629,7 @@ class PcpApp(QWidget):
 
 
     def clean_screen(self):
+        self.dataframe_original = None
         self.table_area.show()
         self.tree.hide()
         self.campo_codigo.clear()
@@ -639,6 +645,7 @@ class PcpApp(QWidget):
         self.combobox_tipo.setCurrentText('-')
         self.combobox_aglutinado.setCurrentText('-')
         self.combobox_status_op.setCurrentText('-')
+        self.checkbox_barcode.hide()
 
         self.guias_abertas.clear()
         self.guias_abertas_onde_usado.clear()
@@ -750,6 +757,7 @@ class PcpApp(QWidget):
         self.btn_consultar_estrutura.setEnabled(status)
         self.btn_toggle_footer.setEnabled(status)
         self.btn_imprimir_op.setEnabled(status)
+        self.checkbox_barcode.setEnabled(status)
 
     def query_consulta_ordem_producao(self):
         data_inicio_formatada = self.campo_data_inicio.date().toString("yyyyMMdd")
@@ -982,6 +990,10 @@ class PcpApp(QWidget):
         self.configurar_tabela(dataframe)
         self.configurar_tabela_tooltips(dataframe)
 
+        if not self.checkbox_barcode.isChecked():
+            barcode_column_index = list(dataframe.columns).index('Barcode')
+            self.tree.setColumnHidden(barcode_column_index, True)
+
         # Construir caminhos relativos
         script_dir = os.path.dirname(os.path.abspath(__file__))
         open_icon_path = os.path.join(script_dir, '..', 'resources', 'images', 'red.png')
@@ -1041,6 +1053,7 @@ class PcpApp(QWidget):
                     item = QTableWidgetItem('')
                 self.tree.setItem(i, list(row.index).index(column_name), item)
 
+        self.checkbox_barcode.show()
         self.table_line_number(dataframe.shape[0])
         self.exibir_indicadores(dataframe)
         self.tree.viewport().update()
