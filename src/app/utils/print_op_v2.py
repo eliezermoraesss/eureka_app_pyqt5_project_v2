@@ -178,223 +178,233 @@ def consultar_hierarquia_tabela(codigo):
 
 
 def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_geral, selected_row):
-    data_hora_impressao = datetime.now().strftime('%d/%m/%Y   %H:%M:%S')
-    codigo = row['Código'].strip()
-    num_qp = row['QP QR'].strip().zfill(6)
-    num_op = row['OP'].strip()
-    tipo = row['Tipo'].strip()
-    op_geral = row['OP GERAL']
-    op_aglutinada = row['Aglutinado']
+    try:
+        data_hora_impressao = datetime.now().strftime('%d/%m/%Y   %H:%M:%S')
+        codigo = row['Código'].strip()
+        num_qp = row['QP QR'].strip().zfill(6)
+        num_op = row['OP'].strip()
+        tipo = row['Tipo'].strip()
+        op_geral = row['OP GERAL']
+        op_aglutinada = row['Aglutinado']
 
-    if selected_row:
-        op_aglutinada = 'S' if op_aglutinada == 'Sim' else ''
+        if selected_row:
+            op_aglutinada = 'S' if op_aglutinada == 'Sim' else ''
 
-    """Generates PDF for a single Production Order"""
-    # Create PDF
-    c = canvas.Canvas(output_path, pagesize=A4)
-    width, height = A4
-    margin = 10 * mm
+        """Generates PDF for a single Production Order"""
+        # Create PDF
+        c = canvas.Canvas(output_path, pagesize=A4)
+        width, height = A4
+        margin = 10 * mm
 
-    # Logo
-    logo_path = get_resource_path('images', 'logo_enaplic.jpg')
-    logo_width = 80
-    logo_x = margin
-    logo_y = height - margin * 3
-    c.drawImage(logo_path, logo_x, logo_y, width=logo_width, preserveAspectRatio=True)
+        # Logo
+        logo_path = get_resource_path('images', 'logo_enaplic.jpg')
+        logo_width = 80
+        logo_x = margin
+        logo_y = height - margin * 3
+        c.drawImage(logo_path, logo_x, logo_y, width=logo_width, preserveAspectRatio=True)
 
-    # Title
-    title_text = f"ORDEM DE PRODUÇÃO - {num_op}"
-    title_font_size = 12
-    c.setFont("Courier-New-Bold", title_font_size)
-    title_width = c.stringWidth(title_text, "Courier-New-Bold", title_font_size)
-    title_x = (width - title_width) / 2
-    title_y = 810  # Adjust this value as needed to position the title vertically
-    c.drawString(title_x, title_y, title_text)
-
-    title_text = f"{tipo}: {num_qp} {row['Projeto']}" if tipo == 'QP' else f"{row['Projeto']}"
-    title_font_size = 12
-    c.setFont("Courier-New-Bold", title_font_size)
-    title_width = c.stringWidth(title_text, "Courier-New-Bold", title_font_size)
-    title_x = (width - title_width) / 2
-    title_y = title_y - 20  # Adjust this value as needed to position the title vertically
-    c.drawString(title_x, title_y, title_text)
-
-    # Add line below the title
-    line_y = title_y - 10
-    c.line(margin, line_y, width - margin, line_y)
-
-    # Barcode
-    barcode_width = 100
-    barcode_x = 475
-    barcode_y = 565  # Adjust this value as needed to position the barcode vertically
-    barcode_path = generate_barcode(num_op)
-    c.drawImage(barcode_path, barcode_x, barcode_y, width=barcode_width, preserveAspectRatio=True)
-
-    # Informações da Ordem de Produção
-    header_style = create_header_style()
-
-    if not selected_row:
-        data_emissao = datetime.strptime(row['Data Abertura'].strip(), "%Y%m%d").strftime("%d/%m/%Y")
-        data_entrega = datetime.strptime(row['Prev Entrega'].strip(), "%Y%m%d").strftime("%d/%m/%Y")
-    else:
-        data_emissao = row['Data Abertura'].strip()
-        data_entrega = row['Prev Entrega'].strip()
-
-    op_info = [
-        f"Produto: {row['Código'].strip()}  {row['Descrição'].strip()}",
-        f"Quantidade: {row['Quantidade']}   {row['Unid']}",
-        f"Centro de Custo: {row['Código CC']}   {row['Centro de Custo']}",
-        f"Dt. Abertura da OP: {data_emissao}",
-        f"Previsão de Entrega: {data_entrega}",
-        f"Dt. Impressão da OP: {data_hora_impressao}",
-        f"Observação: {row['Observação'].strip()}"
-    ]
-
-    y_position = 750  # Adjust this value as needed to position the information vertically
-    for line in op_info:
-        p = Paragraph(line, header_style)
-        p.wrapOn(c, width - 2 * margin, 20)
-        p.drawOn(c, margin, y_position)
-        y_position -= 15
-
-    # Add line below the title
-    c.line(margin, y_position, width - margin, y_position)
-    y_position -= 15
-
-    # Tabela hierárquica
-    dataframe_onde_usado = consultar_hierarquia_tabela(codigo)
-
-    if not dataframe_onde_usado.empty:
-        # Get the list of códigos from dataframe_onde_usado
-        codigos_onde_usado = dataframe_onde_usado['Código'].unique()
-        codigos_onde_usado = [item.strip() for item in codigos_onde_usado]
-
-        if op_aglutinada == 'S':
-            # Filter dataframe_geral to only include rows where 'Código' is in codigos_onde_usado and 'QP' matches num_qp
-            dataframe_filtrado = dataframe_geral[
-                dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
-                (dataframe_geral['QP QR'].str.strip() == num_qp)
-                ]
-        else:
-            dataframe_aglutinados = dataframe_geral[
-                dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
-                (dataframe_geral['QP QR'].str.strip() == num_qp) &
-                (dataframe_geral['Aglutinado'].str.strip() == 'S')
-                ]
-            dataframe_nao_aglutinados = dataframe_geral[
-                dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
-                (dataframe_geral['QP QR'].str.strip() == num_qp) &
-                (dataframe_geral['Aglutinado'].str.strip() != 'S') &
-                (dataframe_geral['OP'].str.contains(op_geral, na=False))
-                ]
-            dataframe_filtrado = pd.concat([dataframe_aglutinados, dataframe_nao_aglutinados])
-
-        # Add the OP column to the filtered dataframe if it doesn't exist
-        if 'OP' not in dataframe_filtrado.columns:
-            dataframe_filtrado['OP'] = row['OP']
-
-        # Merge the filtered dataframe with onde_usado to get additional information
-        dataframe_final = pd.merge(
-            dataframe_filtrado,
-            dataframe_onde_usado,
-            on='Código',
-            suffixes=('', '_onde_usado')
-        )
-
-        # Multiplica quantidade usada do filho pela quantidade do pai
-        dataframe_final['Qtd Usada'] = dataframe_final['Quantidade'] * dataframe_final['Quantidade_onde_usado']
-
-        # Select columns as needed
-        dataframe_final = dataframe_final[[
-            'OP',
-            'Código',
-            'Descrição',
-            'Qtd Usada'
-        ]].copy()
-
-        # Rename columns to match the expected format
-        dataframe_final = dataframe_final.rename(columns={
-            'Código': 'Código Pai',
-            'Qtd Usada': 'Quantidade'
-        })
-
-        # Sort the dataframe if needed
-        dataframe_final = dataframe_final.sort_values('OP')
-
-        # Title hierarchical table
-        title_text = f"LISTA DOS PAIS (ONDE É USADO)"
-        title_font_size = 10
+        # Title
+        title_text = f"ORDEM DE PRODUÇÃO - {num_op}"
+        title_font_size = 12
         c.setFont("Courier-New-Bold", title_font_size)
         title_width = c.stringWidth(title_text, "Courier-New-Bold", title_font_size)
         title_x = (width - title_width) / 2
-        c.drawString(title_x, y_position, title_text)
+        title_y = 810  # Adjust this value as needed to position the title vertically
+        c.drawString(title_x, title_y, title_text)
+
+        title_text = f"{tipo}: {num_qp} {row['Projeto']}" if tipo == 'QP' else f"{row['Projeto']}"
+        title_font_size = 12
+        c.setFont("Courier-New-Bold", title_font_size)
+        title_width = c.stringWidth(title_text, "Courier-New-Bold", title_font_size)
+        title_x = (width - title_width) / 2
+        title_y = title_y - 20  # Adjust this value as needed to position the title vertically
+        c.drawString(title_x, title_y, title_text)
+
+        # Add line below the title
+        line_y = title_y - 10
+        c.line(margin, line_y, width - margin, line_y)
+
+        # Barcode
+        barcode_width = 100
+        barcode_x = 475
+        barcode_y = 565  # Adjust this value as needed to position the barcode vertically
+        barcode_path = generate_barcode(num_op)
+        c.drawImage(barcode_path, barcode_x, barcode_y, width=barcode_width, preserveAspectRatio=True)
+
+        # Informações da Ordem de Produção
+        header_style = create_header_style()
+
+        if not selected_row:
+            data_emissao = datetime.strptime(row['Data Abertura'].strip(), "%Y%m%d").strftime("%d/%m/%Y")
+            data_entrega = datetime.strptime(row['Prev Entrega'].strip(), "%Y%m%d").strftime("%d/%m/%Y")
+        else:
+            data_emissao = row['Data Abertura'].strip()
+            data_entrega = row['Prev Entrega'].strip()
+
+        op_info = [
+            f"Produto: {row['Código'].strip()}  {row['Descrição'].strip()}",
+            f"Quantidade: {row['Quantidade']}   {row['Unid']}",
+            f"Centro de Custo: {row['Código CC']}   {row['Centro de Custo']}",
+            f"Dt. Abertura da OP: {data_emissao}",
+            f"Previsão de Entrega: {data_entrega}",
+            f"Dt. Impressão da OP: {data_hora_impressao}",
+            f"Observação: {row['Observação'].strip()}"
+        ]
+
+        y_position = 750  # Adjust this value as needed to position the information vertically
+        for line in op_info:
+            p = Paragraph(line, header_style)
+            p.wrapOn(c, width - 2 * margin, 20)
+            p.drawOn(c, margin, y_position)
+            y_position -= 15
+
+        # Add line below the title
+        c.line(margin, y_position, width - margin, y_position)
         y_position -= 15
 
-        # Total destinado
-        total_destinado = dataframe_final['Quantidade'].sum()
-        p = Paragraph(f"Total destinado: {total_destinado}  {row['Unid']}", header_style)
-        p.wrapOn(c, width - 2 * margin, 20)
-        p.drawOn(c, margin, y_position)
-        y_position -= 5
+        # Tabela hierárquica
+        dataframe_onde_usado = consultar_hierarquia_tabela(codigo)
 
-        # Generate the table
-        table_y_position = y_position
-        generate_hierarchical_table(dataframe_final, c, table_y_position)
-    else:
-        print(f"No hierarchical data found for código: {row['Código']}")
+        if not dataframe_onde_usado.empty:
+            # Get the list of códigos from dataframe_onde_usado
+            codigos_onde_usado = dataframe_onde_usado['Código'].unique()
+            codigos_onde_usado = [item.strip() for item in codigos_onde_usado]
 
-    # Roteiro
-    workflow_path = get_resource_path('images', 'roteiro_v3.png')
-    workflow_y_position = table_y_position - 780  # Adjust this value as needed to position the workflow vertically
-    c.drawImage(workflow_path, margin, workflow_y_position, width=width - 2 * margin, preserveAspectRatio=True)
+            if op_aglutinada == 'S':
+                # Filter dataframe_geral to only include rows where 'Código' is in codigos_onde_usado and 'QP' matches num_qp
+                dataframe_filtrado = dataframe_geral[
+                    dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
+                    (dataframe_geral['QP QR'].str.strip() == num_qp)
+                    ]
+            else:
+                dataframe_aglutinados = dataframe_geral[
+                    dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
+                    (dataframe_geral['QP QR'].str.strip() == num_qp) &
+                    (dataframe_geral['Aglutinado'].str.strip() == 'S')
+                    ]
+                dataframe_nao_aglutinados = dataframe_geral[
+                    dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
+                    (dataframe_geral['QP QR'].str.strip() == num_qp) &
+                    (dataframe_geral['Aglutinado'].str.strip() != 'S') &
+                    (dataframe_geral['OP'].str.contains(op_geral, na=False))
+                    ]
+                dataframe_filtrado = pd.concat([dataframe_aglutinados, dataframe_nao_aglutinados])
 
-    # Save first page
-    c.save()
+            # Add the OP column to the filtered dataframe if it doesn't exist
+            if 'OP' not in dataframe_filtrado.columns:
+                dataframe_filtrado['OP'] = row['OP']
 
-    # Handle technical drawing (Page 2)
-    codigo_desenho = row['Código'].strip()
-    drawing_path = os.path.normpath(os.path.join(
-        r"\\192.175.175.4\dados\EMPRESA\PROJETOS\PDF-OFICIAL",
-        f"{codigo_desenho}.PDF"
-    ))
+            # Merge the filtered dataframe with onde_usado to get additional information
+            dataframe_final = pd.merge(
+                dataframe_filtrado,
+                dataframe_onde_usado,
+                on='Código',
+                suffixes=('', '_onde_usado')
+            )
 
-    if os.path.exists(drawing_path):
-        merger = PdfMerger()
-        merger.append(output_path)  # First append the production order page
-        merger.append(drawing_path)  # Then append the technical drawing
+            # Multiplica quantidade usada do filho pela quantidade do pai
+            dataframe_final['Qtd Usada'] = dataframe_final['Quantidade'] * dataframe_final['Quantidade_onde_usado']
 
-        # Create a temporary file for the merged result
-        temp_output = output_path + '.temp'
-        merger.write(temp_output)
-        merger.close()
+            # Select columns as needed
+            dataframe_final = dataframe_final[[
+                'OP',
+                'Código',
+                'Descrição',
+                'Qtd Usada'
+            ]].copy()
 
-        # Replace the original file with the merged result
-        os.replace(temp_output, output_path)
-    else:
-        # Create a new page with the "Drawing not found" message
-        c = canvas.Canvas(output_path + '.temp', pagesize=A4)
-        width, height = A4
+            # Rename columns to match the expected format
+            dataframe_final = dataframe_final.rename(columns={
+                'Código': 'Código Pai',
+                'Qtd Usada': 'Quantidade'
+            })
 
-        c.showPage()
-        c.setFont("Courier-New-Italic", 24)
-        c.drawCentredString(width / 2, height / 2, "DESENHO NÃO ENCONTRADO")
+            # Sort the dataframe if needed
+            dataframe_final = dataframe_final.sort_values('OP')
+
+            # Title hierarchical table
+            title_text = f"LISTA DOS PAIS (ONDE É USADO)"
+            title_font_size = 10
+            c.setFont("Courier-New-Bold", title_font_size)
+            title_width = c.stringWidth(title_text, "Courier-New-Bold", title_font_size)
+            title_x = (width - title_width) / 2
+            c.drawString(title_x, y_position, title_text)
+            y_position -= 15
+
+            # Total destinado
+            total_destinado = dataframe_final['Quantidade'].sum()
+            p = Paragraph(f"Total destinado: {total_destinado}  {row['Unid']}", header_style)
+            p.wrapOn(c, width - 2 * margin, 20)
+            p.drawOn(c, margin, y_position)
+            y_position -= 5
+
+            # Generate the table
+            table_y_position = y_position
+            generate_hierarchical_table(dataframe_final, c, table_y_position)
+        else:
+            print(f"No hierarchical data found for código: {row['Código']}")
+
+        # Roteiro
+        workflow_path = get_resource_path('images', 'roteiro_v3.png')
+        workflow_y_position = table_y_position - 780  # Adjust this value as needed to position the workflow vertically
+        c.drawImage(workflow_path, margin, workflow_y_position, width=width - 2 * margin, preserveAspectRatio=True)
+
+        # Save first page
         c.save()
 
-        # Merge the original page with the "Drawing not found" page
-        merger = PdfMerger()
-        merger.append(output_path)
-        merger.append(output_path + '.temp')
+        # Handle technical drawing (Page 2)
+        codigo_desenho = row['Código'].strip()
+        drawing_path = os.path.normpath(os.path.join(
+            r"\\192.175.175.4\dados\EMPRESA\PROJETOS\PDF-OFICIAL",
+            f"{codigo_desenho}.PDF"
+        ))
 
-        temp_output = output_path + '.merged'
-        merger.write(temp_output)
-        merger.close()
+        if os.path.exists(drawing_path):
+            merger = PdfMerger()
+            merger.append(output_path)  # First append the production order page
+            merger.append(drawing_path)  # Then append the technical drawing
 
-        # Clean up temporary files and replace the original
-        os.remove(output_path + '.temp')
-        os.replace(temp_output, output_path)
+            # Create a temporary file for the merged result
+            temp_output = output_path + '.temp'
+            merger.write(temp_output)
+            merger.close()
 
-    # Open the generated PDF
-    QDesktopServices.openUrl(QUrl(QUrl.fromLocalFile(output_path)))
+            # Replace the original file with the merged result
+            os.replace(temp_output, output_path)
+        else:
+            # Create a new page with the "Drawing not found" message
+            c = canvas.Canvas(output_path + '.temp', pagesize=A4)
+            width, height = A4
+
+            c.showPage()
+            c.setFont("Courier-New-Italic", 24)
+            c.drawCentredString(width / 2, height / 2, "DESENHO NÃO ENCONTRADO")
+            c.save()
+
+            # Merge the original page with the "Drawing not found" page
+            merger = PdfMerger()
+            merger.append(output_path)
+            merger.append(output_path + '.temp')
+
+            temp_output = output_path + '.merged'
+            merger.write(temp_output)
+            merger.close()
+
+            # Clean up temporary files and replace the original
+            os.remove(output_path + '.temp')
+            os.replace(temp_output, output_path)
+
+        # Open the generated PDF
+        QDesktopServices.openUrl(QUrl(QUrl.fromLocalFile(output_path)))
+    except Exception as e:
+        print(f"Erro ao gerar PDF: {e}")
+        exibir_mensagem('Erro ao gerar PDF', f'Erro: {str(e)}', 'error')
+    finally:
+        # Clean up temporary files
+        if os.path.exists(output_path + '.temp'):
+            os.remove(output_path + '.temp')
+        if os.path.exists(output_path + '.merged'):
+            os.remove(output_path + '.merged')
 
 
 def registrar_fonte_personalizada():

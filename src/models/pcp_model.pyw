@@ -489,7 +489,7 @@ class PcpApp(QWidget):
         response = show_confirmation_dialog(self, title, message)
 
         if response == QMessageBox.Yes:
-            print_dialog = PrintProductionOrderDialogV2(df_op_aberta, df_geral_op_aberta, selected_row=selected_row, parent=self)
+            print_dialog = PrintProductionOrderDialogV3(df_op_aberta, df_geral_op_aberta, selected_row=selected_row, parent=self)
             print_dialog.show()
         else:
             return
@@ -907,7 +907,7 @@ class PcpApp(QWidget):
 
             self.dataframe = pd.read_sql(query_consulta_op, self.engine)
             self.dataframe.insert(0, 'Status OP', '')
-            # self.dataframe.insert(5, 'Barcode', '')
+            self.dataframe.insert(5, 'Barcode', '')
             self.dataframe.insert(12, 'PDF da OP', '')
 
             # Iterate through the rows of the DataFrame
@@ -1013,13 +1013,11 @@ class PcpApp(QWidget):
                         item.setFont(QFont(self.fonte_tabela, self.tamanho_fonte_tabela, QFont.Bold))
                     else:
                         item = process_table_item(column_name, value)
-                        # if column_name == 'Barcode':
-                        #     item.setSizeHint(QSize(324, 280))
-                        #     barcode_path = generate_barcode(row['OP'].strip())
-                        #     pixmap = QPixmap(barcode_path)
-                        #     resized_pixmap = pixmap.scaled(324, 280, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-                        #     barcode = QIcon(resized_pixmap)
-                        #     item.setIcon(barcode)
+                        if column_name == 'Barcode':
+                            barcode_path = generate_barcode(row['OP'].strip())
+                            barcode = QIcon(barcode_path)
+                            item.setIcon(barcode)
+                            os.remove(barcode_path)
                         if column_name in ['OP', 'Projeto', 'QP QR', 'Tipo']:
                             item.setBackground(COLOR_OP_COLUMN)
                             item.setFont(QFont(self.fonte_tabela, self.tamanho_fonte_tabela, QFont.Bold))
