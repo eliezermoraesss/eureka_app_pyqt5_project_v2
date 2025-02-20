@@ -1,3 +1,4 @@
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMessageBox
 
 def show_confirmation_dialog(self, title, message):
@@ -6,6 +7,7 @@ def show_confirmation_dialog(self, title, message):
     msg_box.setWindowTitle(title)
     msg_box.setText(message)
     msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+    msg_box.setWindowModality(Qt.ApplicationModal)  # Make the dialog modal
     msg_box.setDefaultButton(QMessageBox.Yes)
     yes_button = msg_box.button(QMessageBox.Yes)
     yes_button.setText("Sim")

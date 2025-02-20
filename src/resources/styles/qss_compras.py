@@ -13,7 +13,7 @@ def compras_qss():
             }
             
             QLabel#label-line-number, QLabel#label-indicators {
-                font-size: 16px;
+                font-size: 14px;
                 font-weight: 500;
             }
             

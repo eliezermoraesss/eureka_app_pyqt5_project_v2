@@ -14,7 +14,7 @@ def pcp_qss():
             
             QLabel#label-line-number, QLabel#label-indicators {
                 font-size: 14px;
-                font-weight: 500;
+                font-weight: 400;
             }
             
             QLabel#label-title {
@@ -88,7 +88,7 @@ def pcp_qss():
                 padding: 7px 10px;
                 border: 2px solid #0d6efd;
                 border-radius: 10px;
-                font-size: 12px;
+                font-size: 14px;
                 height: 20px;
                 font-weight: 300;
                 margin: 10px 5px;

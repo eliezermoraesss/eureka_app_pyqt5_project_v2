@@ -20,6 +20,7 @@ from reportlab.platypus import Table, TableStyle, Paragraph
 from sqlalchemy import create_engine
 
 from src.app.utils.db_mssql import setup_mssql
+from src.app.utils.printer_production_order import PrinterProductionOrder
 from src.app.utils.utils import exibir_mensagem, generate_barcode
 from src.dialog.information_dialog import information_dialog
 
@@ -29,8 +30,8 @@ class PDFGeneratorThread(QThread):
     error = pyqtSignal(str)
     progress = pyqtSignal(int, int, int)
 
-    def __init__(self, df: pd.DataFrame, df_op_table, output_dir: str, selected_row):
-        super().__init__()
+    def __init__(self, df: pd.DataFrame, df_op_table, output_dir: str, selected_row, parent=None):
+        super().__init__(parent)
         self.output_path = None
         self.df = df
         self.output_dir = output_dir
@@ -41,12 +42,15 @@ class PDFGeneratorThread(QThread):
         try:
             self.df.reset_index(drop=True, inplace=True)
             total_rows = len(self.df)
+            generated_pdf_paths = list()
             for index, row in self.df.iterrows():
                 progress = int((index + 1) / total_rows * 100)
                 self.output_path = os.path.join(self.output_dir,
                                                 f"OP_{row['OP'].strip()}_{row['Código'].strip()}.pdf")
                 self.progress.emit(progress, index + 1, total_rows)
                 generate_production_order_pdf(row, self.output_path, self.df_op_table, self.selected_row)
+                generated_pdf_paths.append(self.output_path)
+            PrinterProductionOrder(generated_pdf_paths)
             self.finished.emit(self.output_path)
         except Exception as e:
             self.error.emit(str(e))
@@ -345,10 +349,8 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
             print(f"No hierarchical data found for código: {row['Código']}")
 
         # Roteiro
-        workflow_path = get_resource_path('images', 'roteiro_v5.png')
-        workflow_y_position = table_y_position - 780  # Adjust this value as needed to position the workflow vertically
-        # workflow_path = get_resource_path('images', 'roteiro_v4.png')
-        # workflow_y_position = table_y_position - 750  # Adjust this value as needed to position the workflow vertically
+        workflow_path = get_resource_path('images', 'roteiro_v4.png')
+        workflow_y_position = table_y_position - 750  # Adjust this value as needed to position the workflow vertically
         c.drawImage(workflow_path, margin, workflow_y_position, width=width - 2 * margin, preserveAspectRatio=True)
 
         # Save first page
@@ -438,7 +440,7 @@ class PrintProductionOrderDialogV2(QtWidgets.QDialog):
         self.print_production_order()
 
     def init_ui(self):
-        self.setWindowTitle("Eureka® PCP - Impressão de OP")
+        self.setWindowTitle("Eureka® PCP - Imprimir OP")
         self.setGeometry(100, 100, 400, 100)
 
         self.layout = QVBoxLayout(self)
@@ -465,7 +467,7 @@ class PrintProductionOrderDialogV2(QtWidgets.QDialog):
         output_dir = r"\\192.175.175.4\dados\EMPRESA\PRODUCAO\ORDEM_DE_PRODUCAO"
         os.makedirs(output_dir, exist_ok=True)
 
-        self.pdf_thread = PDFGeneratorThread(self.df, self.df_op_table, output_dir, self.selected_row)
+        self.pdf_thread = PDFGeneratorThread(self.df, self.df_op_table, output_dir, self.selected_row, self)
         self.pdf_thread.finished.connect(self.on_pdf_generation_complete)
         self.pdf_thread.error.connect(self.on_pdf_generation_error)
         self.pdf_thread.progress.connect(lambda value, current, total: self.update_progress(value, current, total))
@@ -476,7 +478,7 @@ class PrintProductionOrderDialogV2(QtWidgets.QDialog):
         self.label_status.setText(f"Publicando ordem de produção {current} de {total}")
 
     def on_pdf_generation_complete(self):
-        information_dialog(self, "Eureka® PCP - Impressão de OP", "Processo finalizado com sucesso! ✅🥳\n\n"
+        information_dialog(self, "Eureka® PCP - Imprimir OP", "Impressão realizada com sucesso! ✅🥳\n\n"
                                                               "Os arquivos foram salvos em:\n"
                                                               r"\192.175.175.4\dados\EMPRESA\PRODUCAO\ORDEM_DE_PRODUCAO")
         self.close()

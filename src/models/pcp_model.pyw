@@ -2,15 +2,13 @@ import locale
 import os
 import sys
 
-from src.app.utils.print_op_v3 import PrintProductionOrderDialogV3
-
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from datetime import datetime
 
 import pandas as pd
-from PyQt5.QtCore import Qt, QDate, pyqtSignal, QEvent, QSize
+from PyQt5.QtCore import Qt, QDate, pyqtSignal, QEvent
 from PyQt5.QtGui import QFont, QIcon, QPixmap, QKeySequence, QColor
 from PyQt5.QtWidgets import QWidget, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAction, QDateEdit, QLabel, QSizePolicy, QTabWidget, QMenu, \
@@ -32,7 +30,7 @@ from src.app.utils.search_history_manager import SearchHistoryManager
 from src.resources.styles.qss_pcp import pcp_qss
 from src.app.utils.abrir_hierarquia_estrutura import abrir_hierarquia_estrutura
 from src.dialog.confirmation_dialog import show_confirmation_dialog
-from src.app.utils.print_op_v2 import PrintProductionOrderDialogV2
+from src.app.utils.pdf_production_order_generator import PrintProductionOrderDialogV2
 
 
 class CustomLineEdit(QLineEdit):
@@ -107,7 +105,7 @@ class PcpApp(QWidget):
         self.guias_abertas_onde_usado = []
         self.guias_abertas_saldo = []
 
-        self.altura_linha = 60
+        self.altura_linha = 40
         self.tamanho_fonte_tabela = 10
 
         self.fonte_tabela = 'Open Sans'
@@ -394,9 +392,9 @@ class PcpApp(QWidget):
 
         self.layout_buttons.addStretch()
         self.layout_buttons.addWidget(self.btn_consultar)
-        self.layout_buttons.addWidget(self.btn_consultar_estrutura)
-        self.layout_buttons.addWidget(self.btn_onde_e_usado)
-        self.layout_buttons.addWidget(self.btn_saldo_estoque)
+        self.layout_buttons.addWidget(self.btn_imprimir_op)
+        self.layout_buttons.addWidget(self.btn_visualizar_op)
+        self.layout_buttons.addWidget(self.btn_abrir_desenho)
         self.layout_buttons.addWidget(self.btn_nova_janela)
         self.layout_buttons.addWidget(self.btn_limpar)
         self.layout_buttons.addWidget(self.btn_fechar)
@@ -404,9 +402,9 @@ class PcpApp(QWidget):
         self.layout_buttons.addStretch()
 
         self.layout_footer_label.addStretch(1)
-        self.layout_footer_label.addWidget(self.btn_imprimir_op)
-        self.layout_footer_label.addWidget(self.btn_visualizar_op)
-        self.layout_footer_label.addWidget(self.btn_abrir_desenho)
+        self.layout_footer_label.addWidget(self.btn_consultar_estrutura)
+        self.layout_footer_label.addWidget(self.btn_onde_e_usado)
+        self.layout_footer_label.addWidget(self.btn_saldo_estoque)
         self.layout_footer_label.addWidget(self.btn_exportar_excel)
         self.layout_footer_label.addWidget(self.btn_image_comparator)
         self.layout_footer_label.addWidget(self.label_line_number)
@@ -489,8 +487,12 @@ class PcpApp(QWidget):
         df_geral_op_aberta = self.dataframe_original[self.dataframe_original['Fechamento'].str.strip() == '']
 
         line_number = df_op_aberta.shape[0]
-        title = "Eureka® PCP - Impressão de OP"
-        message = f"Foram encontradas {line_number} OP. 🔎\n\nDeseja prosseguir com a impressão? 🖨️"
+        title = "Eureka® PCP - Imprimir OP"
+        if line_number == 1:
+            message = f"{line_number} OP selecionada."
+        else:
+            message = f"{line_number} OPs selecionadas."
+        message += "\nDeseja prosseguir com a impressão? 🖨️"
         response = show_confirmation_dialog(self, title, message)
 
         if response == QMessageBox.Yes:
@@ -916,7 +918,7 @@ class PcpApp(QWidget):
             self.dataframe = pd.read_sql(query_consulta_op, self.engine)
             self.dataframe.insert(0, 'Status OP', '')
             self.dataframe.insert(5, 'Barcode', '')
-            self.dataframe.insert(12, 'PDF da OP', '')
+            self.dataframe.insert(12, 'OP Impressa', '')
 
             # Iterate through the rows of the DataFrame
             for index, row in self.dataframe.iterrows():
@@ -1033,7 +1035,7 @@ class PcpApp(QWidget):
                         if column_name in ['OP', 'Projeto', 'QP/QR', 'Tipo']:
                             item.setBackground(COLOR_OP_COLUMN)
                             item.setFont(QFont(self.fonte_tabela, self.tamanho_fonte_tabela, QFont.Bold))
-                        if column_name == 'PDF da OP':
+                        if column_name == 'OP Impressa':
                             num_op = row['OP'].strip()
                             codigo = row['Código'].strip()
                             item.setFont(QFont(self.fonte_tabela, self.tamanho_fonte_tabela, QFont.Bold))
