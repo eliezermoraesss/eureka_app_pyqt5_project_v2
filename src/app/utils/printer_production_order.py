@@ -1,4 +1,4 @@
-import fitz  # PyMuPDF
+import pymupdf
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPainter, QImage, QTransform
@@ -19,13 +19,13 @@ class PrinterProductionOrder(QtWidgets.QDialog):
         if print_dialog.exec_() == QPrintDialog.Accepted:
             try:
                 for pdf_path in self.generated_pdf_paths:
-                    document = fitz.open(pdf_path)
+                    document = pymupdf.open(pdf_path)
                     painter = QPainter(printer)
 
                     for page_number in range(document.page_count):
                         page = document.load_page(page_number)
                         zoom = 6.0  # Increase the zoom factor to improve resolution
-                        mat = fitz.Matrix(zoom, zoom)
+                        mat = pymupdf.Matrix(zoom, zoom)
                         pix = page.get_pixmap(matrix=mat)
 
                         img = QImage(pix.samples, pix.width, pix.height, pix.stride, QImage.Format_RGB888)
