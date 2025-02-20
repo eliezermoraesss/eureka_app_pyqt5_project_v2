@@ -473,7 +473,7 @@ class PrintProductionOrderDialogV2(QtWidgets.QDialog):
 
     def update_progress(self, value, current, total):
         self.progress_bar.setValue(value)
-        self.label_status.setText(f"Publicando OP {current} de {total}")
+        self.label_status.setText(f"Publicando ordem de produção {current} de {total}")
 
     def on_pdf_generation_complete(self):
         information_dialog(self, "Eureka® PCP - Impressão de OP", "Processo finalizado com sucesso! ✅🥳\n\n"
