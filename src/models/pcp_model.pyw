@@ -494,7 +494,7 @@ class PcpApp(QWidget):
         response = show_confirmation_dialog(self, title, message)
 
         if response == QMessageBox.Yes:
-            print_dialog = PrintProductionOrderDialogV3(df_op_aberta, df_geral_op_aberta, selected_row=selected_row, parent=self)
+            print_dialog = PrintProductionOrderDialogV2(df_op_aberta, df_geral_op_aberta, selected_row=selected_row, parent=self)
             print_dialog.show()
         else:
             return

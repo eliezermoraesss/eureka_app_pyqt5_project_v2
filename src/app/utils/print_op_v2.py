@@ -345,8 +345,10 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
             print(f"No hierarchical data found for código: {row['Código']}")
 
         # Roteiro
-        workflow_path = get_resource_path('images', 'roteiro_v3.png')
+        workflow_path = get_resource_path('images', 'roteiro_v5.png')
         workflow_y_position = table_y_position - 780  # Adjust this value as needed to position the workflow vertically
+        # workflow_path = get_resource_path('images', 'roteiro_v4.png')
+        # workflow_y_position = table_y_position - 750  # Adjust this value as needed to position the workflow vertically
         c.drawImage(workflow_path, margin, workflow_y_position, width=width - 2 * margin, preserveAspectRatio=True)
 
         # Save first page

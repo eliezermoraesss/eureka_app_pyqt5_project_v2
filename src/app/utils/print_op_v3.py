@@ -193,7 +193,7 @@ def generate_barcode(data):
 def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_geral, selected_row):
     data_hora_impressao = datetime.now().strftime('%d/%m/%Y   %H:%M:%S')
     codigo = row['Código'].strip()
-    num_qp = row['QP QR'].strip().zfill(6)
+    num_qp = row['QP/QR'].strip().zfill(6)
     num_op = row['OP'].strip()
     tipo = row['Tipo'].strip()
     op_geral = row['OP GERAL']
@@ -224,7 +224,7 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
     title_y = 810  # Adjust this value as needed to position the title vertically
     c.drawString(title_x, title_y, title_text)
 
-    title_text = f"{tipo}: {num_qp} {row['PROJETO']}" if tipo == 'QP' else f"{row['PROJETO']}"
+    title_text = f"{tipo}: {num_qp} {row['Projeto']}" if tipo == 'QP' else f"{row['Projeto']}"
     title_font_size = 12
     c.setFont("Courier-New-Bold", title_font_size)
     title_width = c.stringWidth(title_text, "Courier-New-Bold", title_font_size)
@@ -286,17 +286,17 @@ def generate_production_order_pdf(row: pd.Series, output_path: str, dataframe_ge
             # Filter dataframe_geral to only include rows where 'Código' is in codigos_onde_usado and 'QP' matches num_qp
             dataframe_filtrado = dataframe_geral[
                 dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
-                (dataframe_geral['QP QR'].str.strip() == num_qp)
+                (dataframe_geral['QP/QR'].str.strip() == num_qp)
                 ]
         else:
             dataframe_aglutinados = dataframe_geral[
                 dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
-                (dataframe_geral['QP QR'].str.strip() == num_qp) &
+                (dataframe_geral['QP/QR'].str.strip() == num_qp) &
                 (dataframe_geral['Aglutinado'].str.strip() == 'S')
                 ]
             dataframe_nao_aglutinados = dataframe_geral[
                 dataframe_geral['Código'].str.strip().isin(codigos_onde_usado) &
-                (dataframe_geral['QP QR'].str.strip() == num_qp) &
+                (dataframe_geral['QP/QR'].str.strip() == num_qp) &
                 (dataframe_geral['Aglutinado'].str.strip() != 'S') &
                 (dataframe_geral['OP'].str.contains(op_geral, na=False))
                 ]
