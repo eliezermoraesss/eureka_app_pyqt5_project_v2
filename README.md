@@ -158,19 +158,12 @@ Confira abaixo as telas principais do sistema:
 
 ### 3. Módulo Compras 🛒
 ![Compras](images/compras_gif_01.gif)
-
 ![Compras](images/compras_01.png)
-
 ![Compras](images/compras_02.png)
-
 ![Compras](images/compras_03.png)
-
 ![Compras](images/compras_04.png)
-
 ![Compras](images/compras_05.png)
-
 ![Compras](images/compras_06.png)
-
 ![Compras](images/compras_07.png)
 
 
