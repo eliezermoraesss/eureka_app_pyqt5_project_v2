@@ -478,10 +478,10 @@ class PrintProductionOrderDialogV2(QtWidgets.QDialog):
         self.label_status.setText(f"Publicando ordem de produção {current} de {total}")
 
     def on_pdf_generation_complete(self):
+        self.close()
         information_dialog(self, "Eureka® PCP - Imprimir OP", "Impressão realizada com sucesso! ✅🥳\n\n"
                                                               "Os arquivos foram salvos em:\n"
                                                               r"\192.175.175.4\dados\EMPRESA\PRODUCAO\ORDEM_DE_PRODUCAO")
-        self.close()
 
     def on_pdf_generation_error(self, error):
         QMessageBox.critical(self, "Eureka® PCP - Erro", f"Erro ao gerar PDF ❌\nErro: {error}")

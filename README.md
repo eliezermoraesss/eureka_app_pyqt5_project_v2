@@ -89,17 +89,72 @@ O Eureka!® vem para suprir essas necessidades, oferecendo uma solução mais á
 - **📜 Histórico de Compras:** Exibe as últimas notas fiscais de entrada de um item.
 
 ### 2. Módulo PCP 🏭
-![PCP](images/pcp_02.png)
+![PCP](images/pcp_gif_01.gif)  
 
-![PCP](images/pcp_03.png)
+O módulo PCP do **EUREKA®** é uma ferramenta robusta para gestão de produção, oferecendo funcionalidades como:  
+🔹 **Consultar estrutura** (original ou explodida)  
+🔹 **Rastrear uso de componentes** ("Onde é usado?")  
+🔹 **Monitorar saldo em estoque**  
+🔹 **Abrir ferramentas auxiliares** (ImageComparator®, Tabela de Pesos)  
+🔹 **Gerenciar documentos** (abrir, imprimir, visualizar desenhos)  
 
-![PCP](images/pcp_04.png)
+---
 
-![PCP](images/pcp_01.png)
+#### 🖨️ Novidade: Novo template de Ordens de Produção  
+**Destaque da última atualização:**  
+![PCP](images/pcp_05.png)  
 
+Implementei uma **melhoria significativa** na geração de Ordens de Produção (OP), elevando o padrão de rastreabilidade e controle. Confira as mudanças:  
 
-- **📋 Gestão de Ordens de Produção:** Facilita a consulta e o gerenciamento de Ordens de Produção (OPs), com funcionalidades futuras para impressão e fechamento das OPs.
-- **💻 Desenvolvimento em PyQt5.**
+✅ **Antes vs. Agora:**  
+| **Versão Anterior**         | **Nova Versão**                          |
+|-----------------------------|------------------------------------------|
+| Informações básicas da OP    | **Dados críticos adicionados:**          |
+|                              | ➞ Data de abertura da OP no TOTVS       |
+|                              | ➞ Data de impressão da OP               |
+|                              | ➞ Detalhamento ampliado para conferência rápida |
+|                              | ➞ Lista de itens pais (onde usado)      |
+|                              | ➞ Quantidade necessária em cada pai      |
+
+💡 **Novo: Rastreabilidade de Uso**
+- Visualize todos os produtos onde o item será utilizado
+- Identifique as quantidades necessárias em cada aplicação
+- Planeje a produção com base na demanda dos itens pais
+
+🔍 **Impacto da melhoria:**  
+- **Transparência:** Rastreie o ciclo completo da OP (da criação à impressão).  
+- **Eficiência:** Redução de erros com informações detalhadas e acesso rápido.  
+- **Conformidade:** Documentação alinhada a padrões de gestão industrial.  
+📊 **Barra de Status: Indicadores de Produção**
+- **📈 Indicadores em Tempo Real:**
+  - Quantidade de OPs Abertas
+  - Quantidade de OPs Fechadas
+  ![PCP](images/pcp_06.png) 
+- **🔄 Atualização:** Dados sincronizados automaticamente com o TOTVS
+
+*"Essa atualização reflete meu compromisso em transformar o EUREKA® em uma ferramenta cada vez mais estratégica para sua operação!"*  
+
+---
+
+**Próximos passos:**  
+Explore outras funcionalidades do módulo PCP através do menu de contexto:
+
+![Menu de contexto](images/pcp_03.png)
+![Menu de contexto](images/pcp_07.png)
+
+*Sugestão de uso:* Utilize a opção **"Visualizar"** para checar a OP antes de imprimir e garantir que todos os campos estão preenchidos corretamente.
+
+---
+
+### 📸 Interface do Módulo PCP  
+Confira abaixo as telas principais do sistema:  
+
+![PCP](images/pcp_00.png)  
+![PCP](images/pcp_01.png)  
+![PCP](images/pcp_02.png)  
+![PCP](images/pcp_02a.png)  
+![PCP](images/pcp_04.png) 
+
 
 ### 3. Módulo Compras 🛒
 ![Compras](images/compras_gif_01.gif)
@@ -112,10 +167,17 @@ O Eureka!® vem para suprir essas necessidades, oferecendo uma solução mais á
 
 ![Compras](images/compras_04.png)
 
+![Compras](images/compras_05.png)
+
+![Compras](images/compras_06.png)
+
+![Compras](images/compras_07.png)
+
 
 - **🔄 Acompanhamento de SCs e PCs:** Facilita o acompanhamento de Solicitações de Compra (SCs) e Pedidos de Compra (PCs).
 - **📝 Follow-up e Consultas:** Acesso a notas fiscais e histórico de compras.
 - **🔍 Filtros de Pesquisa:** Possibilidade de criar filtros nas tabelas para refinar as pesquisas.
+
 
 ### 4. Módulo Comercial 📊
 ![Comercial](images/comercial_gif_01.gif)
@@ -178,6 +240,37 @@ A funcionalidade de explosão hierárquica de estruturas permite visualizar todo
   - Centralização de funcionalidades importantes
   - Personalização visual para maior conforto
 
+### 6.3. Rastreabilidade e Consultas Integradas 🔍
+
+O sistema oferece um conjunto robusto de funcionalidades para rastreabilidade e consultas:
+
+- **🔗 Onde é Usado:**
+  - Rastreamento completo de utilização do item
+  - Visualização de todas as estruturas onde o componente é aplicado
+  - Quantidade necessária em cada aplicação
+  - Navegação direta para estruturas relacionadas
+
+- **📦 Saldo em Estoque:**
+  - Saldo atual disponível
+  - Quantidade empenhada em OPs
+  - Quantidade prevista (pedidos de compra)
+  - Ponto de ressuprimento
+  - Estoque mínimo e máximo
+
+- **🏢 Últimos Fornecedores:**
+  - Lista dos fornecedores recentes
+  - Preços praticados
+  - Condições de pagamento
+  - Prazos de entrega históricos
+  - Ranking de performance
+
+- **📋 Histórico de Compras:**
+  - Últimas notas fiscais de entrada
+  - Valores e quantidades
+  - Comparativo de preços
+  - Visualização da NF-e em PDF
+  - Exportação de dados para análise
+
 ## 📞 Suporte
 Caso encontre **bugs** ou tenha **dúvidas**, entre em contato com a equipe de suporte. Estamos disponíveis para esclarecimentos e contamos com sua colaboração para reportar eventuais problemas.
 
@@ -202,6 +295,7 @@ Para sugestões e/ou melhorias, envie um e-mail clicando aqui: [e-mail](mailto:e
 - openpyxl
 - reportlab
 - PyPDF2
+- PyMuPDF
 - pyinstaller (gerar o executável)
 ```
 
