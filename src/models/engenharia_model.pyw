@@ -634,7 +634,10 @@ class EngenhariaApp(QWidget):
             B1_REVATU AS "Últ. Rev.", 
             B1_DATREF AS "Cadastrado em:", 
             B1_UREV AS "Data Últ. Rev.", 
-            B1_ZZLOCAL AS "Endereço"
+            B1_ZZLOCAL AS "Endereço",
+            B1_POSIPI AS "NCM",
+            B1_PESO AS "Peso Líquido",
+            B1_PESBRU AS "Peso Bruto"
         FROM 
             {self.database}.dbo.SB1010
         WHERE 

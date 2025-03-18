@@ -2,6 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../etl-insert-baseline-mssql-database" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../../WORKSPACES/python/PyQt5-Video-Book" vcs="Git" />
     <mapping directory="X:/ELIEZER/PROJETO SOLIDWORKS TOTVS/VBA" vcs="Git" />
   </component>

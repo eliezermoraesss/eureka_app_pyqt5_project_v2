@@ -5,6 +5,8 @@
     <orderEntry type="jdk" jdkName="Python 3.12" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="python_files" />
+    <orderEntry type="module" module-name="etl-insert-baseline-mssql-database" />
+    <orderEntry type="module" module-name="script-python" />
   </component>
   <component name="PackageRequirementsSettings">
     <option name="removeUnused" value="true" />
