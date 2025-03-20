@@ -24,8 +24,8 @@ class ConsultaEstrutura(QWidget):
         self.engine = None
         self.descricao = None
         self.df = None
-        self.COLOR_FILE_EXISTS = QColor(51, 211, 145)  # green
-        self.COLOR_FILE_MISSING = QColor(201, 92, 118)  # light red
+        self.GREEN_COLOR = QColor(51, 211, 145)  # green
+        self.RED_COLOR = QColor(201, 92, 118)  # light red
         self.tabela = None
         self.layout_cabecalho = None
         self.layout_nova_guia_estrutura = None
@@ -293,13 +293,18 @@ class ConsultaEstrutura(QWidget):
                                             f"{codigo_desenho}.PDF")
 
                     if os.path.exists(pdf_path):
-                        item.setBackground(self.COLOR_FILE_EXISTS)
+                        item.setBackground(self.GREEN_COLOR)
                         item.setText('Sim')
                         item.setToolTip("Desenho encontrado")
                     else:
-                        item.setBackground(self.COLOR_FILE_MISSING)
+                        item.setBackground(self.RED_COLOR)
                         item.setText('Não')
                         item.setToolTip("Desenho não encontrado")
+                elif column_name == 'Tem Estrutura':
+                    if valor_formatado == 'Sim':
+                        item.setBackground(self.GREEN_COLOR)
+                    else:
+                        item.setBackground(self.RED_COLOR)
 
                 self.tabela.setItem(i, self.df.columns.get_loc(column_name), item)
 
@@ -386,6 +391,20 @@ class ConsultaEstrutura(QWidget):
 
     def query_estrutura(self, revision=None):
         query = f"""
+            WITH SG10_MAX AS (
+                SELECT 
+                    G1_COD, 
+                    G1_REVFIM
+                FROM (
+                    SELECT 
+                        G1_COD,
+                        G1_REVFIM,
+                        ROW_NUMBER() OVER (PARTITION BY G1_COD ORDER BY G1_REVFIM DESC) AS rn
+                    FROM PROTHEUS12_R27.dbo.SG1010
+                    WHERE D_E_L_E_T_ <> '*' AND G1_REVFIM <> 'ZZZ'
+                ) AS ranked
+                WHERE rn = 1
+            )
             SELECT 
                 struct.G1_COMP AS "Código", 
                 prod.B1_DESC AS "Descrição", 
@@ -395,16 +414,22 @@ class ConsultaEstrutura(QWidget):
                 struct.G1_REVFIM AS "Revisão Final", 
                 struct.G1_INI AS "Inserido em:",
                 prod.B1_MSBLQL AS "Bloqueado?",
+                CASE
+                    WHEN SG.G1_COD IS NOT NULL THEN 'Sim'
+                    ELSE 'Não'
+                END AS "Tem Estrutura",
                 prod.B1_ZZLOCAL AS "Endereço"
             FROM 
                 {self.database}.dbo.SG1010 struct
+            LEFT JOIN
+                SG10_MAX SG ON SG.G1_COD = struct.G1_COMP
             INNER JOIN 
                 {self.database}.dbo.SB1010 prod
             ON 
                 struct.G1_COMP = prod.B1_COD AND prod.D_E_L_E_T_ <> '*'
-            WHERE 
-                G1_COD = '{self.codigo_pai}'
-                AND G1_REVFIM <> 'ZZZ' 
+            WHERE
+                struct.G1_COD = '{self.codigo_pai}'
+                AND struct.G1_REVFIM <> 'ZZZ' 
                 AND struct.D_E_L_E_T_ <> '*' 
                 ???
             ORDER BY 
@@ -412,9 +437,17 @@ class ConsultaEstrutura(QWidget):
         """
         if revision is None:
             revisao = f"""
-                AND G1_REVFIM = (SELECT MAX(G1_REVFIM)
-                FROM {self.database}.dbo.SG1010 WHERE G1_COD = '{self.codigo_pai}'
-                AND G1_REVFIM <> 'ZZZ' AND D_E_L_E_T_ <> '*')"""
+                AND struct.G1_REVFIM = (
+                    SELECT 
+                        MAX(G1_REVFIM)
+                    FROM 
+                        {self.database}.dbo.SG1010 
+                    WHERE 
+                        G1_COD = '{self.codigo_pai}'
+                    AND 
+                        G1_REVFIM <> 'ZZZ' 
+                    AND 
+                        D_E_L_E_T_ <> '*')"""
             return query.replace("???", revisao)
         else:
             return (query.replace("???", f"AND '{revision}' BETWEEN struct.G1_REVINI AND struct.G1_REVFIM")

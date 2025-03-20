@@ -114,4 +114,5 @@ def engenharia_qss():
                 background-color: #000000;
                 color: #f9feff;
                 font-weight: bold;
-            }"""
+            }
+            """

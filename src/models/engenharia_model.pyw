@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 
 import pyodbc
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QFont, QIcon, QPixmap, QColor
+from PyQt5.QtGui import QFont, QIcon, QPixmap, QColor, QBrush
 from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QTableWidget, \
     QTableWidgetItem, QSizePolicy, QSpacerItem, QTabWidget, \
@@ -637,7 +637,7 @@ class EngenhariaApp(QWidget):
             CASE 
                 WHEN SG.G1_COD IS NOT NULL THEN 'Sim'
                 ELSE 'Não'
-            END AS Estrutura,
+            END AS "Tem Estrutura",
             B1_REVATU AS "Últ. Rev.", 
             B1_DATREF AS "Cadastrado em:", 
             B1_UREV AS "Data Últ. Rev.", 
@@ -758,11 +758,11 @@ class EngenhariaApp(QWidget):
                             item.setBackground(RED_COLOR)
                             item.setText('Não')
                             item.setToolTip("Desenho não encontrado")
-                    elif column_name == "Estrutura":
+                    elif column_name == "Tem Estrutura":
                         if value == 'Sim':
                             item.setBackground(GREEN_COLOR)
                             item.setToolTip("O produto tem estrutura")
-                        elif value == 'Não':
+                        else:
                             item.setBackground(RED_COLOR)
                             item.setToolTip("O produto não tem estrutura")
 
