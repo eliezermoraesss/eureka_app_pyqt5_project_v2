@@ -48,18 +48,6 @@ class CustomLineEdit(QLineEdit):
         super(CustomLineEdit, self).mousePressEvent(event)
 
 
-def numero_linhas_consulta(query_consulta):
-    order_by_a_remover = "ORDER BY B1_COD ASC"
-    query_sem_order_by = query_consulta.replace(order_by_a_remover, "")
-
-    query = f"""
-                SELECT 
-                    COUNT(*) AS total_records
-                FROM ({query_sem_order_by}) AS combined_results;
-            """
-    return query
-
-
 def abrir_janela_novo_produto():
     new_product_window = NewProductWindow()
     new_product_window.exec_()
@@ -621,7 +609,22 @@ class EngenhariaApp(QWidget):
         filtro_bloqueio = f"AND B1_MSBLQL = '{status_bloqueio}'" if status_bloqueio != '' else ''
 
         query = f"""
-        SELECT B1_COD AS "Código", 
+        WITH SG10_MAX AS (
+            SELECT 
+                G1_COD, 
+                G1_REVFIM
+            FROM (
+                SELECT 
+                    G1_COD,
+                    G1_REVFIM,
+                    ROW_NUMBER() OVER (PARTITION BY G1_COD ORDER BY G1_REVFIM DESC) AS rn
+                FROM PROTHEUS12_R27.dbo.SG1010
+                WHERE D_E_L_E_T_ <> '*' AND G1_REVFIM <> 'ZZZ'
+            ) AS ranked
+            WHERE rn = 1
+        )
+        SELECT 
+            B1_COD AS "Código", 
             B1_DESC AS "Descrição", 
             B1_XDESC2 AS "Desc. Compl.", 
             B1_TIPO AS "Tipo", 
@@ -630,16 +633,21 @@ class EngenhariaApp(QWidget):
             B1_GRUPO AS "Grupo", 
             B1_ZZNOGRP AS "Desc. Grupo", 
             B1_CC AS "Centro Custo", 
-            B1_MSBLQL AS "Bloqueado?", 
+            B1_MSBLQL AS "Bloqueado?",
+            CASE 
+                WHEN SG.G1_COD IS NOT NULL THEN 'Sim'
+                ELSE 'Não'
+            END AS Estrutura,
             B1_REVATU AS "Últ. Rev.", 
             B1_DATREF AS "Cadastrado em:", 
             B1_UREV AS "Data Últ. Rev.", 
             B1_ZZLOCAL AS "Endereço",
             B1_POSIPI AS "NCM",
-            B1_PESO AS "Peso Líquido",
-            B1_PESBRU AS "Peso Bruto"
+            B1_PESO AS "Peso Líquido"
         FROM 
-            {self.database}.dbo.SB1010
+            {self.database}.dbo.SB1010 B1
+        LEFT JOIN
+            SG10_MAX SG ON SG.G1_COD = B1.B1_COD
         WHERE 
             B1_COD LIKE '{codigo}%' 
             AND B1_DESC LIKE '{descricao}%' 
@@ -650,10 +658,25 @@ class EngenhariaApp(QWidget):
             AND B1_GRUPO LIKE '{grupo}%'
             AND B1_CC LIKE '{centro_custo}%'
             {filtro_bloqueio}
-            AND D_E_L_E_T_ <> '*'
+            AND B1.D_E_L_E_T_ <> '*'
             ORDER BY B1_COD ASC
         """
         return query
+
+    def table_line_number(self, line_number):
+        if line_number >= 1:
+            if line_number > 1:
+                message = f"Foram encontrados {line_number} itens"
+            else:
+                message = f"Foi encontrado {line_number} item"
+
+            self.label_line_number.setText(f"{message}")
+            self.label_line_number.show()
+            return True
+        else:
+            self.controle_campos_formulario(True)
+            self.button_visible_control(False)
+            return False
 
     def executar_consulta(self):
         query_consulta = self.query_consulta_tabela_produtos()
@@ -661,8 +684,6 @@ class EngenhariaApp(QWidget):
         if isinstance(query_consulta, bool) and query_consulta:
             self.btn_consultar.setEnabled(True)
             return
-
-        query_contagem_linhas = numero_linhas_consulta(query_consulta)
 
         self.label_line_number.hide()
         self.controle_campos_formulario(False)
@@ -673,20 +694,11 @@ class EngenhariaApp(QWidget):
         self.engine = create_engine(f'mssql+pyodbc:///?odbc_connect={conn_str}')
 
         try:
-            dataframe_line_number = pd.read_sql(query_contagem_linhas, self.engine)
-            line_number = dataframe_line_number.iloc[0, 0]
             dataframe = pd.read_sql(query_consulta, self.engine)
             dataframe.insert(5, 'Desenho PDF', '')
 
             if not dataframe.empty:
-
-                if line_number > 1:
-                    message = f"Foram encontrados {line_number} itens"
-                else:
-                    message = f"Foi encontrado {line_number} item"
-
-                self.label_line_number.setText(f"{message}")
-                self.label_line_number.show()
+                self.table_line_number(dataframe.shape[0])
 
                 self.configurar_tabela(dataframe)
                 self.configurar_tabela_tooltips(dataframe)
@@ -704,8 +716,8 @@ class EngenhariaApp(QWidget):
                 exibir_mensagem("EUREKA® Engenharia", 'Nada encontrado!', "info")
                 return
 
-            COLOR_FILE_EXISTS = QColor(51, 211, 145)  # green
-            COLOR_FILE_MISSING = QColor(201, 92, 118)  # light red
+            GREEN_COLOR = QColor(51, 211, 145)  # green
+            RED_COLOR = QColor(201, 92, 118)  # light red
 
             # Preencher a tabela com os resultados
             for i, (index, row) in enumerate(dataframe.iterrows()):
@@ -739,13 +751,20 @@ class EngenhariaApp(QWidget):
 
                         # Check if file exists and set background color accordingly
                         if os.path.exists(pdf_path):
-                            item.setBackground(COLOR_FILE_EXISTS)
+                            item.setBackground(GREEN_COLOR)
                             item.setText('Sim')
                             item.setToolTip("Desenho encontrado")
                         else:
-                            item.setBackground(COLOR_FILE_MISSING)
+                            item.setBackground(RED_COLOR)
                             item.setText('Não')
                             item.setToolTip("Desenho não encontrado")
+                    elif column_name == "Estrutura":
+                        if value == 'Sim':
+                            item.setBackground(GREEN_COLOR)
+                            item.setToolTip("O produto tem estrutura")
+                        elif value == 'Não':
+                            item.setBackground(RED_COLOR)
+                            item.setToolTip("O produto não tem estrutura")
 
                     self.tree.setItem(i, list(row.index).index(column_name), item)
 
