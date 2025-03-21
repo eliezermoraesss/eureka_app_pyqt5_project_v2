@@ -42,7 +42,7 @@ class NewProductWindow(QtWidgets.QDialog):
         self.required_field_is_blank = False
         self.selected_row = []
         self.user_data = load_session()
-        self.setFixedSize(640, 600)
+        self.setFixedSize(640, 678)
         self.ui = Ui_NewProductWindow()
         self.ui.setupUi(self)
         self.entity_names = {
@@ -51,7 +51,9 @@ class NewProductWindow(QtWidgets.QDialog):
             "unidade_medida": "UNID. MEDIDA",
             "armazem": "ARMAZÉM",
             "centro_custo": "CENTRO DE CUSTO",
-            "grupo": "GRUPO"
+            "grupo": "GRUPO",
+            "ncm": "NCM",
+            "peso_liquido": "PESO LÍQUIDO"
         }
         self.required_fields = {
             "codigo": self.ui.codigo_field,
@@ -60,7 +62,9 @@ class NewProductWindow(QtWidgets.QDialog):
             "unidade_medida": self.ui.um_field,
             "armazem": self.ui.armazem_field,
             "centro_custo": self.ui.cc_field,
-            "grupo": self.ui.grupo_field
+            "grupo": self.ui.grupo_field,
+            "ncm": self.ui.ncm_field,
+            "peso_liquido": self.ui.peso_field
         }
         self.init_ui()
 
@@ -96,6 +100,8 @@ class NewProductWindow(QtWidgets.QDialog):
         self.ui.cc_field.returnPressed.connect(self.insert_product)
         self.ui.grupo_field.returnPressed.connect(self.insert_product)
         self.ui.endereco_field.returnPressed.connect(self.insert_product)
+        self.ui.ncm_field.returnPressed.connect(self.insert_product)
+        self.ui.peso_field.returnPressed.connect(self.insert_product)
 
     def validate_required_fields(self, entity, field):
         if field != '':

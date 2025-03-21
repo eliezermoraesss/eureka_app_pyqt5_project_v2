@@ -15,7 +15,8 @@ def insert_query(self):
     centro_custo = formatar_campo(self.ui.cc_field)
     bloquear = self.ui.bloquear_combobox.currentText()
     endereco = formatar_campo(self.ui.endereco_field)
-
+    ncm = formatar_campo(self.ui.ncm_field)
+    peso_liquido = self.ui.peso_field.text().replace(",", ".").strip()
     data_cadastro = datetime.now().strftime("%Y%m%d")
     chave_primaria = self.nova_chave_primaria()
 
@@ -61,9 +62,9 @@ def insert_query(self):
                     D_E_L_E_T_, R_E_C_N_O_, R_E_C_D_E_L_) 
                 VALUES(0.0, N'    ', N'{codigo.ljust(15)}', N'{descricao.ljust(100)}', N'{descricao_compl.ljust(60)}', 
                 N'                           ', N'{tipo.ljust(2)}', N'{unidade.ljust(2)}', N'{armazem.ljust(2)}', N'{grupo.ljust(4)}', 
-                N'{endereco.ljust(6)}', N'          ', N'  ', N'   ', N'   ', 0.0, 0.0, 0.0, N'         ', N'   ', N'   ', 0.0, 
+                N'{endereco.ljust(6)}', N'{ncm.ljust(10)}', N'  ', N'   ', N'   ', 0.0, 0.0, 0.0, N'         ', N'   ', N'   ', 0.0, 
                 N'                    ', N'  ', 0.0, N' ', 0.0, N'M', N'               ', 0.0, 0.0, 0.0, 0.0, 
-                N'        ', N'        ', 0.0, N'1', N'   ', 0.0, 0.0, N'   ', 0.0, N' ', 0.0, 0.0, 
+                N'        ', N'        ', 0.0, N'1', N'   ', {peso_liquido}, 0.0, N'   ', 0.0, N' ', 0.0, 0.0, 
                 N'                    ', 0.0, N'{centro_custo.ljust(9)}', N'         ', N'      ', N'  ', N' ', 1.0, N' ', 
                 N'N', N' ', N'  ', N'{data_cadastro.ljust(8)}', N'{data_cadastro.ljust(8)}', N' ', N'N', N' ', 0.0, N'        ', N' ', 0.0, 
                 N'      ', N'S', 0.0, N'        ', N' ', 0.0, N'               ', N' ', 0.0, N'   ', N' ', 

@@ -48,7 +48,7 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
             "centro_custo": "CENTRO DE CUSTO",
             "grupo": "GRUPO",
             "ncm": "NCM",
-            "peso_liquido": "PESO LÍQUIDO",
+            "peso_liquido": "PESO LÍQUIDO"
         }
         self.required_fields = {
             "descricao": self.ui.descricao_field,
