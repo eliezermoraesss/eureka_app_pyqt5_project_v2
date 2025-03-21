@@ -37,7 +37,7 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
         self.required_field_is_blank = False
         self.selected_row = selected_row
         self.user_data = load_session()
-        self.setFixedSize(640, 600)
+        self.setFixedSize(640, 639)
         self.ui = Ui_EditProductWindow()
         self.ui.setupUi(self)
         self.entity_names = {
@@ -46,7 +46,9 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
             "unidade_medida": "UNID. MEDIDA",
             "armazem": "ARMAZÉM",
             "centro_custo": "CENTRO DE CUSTO",
-            "grupo": "GRUPO"
+            "grupo": "GRUPO",
+            "ncm": "NCM",
+            "peso_liquido": "PESO LÍQUIDO",
         }
         self.required_fields = {
             "descricao": self.ui.descricao_field,
@@ -54,7 +56,9 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
             "unidade_medida": self.ui.um_field,
             "armazem": self.ui.armazem_field,
             "centro_custo": self.ui.cc_field,
-            "grupo": self.ui.grupo_field
+            "grupo": self.ui.grupo_field,
+            "ncm": self.ui.ncm_field,
+            "peso_liquido": self.ui.peso_field
         }
         self.init_ui()
 
@@ -69,7 +73,9 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
         self.ui.grupo_field.setText(self.selected_row[7])
         self.ui.desc_grupo_field.setText(self.selected_row[8])
         self.ui.bloquear_combobox.setCurrentText(self.selected_row[10])
-        self.ui.endereco_field.setText(self.selected_row[14])
+        self.ui.endereco_field.setText(self.selected_row[15])
+        self.ui.ncm_field.setText(self.selected_row[16])
+        self.ui.peso_field.setText(self.selected_row[17])
 
         self.ui.btn_close.clicked.connect(self.close)
         self.ui.btn_save.clicked.connect(self.update_product)
@@ -101,6 +107,8 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
         self.ui.cc_field.returnPressed.connect(self.update_product)
         self.ui.grupo_field.returnPressed.connect(self.update_product)
         self.ui.endereco_field.returnPressed.connect(self.update_product)
+        self.ui.ncm_field.returnPressed.connect(self.update_product)
+        self.ui.peso_field.returnPressed.connect(self.update_product)
 
     def validate_required_fields(self, entity, field):
         if field != '':
@@ -130,7 +138,9 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
         self.selected_row[8] = self.ui.desc_grupo_field.text().upper().strip()
         self.selected_row[9] = self.ui.cc_field.text().upper().strip()
         self.selected_row[10] = self.ui.bloquear_combobox.currentText()
-        self.selected_row[14] = self.ui.endereco_field.text().upper().strip()
+        self.selected_row[15] = self.ui.endereco_field.text().upper().strip()
+        self.selected_row[16] = self.ui.ncm_field.text().upper().strip()
+        self.selected_row[17] = self.ui.peso_field.text().replace(',', '.').strip()
 
     def verify_blank_required_fields(self):
         self.required_field_is_blank = False
@@ -163,7 +173,9 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
                     B1_ZZNOGRP = ?,
                     B1_CC = ?,
                     B1_MSBLQL = ?,
-                    B1_ZZLOCAL = ?
+                    B1_ZZLOCAL = ?,
+                    B1_POSIPI = ?,
+                    B1_PESO = ?
                 WHERE 
                     B1_COD LIKE ?
                 """
@@ -179,7 +191,9 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
                 self.selected_row[8].ljust(30),
                 self.selected_row[9].ljust(9),
                 '1' if self.selected_row[10] == 'Sim' else '2',
-                self.selected_row[14].ljust(6),
+                self.selected_row[15].ljust(6),
+                self.selected_row[16].ljust(10),
+                self.selected_row[17],
                 f"{self.selected_row[0]}%"
             ]
 

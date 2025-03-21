@@ -201,7 +201,9 @@ def format_log_description(selected_row_before_changed, selected_row_after_chang
         8: 'Desc. Grupo: ',
         9: 'Centro Custo: ',
         10: 'Bloqueio: ',
-        14: 'Endereco: '
+        15: 'Endereco: ',
+        16: 'NCM: ',
+        17: 'Peso Líq.: '
     }
     for value in selected_row_after_changed:
         if value not in selected_row_before_changed:

@@ -479,10 +479,7 @@ class EngenhariaApp(QWidget):
     def abrir_janela_edicao(self, selected_row_table):
         edit_window = EditarProdutoItemWindow(selected_row_table)
         if edit_window.exec_():
-            selected_row = self.tree.currentRow()
-            for column, value in enumerate(selected_row_table):
-                item = QTableWidgetItem(value)
-                self.tree.setItem(selected_row, column, item)
+            self.btn_consultar_actions()
 
     def configurar_tabela_tooltips(self, dataframe):
         tooltips = {
@@ -501,7 +498,9 @@ class EngenhariaApp(QWidget):
             "B1_REVATU": "Revisão atual do produto",
             "B1_DATREF": "Data de referência",
             "B1_UREV": "Unidade de revisão",
-            "B1_ZZLOCAL": "Localização do produto"
+            "B1_ZZLOCAL": "Localização do produto",
+            "B1_POSIPI": "NCM do produto",
+            "B1_PESO": "Peso líquido do produto"
         }
 
         headers = dataframe.columns

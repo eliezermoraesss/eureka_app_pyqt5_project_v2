@@ -9,14 +9,14 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QRegExp
-from PyQt5.QtGui import QRegExpValidator
+from PyQt5.QtCore import QRegExp, QLocale
+from PyQt5.QtGui import QRegExpValidator, QDoubleValidator
 
 
 class Ui_EditProductWindow(object):
     def setupUi(self, EditProductWindow):
         EditProductWindow.setObjectName("EditProductWindow")
-        EditProductWindow.resize(640, 600)
+        EditProductWindow.resize(640, 639)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/image/image/LOGO.jpeg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         EditProductWindow.setWindowIcon(icon)
@@ -93,7 +93,7 @@ class Ui_EditProductWindow(object):
         self.enaplic_logo.setScaledContents(True)
         self.enaplic_logo.setObjectName("enaplic_logo")
         self.main_area = QtWidgets.QWidget(EditProductWindow)
-        self.main_area.setGeometry(QtCore.QRect(0, 50, 641, 551))
+        self.main_area.setGeometry(QtCore.QRect(0, 50, 641, 591))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -248,7 +248,7 @@ class Ui_EditProductWindow(object):
         self.tipo_label.setFont(font)
         self.tipo_label.setObjectName("tipo_label")
 
-        self.btn_close.setGeometry(QtCore.QRect(490, 480, 111, 41))
+        self.btn_close.setGeometry(QtCore.QRect(490, 510, 111, 41))
         self.btn_close.setMinimumSize(QtCore.QSize(0, 41))
         font = QtGui.QFont()
         font.setPointSize(1)
@@ -332,7 +332,7 @@ class Ui_EditProductWindow(object):
         self.armazem_label.setFont(font)
         self.armazem_label.setObjectName("armazem_label")
 
-        self.btn_save.setGeometry(QtCore.QRect(360, 480, 111, 41))
+        self.btn_save.setGeometry(QtCore.QRect(360, 510, 111, 41))
         self.btn_save.setMinimumSize(QtCore.QSize(0, 41))
         font = QtGui.QFont()
         font.setPointSize(1)
@@ -411,6 +411,11 @@ class Ui_EditProductWindow(object):
         self.ncm_field.setClearButtonEnabled(True)
         self.ncm_field.setObjectName("ncm_field")
 
+        # Adicionando o validador para aceitar apenas 8 caracteres numéricos
+        ncm_regex = QRegExp(r'^\d{1,8}$')
+        ncm_validator = QRegExpValidator(ncm_regex)
+        self.ncm_field.setValidator(ncm_validator)
+
         self.peso_field.setGeometry(QtCore.QRect(210, 440, 151, 41))
         self.peso_field.setMinimumSize(QtCore.QSize(10, 41))
         font = QtGui.QFont()
@@ -424,9 +429,10 @@ class Ui_EditProductWindow(object):
         self.peso_field.setClearButtonEnabled(True)
         self.peso_field.setObjectName("peso_field")
 
-        # Adicionando o validador para aceitar apenas valores decimais com vírgula
-        decimal_regex = QRegExp(r'^\d{0,7},\d{0,4}$')
-        validator = QRegExpValidator(decimal_regex)
+        # Adding the validator to accept only decimal values with a comma
+        validator = QDoubleValidator(0.0, 9999999.99, 4)
+        validator.setNotation(QDoubleValidator.StandardNotation)
+        validator.setLocale(QLocale(QLocale.Portuguese, QLocale.Brazil))
         self.peso_field.setValidator(validator)
 
         self.ncm_label = QtWidgets.QLabel(self.main_area)
@@ -687,7 +693,7 @@ class Ui_EditProductWindow(object):
         self.btn_search_grupo.setObjectName("btn_search_grupo")
 
         self.logo_enaplic_50 = QtWidgets.QLabel(self.main_area)
-        self.logo_enaplic_50.setGeometry(QtCore.QRect(50, 450, 121, 101))
+        self.logo_enaplic_50.setGeometry(QtCore.QRect(50, 490, 121, 101))
         self.logo_enaplic_50.setText("")
         self.logo_enaplic_50.setPixmap(QtGui.QPixmap(":/image/image/logo_enaplic_50_anos.png"))
         self.logo_enaplic_50.setScaledContents(True)
