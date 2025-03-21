@@ -9,6 +9,8 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QRegExp
+from PyQt5.QtGui import QRegExpValidator
 
 
 class Ui_EditProductWindow(object):
@@ -196,6 +198,8 @@ class Ui_EditProductWindow(object):
         self.grupo_field = QtWidgets.QLineEdit(self.main_area)
         self.btn_search_grupo = QtWidgets.QPushButton(self.main_area)
         self.desc_grupo_field = QtWidgets.QLineEdit(self.main_area)
+        self.ncm_field = QtWidgets.QLineEdit(self.main_area)
+        self.peso_field = QtWidgets.QLineEdit(self.main_area)
 
         self.btn_save = QtWidgets.QPushButton(self.main_area)
         self.btn_close = QtWidgets.QPushButton(self.main_area)
@@ -283,7 +287,6 @@ class Ui_EditProductWindow(object):
         font.setWeight(75)
         self.descricao_label.setFont(font)
         self.descricao_label.setObjectName("descricao_label")
-
 
         self.descricao_field.setGeometry(QtCore.QRect(50, 40, 551, 41))
         self.descricao_field.setMinimumSize(QtCore.QSize(301, 41))
@@ -394,6 +397,55 @@ class Ui_EditProductWindow(object):
         self.desc_grupo_field.setReadOnly(True)
         self.desc_grupo_field.setClearButtonEnabled(False)
         self.desc_grupo_field.setObjectName("desc_grupo_field")
+
+        self.ncm_field.setGeometry(QtCore.QRect(50, 440, 131, 41))
+        self.ncm_field.setMinimumSize(QtCore.QSize(10, 41))
+        font = QtGui.QFont()
+        font.setPointSize(1)
+        self.ncm_field.setFont(font)
+        self.ncm_field.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.ncm_field.setInputMask("")
+        self.ncm_field.setText("")
+        self.ncm_field.setMaxLength(8)
+        self.ncm_field.setEchoMode(QtWidgets.QLineEdit.Normal)
+        self.ncm_field.setClearButtonEnabled(True)
+        self.ncm_field.setObjectName("ncm_field")
+
+        self.peso_field.setGeometry(QtCore.QRect(210, 440, 151, 41))
+        self.peso_field.setMinimumSize(QtCore.QSize(10, 41))
+        font = QtGui.QFont()
+        font.setPointSize(1)
+        self.peso_field.setFont(font)
+        self.peso_field.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.peso_field.setInputMask("")
+        self.peso_field.setText("")
+        self.peso_field.setMaxLength(9)
+        self.peso_field.setEchoMode(QtWidgets.QLineEdit.Normal)
+        self.peso_field.setClearButtonEnabled(True)
+        self.peso_field.setObjectName("peso_field")
+
+        # Adicionando o validador para aceitar apenas valores decimais com vírgula
+        decimal_regex = QRegExp(r'^\d{0,7},\d{0,4}$')
+        validator = QRegExpValidator(decimal_regex)
+        self.peso_field.setValidator(validator)
+
+        self.ncm_label = QtWidgets.QLabel(self.main_area)
+        self.ncm_label.setGeometry(QtCore.QRect(60, 420, 111, 16))
+        font = QtGui.QFont()
+        font.setPointSize(1)
+        font.setBold(True)
+        font.setWeight(75)
+        self.ncm_label.setFont(font)
+        self.ncm_label.setObjectName("ncm_label")
+
+        self.peso_label = QtWidgets.QLabel(self.main_area)
+        self.peso_label.setGeometry(QtCore.QRect(220, 420, 111, 16))
+        font = QtGui.QFont()
+        font.setPointSize(1)
+        font.setBold(True)
+        font.setWeight(75)
+        self.peso_label.setFont(font)
+        self.peso_label.setObjectName("peso_label")
 
         self.desc_grupo_label = QtWidgets.QLabel(self.main_area)
         self.desc_grupo_label.setGeometry(QtCore.QRect(210, 340, 101, 16))
@@ -662,4 +714,6 @@ class Ui_EditProductWindow(object):
         self.bloquear_combobox.setItemText(1, _translate("EditProductWindow", "Sim"))
         self.bloquear_label.setText(_translate("EditProductWindow", "Bloquear?"))
         self.endereco_label.setText(_translate("EditProductWindow", "Endereço estoque"))
+        self.ncm_label.setText(_translate("EditProductWindow", "NCM"))
+        self.peso_label.setText(_translate("EditProductWindow", "Peso Líquido"))
 from src.qt.ui import resource_rc

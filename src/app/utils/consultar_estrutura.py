@@ -356,7 +356,7 @@ class ConsultaEstrutura(QWidget):
                     0,
                     "QUANTIDADE INVÁLIDA\n\nOs valores devem ser números, não nulos, sem espaços em branco e maiores "
                     "que zero.\nPor favor, corrija tente novamente!",
-                    "SMARTPLIC®", 48 | 0)
+                    "Eureka®", 48 | 0)
 
     def get_last_revision(self, codigo):
         query = f"""
