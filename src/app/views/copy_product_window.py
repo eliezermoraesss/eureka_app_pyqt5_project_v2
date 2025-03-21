@@ -42,7 +42,7 @@ class CopyProdutoItemWindow(QtWidgets.QDialog):
 
         self.required_field_is_blank = False
         self.user_data = load_session()
-        self.setFixedSize(640, 600)
+        self.setFixedSize(640, 678)
         self.ui = Ui_CopyProductWindow()
         self.ui.setupUi(self)
         self.entity_names = {
@@ -52,7 +52,9 @@ class CopyProdutoItemWindow(QtWidgets.QDialog):
             "unidade_medida": "UNID. MEDIDA",
             "armazem": "ARMAZÉM",
             "centro_custo": "CENTRO DE CUSTO",
-            "grupo": "GRUPO"
+            "grupo": "GRUPO",
+            "ncm": "NCM",
+            "peso_liquido": "PESO LÍQUIDO"
         }
         self.required_fields = {
             "codigo": self.ui.codigo_field,
@@ -61,7 +63,9 @@ class CopyProdutoItemWindow(QtWidgets.QDialog):
             "unidade_medida": self.ui.um_field,
             "armazem": self.ui.armazem_field,
             "centro_custo": self.ui.cc_field,
-            "grupo": self.ui.grupo_field
+            "grupo": self.ui.grupo_field,
+            "ncm": self.ui.ncm_field,
+            "peso_liquido": self.ui.peso_field
         }
         self.init_ui()
 
@@ -75,7 +79,9 @@ class CopyProdutoItemWindow(QtWidgets.QDialog):
         self.ui.grupo_field.setText(self.selected_row[7])
         self.ui.desc_grupo_field.setText(self.selected_row[8])
         self.ui.bloquear_combobox.setCurrentText(self.selected_row[10])
-        self.ui.endereco_field.setText(self.selected_row[14])
+        self.ui.endereco_field.setText(self.selected_row[15])
+        self.ui.ncm_field.setText(self.selected_row[16])
+        self.ui.peso_field.setText(self.selected_row[17])
 
         self.ui.btn_close.clicked.connect(self.close)
         self.ui.btn_save.clicked.connect(self.insert_product)
@@ -108,6 +114,8 @@ class CopyProdutoItemWindow(QtWidgets.QDialog):
         self.ui.cc_field.returnPressed.connect(self.insert_product)
         self.ui.grupo_field.returnPressed.connect(self.insert_product)
         self.ui.endereco_field.returnPressed.connect(self.insert_product)
+        self.ui.ncm_field.returnPressed.connect(self.insert_product)
+        self.ui.peso_field.returnPressed.connect(self.insert_product)
 
     def validate_required_fields(self, entity, field):
         if field != '':

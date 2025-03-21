@@ -48,16 +48,6 @@ class CustomLineEdit(QLineEdit):
         super(CustomLineEdit, self).mousePressEvent(event)
 
 
-def abrir_janela_novo_produto():
-    new_product_window = NewProductWindow()
-    new_product_window.exec_()
-
-
-def abrir_janela_copiar_produto(selected_row_table):
-    copy_window = CopyProdutoItemWindow(selected_row_table)
-    copy_window.exec_()
-
-
 class EngenhariaApp(QWidget):
     guia_fechada = pyqtSignal()
 
@@ -163,7 +153,7 @@ class EngenhariaApp(QWidget):
         self.btn_consultar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_new_product = QPushButton("Cadastrar novo produto", self)
-        self.btn_new_product.clicked.connect(abrir_janela_novo_produto)
+        self.btn_new_product.clicked.connect(self.abrir_janela_novo_produto)
         self.btn_new_product.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.btn_home = QPushButton("HOME", self)
@@ -401,7 +391,7 @@ class EngenhariaApp(QWidget):
             nova_janela.triggered.connect(self.abrir_nova_janela)
 
             new_product = QAction('Cadastrar novo produto...', self)
-            new_product.triggered.connect(abrir_janela_novo_produto)
+            new_product.triggered.connect(self.abrir_janela_novo_produto)
 
             cadastro_copia_produto = QAction('Cadastro semelhante...', self)
             cadastro_copia_produto.triggered.connect(self.copiar_item_selecionado)
@@ -469,12 +459,22 @@ class EngenhariaApp(QWidget):
     def copiar_item_selecionado(self):
         selected_row_table = self.linha_selecionada()
         if selected_row_table:
-            abrir_janela_copiar_produto(selected_row_table)
+            self.abrir_janela_copiar_produto(selected_row_table)
 
     def editar_item_selecionado(self):
         selected_row_table = self.linha_selecionada()
         if selected_row_table:
             self.abrir_janela_edicao(selected_row_table)
+
+    def abrir_janela_novo_produto(self):
+        new_product_window = NewProductWindow()
+        if new_product_window.exec_():
+            self.btn_consultar_actions()
+
+    def abrir_janela_copiar_produto(self, selected_row_table):
+        copy_window = CopyProdutoItemWindow(selected_row_table)
+        if copy_window.exec_():
+            self.btn_consultar_actions()
 
     def abrir_janela_edicao(self, selected_row_table):
         edit_window = EditarProdutoItemWindow(selected_row_table)

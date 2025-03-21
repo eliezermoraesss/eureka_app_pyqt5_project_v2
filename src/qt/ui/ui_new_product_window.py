@@ -740,6 +740,6 @@ class Ui_NewProductWindow(object):
         self.bloquear_label.setText(_translate("NewProductWindow", "Bloquear?"))
         self.endereco_label.setText(_translate("NewProductWindow", "Endereço estoque"))
         self.codigo_label.setText(_translate("NewProductWindow", "Código"))
-        self.ncm_label.setText(_translate("EditProductWindow", "NCM"))
-        self.peso_label.setText(_translate("EditProductWindow", "Peso Líquido"))
+        self.ncm_label.setText(_translate("NewProductWindow", "NCM"))
+        self.peso_label.setText(_translate("NewProductWindow", "Peso Líquido"))
 from src.qt.ui import resource_rc

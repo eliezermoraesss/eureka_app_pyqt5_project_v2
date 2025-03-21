@@ -9,12 +9,14 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QLocale, QRegExp
+from PyQt5.QtGui import QDoubleValidator, QRegExpValidator
 
 
 class Ui_CopyProductWindow(object):
     def setupUi(self, CopyProductWindow):
         CopyProductWindow.setObjectName("CopyProductWindow")
-        CopyProductWindow.resize(640, 600)
+        CopyProductWindow.resize(640, 678)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -91,7 +93,7 @@ class Ui_CopyProductWindow(object):
         self.enaplic_logo.setScaledContents(True)
         self.enaplic_logo.setObjectName("enaplic_logo")
         self.main_area = QtWidgets.QWidget(CopyProductWindow)
-        self.main_area.setGeometry(QtCore.QRect(0, 50, 641, 551))
+        self.main_area.setGeometry(QtCore.QRect(0, 50, 641, 631))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -197,6 +199,8 @@ class Ui_CopyProductWindow(object):
         self.grupo_field = QtWidgets.QLineEdit(self.main_area)
         self.btn_search_grupo = QtWidgets.QPushButton(self.main_area)
         self.desc_grupo_field = QtWidgets.QLineEdit(self.main_area)
+        self.ncm_field = QtWidgets.QLineEdit(self.main_area)
+        self.peso_field = QtWidgets.QLineEdit(self.main_area)
 
         self.desc_comp_field.setGeometry(QtCore.QRect(50, 180, 551, 41))
         self.desc_comp_field.setMinimumSize(QtCore.QSize(301, 41))
@@ -243,7 +247,7 @@ class Ui_CopyProductWindow(object):
         self.tipo_label.setFont(font)
         self.tipo_label.setObjectName("tipo_label")
         self.btn_close = QtWidgets.QPushButton(self.main_area)
-        self.btn_close.setGeometry(QtCore.QRect(490, 480, 111, 41))
+        self.btn_close.setGeometry(QtCore.QRect(490, 550, 111, 41))
         self.btn_close.setMinimumSize(QtCore.QSize(0, 41))
         font = QtGui.QFont()
         font.setFamily("Segoe UI")
@@ -328,7 +332,7 @@ class Ui_CopyProductWindow(object):
         self.armazem_label.setFont(font)
         self.armazem_label.setObjectName("armazem_label")
         self.btn_save = QtWidgets.QPushButton(self.main_area)
-        self.btn_save.setGeometry(QtCore.QRect(360, 480, 111, 41))
+        self.btn_save.setGeometry(QtCore.QRect(360, 550, 111, 41))
         self.btn_save.setMinimumSize(QtCore.QSize(0, 41))
         font = QtGui.QFont()
         font.setFamily("Segoe UI")
@@ -394,6 +398,62 @@ class Ui_CopyProductWindow(object):
         self.desc_grupo_field.setReadOnly(True)
         self.desc_grupo_field.setClearButtonEnabled(False)
         self.desc_grupo_field.setObjectName("desc_grupo_field")
+
+        self.ncm_field.setGeometry(QtCore.QRect(50, 480, 131, 41))
+        self.ncm_field.setMinimumSize(QtCore.QSize(10, 41))
+        font = QtGui.QFont()
+        font.setPointSize(1)
+        self.ncm_field.setFont(font)
+        self.ncm_field.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.ncm_field.setInputMask("")
+        self.ncm_field.setText("")
+        self.ncm_field.setMaxLength(8)
+        self.ncm_field.setEchoMode(QtWidgets.QLineEdit.Normal)
+        self.ncm_field.setClearButtonEnabled(True)
+        self.ncm_field.setObjectName("ncm_field")
+
+        # Adicionando o validador para aceitar apenas 8 caracteres numéricos
+        ncm_regex = QRegExp(r'^\d{1,8}$')
+        ncm_validator = QRegExpValidator(ncm_regex)
+        self.ncm_field.setValidator(ncm_validator)
+
+        self.peso_field.setGeometry(QtCore.QRect(210, 480, 151, 41))
+        self.peso_field.setMinimumSize(QtCore.QSize(10, 41))
+        font = QtGui.QFont()
+        font.setPointSize(1)
+        self.peso_field.setFont(font)
+        self.peso_field.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.peso_field.setInputMask("")
+        self.peso_field.setText("")
+        self.peso_field.setMaxLength(9)
+        self.peso_field.setEchoMode(QtWidgets.QLineEdit.Normal)
+        self.peso_field.setClearButtonEnabled(True)
+        self.peso_field.setObjectName("peso_field")
+
+        # Adding the validator to accept only decimal values with a comma
+        validator = QDoubleValidator(0.0, 9999999.99, 4)
+        validator.setNotation(QDoubleValidator.StandardNotation)
+        validator.setLocale(QLocale(QLocale.Portuguese, QLocale.Brazil))
+        self.peso_field.setValidator(validator)
+
+        self.ncm_label = QtWidgets.QLabel(self.main_area)
+        self.ncm_label.setGeometry(QtCore.QRect(60, 460, 111, 16))
+        font = QtGui.QFont()
+        font.setPointSize(1)
+        font.setBold(True)
+        font.setWeight(75)
+        self.ncm_label.setFont(font)
+        self.ncm_label.setObjectName("ncm_label")
+
+        self.peso_label = QtWidgets.QLabel(self.main_area)
+        self.peso_label.setGeometry(QtCore.QRect(220, 460, 111, 16))
+        font = QtGui.QFont()
+        font.setPointSize(1)
+        font.setBold(True)
+        font.setWeight(75)
+        self.peso_label.setFont(font)
+        self.peso_label.setObjectName("peso_label")
+
         self.desc_grupo_label = QtWidgets.QLabel(self.main_area)
         self.desc_grupo_label.setGeometry(QtCore.QRect(210, 390, 101, 16))
         font = QtGui.QFont()
@@ -629,7 +689,7 @@ class Ui_CopyProductWindow(object):
         self.btn_search_grupo.setIconSize(QtCore.QSize(32, 32))
         self.btn_search_grupo.setObjectName("btn_search_grupo")
         self.logo_enaplic_50 = QtWidgets.QLabel(self.main_area)
-        self.logo_enaplic_50.setGeometry(QtCore.QRect(50, 450, 121, 101))
+        self.logo_enaplic_50.setGeometry(QtCore.QRect(50, 530, 121, 101))
         self.logo_enaplic_50.setText("")
         self.logo_enaplic_50.setPixmap(QtGui.QPixmap(":/image/image/logo_enaplic_50_anos.png"))
         self.logo_enaplic_50.setScaledContents(True)
@@ -679,4 +739,6 @@ class Ui_CopyProductWindow(object):
         self.bloquear_label.setText(_translate("CopyProductWindow", "Bloquear?"))
         self.endereco_label.setText(_translate("CopyProductWindow", "Endereço estoque"))
         self.codigo_label.setText(_translate("CopyProductWindow", "Código"))
+        self.ncm_label.setText(_translate("CopyProductWindow", "NCM"))
+        self.peso_label.setText(_translate("CopyProductWindow", "Peso Líquido"))
 from src.qt.ui import resource_rc

@@ -162,8 +162,7 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
             query = f"""
                 UPDATE
                     PROTHEUS12_R27.dbo.SB1010 
-                SET 
-                    B1_COD = ?,
+                SET
                     B1_DESC = ?,
                     B1_XDESC2 = ?,
                     B1_TIPO = ?,
@@ -177,11 +176,10 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
                     B1_POSIPI = ?,
                     B1_PESO = ?
                 WHERE 
-                    B1_COD LIKE ?
+                    B1_COD = ?
                 """
                 
             data = [
-                self.selected_row[0].ljust(15),
                 self.selected_row[1].ljust(100),
                 self.selected_row[2].ljust(60),
                 self.selected_row[3].ljust(2),
@@ -194,7 +192,7 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
                 self.selected_row[15].ljust(6),
                 self.selected_row[16].ljust(10),
                 self.selected_row[17],
-                f"{self.selected_row[0]}%"
+                self.selected_row[0]
             ]
 
             driver = '{SQL Server}'
