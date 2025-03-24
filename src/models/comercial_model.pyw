@@ -810,9 +810,10 @@ class ComercialApp(QWidget):
                                                               .map(lambda x: round(float(x), 2)))
 
                 if tipo_consulta == 'fiscal':
-                    df_consolidated['DOCUMENTO NF'] = df_consolidated['DOCUMENTO NF'].apply(lambda x: x.lstrip('0'))
+                    df_consolidated['PESO'] = df_consolidated['PESO'].apply(lambda x: format_decimal(x) if x is not None else x)
+                    df_consolidated['DOCUMENTO NF'] = df_consolidated['DOCUMENTO NF'].apply(lambda x: x.lstrip('0') if x is not None else x)
                     df_consolidated['ANO ENTRADA NF'] = df_consolidated['ANO ENTRADA NF'].apply(
-                        lambda x: x[:4])
+                        lambda x: x[:4] if x is not None else x)
 
                 self.configurar_tabela(df_consolidated)
                 self.tree.horizontalHeader().setSortIndicator(-1, Qt.AscendingOrder)
