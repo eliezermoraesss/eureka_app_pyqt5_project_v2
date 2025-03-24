@@ -40,6 +40,91 @@ def query_consulta(codigo):
 
     -- CTE para selecionar as revisões máximas
     WITH MaxRevisoes AS (
+        SELECT
+            G1_COD,
+            MAX(G1_REVFIM) AS MaxRevisao
+        FROM
+            SG1010
+        WHERE
+            G1_REVFIM <> 'ZZZ'
+            AND D_E_L_E_T_ <> '*'
+        GROUP BY
+            G1_COD
+    ),
+    -- CTE para selecionar os itens pai e seus subitens recursivamente
+    ListMP AS (
+        -- Selecionar o item pai inicialmente
+        SELECT
+            G1.G1_COD AS "CÓDIGO",
+            G1.G1_COMP AS "COMPONENTE",
+            G1.G1_QUANT AS "QUANTIDADE",
+            0 AS Nivel,
+            G1.G1_REVFIM AS "REVISAO"
+        FROM
+            SG1010 G1
+        INNER JOIN MaxRevisoes MR ON G1.G1_COD = MR.G1_COD AND G1.G1_REVFIM = MR.MaxRevisao
+        WHERE
+            G1.G1_COD = @CodigoPai
+            AND G1.G1_REVFIM <> 'ZZZ'
+            AND G1.D_E_L_E_T_ <> '*'
+        UNION ALL
+        -- Selecione os subitens de cada item pai e multiplique as quantidades
+        SELECT
+            filho.G1_COD,
+            filho.G1_COMP,
+            filho.G1_QUANT * pai.QUANTIDADE,
+            pai.Nivel + 1,
+            filho.G1_REVFIM
+        FROM
+            SG1010 AS filho
+        INNER JOIN ListMP AS pai ON
+            filho.G1_COD = pai."COMPONENTE"
+        INNER JOIN MaxRevisoes MR ON filho.G1_COD = MR.G1_COD AND filho.G1_REVFIM = MR.MaxRevisao
+        WHERE
+            pai.Nivel < 100
+            -- Defina o limite máximo de recursão aqui
+            AND filho.G1_REVFIM <> 'ZZZ'
+            AND filho.D_E_L_E_T_ <> '*'
+    )
+    -- Selecionar os componentes, somar as quantidades e evitar componentes duplicados
+    SELECT 
+        "COMPONENTE" AS "CÓDIGO",
+        prod.B1_DESC AS "DESCRIÇÃO",
+        SUM("QUANTIDADE") AS "QUANT.",
+        prod.B1_UM AS "UNID. MED.", 
+        prod.B1_UCOM AS "ULT. ATUALIZ.",
+        prod.B1_TIPO AS "TIPO", 
+        prod.B1_LOCPAD AS "ARMAZÉM", 
+        prod.B1_UPRC AS "VALOR UNIT. (R$)",
+        SUM("QUANTIDADE" * prod.B1_UPRC) AS "SUB-TOTAL (R$)"
+    FROM 
+        ListMP AS listMP
+    INNER JOIN 
+        SB1010 AS prod ON listMP."COMPONENTE" = prod.B1_COD
+    WHERE 
+        prod.B1_TIPO = 'MP'
+        AND prod.B1_LOCPAD IN ('01', '03', '11', '12', '97')
+        AND prod.D_E_L_E_T_ <> '*'
+    GROUP BY 
+        "COMPONENTE",
+        prod.B1_DESC,
+        prod.B1_UM,
+        prod.B1_UCOM,
+        prod.B1_TIPO,
+        prod.B1_LOCPAD,
+        prod.B1_UPRC
+    ORDER BY 
+        "COMPONENTE" ASC;
+    """
+    return query
+
+def query_pesquisa_fiscal(codigo):
+
+    query = f"""
+    DECLARE @CodigoPai VARCHAR(50) = '{codigo}';
+
+    -- CTE para selecionar as revisões máximas
+    WITH MaxRevisoes AS (
         SELECT G1_COD, MAX(G1_REVFIM) AS MaxRevisao
         FROM SG1010
         WHERE G1_REVFIM <> 'ZZZ' AND D_E_L_E_T_ <> '*'
@@ -135,6 +220,7 @@ def format_decimal(value):
 class ComercialApp(QWidget):
     def __init__(self, main_window):
         super().__init__()
+        self.tipo_consulta = None
         self.main_window = main_window
         user_data = load_session()
         username = user_data["username"]
@@ -183,6 +269,10 @@ class ComercialApp(QWidget):
         self.btn_consultar.clicked.connect(self.btn_consultar_actions)
         self.btn_consultar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
+        self.btn_consulta_fiscal = QPushButton("Pesquisa Fiscal", self)
+        self.btn_consulta_fiscal.clicked.connect(lambda: self.btn_consultar_actions('fiscal'))
+        self.btn_consulta_fiscal.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
         self.btn_limpar = QPushButton("Limpar", self)
         self.btn_limpar.clicked.connect(self.limpar_campos)
         self.btn_limpar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -227,8 +317,6 @@ class ComercialApp(QWidget):
         self.autocomplete_settings = AutoCompleteManager(history_manager)
         self.autocomplete_settings.setup_autocomplete(self.field_name_list, object_fields)
 
-        self.campo_codigo.returnPressed.connect(self.executar_consulta)
-
         layout = QVBoxLayout()
         container_codigo = QVBoxLayout()
         container_codigo.addWidget(self.label_codigo)
@@ -248,6 +336,7 @@ class ComercialApp(QWidget):
         layout_header.addStretch(1)
         layout_toolbar.addLayout(container_codigo)
         layout_toolbar.addWidget(self.btn_consultar)
+        layout_toolbar.addWidget(self.btn_consulta_fiscal)
         layout_toolbar.addWidget(self.btn_limpar)
         layout_toolbar.addWidget(self.btn_nova_janela)
         layout_toolbar.addWidget(self.btn_exportar_excel)
@@ -271,10 +360,10 @@ class ComercialApp(QWidget):
 
         self.setStyleSheet(comercial_qss())
 
-    def btn_consultar_actions(self):
+    def btn_consultar_actions(self, tipo_consulta=None):
         for field_name in self.field_name_list:
             self.autocomplete_settings.save_search_history(field_name)
-        self.executar_consulta()
+        self.executar_consulta(tipo_consulta)
 
     def return_to_main(self):
         self.close()  # Fecha a janela atual
@@ -431,6 +520,9 @@ class ComercialApp(QWidget):
 
         if os.path.exists(self.file_path):
             os.remove(self.file_path)
+
+        if self.tipo_consulta == 'fiscal':
+            df_tabela = df_tabela.drop(columns=['DOCUMENTO NF', 'DATA DE ENTRADA NF', 'CHAVE DE ACESSO'])
 
         nan_row_index = df_tabela.isna().all(axis=1).idxmax()
         df_dados = df_tabela.iloc[:nan_row_index].dropna(how='all')
@@ -655,8 +747,9 @@ class ComercialApp(QWidget):
         self.btn_exportar_pdf.setEnabled(status)
         self.btn_limpar.setEnabled(status)
         self.btn_abrir_desenho.setEnabled(status)
+        self.btn_consulta_fiscal.setEnabled(status)
 
-    def executar_consulta(self):
+    def executar_consulta(self, tipo_consulta):
         codigo = self.campo_codigo.text().upper().strip()
         self.codigo = codigo
 
@@ -670,7 +763,8 @@ class ComercialApp(QWidget):
 
         dialog = loading_dialog(self, "Carregando...", "🤖 Processando dados do TOTVS..."
                                                        "\n\n🤖 Por favor, aguarde.\n\nEureka®")
-        query = query_consulta(codigo)
+
+        query = query_consulta(codigo) if tipo_consulta != 'fiscal' else query_pesquisa_fiscal(codigo)
         self.label_product_name.hide()
         self.label_costs.hide()
         self.controle_campos_formulario(False)
@@ -682,7 +776,9 @@ class ComercialApp(QWidget):
             dataframe = pd.read_sql(query, engine)
             if not dataframe.empty:
                 self.descricao = self.get_product_name(self.codigo)
-                consolidated_dataframe = dataframe.groupby('CÓDIGO').agg({
+                self.tipo_consulta = None
+
+                common_columns = {
                     'DESCRIÇÃO': 'first',
                     'QUANT.': 'sum',
                     'UNID. MED.': 'first',
@@ -690,21 +786,29 @@ class ComercialApp(QWidget):
                     'TIPO': 'first',
                     'ARMAZÉM': 'first',
                     'VALOR UNIT. (R$)': 'first',
-                    'SUB-TOTAL (R$)': 'sum',
-                    'DOCUMENTO NF': 'first',
-                    'DATA DE ENTRADA NF': 'first',
-                    'CHAVE DE ACESSO': 'first'
-                }).reset_index()
+                    'SUB-TOTAL (R$)': 'sum'
+                }
+
+                if tipo_consulta == 'fiscal':
+                    self.tipo_consulta = tipo_consulta
+                    fiscal_columns = {
+                        'DOCUMENTO NF': 'first',
+                        'DATA DE ENTRADA NF': 'first',
+                        'CHAVE DE ACESSO': 'first'
+                    }
+                    common_columns.update(fiscal_columns)
+
+                df_consolidated = dataframe.groupby('CÓDIGO').agg(common_columns).reset_index()
 
                 # Converter para float com duas casas decimais
                 columns_to_convert = ['QUANT.', 'VALOR UNIT. (R$)', 'SUB-TOTAL (R$)']
-                consolidated_dataframe[columns_to_convert] = (consolidated_dataframe[columns_to_convert]
+                df_consolidated[columns_to_convert] = (df_consolidated[columns_to_convert]
                                                               .map(lambda x: round(float(x), 2)))
-                self.configurar_tabela(consolidated_dataframe)
+                self.configurar_tabela(df_consolidated)
                 self.tree.horizontalHeader().setSortIndicator(-1, Qt.AscendingOrder)
                 self.tree.setRowCount(0)
 
-                for i, row in consolidated_dataframe.iterrows():
+                for i, row in df_consolidated.iterrows():
                     self.tree.setSortingEnabled(False)
                     self.tree.insertRow(i)
                     for column_name, value in row.items():
@@ -730,12 +834,12 @@ class ComercialApp(QWidget):
                         elif column_name in ['VALOR UNIT. (R$)', 'SUB-TOTAL (R$)']:
                             item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
-                        self.tree.setItem(i, consolidated_dataframe.columns.get_loc(column_name), item)
+                        self.tree.setItem(i, df_consolidated.columns.get_loc(column_name), item)
                 self.tree.setSortingEnabled(True)
                 self.controle_campos_formulario(True)
                 self.label_product_name.setText(f"{self.codigo} - {self.descricao}")
                 self.label_product_name.show()
-                self.formatar_indicadores_custos(consolidated_dataframe)
+                self.formatar_indicadores_custos(df_consolidated)
                 self.btn_exportar_excel.show()
                 self.btn_exportar_pdf.show()
                 self.btn_abrir_desenho.show()
