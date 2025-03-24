@@ -36,85 +36,85 @@ from src.resources.styles.qss_comercial import comercial_qss
 def query_consulta(codigo):
 
     query = f"""
-    DECLARE @CodigoPai VARCHAR(50) = '{codigo}'; -- Substitua pelo código pai que deseja consultar
+    DECLARE @CodigoPai VARCHAR(50) = '{codigo}';
 
     -- CTE para selecionar as revisões máximas
     WITH MaxRevisoes AS (
-        SELECT
-            G1_COD,
-            MAX(G1_REVFIM) AS MaxRevisao
-        FROM
-            SG1010
-        WHERE
-            G1_REVFIM <> 'ZZZ'
-            AND D_E_L_E_T_ <> '*'
-        GROUP BY
-            G1_COD
+        SELECT G1_COD, MAX(G1_REVFIM) AS MaxRevisao
+        FROM SG1010
+        WHERE G1_REVFIM <> 'ZZZ' AND D_E_L_E_T_ <> '*'
+        GROUP BY G1_COD
     ),
     -- CTE para selecionar os itens pai e seus subitens recursivamente
     ListMP AS (
-        -- Selecionar o item pai inicialmente
-        SELECT
-            G1.G1_COD AS "CÓDIGO",
-            G1.G1_COMP AS "COMPONENTE",
-            G1.G1_QUANT AS "QUANTIDADE",
-            0 AS Nivel,
-            G1.G1_REVFIM AS "REVISAO"
-        FROM
-            SG1010 G1
+        SELECT G1.G1_COD AS "CÓDIGO", G1.G1_COMP AS "COMPONENTE", G1.G1_QUANT AS "QUANTIDADE", 0 AS Nivel, G1.G1_REVFIM AS "REVISAO"
+        FROM SG1010 G1
         INNER JOIN MaxRevisoes MR ON G1.G1_COD = MR.G1_COD AND G1.G1_REVFIM = MR.MaxRevisao
-        WHERE
-            G1.G1_COD = @CodigoPai
-            AND G1.G1_REVFIM <> 'ZZZ'
-            AND G1.D_E_L_E_T_ <> '*'
+        WHERE G1.G1_COD = @CodigoPai AND G1.G1_REVFIM <> 'ZZZ' AND G1.D_E_L_E_T_ <> '*'
         UNION ALL
-        -- Selecione os subitens de cada item pai e multiplique as quantidades
-        SELECT
-            filho.G1_COD,
-            filho.G1_COMP,
-            filho.G1_QUANT * pai.QUANTIDADE,
-            pai.Nivel + 1,
-            filho.G1_REVFIM
-        FROM
-            SG1010 AS filho
-        INNER JOIN ListMP AS pai ON
-            filho.G1_COD = pai."COMPONENTE"
+        SELECT filho.G1_COD, filho.G1_COMP, filho.G1_QUANT * pai.QUANTIDADE, pai.Nivel + 1, filho.G1_REVFIM
+        FROM SG1010 AS filho
+        INNER JOIN ListMP AS pai ON filho.G1_COD = pai."COMPONENTE"
         INNER JOIN MaxRevisoes MR ON filho.G1_COD = MR.G1_COD AND filho.G1_REVFIM = MR.MaxRevisao
-        WHERE
-            pai.Nivel < 100
-            -- Defina o limite máximo de recursão aqui
-            AND filho.G1_REVFIM <> 'ZZZ'
-            AND filho.D_E_L_E_T_ <> '*'
+        WHERE pai.Nivel < 100 AND filho.G1_REVFIM <> 'ZZZ' AND filho.D_E_L_E_T_ <> '*'
+    ),
+    -- CTE com os dados da Nota Fiscal (simplificada para último registro apenas)
+    UltimaNF AS (
+        SELECT
+            NFE.D1_COD,
+            NFE.D1_DOC AS "DOCUMENTO NF",
+            NFE.D1_DTDIGIT AS "DATA DE ENTRADA NF",
+            livroFiscalFiltrado.F3_CHVNFE AS "CHAVE DE ACESSO",
+            ROW_NUMBER() OVER (PARTITION BY NFE.D1_COD ORDER BY NFE.R_E_C_N_O_ DESC) AS rn
+        FROM PROTHEUS12_R27.dbo.SD1010 NFE
+        LEFT JOIN (
+            SELECT 
+                F3_NFISCAL, 
+                F3_CLIEFOR, 
+                F3_CHVNFE,
+                ROW_NUMBER() OVER (PARTITION BY F3_NFISCAL, F3_CLIEFOR ORDER BY F3_CHVNFE DESC) AS row_num
+            FROM PROTHEUS12_R27.dbo.SF3010
+        ) AS livroFiscalFiltrado
+            ON livroFiscalFiltrado.F3_NFISCAL = NFE.D1_DOC AND livroFiscalFiltrado.F3_CLIEFOR = NFE.D1_FORNECE
+        WHERE NFE.D1_COD IN (SELECT DISTINCT "COMPONENTE" FROM ListMP)
+            AND NFE.D_E_L_E_T_ <> '*'
+            AND livroFiscalFiltrado.row_num = 1
     )
-    -- Selecionar os componentes, somar as quantidades e evitar componentes duplicados
+    -- Consulta Final
     SELECT 
-        "COMPONENTE" AS "CÓDIGO",
+        listMP."COMPONENTE" AS "CÓDIGO",
         prod.B1_DESC AS "DESCRIÇÃO",
-        SUM("QUANTIDADE") AS "QUANT.",
+        SUM(listMP."QUANTIDADE") AS "QUANT.",
         prod.B1_UM AS "UNID. MED.", 
         prod.B1_UCOM AS "ULT. ATUALIZ.",
         prod.B1_TIPO AS "TIPO", 
         prod.B1_LOCPAD AS "ARMAZÉM", 
         prod.B1_UPRC AS "VALOR UNIT. (R$)",
-        SUM("QUANTIDADE" * prod.B1_UPRC) AS "SUB-TOTAL (R$)"
+        SUM(listMP."QUANTIDADE" * prod.B1_UPRC) AS "SUB-TOTAL (R$)",
+        NF.[DOCUMENTO NF],
+        NF.[DATA DE ENTRADA NF],
+        NF.[CHAVE DE ACESSO] 
     FROM 
-        ListMP AS listMP
-    INNER JOIN 
-        SB1010 AS prod ON listMP."COMPONENTE" = prod.B1_COD
+        ListMP listMP
+    INNER JOIN SB1010 prod ON listMP."COMPONENTE" = prod.B1_COD
+    LEFT JOIN UltimaNF NF ON listMP."COMPONENTE" = NF.D1_COD AND NF.rn = 1
     WHERE 
         prod.B1_TIPO = 'MP'
         AND prod.B1_LOCPAD IN ('01', '03', '11', '12', '97')
         AND prod.D_E_L_E_T_ <> '*'
     GROUP BY 
-        "COMPONENTE",
+        listMP."COMPONENTE",
         prod.B1_DESC,
         prod.B1_UM,
         prod.B1_UCOM,
         prod.B1_TIPO,
         prod.B1_LOCPAD,
-        prod.B1_UPRC
+        prod.B1_UPRC,
+        NF.[DOCUMENTO NF],
+        NF.[DATA DE ENTRADA NF],
+        NF.[CHAVE DE ACESSO] 
     ORDER BY 
-        "COMPONENTE" ASC;
+        listMP."COMPONENTE" ASC;
     """
     return query
 
@@ -690,7 +690,10 @@ class ComercialApp(QWidget):
                     'TIPO': 'first',
                     'ARMAZÉM': 'first',
                     'VALOR UNIT. (R$)': 'first',
-                    'SUB-TOTAL (R$)': 'sum'
+                    'SUB-TOTAL (R$)': 'sum',
+                    'DOCUMENTO NF': 'first',
+                    'DATA DE ENTRADA NF': 'first',
+                    'CHAVE DE ACESSO': 'first'
                 }).reset_index()
 
                 # Converter para float com duas casas decimais
