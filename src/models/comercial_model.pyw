@@ -177,6 +177,7 @@ def query_pesquisa_fiscal(codigo):
         prod.B1_LOCPAD AS "ARMAZÉM", 
         prod.B1_UPRC AS "VALOR UNIT. (R$)",
         SUM(listMP."QUANTIDADE" * prod.B1_UPRC) AS "SUB-TOTAL (R$)",
+        prod.B1_PESO AS "PESO",
         NF.[DOCUMENTO NF],
         NF.[ANO ENTRADA NF],
         NF.[CHAVE DE ACESSO] 
@@ -196,6 +197,7 @@ def query_pesquisa_fiscal(codigo):
         prod.B1_TIPO,
         prod.B1_LOCPAD,
         prod.B1_UPRC,
+        prod.B1_PESO,
         NF.[DOCUMENTO NF],
         NF.[ANO ENTRADA NF],
         NF.[CHAVE DE ACESSO] 
@@ -793,6 +795,7 @@ class ComercialApp(QWidget):
                 if tipo_consulta == 'fiscal':
                     self.tipo_consulta = tipo_consulta
                     fiscal_columns = {
+                        'PESO': 'first',
                         'DOCUMENTO NF': 'first',
                         'ANO ENTRADA NF': 'first',
                         'CHAVE DE ACESSO': 'first'
