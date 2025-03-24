@@ -148,7 +148,7 @@ def query_pesquisa_fiscal(codigo):
         SELECT
             NFE.D1_COD,
             NFE.D1_DOC AS "DOCUMENTO NF",
-            NFE.D1_DTDIGIT AS "DATA DE ENTRADA NF",
+            NFE.D1_DTDIGIT AS "ANO ENTRADA NF",
             livroFiscalFiltrado.F3_CHVNFE AS "CHAVE DE ACESSO",
             ROW_NUMBER() OVER (PARTITION BY NFE.D1_COD ORDER BY NFE.R_E_C_N_O_ DESC) AS rn
         FROM PROTHEUS12_R27.dbo.SD1010 NFE
@@ -159,6 +159,7 @@ def query_pesquisa_fiscal(codigo):
                 F3_CHVNFE,
                 ROW_NUMBER() OVER (PARTITION BY F3_NFISCAL, F3_CLIEFOR ORDER BY F3_CHVNFE DESC) AS row_num
             FROM PROTHEUS12_R27.dbo.SF3010
+            WHERE F3_ESPECIE = 'SPED'
         ) AS livroFiscalFiltrado
             ON livroFiscalFiltrado.F3_NFISCAL = NFE.D1_DOC AND livroFiscalFiltrado.F3_CLIEFOR = NFE.D1_FORNECE
         WHERE NFE.D1_COD IN (SELECT DISTINCT "COMPONENTE" FROM ListMP)
@@ -177,7 +178,7 @@ def query_pesquisa_fiscal(codigo):
         prod.B1_UPRC AS "VALOR UNIT. (R$)",
         SUM(listMP."QUANTIDADE" * prod.B1_UPRC) AS "SUB-TOTAL (R$)",
         NF.[DOCUMENTO NF],
-        NF.[DATA DE ENTRADA NF],
+        NF.[ANO ENTRADA NF],
         NF.[CHAVE DE ACESSO] 
     FROM 
         ListMP listMP
@@ -196,7 +197,7 @@ def query_pesquisa_fiscal(codigo):
         prod.B1_LOCPAD,
         prod.B1_UPRC,
         NF.[DOCUMENTO NF],
-        NF.[DATA DE ENTRADA NF],
+        NF.[ANO ENTRADA NF],
         NF.[CHAVE DE ACESSO] 
     ORDER BY 
         listMP."COMPONENTE" ASC;
@@ -522,7 +523,7 @@ class ComercialApp(QWidget):
             os.remove(self.file_path)
 
         if self.tipo_consulta == 'fiscal':
-            df_tabela = df_tabela.drop(columns=['DOCUMENTO NF', 'DATA DE ENTRADA NF', 'CHAVE DE ACESSO'])
+            df_tabela = df_tabela.drop(columns=['DOCUMENTO NF', 'ANO ENTRADA NF', 'CHAVE DE ACESSO'])
 
         nan_row_index = df_tabela.isna().all(axis=1).idxmax()
         df_dados = df_tabela.iloc[:nan_row_index].dropna(how='all')
@@ -793,7 +794,7 @@ class ComercialApp(QWidget):
                     self.tipo_consulta = tipo_consulta
                     fiscal_columns = {
                         'DOCUMENTO NF': 'first',
-                        'DATA DE ENTRADA NF': 'first',
+                        'ANO ENTRADA NF': 'first',
                         'CHAVE DE ACESSO': 'first'
                     }
                     common_columns.update(fiscal_columns)
@@ -804,6 +805,12 @@ class ComercialApp(QWidget):
                 columns_to_convert = ['QUANT.', 'VALOR UNIT. (R$)', 'SUB-TOTAL (R$)']
                 df_consolidated[columns_to_convert] = (df_consolidated[columns_to_convert]
                                                               .map(lambda x: round(float(x), 2)))
+
+                if tipo_consulta == 'fiscal':
+                    df_consolidated['DOCUMENTO NF'] = df_consolidated['DOCUMENTO NF'].apply(lambda x: x.lstrip('0'))
+                    df_consolidated['ANO ENTRADA NF'] = df_consolidated['ANO ENTRADA NF'].apply(
+                        lambda x: x[:4])
+
                 self.configurar_tabela(df_consolidated)
                 self.tree.horizontalHeader().setSortIndicator(-1, Qt.AscendingOrder)
                 self.tree.setRowCount(0)
@@ -829,7 +836,7 @@ class ComercialApp(QWidget):
 
                         item = QTableWidgetItem(str(value).strip())
 
-                        if column_name in ['QUANT.', 'ULT. ATUALIZ.', 'ARMAZÉM']:
+                        if column_name in ['QUANT.', 'ULT. ATUALIZ.', 'ARMAZÉM', 'DOCUMENTO NF', 'ANO ENTRADA NF', 'CHAVE DE ACESSO']:
                             item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
                         elif column_name in ['VALOR UNIT. (R$)', 'SUB-TOTAL (R$)']:
                             item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
