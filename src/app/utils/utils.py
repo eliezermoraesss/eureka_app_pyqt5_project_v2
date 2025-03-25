@@ -1,13 +1,16 @@
 import os
+import re
 import tempfile
 import tkinter as tk
 from datetime import datetime
 from tkinter import messagebox
 import sys
 import pandas as pd
+import pyodbc
 import pyperclip
 from barcode import Code128
 from barcode.writer import ImageWriter
+from db_mssql import setup_mssql
 
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -16,6 +19,7 @@ from PyQt5.QtCore import QCoreApplication, QUrl
 from PyQt5.QtGui import QDesktopServices
 from PyQt5.QtWidgets import QMessageBox, QHeaderView, QFileDialog
 from src.dialog.information_dialog import information_dialog
+from src.app.utils.search_queries import select_query
 
 
 def abrir_nova_janela(self, models):
@@ -268,3 +272,32 @@ def generate_barcode(data):
     Code128(data, writer=ImageWriter()).write(temp_barcode)
     temp_barcode.close()
     return temp_barcode.name
+
+
+def validar_ncm(ncm):
+    pattern = re.compile(r'^\d{8}$')
+    ncm_format = pattern.match(ncm)
+    ncm_exists = execute_validate_query('ncm', ncm)
+    if ncm_format and ncm_exists is not None:
+        return True
+    else:
+        return False
+
+
+def execute_validate_query(entity, field):
+    query = select_query(entity)
+    query = query[1].replace(":search_field", f"{field}")  # Índice [1] filtra pelo código da entidade
+
+    driver = '{SQL Server}'
+    username, password, database, server = setup_mssql()
+    try:
+        with pyodbc.connect(
+                f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}') as conn:
+            cursor = conn.cursor()
+            cursor.execute(query)
+            result = cursor.fetchone()
+            return result if result is not None else None
+
+    except Exception as ex:
+        QMessageBox.warning(None, f"Eureka® - Falha ao conectar no banco de dados",
+                            f"Erro ao consultar {field}.\n\n{str(ex)}\n\nContate o administrador do sistema.")

@@ -7,28 +7,8 @@ from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.load_session import load_session
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.app.utils.save_log_database import save_log_database
-from src.app.utils.search_queries import select_query
-from src.app.utils.utils import tratar_campo_codigo
+from src.app.utils.utils import tratar_campo_codigo, validar_ncm, execute_validate_query
 from src.qt.ui.ui_new_product_window import Ui_NewProductWindow
-
-
-def execute_validate_query(entity, field):
-    query = select_query(entity)
-    query = query[1].replace(":search_field", f"{field}")  # Índice [1] filtra pelo código da entidade
-
-    driver = '{SQL Server}'
-    username, password, database, server = setup_mssql()
-    try:
-        with pyodbc.connect(
-                f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}') as conn:
-            cursor = conn.cursor()
-            cursor.execute(query)
-            result = cursor.fetchone()
-            return result if result is not None else None
-
-    except Exception as ex:
-        QMessageBox.warning(None, f"Eureka® - Falha ao conectar no banco de dados",
-                            f"Erro ao consultar {field}.\n\n{str(ex)}\n\nContate o administrador do sistema.")
 
 
 class NewProductWindow(QtWidgets.QDialog):
@@ -71,10 +51,12 @@ class NewProductWindow(QtWidgets.QDialog):
     def init_ui(self):
         self.ui.btn_close.clicked.connect(self.close)
         self.ui.btn_save.clicked.connect(self.insert_product)
-        self.ui.btn_search_tipo.clicked.connect(lambda: open_search_dialog("Tipo", self.ui.tipo_field, "tipo"))
+        self.ui.btn_search_tipo.clicked.connect(
+            lambda: open_search_dialog("Tipo", self.ui.tipo_field, "tipo"))
         self.ui.btn_search_um.clicked.connect(
             lambda: open_search_dialog("Unidade de Medida", self.ui.um_field, "unidade_medida"))
-        self.ui.btn_search_arm.clicked.connect(lambda: open_search_dialog("Armazém", self.ui.armazem_field, "armazem"))
+        self.ui.btn_search_arm.clicked.connect(
+            lambda: open_search_dialog("Armazém", self.ui.armazem_field, "armazem"))
         self.ui.btn_search_cc.clicked.connect(
             lambda: open_search_dialog("Centro de Custo", self.ui.cc_field, "centro_custo"))
         self.ui.btn_search_grupo.clicked.connect(lambda: open_search_dialog("Grupo", self.ui.grupo_field, "grupo"))
@@ -109,9 +91,8 @@ class NewProductWindow(QtWidgets.QDialog):
             if validated is None:
                 required_field = self.required_fields[entity]
                 required_field.clear()
-                QMessageBox.information(self, "Eureka®",
-                                        f"Nenhum resultado encontrado para o campo {self.entity_names[entity]} com o "
-                                        f"valor {field}")
+                QMessageBox.information(self, "Eureka® Validação de campo",
+                                        f"O valor {field} não é válido para o campo {self.entity_names[entity]}.")
         elif entity == 'grupo':
             self.ui.desc_grupo_field.setText("")
 
@@ -149,9 +130,15 @@ class NewProductWindow(QtWidgets.QDialog):
 
     def insert_product(self):
         codigo = tratar_campo_codigo(self.ui.codigo_field)
+        ncm = self.ui.ncm_field.text()
         try:
             self.verify_blank_required_fields()
             if self.required_field_is_blank:
+                return
+
+            if not validar_ncm(ncm):
+                QMessageBox.information(self, "Eureka® Validação de campo",
+                                        f"O NCM não existe!\nUtilize um código existente e tente novamente.")
                 return
 
             if self.verificar_se_existe_cadastro(codigo):

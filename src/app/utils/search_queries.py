@@ -1,5 +1,36 @@
 def select_query(entity):
     query_dict = {
+        "ncm": [
+            """
+            SELECT 
+                YD_TEC AS "NCM", 
+                YD_DESC_P AS "Descrição"
+            FROM 
+                PROTHEUS12_R27.dbo.SYD010
+            WHERE 
+                D_E_L_E_T_ <> '*' 
+            """,
+            """
+            SELECT 
+                YD_TEC AS "NCM", 
+                YD_DESC_P AS "Descrição"
+            FROM 
+                PROTHEUS12_R27.dbo.SYD010
+            WHERE 
+                YD_TEC LIKE ':search_field%' 
+                AND D_E_L_E_T_ <> '*'
+            """,
+            """
+            SELECT 
+                YD_TEC AS "NCM", 
+                YD_DESC_P AS "Descrição"
+            FROM 
+                PROTHEUS12_R27.dbo.SYD010
+            WHERE 
+                YD_DESC_P LIKE '%:search_field%' 
+                AND D_E_L_E_T_ <> '*' 
+            """
+        ],
         "produto": [
             """
             SELECT 
