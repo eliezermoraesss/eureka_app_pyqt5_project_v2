@@ -6,7 +6,6 @@ from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.load_session import load_session
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.app.utils.save_log_database import save_log_database
-from src.app.utils.search_queries import select_query
 from src.app.utils.utils import format_log_description, execute_validate_query, validar_ncm, validar_peso
 from src.qt.ui.ui_edit_product_window import Ui_EditProductWindow
 

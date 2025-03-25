@@ -2,14 +2,12 @@ import pyodbc
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 
-from src.app.utils.common_query import insert_query
+from src.app.utils.insert_product import insert_product
 from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.load_session import load_session
 from src.app.utils.open_search_dialog import open_search_dialog
-from src.app.utils.save_log_database import save_log_database
 from src.app.utils.search_queries import select_query
 from src.qt.ui.ui_copy_product_window import Ui_CopyProductWindow
-from src.app.utils.utils import tratar_campo_codigo
 
 
 def execute_validate_query(entity, field):
@@ -84,7 +82,7 @@ class CopyProdutoItemWindow(QtWidgets.QDialog):
         self.ui.peso_field.setText(self.selected_row[17])
 
         self.ui.btn_close.clicked.connect(self.close)
-        self.ui.btn_save.clicked.connect(self.insert_product)
+        self.ui.btn_save.clicked.connect(lambda: insert_product(self))
         self.ui.btn_search_tipo.clicked.connect(lambda: open_search_dialog("Tipo", self.ui.tipo_field, "tipo"))
         self.ui.btn_search_um.clicked.connect(
             lambda: open_search_dialog("Unidade de Medida", self.ui.um_field, "unidade_medida"))
@@ -105,17 +103,17 @@ class CopyProdutoItemWindow(QtWidgets.QDialog):
         self.ui.grupo_field.textChanged.connect(
             lambda: self.validate_required_fields("grupo", self.ui.grupo_field.text().upper()))
 
-        self.ui.codigo_field.returnPressed.connect(self.insert_product)
-        self.ui.descricao_field.returnPressed.connect(self.insert_product)
-        self.ui.desc_comp_field.returnPressed.connect(self.insert_product)
-        self.ui.tipo_field.returnPressed.connect(self.insert_product)
-        self.ui.um_field.returnPressed.connect(self.insert_product)
-        self.ui.armazem_field.returnPressed.connect(self.insert_product)
-        self.ui.cc_field.returnPressed.connect(self.insert_product)
-        self.ui.grupo_field.returnPressed.connect(self.insert_product)
-        self.ui.endereco_field.returnPressed.connect(self.insert_product)
-        self.ui.ncm_field.returnPressed.connect(self.insert_product)
-        self.ui.peso_field.returnPressed.connect(self.insert_product)
+        self.ui.codigo_field.returnPressed.connect(lambda: insert_product(self))
+        self.ui.descricao_field.returnPressed.connect(lambda: insert_product(self))
+        self.ui.desc_comp_field.returnPressed.connect(lambda: insert_product(self))
+        self.ui.tipo_field.returnPressed.connect(lambda: insert_product(self))
+        self.ui.um_field.returnPressed.connect(lambda: insert_product(self))
+        self.ui.armazem_field.returnPressed.connect(lambda: insert_product(self))
+        self.ui.cc_field.returnPressed.connect(lambda: insert_product(self))
+        self.ui.grupo_field.returnPressed.connect(lambda: insert_product(self))
+        self.ui.endereco_field.returnPressed.connect(lambda: insert_product(self))
+        self.ui.ncm_field.returnPressed.connect(lambda: insert_product(self))
+        self.ui.peso_field.returnPressed.connect(lambda: insert_product(self))
 
     def validate_required_fields(self, entity, field):
         if field != '':
@@ -160,36 +158,6 @@ class CopyProdutoItemWindow(QtWidgets.QDialog):
                                 f"Não foi possível obter última chave primária da tabela de produtos SB1010.\n\n{str(ex)}"
                                 f"\n\nContate o administrador do sistema.")
             return None
-
-    def insert_product(self):
-        codigo = tratar_campo_codigo(self.ui.codigo_field)
-        try:
-            self.verify_blank_required_fields()
-            if self.required_field_is_blank:
-                return
-
-            if self.verificar_se_existe_cadastro(codigo):
-                return
-            else:
-                with pyodbc.connect(
-                        f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};PWD={self.password}') as conn:
-                    query = insert_query(self)
-                    cursor = conn.cursor()
-                    cursor.execute(query)
-                    conn.commit()
-
-                # Fechar a janela após salvar
-                self.accept()
-                log_description = f"Cadastro de novo produto"
-                save_log_database(self.user_data, log_description, codigo)
-
-                QMessageBox.information(self, f"Eureka® Engenharia",
-                                        f"Produto cadastrado com sucesso!")
-
-        except Exception as ex:
-            QMessageBox.warning(self, f"Eureka® - Falha ao conectar no banco de dados",
-                                f"Erro ao tentar cadastrar novo produto no TOTVS.\n\n{str(ex)}\n\nContate o "
-                                f"administrador do sistema.")
 
     def fetch_group_description(self, field_value):
         result = execute_validate_query("grupo", field_value)
