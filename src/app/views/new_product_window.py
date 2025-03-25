@@ -7,7 +7,7 @@ from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.load_session import load_session
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.app.utils.save_log_database import save_log_database
-from src.app.utils.utils import tratar_campo_codigo, validar_ncm, execute_validate_query
+from src.app.utils.utils import tratar_campo_codigo, validar_ncm, execute_validate_query, validar_peso
 from src.qt.ui.ui_new_product_window import Ui_NewProductWindow
 
 
@@ -131,6 +131,7 @@ class NewProductWindow(QtWidgets.QDialog):
     def insert_product(self):
         codigo = tratar_campo_codigo(self.ui.codigo_field)
         ncm = self.ui.ncm_field.text()
+        peso = self.ui.peso_field.text()
         try:
             self.verify_blank_required_fields()
             if self.required_field_is_blank:
@@ -139,6 +140,11 @@ class NewProductWindow(QtWidgets.QDialog):
             if not validar_ncm(ncm):
                 QMessageBox.information(self, "Eureka® Validação de campo",
                                         f"O NCM não existe!\nUtilize um código existente e tente novamente.")
+                return
+
+            if not validar_peso(peso):
+                QMessageBox.information(self, "Eureka® Validação de campo",
+                                        f"O Peso Líquido deve ser maior do que zero!")
                 return
 
             if self.verificar_se_existe_cadastro(codigo):

@@ -301,3 +301,7 @@ def execute_validate_query(entity, field):
     except Exception as ex:
         QMessageBox.warning(None, f"Eureka® - Falha ao conectar no banco de dados",
                             f"Erro ao consultar {field}.\n\n{str(ex)}\n\nContate o administrador do sistema.")
+
+
+def validar_peso(peso):
+    return False if float(peso.replace(',', '.')) <= 0 else True
