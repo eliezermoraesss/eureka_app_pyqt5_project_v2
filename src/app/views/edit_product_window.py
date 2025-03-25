@@ -7,27 +7,8 @@ from src.app.utils.load_session import load_session
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.app.utils.save_log_database import save_log_database
 from src.app.utils.search_queries import select_query
-from src.app.utils.utils import format_log_description
+from src.app.utils.utils import format_log_description, execute_validate_query, validar_ncm, validar_peso
 from src.qt.ui.ui_edit_product_window import Ui_EditProductWindow
-
-
-def execute_validate_query(entity, field):
-    query = select_query(entity)
-    query = query[1].replace(":search_field", f"{field}")  # Índice [1] filtra pelo código da entidade
-
-    driver = '{SQL Server}'
-    username, password, database, server = setup_mssql()
-    try:
-        with pyodbc.connect(
-                f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}') as conn:
-            cursor = conn.cursor()
-            cursor.execute(query)
-            result = cursor.fetchone()
-            return result if result is not None else None
-
-    except Exception as ex:
-        QMessageBox.warning(None, f"Eureka® - Falha ao conectar no banco de dados",
-                            f"Erro ao consultar {field}.\n\n{str(ex)}\n\nContate o administrador do sistema.")
 
 
 class EditarProdutoItemWindow(QtWidgets.QDialog):
@@ -116,9 +97,8 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
             if validated is None:
                 required_field = self.required_fields[entity]
                 required_field.clear()
-                QMessageBox.information(self, "Eureka®",
-                                        f"Nenhum resultado encontrado para o campo {self.entity_names[entity]} com o "
-                                        f"valor {field}")
+                QMessageBox.information(self, "Eureka® Validação de campo",
+                                        f"O valor {field} não é válido para o campo {self.entity_names[entity]}.")
         elif entity == 'grupo':
             self.ui.desc_grupo_field.setText("")
 
@@ -152,6 +132,19 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
 
     def update_product(self):
         try:
+            ncm = self.ui.ncm_field.text()
+            peso = self.ui.peso_field.text()
+
+            if not validar_ncm(ncm):
+                QMessageBox.information(self, "Eureka® Validação de campo",
+                                        f"O NCM não existe!\nUtilize um código existente e tente novamente.")
+                return
+
+            if not validar_peso(peso):
+                QMessageBox.information(self, "Eureka® Validação de campo",
+                                        f"O Peso Líquido deve ser maior do que zero!")
+                return
+
             selected_row_before_changed = self.selected_row.copy()
             self.update_table()
             selected_row_after_changed = self.selected_row
