@@ -10,7 +10,6 @@ import pyodbc
 import pyperclip
 from barcode import Code128
 from barcode.writer import ImageWriter
-from db_mssql import setup_mssql
 
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -20,6 +19,7 @@ from PyQt5.QtGui import QDesktopServices
 from PyQt5.QtWidgets import QMessageBox, QHeaderView, QFileDialog
 from src.dialog.information_dialog import information_dialog
 from src.app.utils.search_queries import select_query
+from src.app.utils.db_mssql import setup_mssql
 
 
 def abrir_nova_janela(self, models):
