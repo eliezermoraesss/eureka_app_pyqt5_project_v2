@@ -3,6 +3,8 @@ import locale
 import os
 import sys
 
+from more_itertools.more import first
+
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -122,7 +124,6 @@ def query_pesquisa_fiscal(codigo):
 
     query = f"""
     DECLARE @CodigoPai VARCHAR(50) = '{codigo}';
-
     -- CTE para selecionar as revisões máximas
     WITH MaxRevisoes AS (
         SELECT G1_COD, MAX(G1_REVFIM) AS MaxRevisao
@@ -149,6 +150,7 @@ def query_pesquisa_fiscal(codigo):
             NFE.D1_COD,
             NFE.D1_DOC AS "DOCUMENTO NF",
             NFE.D1_DTDIGIT AS "ANO ENTRADA NF",
+            NFE.D1_FORNECE AS "FORNECEDOR",
             livroFiscalFiltrado.F3_CHVNFE AS "CHAVE DE ACESSO",
             ROW_NUMBER() OVER (PARTITION BY NFE.D1_COD ORDER BY NFE.R_E_C_N_O_ DESC) AS rn
         FROM PROTHEUS12_R27.dbo.SD1010 NFE
@@ -177,14 +179,24 @@ def query_pesquisa_fiscal(codigo):
         prod.B1_LOCPAD AS "ARMAZÉM", 
         prod.B1_UPRC AS "VALOR UNIT. (R$)",
         SUM(listMP."QUANTIDADE" * prod.B1_UPRC) AS "SUB-TOTAL (R$)",
-        prod.B1_PESO AS "PESO",
+        prod.B1_PESO AS "PESO LÍQ",
+        CASE
+            WHEN fornProd.A5_CODPRF IS NULL THEN ''
+            ELSE fornProd.A5_CODPRF
+        END AS "CÓD. FORNECEDOR",
         NF.[DOCUMENTO NF],
         NF.[ANO ENTRADA NF],
         NF.[CHAVE DE ACESSO] 
     FROM 
         ListMP listMP
-    INNER JOIN SB1010 prod ON listMP."COMPONENTE" = prod.B1_COD
-    LEFT JOIN UltimaNF NF ON listMP."COMPONENTE" = NF.D1_COD AND NF.rn = 1
+    INNER JOIN SB1010 prod 
+        ON listMP."COMPONENTE" = prod.B1_COD
+    LEFT JOIN UltimaNF NF 
+        ON listMP."COMPONENTE" = NF.D1_COD 
+        AND NF.rn = 1
+    LEFT JOIN SA5010 fornProd 
+        ON NF.D1_COD = fornProd.A5_PRODUTO 
+        AND NF."FORNECEDOR" = fornProd.A5_FORNECE
     WHERE 
         prod.B1_TIPO = 'MP'
         AND prod.B1_LOCPAD IN ('01', '03', '11', '12', '97')
@@ -200,7 +212,8 @@ def query_pesquisa_fiscal(codigo):
         prod.B1_PESO,
         NF.[DOCUMENTO NF],
         NF.[ANO ENTRADA NF],
-        NF.[CHAVE DE ACESSO] 
+        NF.[CHAVE DE ACESSO],
+        fornProd.A5_CODPRF
     ORDER BY 
         listMP."COMPONENTE" ASC;
     """
@@ -525,7 +538,7 @@ class ComercialApp(QWidget):
             os.remove(self.file_path)
 
         if self.tipo_consulta == 'fiscal':
-            df_tabela = df_tabela.drop(columns=['DOCUMENTO NF', 'ANO ENTRADA NF', 'CHAVE DE ACESSO'])
+            df_tabela = df_tabela.drop(columns=['DOCUMENTO NF', 'ANO ENTRADA NF', 'CHAVE DE ACESSO', 'PESO LÍQ', 'CÓD. FORNECEDOR'])
 
         nan_row_index = df_tabela.isna().all(axis=1).idxmax()
         df_dados = df_tabela.iloc[:nan_row_index].dropna(how='all')
@@ -795,7 +808,8 @@ class ComercialApp(QWidget):
                 if tipo_consulta == 'fiscal':
                     self.tipo_consulta = tipo_consulta
                     fiscal_columns = {
-                        'PESO': 'first',
+                        'PESO LÍQ': 'first',
+                        'CÓD. FORNECEDOR': 'first',
                         'DOCUMENTO NF': 'first',
                         'ANO ENTRADA NF': 'first',
                         'CHAVE DE ACESSO': 'first'
@@ -810,7 +824,7 @@ class ComercialApp(QWidget):
                                                               .map(lambda x: round(float(x), 2)))
 
                 if tipo_consulta == 'fiscal':
-                    df_consolidated['PESO'] = df_consolidated['PESO'].apply(lambda x: format_decimal(x) if x is not None else x)
+                    df_consolidated['PESO LÍQ'] = df_consolidated['PESO LÍQ'].apply(lambda x: format_decimal(x) if x is not None else x)
                     df_consolidated['DOCUMENTO NF'] = df_consolidated['DOCUMENTO NF'].apply(lambda x: x.lstrip('0') if x is not None else x)
                     df_consolidated['ANO ENTRADA NF'] = df_consolidated['ANO ENTRADA NF'].apply(
                         lambda x: x[:4] if x is not None else x)
@@ -840,7 +854,9 @@ class ComercialApp(QWidget):
 
                         item = QTableWidgetItem(str(value).strip())
 
-                        if column_name in ['QUANT.', 'ULT. ATUALIZ.', 'ARMAZÉM', 'DOCUMENTO NF', 'ANO ENTRADA NF', 'CHAVE DE ACESSO']:
+                        if column_name in ['QUANT.', 'ULT. ATUALIZ.', 'ARMAZÉM',
+                                           'DOCUMENTO NF', 'ANO ENTRADA NF',
+                                           'CHAVE DE ACESSO', 'CÓD. FORNECEDOR', 'PESO LÍQ']:
                             item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
                         elif column_name in ['VALOR UNIT. (R$)', 'SUB-TOTAL (R$)']:
                             item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)

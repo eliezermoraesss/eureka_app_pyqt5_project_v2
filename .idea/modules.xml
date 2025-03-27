@@ -6,6 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/eureka_app_pyqt5_project.iml" filepath="$PROJECT_DIR$/.idea/eureka_app_pyqt5_project.iml" />
       <module fileurl="file://X:/ELIEZER/PROJETO SOLIDWORKS TOTVS/VBA/PYTHON/python_files/.idea/python_files.iml" filepath="X:/ELIEZER/PROJETO SOLIDWORKS TOTVS/VBA/PYTHON/python_files/.idea/python_files.iml" />
       <module fileurl="file://$PROJECT_DIR$/../../SOLIDWORKS_VBA/script-python/.idea/script-python.iml" filepath="$PROJECT_DIR$/../../SOLIDWORKS_VBA/script-python/.idea/script-python.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../xml_parser/.idea/xml_parser.iml" filepath="$PROJECT_DIR$/../xml_parser/.idea/xml_parser.iml" />
     </modules>
   </component>
 </project>

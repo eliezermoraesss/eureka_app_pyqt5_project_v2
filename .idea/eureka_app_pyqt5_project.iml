@@ -7,6 +7,7 @@
     <orderEntry type="module" module-name="python_files" />
     <orderEntry type="module" module-name="etl-insert-baseline-mssql-database" />
     <orderEntry type="module" module-name="script-python" />
+    <orderEntry type="module" module-name="xml_parser" />
   </component>
   <component name="PackageRequirementsSettings">
     <option name="removeUnused" value="true" />
