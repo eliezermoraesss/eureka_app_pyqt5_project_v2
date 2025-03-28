@@ -3,8 +3,6 @@ import locale
 import os
 import sys
 
-from more_itertools.more import first
-
 # Caminho absoluto para o diretório onde o módulo src está localizado
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
