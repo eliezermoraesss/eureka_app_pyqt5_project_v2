@@ -6,7 +6,8 @@ from src.app.utils.db_mssql import setup_mssql
 from src.app.utils.load_session import load_session
 from src.app.utils.open_search_dialog import open_search_dialog
 from src.app.utils.save_log_database import save_log_database
-from src.app.utils.utils import format_log_description, execute_validate_query, validar_ncm, validar_peso
+from src.app.utils.utils import format_log_description, validar_ncm, validar_peso, \
+    verify_blank_required_fields, validate_required_fields, fetch_group_description
 from src.qt.ui.ui_edit_product_window import Ui_EditProductWindow
 
 
@@ -68,16 +69,16 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
         self.ui.btn_search_grupo.clicked.connect(lambda: open_search_dialog("Grupo", self.ui.grupo_field, "grupo"))
 
         self.ui.tipo_field.textChanged.connect(
-            lambda: self.validate_required_fields("tipo", self.ui.tipo_field.text().upper()))
+            lambda: validate_required_fields(self,"tipo", self.ui.tipo_field.text().upper()))
         self.ui.um_field.textChanged.connect(
-            lambda: self.validate_required_fields("unidade_medida", self.ui.um_field.text().upper()))
+            lambda: validate_required_fields(self,"unidade_medida", self.ui.um_field.text().upper()))
         self.ui.armazem_field.textChanged.connect(
-            lambda: self.validate_required_fields("armazem", self.ui.armazem_field.text().upper()))
+            lambda: validate_required_fields(self,"armazem", self.ui.armazem_field.text().upper()))
         self.ui.cc_field.textChanged.connect(
-            lambda: self.validate_required_fields("centro_custo", self.ui.cc_field.text().upper()))
+            lambda: validate_required_fields(self,"centro_custo", self.ui.cc_field.text().upper()))
         self.ui.grupo_field.textChanged.connect(self.on_grupo_field_changed)
         self.ui.grupo_field.textChanged.connect(
-            lambda: self.validate_required_fields("grupo", self.ui.grupo_field.text().upper()))
+            lambda: validate_required_fields(self,"grupo", self.ui.grupo_field.text().upper()))
         
         self.ui.descricao_field.returnPressed.connect(self.update_product)
         self.ui.desc_comp_field.returnPressed.connect(self.update_product)
@@ -90,20 +91,9 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
         self.ui.ncm_field.returnPressed.connect(self.update_product)
         self.ui.peso_field.returnPressed.connect(self.update_product)
 
-    def validate_required_fields(self, entity, field):
-        if field != '':
-            validated = execute_validate_query(entity, field)
-            if validated is None:
-                required_field = self.required_fields[entity]
-                required_field.clear()
-                QMessageBox.information(self, "Eureka® Validação de campo",
-                                        f"O valor {field} não é válido para o campo {self.entity_names[entity]}.")
-        elif entity == 'grupo':
-            self.ui.desc_grupo_field.setText("")
-
     def on_grupo_field_changed(self, field_value):
         if field_value:
-            self.fetch_group_description(field_value)
+            fetch_group_description(self, field_value)
 
     def update_table(self):
         # Salvar os valores dos campos do formulário no atributo da classe 'selected_row_table' do tipo list []
@@ -121,20 +111,13 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
         self.selected_row[16] = self.ui.ncm_field.text().upper().strip()
         self.selected_row[17] = self.ui.peso_field.text().replace(',', '.').strip()
 
-    def verify_blank_required_fields(self):
-        self.required_field_is_blank = False
-        for field_name, field_object in self.required_fields.items():
-            if field_name != 'centro_custo' and not field_object.text():
-                QMessageBox.information(self, 'Eureka®', f"O campo {self.entity_names[field_name]} é obrigatório e não "
-                                                         f"pode estar vazio.")
-                self.required_field_is_blank = True
-
     def update_product(self):
         try:
+            codigo = self.ui.type_label.text().upper()
             ncm = self.ui.ncm_field.text()
             peso = self.ui.peso_field.text()
 
-            if not validar_ncm(ncm):
+            if not validar_ncm(ncm) and not codigo.startswith("C"):
                 QMessageBox.information(self, "Eureka® Validação de campo",
                                         f"O NCM não existe!\nUtilize um código existente e tente novamente.")
                 return
@@ -147,7 +130,7 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
             selected_row_before_changed = self.selected_row.copy()
             self.update_table()
             selected_row_after_changed = self.selected_row
-            self.verify_blank_required_fields()
+            verify_blank_required_fields(self, codigo)
             if self.required_field_is_blank:
                 return
 
@@ -207,12 +190,3 @@ class EditarProdutoItemWindow(QtWidgets.QDialog):
         except Exception as ex:
             QMessageBox.warning(self, f"Eureka® - Falha ao conectar no banco de dados",
                                 f"Erro ao tentar alterar as informações do produto {self.selected_row[0]}.\n\n{str(ex)}\n\nContate o administrador do sistema.")
-
-    def fetch_group_description(self, field_value):
-        result = execute_validate_query("grupo", field_value)
-        if result is not None:
-            group_description = result[1].strip()
-            self.ui.desc_grupo_field.setText(group_description)
-        else:
-            QMessageBox.information(self, "Eureka®",
-                                    f"Nenhum resultado encontrado para o campo GRUPO com o valor {field_value}")

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src.app.utils.utils import tratar_campo_codigo, formatar_campo
+from src.app.utils.utils import tratar_campo_codigo, formatar_campo, nova_chave_primaria
 
 
 def insert_query(self):
@@ -18,7 +18,7 @@ def insert_query(self):
     ncm = formatar_campo(self.ui.ncm_field)
     peso_liquido = self.ui.peso_field.text().replace(",", ".").strip()
     data_cadastro = datetime.now().strftime("%Y%m%d")
-    chave_primaria = self.nova_chave_primaria()
+    chave_primaria = nova_chave_primaria(self)
 
     if chave_primaria is None:
         return

@@ -3,7 +3,8 @@ from PyQt5.QtWidgets import QMessageBox
 
 from src.app.utils.common_query import insert_query
 from src.app.utils.save_log_database import save_log_database
-from src.app.utils.utils import tratar_campo_codigo, validar_ncm, validar_peso
+from src.app.utils.utils import tratar_campo_codigo, validar_ncm, validar_peso, verificar_se_existe_cadastro, \
+    verify_blank_required_fields
 
 
 def insert_product(self):
@@ -11,11 +12,11 @@ def insert_product(self):
     ncm = self.ui.ncm_field.text()
     peso = self.ui.peso_field.text()
     try:
-        self.verify_blank_required_fields()
+        verify_blank_required_fields(self, codigo)
         if self.required_field_is_blank:
             return
 
-        if not validar_ncm(ncm):
+        if not validar_ncm(ncm) and not codigo.startswith("C"):
             QMessageBox.information(self, "Eureka® Validação de campo",
                                     f"O NCM não existe!\nUtilize um código existente e tente novamente.")
             return
@@ -25,7 +26,7 @@ def insert_product(self):
                                     f"O Peso Líquido deve ser maior do que zero!")
             return
 
-        if self.verificar_se_existe_cadastro(codigo):
+        if verificar_se_existe_cadastro(self, codigo):
             return
         else:
             with pyodbc.connect(

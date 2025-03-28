@@ -273,7 +273,6 @@ def generate_barcode(data):
     temp_barcode.close()
     return temp_barcode.name
 
-
 def validar_ncm(ncm):
     pattern = re.compile(r'^\d{8}$')
     ncm_format = pattern.match(ncm)
@@ -282,7 +281,6 @@ def validar_ncm(ncm):
         return True
     else:
         return False
-
 
 def execute_validate_query(entity, field):
     query = select_query(entity)
@@ -305,3 +303,65 @@ def execute_validate_query(entity, field):
 
 def validar_peso(peso):
     return False if float(peso.replace(',', '.')) <= 0 else True
+
+def verificar_se_existe_cadastro(self, codigo):
+    try:
+        with pyodbc.connect(
+                f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};PWD={self.password}') as conn:
+            query = f"SELECT B1_COD FROM PROTHEUS12_R27.dbo.SB1010 WHERE B1_COD LIKE '{codigo}%' AND D_E_L_E_T_ <> '*';"
+            cursor = conn.cursor()
+            result = cursor.execute(query).fetchone()
+
+            if result is not None:
+                QMessageBox.warning(None, f"Eureka® {codigo}", f"Já existe cadastro deste produto.\nVerifique e tente novamente!")
+                return True
+            else:
+                return False
+
+    except Exception as ex:
+        QMessageBox.warning(self, f"Eureka® - Erro ao consultar banco de dados TOTVS",
+                            f"Não foi possível obter última chave primária da tabela de produtos SB1010.\n\n{str(ex)}"
+                            f"\n\nContate o administrador do sistema.")
+        return None
+
+def verify_blank_required_fields(self, field):
+    self.required_field_is_blank = False
+    self.required_fields.pop("ncm") if field.startswith("C") else None
+    for field_name, field_object in self.required_fields.items():
+        if field_name != 'centro_custo' and not field_object.text():
+            QMessageBox.information(self, 'Eureka®', f"O campo {self.entity_names[field_name]} é obrigatório e não "
+                                                     f"pode estar vazio.")
+            self.required_field_is_blank = True
+
+def validate_required_fields(self, entity, field):
+    if field != '':
+        validated = execute_validate_query(entity, field)
+        if validated is None:
+            required_field = self.required_fields[entity]
+            required_field.clear()
+            QMessageBox.information(self, "Eureka® Validação de campo",
+                                    f"O valor {field} não é válido para o campo {self.entity_names[entity]}.")
+
+def fetch_group_description(self, field_value):
+    result = execute_validate_query("grupo", field_value)
+    if result is not None:
+        group_description = result[1].strip()
+        self.ui.desc_grupo_field.setText(group_description)
+    else:
+        QMessageBox.information(self, "Eureka®",
+                                f"Nenhum resultado encontrado para o campo GRUPO com o valor {field_value}")
+def nova_chave_primaria(self):
+    try:
+        with pyodbc.connect(
+                f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};PWD={self.password}') as conn:
+            query = f"SELECT TOP 1 R_E_C_N_O_ FROM PROTHEUS12_R27.dbo.SB1010 ORDER BY R_E_C_N_O_ DESC;"
+            cursor = conn.cursor()
+            result = cursor.execute(query).fetchone()
+
+            return result[0] + 1
+
+    except Exception as ex:
+        QMessageBox.warning(self, f"Eureka® - Erro ao consultar banco de dados TOTVS",
+                            f"Não foi possível obter última chave primária da tabela de produtos SB1010.\n\n{str(ex)}"
+                            f"\n\nContate o administrador do sistema.")
+        return None

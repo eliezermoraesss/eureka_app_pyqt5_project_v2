@@ -1,32 +1,11 @@
-import pyodbc
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QMessageBox
 
-from src.app.utils.insert_product import insert_product
 from src.app.utils.db_mssql import setup_mssql
+from src.app.utils.insert_product import insert_product
 from src.app.utils.load_session import load_session
 from src.app.utils.open_search_dialog import open_search_dialog
-from src.app.utils.search_queries import select_query
+from src.app.utils.utils import validate_required_fields, fetch_group_description
 from src.qt.ui.ui_copy_product_window import Ui_CopyProductWindow
-
-
-def execute_validate_query(entity, field):
-    query = select_query(entity)
-    query = query[1].replace(":search_field", f"{field}")  # Índice [1] filtra pelo código da entidade
-
-    driver = '{SQL Server}'
-    username, password, database, server = setup_mssql()
-    try:
-        with pyodbc.connect(
-                f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}') as conn:
-            cursor = conn.cursor()
-            cursor.execute(query)
-            result = cursor.fetchone()
-            return result if result is not None else None
-
-    except Exception as ex:
-        QMessageBox.warning(None, f"Eureka® - Falha ao conectar no banco de dados",
-                            f"Erro ao consultar {field}.\n\n{str(ex)}\n\nContate o administrador do sistema.")
 
 
 class CopyProdutoItemWindow(QtWidgets.QDialog):
@@ -92,16 +71,16 @@ class CopyProdutoItemWindow(QtWidgets.QDialog):
         self.ui.btn_search_grupo.clicked.connect(lambda: open_search_dialog("Grupo", self.ui.grupo_field, "grupo"))
 
         self.ui.tipo_field.textChanged.connect(
-            lambda: self.validate_required_fields("tipo", self.ui.tipo_field.text().upper()))
+            lambda: validate_required_fields(self, "tipo", self.ui.tipo_field.text().upper()))
         self.ui.um_field.textChanged.connect(
-            lambda: self.validate_required_fields("unidade_medida", self.ui.um_field.text().upper()))
+            lambda: validate_required_fields(self, "unidade_medida", self.ui.um_field.text().upper()))
         self.ui.armazem_field.textChanged.connect(
-            lambda: self.validate_required_fields("armazem", self.ui.armazem_field.text().upper()))
+            lambda: validate_required_fields(self, "armazem", self.ui.armazem_field.text().upper()))
         self.ui.cc_field.textChanged.connect(
-            lambda: self.validate_required_fields("centro_custo", self.ui.cc_field.text().upper()))
+            lambda: validate_required_fields(self, "centro_custo", self.ui.cc_field.text().upper()))
         self.ui.grupo_field.textChanged.connect(self.on_grupo_field_changed)
         self.ui.grupo_field.textChanged.connect(
-            lambda: self.validate_required_fields("grupo", self.ui.grupo_field.text().upper()))
+            lambda: validate_required_fields(self, "grupo", self.ui.grupo_field.text().upper()))
 
         self.ui.codigo_field.returnPressed.connect(lambda: insert_product(self))
         self.ui.descricao_field.returnPressed.connect(lambda: insert_product(self))
@@ -115,71 +94,6 @@ class CopyProdutoItemWindow(QtWidgets.QDialog):
         self.ui.ncm_field.returnPressed.connect(lambda: insert_product(self))
         self.ui.peso_field.returnPressed.connect(lambda: insert_product(self))
 
-    def validate_required_fields(self, entity, field):
-        if field != '':
-            validated = execute_validate_query(entity, field)
-            if validated is None:
-                required_field = self.required_fields[entity]
-                required_field.clear()
-                QMessageBox.information(self, "Eureka®",
-                                        f"Nenhum resultado encontrado para o campo {self.entity_names[entity]} com o "
-                                        f"valor {field}")
-        elif entity == 'grupo':
-            self.ui.desc_grupo_field.setText("")
-
     def on_grupo_field_changed(self, field_value):
         if field_value:
-            self.fetch_group_description(field_value)
-
-    def verify_blank_required_fields(self):
-        self.required_field_is_blank = False
-        for field_name, field_object in self.required_fields.items():
-            if field_name != 'centro_custo' and not field_object.text():
-                QMessageBox.information(self, 'Eureka®', f"O campo {self.entity_names[field_name]} é obrigatório e não "
-                                                         f"pode estar vazio.")
-                self.required_field_is_blank = True
-
-    def verificar_se_existe_cadastro(self, codigo):
-        try:
-            with pyodbc.connect(
-                    f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};PWD={self.password}') as conn:
-                query = f"SELECT B1_COD FROM PROTHEUS12_R27.dbo.SB1010 WHERE B1_COD LIKE '{codigo}%' AND D_E_L_E_T_ <> '*';"
-                cursor = conn.cursor()
-                result = cursor.execute(query).fetchone()
-
-                if result is not None:
-                    QMessageBox.warning(None, f"Eureka® {codigo}", f"Já existe cadastro deste produto.\nVerifique e tente novamente!")
-                    return True
-                else:
-                    return False
-
-        except Exception as ex:
-            QMessageBox.warning(self, f"Eureka® - Erro ao consultar banco de dados TOTVS",
-                                f"Não foi possível obter última chave primária da tabela de produtos SB1010.\n\n{str(ex)}"
-                                f"\n\nContate o administrador do sistema.")
-            return None
-
-    def fetch_group_description(self, field_value):
-        result = execute_validate_query("grupo", field_value)
-        if result is not None:
-            group_description = result[1].strip()
-            self.ui.desc_grupo_field.setText(group_description)
-        else:
-            QMessageBox.information(self, "Eureka®",
-                                    f"Nenhum resultado encontrado para o campo GRUPO com o valor {field_value}")
-
-    def nova_chave_primaria(self):
-        try:
-            with pyodbc.connect(
-                    f'DRIVER={self.driver};SERVER={self.server};DATABASE={self.database};UID={self.username};PWD={self.password}') as conn:
-                query = f"SELECT TOP 1 R_E_C_N_O_ FROM PROTHEUS12_R27.dbo.SB1010 ORDER BY R_E_C_N_O_ DESC;"
-                cursor = conn.cursor()
-                result = cursor.execute(query).fetchone()
-
-                return result[0] + 1
-
-        except Exception as ex:
-            QMessageBox.warning(self, f"Eureka® - Erro ao consultar banco de dados TOTVS",
-                                f"Não foi possível obter última chave primária da tabela de produtos SB1010.\n\n{str(ex)}"
-                                f"\n\nContate o administrador do sistema.")
-            return None
+            fetch_group_description(self, field_value)
